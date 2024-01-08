@@ -1119,7 +1119,11 @@ var GSC_PATCH = {
         bs: { hp: 75, at: 90, df: 140, sa: 60, sd: 60, sp: 40 },
         weightkg: 125.8
     },
-    Furret: { types: ['Normal'], bs: { hp: 85, at: 76, df: 64, sa: 45, sd: 55, sp: 90 }, weightkg: 32.5 },
+    Furret: {
+        types: ['Normal'],
+        bs: { hp: 85, at: 76, df: 64, sa: 45, sd: 55, sp: 90 },
+        weightkg: 32.5
+    },
     Girafarig: {
         types: ['Normal', 'Psychic'],
         bs: { hp: 70, at: 80, df: 65, sa: 90, sd: 65, sp: 85 },
@@ -10030,34 +10034,59 @@ var CHROMATIC_PATCH = {
     Alcremie: { otherFormes: ['Alcremie-Gmax', 'Alcremie-Mega-Gmax'] },
     Ampharos: { otherFormes: ['Ampharos-Aevian', 'Ampharos-Mega'] },
     Appletun: { otherFormes: ['Appletun-Gmax', 'Appletun-Mega-Gmax'] },
+    Ariados: { otherFormes: ['Ariados-Crest'] },
+    Bastiodon: { otherFormes: ['Bastiodon-Crest'] },
+    Beheeyem: { otherFormes: ['Beheeyem-Crest'] },
     Blastoise: { otherFormes: ['Blastoise-Mega', 'Blastoise-Gmax', 'Blastoise-Mega-Gmax'] },
+    Boltund: { otherFormes: ['Boltund-Crest'] },
     Breloom: { otherFormes: ['Breloom-Aevian'] },
     Bronzong: { otherFormes: ['Bronzong-Aevian'] },
     Bronzor: { otherFormes: ['Bronzor-Aevian'] },
     Budew: { otherFormes: ['Budew-Aevian'] },
     Butterfree: { otherFormes: ['Butterfree-Gmax', 'Butterfree-Mega-Gmax'] },
+    Castform: { otherFormes: ['Castform-Rainy', 'Castform-Snowy', 'Castform-Sunny', 'Castform-Crest', 'Castform-Crest-Rainy', 'Castform-Crest-Snowy', 'Castform-Crest-Sunny'] },
     Centiskorch: { otherFormes: ['Centiskorch-Gmax', 'Centiskorch-Mega-Gmax'] },
     Chandelure: { otherFormes: ['Chandelure-Aevian'] },
     Charizard: { otherFormes: ['Charizard-Mega-X', 'Charizard-Mega-Y', 'Charizard-Gmax', 'Charizard-Mega-Gmax'] },
+    Cherrim: { otherFormes: ['Cherrim-Sunshine', 'Cherrim-Crest', 'Cherrim-Crest-Sunshine'] },
+    Cinccino: { otherFormes: ['Cinccino-Crest'] },
     Cinderace: { otherFormes: ['Cinderace-Gmax', 'Cinderace-Mega-Gmax'] },
+    Claydol: { otherFormes: ['Claydol-Crest'] },
     Coalossal: { otherFormes: ['Coalossal-Gmax', 'Coalossal-Mega-Gmax'] },
+    Cofagrigus: { otherFormes: ['Cofagrigus-Crest'] },
     Copperajah: { otherFormes: ['Copperajah-Gmax', 'Copperajah-Mega-Gmax'] },
     Corviknight: { otherFormes: ['Corviknight-Gmax', 'Corviknight-Mega-Gmax'] },
+    Crabominable: { otherFormes: ['Crabominable-Crest'] },
+    Cryogonal: { otherFormes: ['Cryogonal-Crest'] },
+    Darmanitan: { otherFormes: ['Darmanitan-Galar', 'Darmanitan-Galar-Zen', 'Darmanitan-Zen', 'Darmanitan-Crest'] },
+    Dedenne: { otherFormes: ['Dedenne-Crest'] },
+    Delcatty: { otherFormes: ['Delcatty-Crest'] },
     Drednaw: { otherFormes: ['Drednaw-Gmax', 'Drednaw-Mega-Gmax'] },
+    Druddigon: { otherFormes: ['Druddigon-Crest'] },
     Duraludon: { otherFormes: ['Duraludon-Gmax', 'Duraludon-Mega-Gmax'] },
+    Dusknoir: { otherFormes: ['Dusknoir-Crest'] },
+    Electrode: { otherFormes: ['Electrode-Hisui', 'Electrode-Crest'] },
+    Empoleon: { otherFormes: ['Empoleon-Crest'] },
+    Fearow: { otherFormes: ['Fearow-Crest'] },
     Feebas: { otherFormes: ['Feebas-Aevian'] },
+    Feraligatr: { otherFormes: ['Feraligatr-Crest'] },
     Flaaffy: { otherFormes: ['Flaaffy-Aevian'] },
     Flapple: { otherFormes: ['Flapple-Gmax', 'Flapple-Mega-Gmax'] },
     Froslass: { otherFormes: ['Froslass-Aevian'] },
+    Furret: { otherFormes: ['Furret-Crest'] },
     Garbodor: { otherFormes: ['Garbodor-Gmax', 'Garbodor-Mega-Gmax'] },
     Gastrodon: { otherFormes: ['Gastrodon-Aevian-East', 'Gastrodon-Aevian-West'] },
     Gengar: { otherFormes: ['Gengar-Gmax', 'Gengar-Mega-Gmax'] },
     Glalie: { otherFormes: ['Glalie-Aevian'] },
+    Glaceon: { otherFormes: ['Glaceon-Crest'] },
     Golisopod: { otherFormes: ['Golisopod-Aevian'] },
+    Gothitelle: { otherFormes: ['Gothitelle-Crest', 'Gothitelle-Crest-Dark'] },
     Grimmsnarl: { otherFormes: ['Grimmsnarl-Gmax', 'Grimmsnarl-Mega-Gmax'] },
     Gyarados: { otherFormes: ['Gyarados-Aevian'] },
     'Hakamo-o': { otherFormes: ['Hakamo-o-Aevian'] },
     Hatterene: { otherFormes: ['Hatterene-Gmax', 'Hatterene-Mega-Gmax'] },
+    Hypno: { otherFormes: ['Hypno-Crest'] },
+    Infernape: { otherFormes: ['Infernape-Crest'] },
     Inteleon: { otherFormes: ['Inteleon-Gmax', 'Inteleon-Mega-Gmax'] },
     'Jangmo-o': { otherFormes: ['Jangmo-o-Aevian'] },
     Kingler: { otherFormes: ['Kingler-Gmax', 'Kingler-Mega-Gmax'] },
@@ -10065,38 +10094,109 @@ var CHROMATIC_PATCH = {
     Lampent: { otherFormes: ['Lampent-Aevian'] },
     Lapras: { otherFormes: ['Lapras-Aevian', 'Lapras-Gmax', 'Lapras-Mega-Gmax'] },
     Larvesta: { otherFormes: ['Larvesta-Aevian'] },
+    Leafeon: { otherFormes: ['Leafeon-Crest'] },
     Leavanny: { otherFormes: ['Leavanny-Aevian'] },
+    Ledian: { otherFormes: ['Ledian-Crest'] },
     Litwick: { otherFormes: ['Litwick-Aevian'] },
+    Luvdisc: { otherFormes: ['Luvdisc-Crest'] },
+    Luxray: { otherFormes: ['Luxray-Crest'] },
     Machamp: { otherFormes: ['Machamp-Gmax', 'Machamp-Mega-Gmax'] },
+    Magcargo: { otherFormes: ['Magcargo-Crest'] },
     Magikarp: { otherFormes: ['Magikarp-Aevian'] },
     Mareep: { otherFormes: ['Mareep-Aevian'] },
+    Meganium: { otherFormes: ['Meganium-Crest'] },
     Melmetal: { otherFormes: ['Melmetal-Gmax', 'Melmetal-Mega-Gmax'] },
     Milotic: { otherFormes: ['Milotic-Aevian'] },
     Misdreavus: { otherFormes: ['Misdreavus-Aevian'] },
     Mismagius: { otherFormes: ['Mismagius-Aevian'] },
     Munna: { otherFormes: ['Munna-Aevian'] },
     Musharna: { otherFormes: ['Musharna-Aevian'] },
+    Noctowl: { otherFormes: ['Noctowl-Crest'] },
     Orbeetle: { otherFormes: ['Orbeetle-Gmax', 'Orbeetle-Mega-Gmax'] },
+    Oricorio: { otherFormes: ['Oricorio-Pa\'u', 'Oricorio-Pom-Pom', 'Oricorio-Sensu', 'Oricorio-Crest-Baile', 'Oricorio-Crest-Pa\'u', 'Oricorio-Crest-Pom-Pom', 'Oricorio-Crest-Sensu'] },
     Palossand: { otherFormes: ['Palossand-Aevian-Fiery', 'Palossand-Aevian-Icy', 'Palossand-Aevian-Rocky'] },
     Paras: { otherFormes: ['Paras-Aevian', 'Paras-Aevian-Zombie'] },
     Parasect: { otherFormes: ['Parasect-Aevian', 'Parasect-Aevian-Zombie'] },
+    Phione: { otherFormes: ['Phione-Crest'] },
+    Probopass: { otherFormes: ['Probopass-Crest'] },
+    Rampardos: { otherFormes: ['Rampardos-Crest'] },
+    Relicanth: { otherFormes: ['Relicanth-Crest'] },
+    Reuniclus: { otherFormes: ['Reuniclus-Crest', 'Reuniclus-Crest-Fighting'] },
     Rillaboom: { otherFormes: ['Rillaboom-Gmax', 'Rillaboom-Mega-Gmax'] },
     Roselia: { otherFormes: ['Roselia-Aevian'] },
     Roserade: { otherFormes: ['Roserade-Aevian'] },
+    Samurott: { otherFormes: ['Samurott-Hisui', 'Samurott-Crest'] },
     Sandaconda: { otherFormes: ['Sandaconda-Gmax', 'Sandaconda-Mega-Gmax'] },
     Sandygast: { otherFormes: ['Sandygast-Aevian-Fiery', 'Sandygast-Aevian-Icy', 'Sandygast-Aevian-Rocky'] },
+    Sawsbuck: { otherFormes: ['Sawsbuck-Crest-Autumn', 'Sawsbuck-Crest-Spring', 'Sawsbuck-Crest-Summer', 'Sawsbuck-Crest-Winter'] },
+    Seviper: { otherFormes: ['Seviper-Crest'] },
     Sewaddle: { otherFormes: ['Sewaddle-Aevian'] },
     Shellos: { otherFormes: ['Shellos-Aevian-East', 'Shellos-Aevian-West'] },
+    Shiinotic: { otherFormes: ['Shiinotic-Crest'] },
     Shroomish: { otherFormes: ['Shroomish-Aevian'] },
     Sigilyph: { otherFormes: ['Sigilyph-Aevian'] },
+    Silvally: {
+        otherFormes: [
+            'Silvally-Bug',
+            'Silvally-Dark',
+            'Silvally-Dragon',
+            'Silvally-Electric',
+            'Silvally-Fairy',
+            'Silvally-Fighting',
+            'Silvally-Fire',
+            'Silvally-Flying',
+            'Silvally-Ghost',
+            'Silvally-Grass',
+            'Silvally-Ground',
+            'Silvally-Ice',
+            'Silvally-Poison',
+            'Silvally-Psychic',
+            'Silvally-Rock',
+            'Silvally-Steel',
+            'Silvally-Water',
+            'Silvally-Crest-Bug',
+            'Silvally-Crest-Dark',
+            'Silvally-Crest-Dragon',
+            'Silvally-Crest-Electric',
+            'Silvally-Crest-Fairy',
+            'Silvally-Crest-Fighting',
+            'Silvally-Crest-Fire',
+            'Silvally-Crest-Flying',
+            'Silvally-Crest-Ghost',
+            'Silvally-Crest-Grass',
+            'Silvally-Crest-Ground',
+            'Silvally-Crest-Ice',
+            'Silvally-Crest-Normal',
+            'Silvally-Crest-Poison',
+            'Silvally-Crest-Psychic',
+            'Silvally-Crest-Rock',
+            'Silvally-Crest-Steel',
+            'Silvally-Crest-Water',
+        ]
+    },
+    Simipour: { otherFormes: ['Simipour-Crest'] },
+    Simisage: { otherFormes: ['Simisage-Crest'] },
+    Simisear: { otherFormes: ['Simisear-Crest'] },
+    Skuntank: { otherFormes: ['Skuntank-Crest'] },
     Snorlax: { otherFormes: ['Snorlax-Gmax', 'Snorlax-Mega-Gmax'] },
     Snorunt: { otherFormes: ['Snorunt-Aevian'] },
+    Spiritomb: { otherFormes: ['Spiritomb-Crest'] },
+    Stantler: { otherFormes: ['Stantler-Crest'] },
     Swadloon: { otherFormes: ['Swadloon-Aevian'] },
+    Swalot: { otherFormes: ['Swalot-Crest'] },
+    Thievul: { otherFormes: ['Thievul-Crest'] },
+    Torterra: { otherFormes: ['Torterra-Crest'] },
     Toxtricity: { otherFormes: ['Toxtricity-Aevian', 'Toxtricity-Gmax', 'Toxtricity-Low-Key', 'Toxtricity-Low-Key-Gmax', 'Toxtricity-Mega-Gmax'] },
+    Typhlosion: { otherFormes: ['Typhlosion-Hisui', 'Typhlosion-Crest'] },
     Urshifu: { otherFormes: ['Urshifu-Gmax', 'Urshifu-Mega-Gmax', 'Urshifu-Rapid-Strike', 'Urshifu-Rapid-Strike-Gmax', 'Urshifu-Rapid-Strike-Mega-Gmax'] },
     Venusaur: { otherFormes: ['Venusaur-Mega', 'Venusaur-Gmax', 'Venusaur-Mega-Gmax'] },
+    Vespiquen: { otherFormes: ['Vespiquen-Crest-Offense', 'Vespiquen-Crest-Defense'] },
     Volcarona: { otherFormes: ['Volcarona-Aevian'] },
+    Whiscash: { otherFormes: ['Whiscash-Crest'] },
     Wimpod: { otherFormes: ['Wimpod-Aevian'] },
+    Wyrdeer: { otherFormes: ['Wyrdeer-Crest'] },
+    Zangoose: { otherFormes: ['Zangoose-Crest'] },
+    Zoroark: { otherFormes: ['Zoroark-Hisui', 'Zoroark-Crest'] },
     'Alateon': {
         types: ['Bug'],
         bs: { hp: 95, at: 65, df: 130, sa: 110, sd: 65, sp: 60 },
@@ -10117,12 +10217,506 @@ var CHROMATIC_PATCH = {
         abilities: { 0: 'Filter' },
         baseSpecies: 'Ampharos'
     },
-    'Dummy-Aevian': {
+    'Ariados-Crest': {
+        types: ['Bug', 'Poison'],
+        bs: { hp: 70, at: 90, df: 70, sa: 60, sd: 70, sp: 40 },
+        weightkg: 33.5,
+        abilities: { 0: 'Swarm' },
+        baseSpecies: 'Ariados'
+    },
+    'Bastiodon-Crest': {
+        types: ['Rock', 'Steel'],
+        bs: { hp: 60, at: 52, df: 168, sa: 47, sd: 138, sp: 30 },
+        weightkg: 149.5,
+        abilities: { 0: 'Sturdy' },
+        baseSpecies: 'Bastiodon'
+    },
+    'Beheeyem-Crest': {
+        types: ['Psychic'],
+        bs: { hp: 75, at: 75, df: 75, sa: 125, sd: 95, sp: 40 },
+        weightkg: 34.5,
+        abilities: { 0: 'Telepathy' },
+        baseSpecies: 'Beheeyem'
+    },
+    'Boltund-Crest': {
+        types: ['Electric'],
+        bs: { hp: 69, at: 90, df: 60, sa: 90, sd: 60, sp: 121 },
+        weightkg: 34,
+        abilities: { 0: 'Strong Jaw' },
+        baseSpecies: 'Boltund'
+    },
+    'Castform-Crest': {
+        types: ['Normal'],
+        bs: { hp: 70, at: 70, df: 70, sa: 70, sd: 70, sp: 70 },
+        weightkg: 0.8,
+        abilities: { 0: 'Forecast' },
+        baseSpecies: 'Castform'
+    },
+    'Castform-Crest-Rainy': {
+        types: ['Water'],
+        bs: { hp: 100, at: 70, df: 80, sa: 70, sd: 80, sp: 70 },
+        weightkg: 0.8,
+        abilities: { 0: 'Rain Dish' },
+        baseSpecies: 'Castform'
+    },
+    'Castform-Crest-Snowy': {
+        types: ['Ice'],
+        bs: { hp: 70, at: 70, df: 70, sa: 100, sd: 70, sp: 90 },
+        weightkg: 0.8,
+        abilities: { 0: 'Slush Rush' },
+        baseSpecies: 'Castform'
+    },
+    'Castform-Crest-Sunny': {
+        types: ['Fire'],
+        bs: { hp: 70, at: 70, df: 70, sa: 90, sd: 70, sp: 100 },
+        weightkg: 0.8,
+        abilities: { 0: 'Solar Power' },
+        baseSpecies: 'Castform'
+    },
+    'Cherrim-Crest': {
+        types: ['Grass'],
+        bs: { hp: 70, at: 60, df: 70, sa: 87, sd: 78, sp: 85 },
+        weightkg: 9.3,
+        abilities: { 0: 'Flower Gift' },
+        baseSpecies: 'Cherrim'
+    },
+    'Cherrim-Crest-Sunshine': {
+        types: ['Grass'],
+        bs: { hp: 70, at: 60, df: 70, sa: 87, sd: 78, sp: 85 },
+        weightkg: 9.3,
+        abilities: { 0: 'Flower Gift' },
+        baseSpecies: 'Cherrim'
+    },
+    'Cinccino-Crest': {
+        types: ['Normal'],
+        bs: { hp: 75, at: 95, df: 60, sa: 65, sd: 60, sp: 115 },
+        weightkg: 7.5,
+        abilities: { 0: 'Skill Link' },
+        baseSpecies: 'Cinccino'
+    },
+    'Claydol-Crest': {
+        types: ['Ground', 'Psychic'],
+        bs: { hp: 60, at: 70, df: 105, sa: 70, sd: 120, sp: 75 },
+        weightkg: 108,
+        abilities: { 0: 'Levitate' },
+        gender: 'N',
+        baseSpecies: 'Claydol'
+    },
+    'Cofagrigus-Crest': {
+        types: ['Ghost'],
+        bs: { hp: 58, at: 50, df: 145, sa: 95, sd: 105, sp: 30 },
+        weightkg: 76.5,
+        abilities: { 0: 'Mummy' },
+        baseSpecies: 'Cofagrigus'
+    },
+    'Crabominable-Crest': {
+        types: ['Fighting', 'Ice'],
+        bs: { hp: 97, at: 132, df: 77, sa: 62, sd: 67, sp: 43 },
+        weightkg: 180,
+        abilities: { 0: 'Hyper Cutter' },
+        baseSpecies: 'Crabominable'
+    },
+    'Cryogonal-Crest': {
+        types: ['Ice'],
+        bs: { hp: 70, at: 50, df: 30, sa: 95, sd: 135, sp: 105 },
+        weightkg: 148,
+        abilities: { 0: 'Levitate' },
+        gender: 'N',
+        baseSpecies: 'Cryogonal'
+    },
+    'Darmanitan-Crest': {
+        types: ['Fire', 'Psychic'],
+        bs: { hp: 105, at: 30, df: 105, sa: 140, sd: 105, sp: 55 },
+        weightkg: 92.9,
+        abilities: { 0: 'Zen Mode' },
+        baseSpecies: 'Darmanitan'
+    },
+    'Dedenne-Crest': {
+        types: ['Electric', 'Fairy'],
+        bs: { hp: 67, at: 58, df: 57, sa: 81, sd: 67, sp: 101 },
+        weightkg: 2.2,
+        abilities: { 0: 'Cheek Pouch' },
+        baseSpecies: 'Dedenne'
+    },
+    'Delcatty-Crest': {
+        types: ['Normal'],
+        bs: { hp: 70, at: 65, df: 65, sa: 55, sd: 55, sp: 70 },
+        weightkg: 32.6,
+        abilities: { 0: 'Cute Charm' },
+        baseSpecies: 'Delcatty'
+    },
+    'Druddigon-Crest': {
+        types: ['Dragon'],
+        bs: { hp: 77, at: 120, df: 90, sa: 60, sd: 90, sp: 48 },
+        weightkg: 139,
+        abilities: { 0: 'Rough Skin' },
+        baseSpecies: 'Druddigon'
+    },
+    'Dusknoir-Crest': {
+        types: ['Ghost'],
+        bs: { hp: 45, at: 100, df: 135, sa: 65, sd: 135, sp: 45 },
+        weightkg: 106.6,
+        abilities: { 0: 'Pressure' },
+        baseSpecies: 'Dusknoir'
+    },
+    'Electrode-Crest': {
+        types: ['Electric'],
+        bs: { hp: 60, at: 50, df: 70, sa: 80, sd: 80, sp: 140 },
+        weightkg: 66.6,
+        abilities: { 0: 'Soundproof' },
+        gender: 'N',
+        baseSpecies: 'Electrode'
+    },
+    'Empoleon-Crest': {
+        types: ['Water', 'Steel'],
+        bs: { hp: 84, at: 86, df: 88, sa: 111, sd: 101, sp: 60 },
+        weightkg: 84.5,
+        abilities: { 0: 'Torrent' },
+        baseSpecies: 'Empoleon'
+    },
+    'Fearow-Crest': {
+        types: ['Normal', 'Flying'],
+        bs: { hp: 65, at: 90, df: 65, sa: 61, sd: 61, sp: 100 },
+        weightkg: 38,
+        abilities: { 0: 'Keen Eye' },
+        baseSpecies: 'Fearow'
+    },
+    'Feraligatr-Crest': {
+        types: ['Water'],
+        bs: { hp: 85, at: 105, df: 100, sa: 79, sd: 83, sp: 78 },
+        weightkg: 88.8,
+        abilities: { 0: 'Torrent' },
+        baseSpecies: 'Feraligatr'
+    },
+    'Furret-Crest': {
+        types: ['Normal'],
+        bs: { hp: 85, at: 76, df: 64, sa: 45, sd: 55, sp: 90 },
+        weightkg: 32.5,
+        abilities: { 0: 'Run Away' },
+        baseSpecies: 'Furret'
+    },
+    'Glaceon-Crest': {
+        types: ['Ice'],
+        bs: { hp: 65, at: 60, df: 110, sa: 130, sd: 95, sp: 65 },
+        weightkg: 25.9,
+        abilities: { 0: 'Snow Cloak' },
+        baseSpecies: 'Glaceon'
+    },
+    'Gothitelle-Crest': {
+        types: ['Psychic'],
+        bs: { hp: 70, at: 55, df: 95, sa: 95, sd: 110, sp: 65 },
+        weightkg: 44,
+        abilities: { 0: 'Frisk' },
+        baseSpecies: 'Gothitelle'
+    },
+    'Gothitelle-Crest-Dark': {
+        types: ['Dark'],
+        bs: { hp: 70, at: 55, df: 95, sa: 95, sd: 110, sp: 65 },
+        weightkg: 44,
+        abilities: { 0: 'Frisk' },
+        baseSpecies: 'Gothitelle'
+    },
+    'Hypno-Crest': {
+        types: ['Psychic'],
+        bs: { hp: 85, at: 73, df: 70, sa: 73, sd: 115, sp: 67 },
+        weightkg: 75.6,
+        abilities: { 0: 'Insomnia' },
+        baseSpecies: 'Hypno'
+    },
+    'Infernape-Crest': {
+        types: ['Fire', 'Fighting'],
+        bs: { hp: 76, at: 104, df: 71, sa: 104, sd: 71, sp: 108 },
+        weightkg: 55,
+        abilities: { 0: 'Blaze' },
+        baseSpecies: 'Infernape'
+    },
+    'Leafeon-Crest': {
+        types: ['Grass'],
+        bs: { hp: 65, at: 110, df: 130, sa: 60, sd: 65, sp: 95 },
+        weightkg: 25.5,
+        abilities: { 0: 'Leaf Guard' },
+        baseSpecies: 'Leafeon'
+    },
+    'Ledian-Crest': {
+        types: ['Bug', 'Flying'],
+        bs: { hp: 55, at: 35, df: 50, sa: 55, sd: 110, sp: 85 },
+        weightkg: 35.6,
+        abilities: { 0: 'Swarm' },
+        baseSpecies: 'Ledian'
+    },
+    'Luvdisc-Crest': {
+        types: ['Water'],
+        bs: { hp: 43, at: 30, df: 55, sa: 40, sd: 65, sp: 97 },
+        weightkg: 8.7,
+        abilities: { 0: 'Swift Swim' },
+        baseSpecies: 'Luvdisc'
+    },
+    'Luxray-Crest': {
+        types: ['Electric'],
+        bs: { hp: 80, at: 120, df: 79, sa: 95, sd: 79, sp: 70 },
+        weightkg: 42,
+        abilities: { 0: 'Rivalry' },
+        baseSpecies: 'Luxray'
+    },
+    'Magcargo-Crest': {
+        types: ['Fire', 'Rock'],
+        bs: { hp: 50, at: 50, df: 120, sa: 80, sd: 80, sp: 30 },
+        weightkg: 55,
+        abilities: { 0: 'Magma Armor' },
+        baseSpecies: 'Magcargo'
+    },
+    'Meganium-Crest': {
+        types: ['Grass'],
+        bs: { hp: 80, at: 82, df: 100, sa: 83, sd: 100, sp: 80 },
+        weightkg: 100.5,
+        abilities: { 0: 'Overgrow' },
+        baseSpecies: 'Meganium'
+    },
+    'Noctowl-Crest': {
+        types: ['Normal', 'Flying'],
+        bs: { hp: 100, at: 50, df: 50, sa: 76, sd: 96, sp: 70 },
+        weightkg: 40.8,
+        abilities: { 0: 'Insomnia' },
+        baseSpecies: 'Noctowl'
+    },
+    'Oricorio-Crest-Baile': {
+        types: ['Fire', 'Flying'],
+        bs: { hp: 75, at: 70, df: 70, sa: 98, sd: 70, sp: 93 },
+        weightkg: 3.4,
+        abilities: { 0: 'Dancer' },
+        baseSpecies: 'Oricorio'
+    },
+    'Oricorio-Crest-Pa\'u': {
+        types: ['Psychic', 'Flying'],
+        bs: { hp: 75, at: 70, df: 70, sa: 98, sd: 70, sp: 93 },
+        weightkg: 3.4,
+        abilities: { 0: 'Dancer' },
+        baseSpecies: 'Oricorio'
+    },
+    'Oricorio-Crest-Pom-Pom': {
+        types: ['Electric', 'Flying'],
+        bs: { hp: 75, at: 70, df: 70, sa: 98, sd: 70, sp: 93 },
+        weightkg: 3.4,
+        abilities: { 0: 'Dancer' },
+        baseSpecies: 'Oricorio'
+    },
+    'Oricorio-Crest-Sensu': {
+        types: ['Ghost', 'Flying'],
+        bs: { hp: 75, at: 70, df: 70, sa: 98, sd: 70, sp: 93 },
+        weightkg: 3.4,
+        abilities: { 0: 'Dancer' },
+        baseSpecies: 'Oricorio'
+    },
+    'Phione-Crest': {
+        types: ['Water'],
+        bs: { hp: 80, at: 80, df: 80, sa: 80, sd: 80, sp: 80 },
+        weightkg: 3.1,
+        abilities: { 0: 'Hydration' },
+        gender: 'N',
+        baseSpecies: 'Phione'
+    },
+    'Probopass-Crest': {
+        types: ['Rock', 'Steel'],
+        bs: { hp: 60, at: 55, df: 145, sa: 75, sd: 150, sp: 40 },
+        weightkg: 340,
+        abilities: { 0: 'Sturdy' },
+        baseSpecies: 'Probopass'
+    },
+    'Rampardos-Crest': {
+        types: ['Rock'],
+        bs: { hp: 97, at: 165, df: 60, sa: 65, sd: 50, sp: 58 },
+        weightkg: 102.5,
+        abilities: { 0: 'Mold Breaker' },
+        baseSpecies: 'Rampardos'
+    },
+    'Relicanth-Crest': {
+        types: ['Water', 'Rock'],
+        bs: { hp: 100, at: 90, df: 130, sa: 45, sd: 65, sp: 55 },
+        weightkg: 23.4,
+        abilities: { 0: 'Swift Swim' },
+        baseSpecies: 'Relicanth'
+    },
+    'Reuniclus-Crest': {
+        types: ['Psychic'],
+        bs: { hp: 110, at: 65, df: 75, sa: 125, sd: 85, sp: 30 },
+        weightkg: 20.1,
+        abilities: { 0: 'Overcoat' },
+        baseSpecies: 'Reuniclus'
+    },
+    'Reuniclus-Crest-Fighting': {
+        types: ['Fighting'],
+        bs: { hp: 110, at: 65, df: 75, sa: 125, sd: 85, sp: 30 },
+        weightkg: 20.1,
+        abilities: { 0: 'Overcoat' },
+        baseSpecies: 'Reuniclus'
+    },
+    'Samurott-Crest': {
+        types: ['Water'],
+        bs: { hp: 95, at: 100, df: 85, sa: 108, sd: 70, sp: 70 },
+        weightkg: 94.6,
+        abilities: { 0: 'Torrent' },
+        baseSpecies: 'Samurott'
+    },
+    'Sawsbuck-Crest-Autumn': {
+        types: ['Ground', 'Grass'],
+        bs: { hp: 80, at: 100, df: 70, sa: 60, sd: 70, sp: 95 },
+        weightkg: 92.5,
+        abilities: { 0: 'Chlorophyll' },
+        baseSpecies: 'Sawsbuck'
+    },
+    'Sawsbuck-Crest-Spring': {
+        types: ['Water', 'Grass'],
+        bs: { hp: 80, at: 100, df: 70, sa: 60, sd: 70, sp: 95 },
+        weightkg: 92.5,
+        abilities: { 0: 'Chlorophyll' },
+        baseSpecies: 'Sawsbuck'
+    },
+    'Sawsbuck-Crest-Summer': {
+        types: ['Fire', 'Grass'],
+        bs: { hp: 80, at: 100, df: 70, sa: 60, sd: 70, sp: 95 },
+        weightkg: 92.5,
+        abilities: { 0: 'Chlorophyll' },
+        baseSpecies: 'Sawsbuck'
+    },
+    'Sawsbuck-Crest-Winter': {
+        types: ['Ice', 'Grass'],
+        bs: { hp: 80, at: 100, df: 70, sa: 60, sd: 70, sp: 95 },
+        weightkg: 92.5,
+        abilities: { 0: 'Chlorophyll' },
+        baseSpecies: 'Sawsbuck'
+    },
+    'Seviper-Crest': {
+        types: ['Poison'],
+        bs: { hp: 73, at: 100, df: 60, sa: 100, sd: 60, sp: 65 },
+        weightkg: 52.5,
+        abilities: { 0: 'Shed Skin' },
+        baseSpecies: 'Seviper'
+    },
+    'Shiinotic-Crest': {
+        types: ['Grass', 'Fairy'],
+        bs: { hp: 60, at: 45, df: 80, sa: 90, sd: 100, sp: 30 },
+        weightkg: 11.5,
+        abilities: { 0: 'Illuminate' },
+        baseSpecies: 'Shiinotic'
+    },
+    'Simipour-Crest': {
+        types: ['Water'],
+        bs: { hp: 75, at: 98, df: 63, sa: 98, sd: 63, sp: 101 },
+        weightkg: 29,
+        abilities: { 0: 'Gluttony' },
+        baseSpecies: 'Simipour'
+    },
+    'Simisage-Crest': {
+        types: ['Grass'],
+        bs: { hp: 75, at: 98, df: 63, sa: 98, sd: 63, sp: 101 },
+        weightkg: 30.5,
+        abilities: { 0: 'Gluttony' },
+        baseSpecies: 'Simisage'
+    },
+    'Simisear-Crest': {
+        types: ['Fire'],
+        bs: { hp: 75, at: 98, df: 63, sa: 98, sd: 63, sp: 101 },
+        weightkg: 28,
+        abilities: { 0: 'Gluttony' },
+        baseSpecies: 'Simisear'
+    },
+    'Skuntank-Crest': {
+        types: ['Poison', 'Dark'],
+        bs: { hp: 103, at: 93, df: 67, sa: 71, sd: 61, sp: 84 },
+        weightkg: 38,
+        abilities: { 0: 'Stench' },
+        baseSpecies: 'Skuntank'
+    },
+    'Spiritomb-Crest': {
+        types: ['Ghost', 'Dark'],
+        bs: { hp: 50, at: 92, df: 108, sa: 92, sd: 108, sp: 35 },
+        weightkg: 108,
+        abilities: { 0: 'Pressure' },
+        baseSpecies: 'Spiritomb'
+    },
+    'Stantler-Crest': {
+        types: ['Normal'],
+        bs: { hp: 73, at: 95, df: 62, sa: 85, sd: 65, sp: 85 },
+        weightkg: 71.2,
+        abilities: { 0: 'Intimidate' },
+        baseSpecies: 'Stantler'
+    },
+    'Swalot-Crest': {
+        types: ['Poison'],
+        bs: { hp: 100, at: 73, df: 83, sa: 73, sd: 83, sp: 55 },
+        weightkg: 80,
+        abilities: { 0: 'Liquid Ooze' },
+        baseSpecies: 'Swalot'
+    },
+    'Thievul-Crest': {
+        types: ['Dark'],
+        bs: { hp: 70, at: 58, df: 58, sa: 87, sd: 92, sp: 90 },
+        weightkg: 19.9,
+        abilities: { 0: 'Run Away' },
+        baseSpecies: 'Thievul'
+    },
+    'Torterra-Crest': {
+        types: ['Grass', 'Ground'],
+        bs: { hp: 95, at: 109, df: 105, sa: 75, sd: 85, sp: 56 },
+        weightkg: 310,
+        abilities: { 0: 'Overgrow' },
+        baseSpecies: 'Torterra'
+    },
+    'Typhlosion-Crest': {
+        types: ['Fire'],
+        bs: { hp: 78, at: 84, df: 78, sa: 109, sd: 85, sp: 100 },
+        weightkg: 79.5,
+        abilities: { 0: 'Blaze' },
+        baseSpecies: 'Typhlosion'
+    },
+    'Vespiquen-Crest-Offense': {
+        types: ['Bug', 'Flying'],
+        bs: { hp: 70, at: 80, df: 102, sa: 80, sd: 102, sp: 40 },
+        weightkg: 38.5,
+        abilities: { 0: 'Pressure' },
+        baseSpecies: 'Vespiquen'
+    },
+    'Vespiquen-Crest-Defense': {
+        types: ['Bug', 'Flying'],
+        bs: { hp: 70, at: 80, df: 102, sa: 80, sd: 102, sp: 40 },
+        weightkg: 38.5,
+        abilities: { 0: 'Pressure' },
+        baseSpecies: 'Vespiquen'
+    },
+    'Whiscash-Crest': {
+        types: ['Water', 'Ground'],
+        bs: { hp: 110, at: 78, df: 73, sa: 76, sd: 71, sp: 60 },
+        weightkg: 23.6,
+        abilities: { 0: 'Oblivious' },
+        baseSpecies: 'Whiscash'
+    },
+    'Wyrdeer-Crest': {
+        types: ['Normal', 'Psychic'],
+        bs: { hp: 103, at: 105, df: 72, sa: 105, sd: 75, sp: 65 },
+        weightkg: 95.1,
+        abilities: { 0: 'Intimidate' },
+        baseSpecies: 'Wyrdeer'
+    },
+    'Zangoose-Crest': {
+        types: ['Normal'],
+        bs: { hp: 73, at: 115, df: 60, sa: 60, sd: 60, sp: 90 },
+        weightkg: 40.3,
+        abilities: { 0: 'Immunity' },
+        baseSpecies: 'Zangoose'
+    },
+    'Zoroark-Crest': {
+        types: ['Dark'],
+        bs: { hp: 60, at: 105, df: 60, sa: 120, sd: 60, sp: 105 },
+        weightkg: 81.1,
+        abilities: { 0: 'Illusion' },
+        baseSpecies: 'Zoroark'
+    },
+    'Dummmy-Aevian': {
         types: ['Poison', 'Ground'],
         bs: { hp: 55, at: 45, df: 45, sa: 25, sd: 25, sp: 15 },
         weightkg: 11,
         abilities: { 0: 'Poison Point' },
-        baseSpecies: 'Dummy',
+        baseSpecies: 'Dummmy',
         nfe: true
     }
 };
