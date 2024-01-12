@@ -10124,7 +10124,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     otherFormes: ['Eeveelution-Mega'],
   },
   'Eevoluteon-Mega': {
-    types: ['Normal'],
+    types: ['???'],
     bs: {hp: 95, at: 105, df: 105, sa: 105, sd: 105, sp: 105},
     weightkg: 29,
     abilities: {0: 'Mastery'}, // to be implemented + type sync

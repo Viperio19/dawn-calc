@@ -216,6 +216,7 @@ export function calculateSMSSSV(
   let isGalvanize = false;
   let isLiquidVoice = false;
   let isNormalize = false;
+  let isTypeSync = false;
   const noTypeChange = move.named(
     'Revelation Dance',
     'Judgment',
@@ -242,8 +243,10 @@ export function calculateSMSSSV(
       type = 'Ice';
     } else if ((isNormalize = attacker.hasAbility('Normalize'))) { // Boosts any type
       type = 'Normal';
+    } else if ((isTypeSync = attacker.hasAbility('Type Sync') && normal)) {
+      type = attacker.types[0];
     }
-    if (isGalvanize || isPixilate || isRefrigerate || isAerilate || isNormalize) {
+    if (isGalvanize || isPixilate || isRefrigerate || isAerilate || isNormalize || isTypeSync) {
       desc.attackerAbility = attacker.ability;
       hasAteAbilityTypeChange = true;
     } else if (isLiquidVoice) {
@@ -512,7 +515,7 @@ export function calculateSMSSSV(
   // the random factor is applied between the crit mod and the stab mod, so don't apply anything
   // below this until we're inside the loop
   let stabMod = 4096;
-  if (attacker.hasOriginalType(move.type)) {
+  if (attacker.hasOriginalType(move.type) || attacker.hasAbility('Mastery')) {
     stabMod += 2048;
   } else if (attacker.hasAbility('Protean', 'Libero') && !attacker.teraType) {
     stabMod += 2048;
@@ -1126,7 +1129,12 @@ export function calculateBPModsSMSSSV(
   // The -ate abilities already changed move typing earlier, so most checks are done and desc is set
   // However, Max Moves also don't boost -ate Abilities
   if (!move.isMax && hasAteAbilityTypeChange) {
-    bpMods.push(4915);
+    if (attacker.hasAbility('Type Sync')) {
+      bpMods.push(4505);
+    }
+    else {
+      bpMods.push(4915);
+    }
   }
 
   if ((attacker.hasAbility('Reckless') && (move.recoil || move.hasCrashDamage)) ||
