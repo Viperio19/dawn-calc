@@ -10117,6 +10117,80 @@ var CHROMATIC_PATCH = {
         abilities: { 0: 'Filter' },
         baseSpecies: 'Ampharos'
     },
+    'Breezeon': {
+        types: ['Flying'],
+        bs: { hp: 65, at: 95, df: 110, sa: 65, sd: 60, sp: 130 },
+        weightkg: 29,
+        abilities: { 0: 'Gale Wings' }
+    },
+    'Draceon': {
+        types: ['Dragon'],
+        bs: { hp: 110, at: 130, df: 60, sa: 65, sd: 95, sp: 65 },
+        weightkg: 29,
+        abilities: { 0: 'Multiscale' }
+    },
+    'Eevoluteon': {
+        types: ['Normal'],
+        bs: { hp: 95, at: 90, df: 90, sa: 90, sd: 90, sp: 90 },
+        weightkg: 29,
+        abilities: { 0: 'Normalize' },
+        otherFormes: ['Eevoluteon-Mega']
+    },
+    'Eevoluteon-Mega': {
+        types: ['???'],
+        bs: { hp: 95, at: 105, df: 105, sa: 105, sd: 105, sp: 105 },
+        weightkg: 29,
+        abilities: { 0: 'Mastery' },
+        baseSpecies: 'Eevoluteon'
+    },
+    'Entomeon': {
+        types: ['Bug'],
+        bs: { hp: 65, at: 110, df: 130, sa: 65, sd: 60, sp: 95 },
+        weightkg: 29,
+        abilities: { 0: 'Compound Eyes' }
+    },
+    'Lucheon': {
+        types: ['Fighting'],
+        bs: { hp: 95, at: 130, df: 65, sa: 65, sd: 60, sp: 110 },
+        weightkg: 29,
+        abilities: { 0: 'Iron Fist' }
+    },
+    'Metaleon': {
+        types: ['Steel'],
+        bs: { hp: 95, at: 65, df: 130, sa: 65, sd: 110, sp: 60 },
+        weightkg: 29,
+        abilities: { 0: 'Inner Focus' }
+    },
+    'Petreon': {
+        types: ['Rock'],
+        bs: { hp: 130, at: 60, df: 110, sa: 65, sd: 95, sp: 65 },
+        weightkg: 29,
+        abilities: { 0: 'Dry Skin' }
+    },
+    'Spectreon': {
+        types: ['Ghost'],
+        bs: { hp: 60, at: 130, df: 95, sa: 65, sd: 65, sp: 110 },
+        weightkg: 29,
+        abilities: { 0: 'Cursed Body' }
+    },
+    'Terreon': {
+        types: ['Ground'],
+        bs: { hp: 130, at: 65, df: 60, sa: 95, sd: 110, sp: 65 },
+        weightkg: 29,
+        abilities: { 0: 'Sand Force' }
+    },
+    'Toxeon': {
+        types: ['Poison'],
+        bs: { hp: 95, at: 65, df: 110, sa: 65, sd: 130, sp: 60 },
+        weightkg: 29,
+        abilities: { 0: 'Poison Touch' }
+    },
+    'Wyrmeon': {
+        types: ['Dragon'],
+        bs: { hp: 65, at: 65, df: 60, sa: 130, sd: 95, sp: 110 },
+        weightkg: 29,
+        abilities: { 0: 'Inner Focus' }
+    },
     'Dummy-Aevian': {
         types: ['Poison', 'Ground'],
         bs: { hp: 55, at: 45, df: 45, sa: 25, sd: 25, sp: 15 },

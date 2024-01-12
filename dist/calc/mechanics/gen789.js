@@ -151,6 +151,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     var isGalvanize = false;
     var isLiquidVoice = false;
     var isNormalize = false;
+    var isTypeSync = false;
     var noTypeChange = move.named('Revelation Dance', 'Judgment', 'Nature Power', 'Techno Blast', 'Multi Attack', 'Natural Gift', 'Weather Ball', 'Terrain Pulse', 'Struggle') || (move.named('Tera Blast') && attacker.teraType);
     if (!move.isZ && !noTypeChange) {
         var normal = move.hasType('Normal');
@@ -172,7 +173,10 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         else if ((isNormalize = attacker.hasAbility('Normalize'))) {
             type = 'Normal';
         }
-        if (isGalvanize || isPixilate || isRefrigerate || isAerilate || isNormalize) {
+        else if ((isTypeSync = attacker.hasAbility('Type Sync') && normal)) {
+            type = attacker.types[0];
+        }
+        if (isGalvanize || isPixilate || isRefrigerate || isAerilate || isNormalize || isTypeSync) {
             desc.attackerAbility = attacker.ability;
             hasAteAbilityTypeChange = true;
         }
@@ -350,7 +354,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         desc.defenderItem = defender.item;
     }
     var stabMod = 4096;
-    if (attacker.hasOriginalType(move.type)) {
+    if (attacker.hasOriginalType(move.type) || attacker.hasAbility('Mastery')) {
         stabMod += 2048;
     }
     else if (attacker.hasAbility('Protean', 'Libero') && !attacker.teraType) {
@@ -825,7 +829,12 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
         desc.attackerAbility = attacker.ability;
     }
     if (!move.isMax && hasAteAbilityTypeChange) {
-        bpMods.push(4915);
+        if (attacker.hasAbility('Type Sync')) {
+            bpMods.push(4505);
+        }
+        else {
+            bpMods.push(4915);
+        }
     }
     if ((attacker.hasAbility('Reckless') && (move.recoil || move.hasCrashDamage)) ||
         (attacker.hasAbility('Iron Fist') && move.flags.punch)) {

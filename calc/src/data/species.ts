@@ -10121,13 +10121,13 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     bs: {hp: 95, at: 90, df: 90, sa: 90, sd: 90, sp: 90},
     weightkg: 29,
     abilities: {0: 'Normalize'},
-    otherFormes: ['Eeveelution-Mega'],
+    otherFormes: ['Eevoluteon-Mega'],
   },
   'Eevoluteon-Mega': {
     types: ['???'],
     bs: {hp: 95, at: 105, df: 105, sa: 105, sd: 105, sp: 105},
     weightkg: 29,
-    abilities: {0: 'Mastery'}, // to be implemented + type sync
+    abilities: {0: 'Mastery'},
     baseSpecies: 'Eevoluteon',
   },
   'Entomeon': {
