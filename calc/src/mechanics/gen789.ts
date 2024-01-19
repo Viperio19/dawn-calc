@@ -1130,7 +1130,8 @@ export function calculateBPModsSMSSSV(
   // However, Max Moves also don't boost -ate Abilities
   if (!move.isMax && hasAteAbilityTypeChange) {
     if (attacker.hasAbility('Type Sync')) {
-      bpMods.push(4505);
+      if (!attacker.named('Spectreon'))
+        bpMods.push(4505);
     }
     else {
       bpMods.push(4915);
