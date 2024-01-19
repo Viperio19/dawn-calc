@@ -161,6 +161,9 @@ function getFinalSpeed(gen, pokemon, field, side) {
     else if (pokemon.hasItem('Quick Powder') && pokemon.named('Ditto')) {
         speedMods.push(8192);
     }
+    if (pokemon.named('Ariados-Crest')) {
+        speedMods.push(6144);
+    }
     speed = OF32(pokeRound((speed * chainMods(speedMods, 410, 131172)) / 4096));
     if (pokemon.hasStatus('par') && !pokemon.hasAbility('Quick Feet')) {
         speed = Math.floor(OF32(speed * (gen.num < 7 ? 25 : 50)) / 100);

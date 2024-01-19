@@ -66,7 +66,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         }
     }
     var isCritical = !defender.hasAbility('Battle Armor', 'Shell Armor') &&
-        (move.isCrit || (attacker.hasAbility('Merciless') && defender.hasStatus('psn', 'tox'))) &&
+        (move.isCrit || (attacker.hasAbility('Merciless') && defender.hasStatus('psn', 'tox')) || (attacker.named('Ariados-Crest')) && (defender.status || defender.boosts.spe < 0)) &&
         move.timesUsed === 1;
     var type = move.type;
     if (move.named('Weather Ball')) {

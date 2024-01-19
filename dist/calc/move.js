@@ -79,7 +79,7 @@ var Move = (function () {
         this.hasCrashDamage = !!data.hasCrashDamage;
         this.mindBlownRecoil = !!data.mindBlownRecoil;
         this.struggleRecoil = !!data.struggleRecoil;
-        this.isCrit = !!options.isCrit || !!data.willCrit ||
+        this.isCrit = (['futuresight', 'doomdesire'].includes(data.id)) || !!options.isCrit || !!data.willCrit ||
             gen.num === 1 && ['crabhammer', 'razorleaf', 'slash', 'karate chop'].includes(data.id);
         this.isStellarFirstUse = !!options.isStellarFirstUse;
         this.drain = data.drain;

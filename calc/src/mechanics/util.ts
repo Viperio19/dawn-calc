@@ -123,6 +123,11 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
     speedMods.push(8192);
   }
 
+  // Crests
+  if (pokemon.named('Ariados-Crest')) {
+    speedMods.push(6144);
+  }
+
   speed = OF32(pokeRound((speed * chainMods(speedMods, 410, 131172)) / 4096));
   if (pokemon.hasStatus('par') && !pokemon.hasAbility('Quick Feet')) {
     speed = Math.floor(OF32(speed * (gen.num < 7 ? 25 : 50)) / 100);
