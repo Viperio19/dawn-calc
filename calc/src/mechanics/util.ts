@@ -85,6 +85,10 @@ export function computeFinalStats(
       } else {
         pokemon.stats[stat] = getModifiedStat(pokemon.rawStats[stat]!, pokemon.boosts[stat]!, gen);
       }
+
+      // Crests
+
+      
     }
   }
 }

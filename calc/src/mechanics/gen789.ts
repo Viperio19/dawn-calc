@@ -514,7 +514,7 @@ export function calculateSMSSSV(
   let stabMod = 4096;
   if (attacker.hasOriginalType(move.type)) {
     stabMod += 2048;
-  } else if (attacker.hasAbility('Protean', 'Libero') && !attacker.teraType) {
+  } else if ((attacker.hasAbility('Protean', 'Libero') || attacker.named('Boltund-Crest')) && !attacker.teraType) {
     stabMod += 2048;
     desc.attackerAbility = attacker.ability;
   }
@@ -888,6 +888,11 @@ export function calculateBasePowerSMSSSV(
   default:
     basePower = move.bp;
   }
+
+  if (attacker.named('Cinccino-Crest')) {
+    basePower *= 0.35;
+  }
+
   if (basePower === 0) {
     return 0;
   }
@@ -1192,6 +1197,25 @@ export function calculateBPModsSMSSSV(
     bpMods.push(4505);
     desc.attackerItem = attacker.item;
   }
+
+  // Crests
+
+  if (defender.named('Beheeyem-Crest') && defender.stats.spe <= attacker.stats.spe) {
+    bpMods.push(2732);
+  }
+
+  if (attacker.named('Boltund-Crest') && move.flags.bite && attacker.stats.spe >= defender.stats.spe) {
+    bpMods.push(6144);
+  }
+
+  // if (attacker.named('Cinccino-Crest')) {
+  //   bpMods.push(1434);
+  // }
+
+  if (attacker.named('Claydol-Crest') && ['Charge Beam', 'Hyper Beam', 'Ice Beam', 'Psybeam', 'Signal Beam', 'Solar Beam'].includes(move.name)) {
+    bpMods.push(6144);
+  }
+
   return bpMods;
 }
 
@@ -1214,7 +1238,7 @@ export function calculateAttackSMSSSV(
     move.named('Shell Side Arm') &&
     getShellSideArmCategory(attacker, defender) === 'Physical'
       ? 'atk'
-      : move.named('Body Press')
+      : move.named('Body Press') || (attacker.named('Claydol-Crest') && move.category === 'Special')
         ? 'def'
         : move.category === 'Special'
           ? 'spa'
@@ -1224,8 +1248,11 @@ export function calculateAttackSMSSSV(
       ? getEVDescriptionText(gen, defender, attackStat, defender.nature)
       : getEVDescriptionText(gen, attacker, attackStat, attacker.nature);
 
-  if (attackSource.boosts[attackStat] === 0 ||
-      (isCritical && attackSource.boosts[attackStat] < 0)) {
+  if (attacker.named('Claydol-Crest') && move.category === 'Special') {
+    attack = getModifiedStat(attacker.rawStats['def']!, attacker.boosts['spa']!);
+    desc.attackBoost = attackSource.boosts['spa'];
+  } else if (attackSource.boosts[attackStat] === 0 ||
+    (isCritical && attackSource.boosts[attackStat] < 0)) {
     attack = attackSource.rawStats[attackStat];
   } else if (defender.hasAbility('Unaware')) {
     attack = attackSource.rawStats[attackStat];
@@ -1387,6 +1414,13 @@ export function calculateAtModsSMSSSV(
     atMods.push(6144);
     desc.attackerItem = attacker.item;
   }
+
+  // Crests
+
+  if (attacker.named('Cofagrigus-Crest') && move.category === 'Special') {
+    atMods.push(5120);
+  }
+
   return atMods;
 }
 
@@ -1520,6 +1554,17 @@ export function calculateDfModsSMSSSV(
     dfMods.push(8192);
     desc.defenderItem = defender.item;
   }
+
+  // Crests
+
+  if (defender.named('Cofagrigus-Crest') && move.category === 'Special') {
+    dfMods.push(5120);
+  }
+
+  if (defender.named('Crabominable-Crest')) {
+    dfMods.push(4915);
+  }
+
   return dfMods;
 }
 

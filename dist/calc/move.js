@@ -52,6 +52,11 @@ var Move = (function () {
                         : data.multihit[0] + 1;
                 }
             }
+            else if (options.species == 'Cinccino-Crest') {
+                this.hits = (options.ability === 'Skill Link')
+                    ? 5
+                    : 3;
+            }
             this.timesUsedWithMetronome = options.timesUsedWithMetronome;
         }
         this.gen = gen;

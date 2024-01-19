@@ -353,7 +353,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     if (attacker.hasOriginalType(move.type)) {
         stabMod += 2048;
     }
-    else if (attacker.hasAbility('Protean', 'Libero') && !attacker.teraType) {
+    else if ((attacker.hasAbility('Protean', 'Libero') || attacker.named('Boltund-Crest')) && !attacker.teraType) {
         stabMod += 2048;
         desc.attackerAbility = attacker.ability;
     }
@@ -659,6 +659,9 @@ function calculateBasePowerSMSSSV(gen, attacker, defender, move, field, hasAteAb
         default:
             basePower = move.bp;
     }
+    if (attacker.named('Cinccino-Crest')) {
+        basePower *= 0.35;
+    }
     if (basePower === 0) {
         return 0;
     }
@@ -882,6 +885,15 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
         bpMods.push(4505);
         desc.attackerItem = attacker.item;
     }
+    if (defender.named('Beheeyem-Crest') && defender.stats.spe <= attacker.stats.spe) {
+        bpMods.push(2732);
+    }
+    if (attacker.named('Boltund-Crest') && move.flags.bite && attacker.stats.spe >= defender.stats.spe) {
+        bpMods.push(6144);
+    }
+    if (attacker.named('Claydol-Crest') && ['Charge Beam', 'Hyper Beam', 'Ice Beam', 'Psybeam', 'Signal Beam', 'Solar Beam'].includes(move.name)) {
+        bpMods.push(6144);
+    }
     return bpMods;
 }
 exports.calculateBPModsSMSSSV = calculateBPModsSMSSSV;
@@ -896,7 +908,7 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
     var attackStat = move.named('Shell Side Arm') &&
         (0, util_2.getShellSideArmCategory)(attacker, defender) === 'Physical'
         ? 'atk'
-        : move.named('Body Press')
+        : move.named('Body Press') || (attacker.named('Claydol-Crest') && move.category === 'Special')
             ? 'def'
             : move.category === 'Special'
                 ? 'spa'
@@ -905,7 +917,11 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
         move.named('Foul Play')
             ? (0, util_2.getEVDescriptionText)(gen, defender, attackStat, defender.nature)
             : (0, util_2.getEVDescriptionText)(gen, attacker, attackStat, attacker.nature);
-    if (attackSource.boosts[attackStat] === 0 ||
+    if (attacker.named('Claydol-Crest') && move.category === 'Special') {
+        attack = (0, util_2.getModifiedStat)(attacker.rawStats['def'], attacker.boosts['spa']);
+        desc.attackBoost = attackSource.boosts['spa'];
+    }
+    else if (attackSource.boosts[attackStat] === 0 ||
         (isCritical && attackSource.boosts[attackStat] < 0)) {
         attack = attackSource.rawStats[attackStat];
     }
@@ -1044,6 +1060,9 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
         atMods.push(6144);
         desc.attackerItem = attacker.item;
     }
+    if (attacker.named('Cofagrigus-Crest') && move.category === 'Special') {
+        atMods.push(5120);
+    }
     return atMods;
 }
 exports.calculateAtModsSMSSSV = calculateAtModsSMSSSV;
@@ -1144,6 +1163,12 @@ function calculateDfModsSMSSSV(gen, attacker, defender, move, field, desc, isCri
         (defender.hasItem('Deep Sea Scale') && defender.named('Clamperl') && !hitsPhysical)) {
         dfMods.push(8192);
         desc.defenderItem = defender.item;
+    }
+    if (defender.named('Cofagrigus-Crest') && move.category === 'Special') {
+        dfMods.push(5120);
+    }
+    if (defender.named('Crabominable-Crest')) {
+        dfMods.push(4915);
     }
     return dfMods;
 }

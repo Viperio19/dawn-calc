@@ -167,8 +167,18 @@ export function getRecoil(
   let text = '';
 
   const damageOverflow = minDamage > defender.curHP() || maxDamage > defender.curHP();
-  if (move.recoil) {
-    const mod = (move.recoil[0] / move.recoil[1]) * 100;
+  if (move.recoil || defender.named('Bastiodon-Crest')) {
+    let tempMod = 0;
+    
+    if (move.recoil) {
+      tempMod += (move.recoil[0] / move.recoil[1]) * 100;
+    }
+    if (defender.named('Bastiodon-Crest')) {
+      tempMod += 50;
+    }
+
+    const mod = tempMod;
+
     let minRecoilDamage, maxRecoilDamage;
     if (damageOverflow) {
       minRecoilDamage =

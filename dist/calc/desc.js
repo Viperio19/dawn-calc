@@ -96,8 +96,15 @@ function getRecoil(gen, attacker, defender, move, damage, notation) {
     var recoil = [0, 0];
     var text = '';
     var damageOverflow = minDamage > defender.curHP() || maxDamage > defender.curHP();
-    if (move.recoil) {
-        var mod = (move.recoil[0] / move.recoil[1]) * 100;
+    if (move.recoil || defender.named('Bastiodon-Crest')) {
+        var tempMod = 0;
+        if (move.recoil) {
+            tempMod += (move.recoil[0] / move.recoil[1]) * 100;
+        }
+        if (defender.named('Bastiodon-Crest')) {
+            tempMod += 50;
+        }
+        var mod = tempMod;
         var minRecoilDamage = void 0, maxRecoilDamage = void 0;
         if (damageOverflow) {
             minRecoilDamage =
