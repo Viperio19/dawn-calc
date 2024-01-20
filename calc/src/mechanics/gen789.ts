@@ -357,7 +357,7 @@ export function calculateSMSSSV(
 
   if ((defender.hasAbility('Wonder Guard') && typeEffectiveness <= 1) ||
       (move.hasType('Grass') && defender.hasAbility('Sap Sipper')) ||
-      (move.hasType('Fire') && defender.hasAbility('Flash Fire', 'Well-Baked Body')) ||
+      (move.hasType('Fire') && (defender.hasAbility('Flash Fire', 'Well-Baked Body') || defender.named('Druddigon-Crest'))) ||
       (move.hasType('Water') && defender.hasAbility('Dry Skin', 'Storm Drain', 'Water Absorb')) ||
       (move.hasType('Electric') &&
         defender.hasAbility('Lightning Rod', 'Motor Drive', 'Volt Absorb')) ||
@@ -1057,7 +1057,7 @@ export function calculateBPModsSMSSSV(
   // Abilities
 
   // Use BasePower after moves with custom BP to determine if Technician should boost
-  if ((attacker.hasAbility('Technician') && basePower <= 60) ||
+  if (((attacker.hasAbility('Technician') || attacker.named('Dusknoir-Crest')) && basePower <= 60) ||
     (attacker.hasAbility('Flare Boost') &&
       attacker.hasStatus('brn') && move.category === 'Special') ||
     (attacker.hasAbility('Toxic Boost') &&
@@ -1208,7 +1208,15 @@ export function calculateBPModsSMSSSV(
     bpMods.push(6144);
   }
 
-  if (attacker.named('Claydol-Crest') && ['Charge Beam', 'Hyper Beam', 'Ice Beam', 'Psybeam', 'Signal Beam', 'Solar Beam'].includes(move.name)) {
+  if (attacker.named('Claydol-Crest') && move.flags.beam) {
+    bpMods.push(6144);
+  }
+
+  if (attacker.named('Druddigon-Crest') && move.hasType('Fire', 'Dragon')) {
+    bpMods.push(5324);
+  }
+
+  if (attacker.named('Fearow-Crest') && move.flags.stabbing) {
     bpMods.push(6144);
   }
 
@@ -1234,11 +1242,13 @@ export function calculateAttackSMSSSV(
     move.named('Shell Side Arm') &&
     getShellSideArmCategory(attacker, defender) === 'Physical'
       ? 'atk'
-      : move.named('Body Press') || (attacker.named('Claydol-Crest') && move.category === 'Special')
+      : (attacker.named('Claydol-Crest') && move.category === 'Special') || move.named('Body Press')
         ? 'def'
-        : move.category === 'Special'
-          ? 'spa'
-          : 'atk';
+        : (attacker.named('Dedenne-Crest'))
+          ? 'spe'
+          : move.category === 'Special'
+            ? 'spa'
+            : 'atk';
   desc.attackEVs =
     move.named('Foul Play')
       ? getEVDescriptionText(gen, defender, attackStat, defender.nature)
@@ -1247,6 +1257,14 @@ export function calculateAttackSMSSSV(
   if (attacker.named('Claydol-Crest') && move.category === 'Special') {
     attack = getModifiedStat(attacker.rawStats['def']!, attacker.boosts['spa']!);
     desc.attackBoost = attackSource.boosts['spa'];
+  } else if (attacker.named('Dedenne-Crest')){
+    if (move.category === 'Special') {
+      attack = getModifiedStat(attacker.rawStats['spe']!, attacker.boosts['spa']!);
+      desc.attackBoost = attackSource.boosts['spa'];
+    } else {
+      attack = getModifiedStat(attacker.rawStats['spe']!, attacker.boosts['atk']!);
+      desc.attackBoost = attackSource.boosts['atk'];
+    }
   } else if (attackSource.boosts[attackStat] === 0 ||
     (isCritical && attackSource.boosts[attackStat] < 0)) {
     attack = attackSource.rawStats[attackStat];
@@ -1416,6 +1434,9 @@ export function calculateAtModsSMSSSV(
   if (attacker.named('Cofagrigus-Crest') && move.category === 'Special') {
     atMods.push(5120);
   }
+  if (attacker.named('Dusknoir-Crest') && move.category === 'Physical') {
+    atMods.push(5120);
+  }
 
   return atMods;
 }
@@ -1559,6 +1580,9 @@ export function calculateDfModsSMSSSV(
 
   if (defender.named('Crabominable-Crest')) {
     dfMods.push(4915);
+  }
+  if (attacker.named('Electrode-Crest')) {
+    dfMods.push(2048);
   }
 
   return dfMods;

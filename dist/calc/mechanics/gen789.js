@@ -244,7 +244,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     }
     if ((defender.hasAbility('Wonder Guard') && typeEffectiveness <= 1) ||
         (move.hasType('Grass') && defender.hasAbility('Sap Sipper')) ||
-        (move.hasType('Fire') && defender.hasAbility('Flash Fire', 'Well-Baked Body')) ||
+        (move.hasType('Fire') && (defender.hasAbility('Flash Fire', 'Well-Baked Body') || defender.named('Druddigon-Crest'))) ||
         (move.hasType('Water') && defender.hasAbility('Dry Skin', 'Storm Drain', 'Water Absorb')) ||
         (move.hasType('Electric') &&
             defender.hasAbility('Lightning Rod', 'Motor Drive', 'Volt Absorb')) ||
@@ -762,7 +762,7 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
             desc.terrain = field.terrain;
         }
     }
-    if ((attacker.hasAbility('Technician') && basePower <= 60) ||
+    if (((attacker.hasAbility('Technician') || attacker.named('Dusknoir-Crest')) && basePower <= 60) ||
         (attacker.hasAbility('Flare Boost') &&
             attacker.hasStatus('brn') && move.category === 'Special') ||
         (attacker.hasAbility('Toxic Boost') &&
@@ -891,7 +891,13 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
     if (attacker.named('Boltund-Crest') && move.flags.bite && attacker.stats.spe >= defender.stats.spe) {
         bpMods.push(6144);
     }
-    if (attacker.named('Claydol-Crest') && ['Charge Beam', 'Hyper Beam', 'Ice Beam', 'Psybeam', 'Signal Beam', 'Solar Beam'].includes(move.name)) {
+    if (attacker.named('Claydol-Crest') && move.flags.beam) {
+        bpMods.push(6144);
+    }
+    if (attacker.named('Druddigon-Crest') && move.hasType('Fire', 'Dragon')) {
+        bpMods.push(5324);
+    }
+    if (attacker.named('Fearow-Crest') && move.flags.stabbing) {
         bpMods.push(6144);
     }
     return bpMods;
@@ -908,11 +914,13 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
     var attackStat = move.named('Shell Side Arm') &&
         (0, util_2.getShellSideArmCategory)(attacker, defender) === 'Physical'
         ? 'atk'
-        : move.named('Body Press') || (attacker.named('Claydol-Crest') && move.category === 'Special')
+        : (attacker.named('Claydol-Crest') && move.category === 'Special') || move.named('Body Press')
             ? 'def'
-            : move.category === 'Special'
-                ? 'spa'
-                : 'atk';
+            : (attacker.named('Dedenne-Crest'))
+                ? 'spe'
+                : move.category === 'Special'
+                    ? 'spa'
+                    : 'atk';
     desc.attackEVs =
         move.named('Foul Play')
             ? (0, util_2.getEVDescriptionText)(gen, defender, attackStat, defender.nature)
@@ -920,6 +928,16 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
     if (attacker.named('Claydol-Crest') && move.category === 'Special') {
         attack = (0, util_2.getModifiedStat)(attacker.rawStats['def'], attacker.boosts['spa']);
         desc.attackBoost = attackSource.boosts['spa'];
+    }
+    else if (attacker.named('Dedenne-Crest')) {
+        if (move.category === 'Special') {
+            attack = (0, util_2.getModifiedStat)(attacker.rawStats['spe'], attacker.boosts['spa']);
+            desc.attackBoost = attackSource.boosts['spa'];
+        }
+        else {
+            attack = (0, util_2.getModifiedStat)(attacker.rawStats['spe'], attacker.boosts['atk']);
+            desc.attackBoost = attackSource.boosts['atk'];
+        }
     }
     else if (attackSource.boosts[attackStat] === 0 ||
         (isCritical && attackSource.boosts[attackStat] < 0)) {
@@ -1063,6 +1081,9 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
     if (attacker.named('Cofagrigus-Crest') && move.category === 'Special') {
         atMods.push(5120);
     }
+    if (attacker.named('Dusknoir-Crest') && move.category === 'Physical') {
+        atMods.push(5120);
+    }
     return atMods;
 }
 exports.calculateAtModsSMSSSV = calculateAtModsSMSSSV;
@@ -1169,6 +1190,9 @@ function calculateDfModsSMSSSV(gen, attacker, defender, move, field, desc, isCri
     }
     if (defender.named('Crabominable-Crest')) {
         dfMods.push(4915);
+    }
+    if (attacker.named('Electrode-Crest')) {
+        dfMods.push(2048);
     }
     return dfMods;
 }

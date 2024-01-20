@@ -74,6 +74,8 @@ export interface MoveFlags {
     pulse?: 1 | 0;
     slicing?: 1 | 0;
     wind?: 1 | 0;
+    beam?: 1 | 0;
+    stabbing?: 1 | 0;
 }
 export interface SelfOrSecondaryEffect {
     boosts?: Partial<StatsTable>;
@@ -109,6 +111,8 @@ export interface Move extends Data<MoveName> {
         basePower: number;
     };
     readonly multihit?: number | number[];
+    readonly beam?: boolean;
+    readonly stabbing?: boolean;
 }
 export interface Species {
     get(id: ID): Specie | undefined;

@@ -80,6 +80,19 @@ function getRecovery(gen, attacker, defender, move, damage, notation) {
             }
         }
     }
+    if (attacker.named('Dusknoir-Crest') && move.named('Shadow Punch')) {
+        var percentHealed = 0.5;
+        var max = Math.round(defender.maxHP() * percentHealed);
+        for (var i = 0; i < minD.length; i++) {
+            var range = [minD[i], maxD[i]];
+            for (var j in recovery) {
+                var drained = Math.round(range[j] * percentHealed);
+                if (attacker.hasItem('Big Root'))
+                    drained = Math.trunc(drained * 5324 / 4096);
+                recovery[j] += Math.min(drained * move.hits, max);
+            }
+        }
+    }
     if (recovery[1] === 0)
         return { recovery: recovery, text: text };
     var minHealthRecovered = toDisplay(notation, recovery[0], attacker.maxHP());
@@ -358,6 +371,10 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
         if (defender.hasAbility('Dry Skin', 'Solar Power')) {
             damage -= Math.floor(defender.maxHP() / 8);
             texts.push(defender.ability + ' damage');
+        }
+        if (defender.named('Druddigon-Crest')) {
+            damage += Math.floor(defender.maxHP() / 8);
+            texts.push('Crest recovery');
         }
     }
     else if (field.hasWeather('Rain', 'Heavy Rain')) {

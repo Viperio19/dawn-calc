@@ -141,6 +141,19 @@ export function getRecovery(
     }
   }
 
+  if (attacker.named('Dusknoir-Crest') && move.named('Shadow Punch')) {
+    const percentHealed = 0.5;
+    const max = Math.round(defender.maxHP() * percentHealed);
+    for (let i = 0; i < minD.length; i++) {
+      const range = [minD[i], maxD[i]];
+      for (const j in recovery) {
+        let drained = Math.round(range[j] * percentHealed);
+        if (attacker.hasItem('Big Root')) drained = Math.trunc(drained * 5324 / 4096);
+        recovery[j] += Math.min(drained * move.hits, max);
+      }
+    }
+  }
+
   if (recovery[1] === 0) return {recovery, text};
 
   const minHealthRecovered = toDisplay(notation, recovery[0], attacker.maxHP());
@@ -505,6 +518,10 @@ function getEndOfTurn(
     if (defender.hasAbility('Dry Skin', 'Solar Power')) {
       damage -= Math.floor(defender.maxHP() / 8);
       texts.push(defender.ability + ' damage');
+    }
+    if (defender.named('Druddigon-Crest')) {
+      damage += Math.floor(defender.maxHP() / 8);
+      texts.push('Crest recovery');
     }
   } else if (field.hasWeather('Rain', 'Heavy Rain')) {
     if (defender.hasAbility('Dry Skin')) {

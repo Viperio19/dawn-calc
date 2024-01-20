@@ -40,6 +40,8 @@ export interface MoveData {
   readonly isPulse?: boolean;
   readonly isSlicing?: boolean;
   readonly isWind?: boolean;
+  readonly isBeam?: boolean;
+  readonly isStabbing?: boolean;
 }
 
 const RBY: {[name: string]: MoveData} = {
@@ -4912,7 +4914,34 @@ const SV_PATCH: {[name: string]: DeepPartial<MoveData>} = {
   },
 };
 
-const SV: {[name: string]: MoveData} = extend(true, {}, SS, SV_PATCH);
+const CHROMATIC_PATCH: {[name: string]: DeepPartial<MoveData>} = {
+  'Charge Beam': {isBeam: true},
+  'Hyper Beam': {isBeam: true},
+  'Ice Beam': {isBeam: true},
+  'Psybeam': {isBeam: true},
+  'Signal Beam': {isBeam: true},
+  'Solar Beam': {isBeam: true},
+  'Horn Attack': {isStabbing: true},
+  'Fury Attack': {isStabbing: true},
+  'Poison Sting': {isStabbing: true},
+  'Twineedle': {isStabbing: true},
+  'Pin Missile': {isStabbing: true},
+  'Peck': {isStabbing: true},
+  'Drill Peck': {isStabbing: true},
+  'Megahorn': {isStabbing: true},
+  'Poison Jab': {isStabbing: true},
+  'Needle Arm': {isStabbing: true},
+  'Pluck': {isStabbing: true},
+  'Drill Run': {isStabbing: true},
+  'Horn Leech': {isStabbing: true},
+  'Fell Stinger': {isStabbing: true},
+  'Smart Strike': {isStabbing: true},
+  'Branch Poke': {isStabbing: true},
+  'False Surrender': {isStabbing: true},
+  'Glacial Lance': {isStabbing: true},
+};
+
+const SV: {[name: string]: MoveData} = extend(true, {}, SS, SV_PATCH, CHROMATIC_PATCH);
 
 export const MOVES = [{}, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV];
 
@@ -4999,6 +5028,8 @@ class Move implements I.Move {
     if (data.isPulse) this.flags.pulse = 1;
     if (data.isSlicing) this.flags.slicing = 1;
     if (data.isWind) this.flags.wind = 1;
+    if (data.isBeam) this.flags.beam = 1;
+    if (data.isStabbing) this.flags.stabbing = 1;
 
     assignWithout(this, data, Move.FLAGS);
 

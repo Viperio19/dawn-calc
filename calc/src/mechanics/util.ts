@@ -521,7 +521,7 @@ export function countBoosts(gen: Generation, boosts: StatsTable) {
 export function getEVDescriptionText(
   gen: Generation,
   pokemon: Pokemon,
-  stat: 'atk' | 'def' | 'spd' | 'spa',
+  stat: 'atk' | 'def' | 'spd' | 'spa' | 'spe',
   natureName: NatureName
 ): string {
   const nature = gen.natures.get(toID(natureName))!;
