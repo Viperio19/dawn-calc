@@ -1198,7 +1198,7 @@ export function calculateBPModsSMSSSV(
     desc.attackerItem = attacker.item;
   }
 
-  // Crests
+  // Crests - Misc Buffs
 
   if (defender.named('Beheeyem-Crest') && defender.stats.spe <= attacker.stats.spe) {
     bpMods.push(2732);
@@ -1207,10 +1207,6 @@ export function calculateBPModsSMSSSV(
   if (attacker.named('Boltund-Crest') && move.flags.bite && attacker.stats.spe >= defender.stats.spe) {
     bpMods.push(6144);
   }
-
-  // if (attacker.named('Cinccino-Crest')) {
-  //   bpMods.push(1434);
-  // }
 
   if (attacker.named('Claydol-Crest') && ['Charge Beam', 'Hyper Beam', 'Ice Beam', 'Psybeam', 'Signal Beam', 'Solar Beam'].includes(move.name)) {
     bpMods.push(6144);
@@ -1415,7 +1411,7 @@ export function calculateAtModsSMSSSV(
     desc.attackerItem = attacker.item;
   }
 
-  // Crests
+  // Crests - Attack buffs
 
   if (attacker.named('Cofagrigus-Crest') && move.category === 'Special') {
     atMods.push(5120);
@@ -1555,7 +1551,7 @@ export function calculateDfModsSMSSSV(
     desc.defenderItem = defender.item;
   }
 
-  // Crests
+  // Crests - Defense buffs
 
   if (defender.named('Cofagrigus-Crest') && move.category === 'Special') {
     dfMods.push(5120);
