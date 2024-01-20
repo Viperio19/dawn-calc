@@ -290,6 +290,10 @@ export function calculateSMSSSV(
     )
     : 1;
   let typeEffectiveness = type1Effectiveness * type2Effectiveness;
+  
+  if (defender.named('Glaceon-Crest') && move.hasType('Fighting', 'Rock')) {
+    typeEffectiveness = 0.5;
+  }
 
   if (defender.teraType && defender.teraType !== 'Stellar') {
     typeEffectiveness = getMoveEffectiveness(
@@ -1063,7 +1067,7 @@ export function calculateBPModsSMSSSV(
     (attacker.hasAbility('Toxic Boost') &&
       attacker.hasStatus('psn', 'tox') && move.category === 'Physical') ||
     (attacker.hasAbility('Mega Launcher') && move.flags.pulse) ||
-    (attacker.hasAbility('Strong Jaw') && move.flags.bite) ||
+    ((attacker.hasAbility('Strong Jaw') || attacker.named('Feraligatr-Crest')) && move.flags.bite) ||
     (attacker.hasAbility('Steely Spirit') && move.hasType('Steel')) ||
     (attacker.hasAbility('Sharpness') && move.flags.slicing)
   ) {
