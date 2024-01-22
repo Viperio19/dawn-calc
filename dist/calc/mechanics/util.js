@@ -139,7 +139,7 @@ function getFinalSpeed(gen, pokemon, field, side) {
         (pokemon.hasAbility('Chlorophyll') && weather.includes('Sun')) ||
         (pokemon.hasAbility('Sand Rush') && weather === 'Sand') ||
         (pokemon.hasAbility('Swift Swim') && weather.includes('Rain')) ||
-        (pokemon.hasAbility('Slush Rush') && ['Hail', 'Snow'].includes(weather)) ||
+        ((pokemon.hasAbility('Slush Rush') || pokemon.named('Empoleon-Crest')) && ['Hail', 'Snow'].includes(weather)) ||
         (pokemon.hasAbility('Surge Surfer') && terrain === 'Electric')) {
         speedMods.push(8192);
     }
@@ -167,6 +167,9 @@ function getFinalSpeed(gen, pokemon, field, side) {
     speed = OF32(pokeRound((speed * chainMods(speedMods, 410, 131172)) / 4096));
     if (pokemon.hasStatus('par') && !pokemon.hasAbility('Quick Feet')) {
         speed = Math.floor(OF32(speed * (gen.num < 7 ? 25 : 50)) / 100);
+    }
+    if (pokemon.named('Cryogonal-Crest')) {
+        speed += pokeRound(((pokemon.stats['spd'] * 12) / 100));
     }
     speed = Math.min(gen.num <= 2 ? 999 : 10000, speed);
     return Math.max(0, speed);

@@ -339,9 +339,11 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         ? 'atk'
         : move.named('Body Press')
             ? 'def'
-            : move.category === 'Special'
-                ? 'spa'
-                : 'atk';
+            : (attacker.named('Infernape-Crest'))
+                ? (move.category === 'Special' ? 'spd' : 'def')
+                : move.category === 'Special'
+                    ? 'spa'
+                    : 'atk';
     var defense = calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCritical);
     var hitsPhysical = move.overrideDefensiveStat === 'def' || move.category === 'Physical' ||
         (move.named('Shell Side Arm') && (0, util_2.getShellSideArmCategory)(attacker, defender) === 'Physical');
@@ -359,6 +361,9 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     else if ((attacker.hasAbility('Protean', 'Libero') || attacker.named('Boltund-Crest')) && !attacker.teraType) {
         stabMod += 2048;
         desc.attackerAbility = attacker.ability;
+    }
+    else if (attacker.named('Empoleon-Crest') && move.hasType('Ice')) {
+        stabMod += 2048;
     }
     var teraType = attacker.teraType;
     if (teraType === move.type && teraType !== 'Stellar') {
@@ -921,9 +926,11 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
             ? 'def'
             : (attacker.named('Dedenne-Crest'))
                 ? 'spe'
-                : move.category === 'Special'
-                    ? 'spa'
-                    : 'atk';
+                : (attacker.named('Infernape-Crest'))
+                    ? (move.category === 'Special' ? 'spd' : 'def')
+                    : move.category === 'Special'
+                        ? 'spa'
+                        : 'atk';
     desc.attackEVs =
         move.named('Foul Play')
             ? (0, util_2.getEVDescriptionText)(gen, defender, attackStat, defender.nature)
@@ -958,8 +965,23 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
         attack = (0, util_2.pokeRound)((attack * 3) / 2);
         desc.attackerAbility = attacker.ability;
     }
+    if (attacker.named('Cofagrigus-Crest') && move.category === 'Special') {
+        attack = (0, util_2.pokeRound)((attack * 5) / 4);
+    }
+    if (attacker.named('Crabominable-Crest') && move.named('Body Press')) {
+        attack = (0, util_2.pokeRound)((attack * 6) / 5);
+    }
+    if (attacker.named('Dusknoir-Crest') && move.category === 'Physical') {
+        attack = (0, util_2.pokeRound)((attack * 5) / 4);
+    }
+    if (attacker.named('Hypno-Crest') && move.category === 'Special') {
+        attack = (0, util_2.pokeRound)((attack * 3) / 2);
+    }
     var atMods = calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc);
     attack = (0, util_2.OF16)(Math.max(1, (0, util_2.pokeRound)((attack * (0, util_2.chainMods)(atMods, 410, 131072)) / 4096)));
+    if (attacker.named('Cryogonal-Crest')) {
+        attack += (0, util_2.pokeRound)(((attacker.stats['spd'] * 12) / 100));
+    }
     return attack;
 }
 exports.calculateAttackSMSSSV = calculateAttackSMSSSV;
@@ -1081,12 +1103,6 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
         atMods.push(6144);
         desc.attackerItem = attacker.item;
     }
-    if (attacker.named('Cofagrigus-Crest') && move.category === 'Special') {
-        atMods.push(5120);
-    }
-    if (attacker.named('Dusknoir-Crest') && move.category === 'Physical') {
-        atMods.push(5120);
-    }
     return atMods;
 }
 exports.calculateAtModsSMSSSV = calculateAtModsSMSSSV;
@@ -1114,11 +1130,25 @@ function calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCr
         defense = (0, util_2.pokeRound)((defense * 3) / 2);
         desc.weather = field.weather;
     }
-    if (field.hasWeather('Snow') && defender.hasType('Ice') && hitsPhysical) {
+    if (field.hasWeather('Snow') && (defender.hasType('Ice') || defender.named('Empoleon-Crest')) && hitsPhysical) {
         defense = (0, util_2.pokeRound)((defense * 3) / 2);
         desc.weather = field.weather;
     }
+    if (defender.named('Cofagrigus-Crest') && move.category === 'Special') {
+        defense = (0, util_2.pokeRound)((defense * 5) / 4);
+    }
+    if (defender.named('Crabominable-Crest')) {
+        defense = (0, util_2.pokeRound)((defense * 6) / 5);
+    }
     var dfMods = calculateDfModsSMSSSV(gen, attacker, defender, move, field, desc, isCritical, hitsPhysical);
+    if (defender.named('Cryogonal-Crest')) {
+        if (move.category === 'Special') {
+            defense = (0, util_2.pokeRound)((defense * 6) / 5);
+        }
+        else {
+            defense += (0, util_2.pokeRound)(((defender.stats['spd'] * 12) / 100));
+        }
+    }
     return (0, util_2.OF16)(Math.max(1, (0, util_2.pokeRound)((defense * (0, util_2.chainMods)(dfMods, 410, 131072)) / 4096)));
 }
 exports.calculateDefenseSMSSSV = calculateDefenseSMSSSV;
@@ -1187,12 +1217,6 @@ function calculateDfModsSMSSSV(gen, attacker, defender, move, field, desc, isCri
         (defender.hasItem('Deep Sea Scale') && defender.named('Clamperl') && !hitsPhysical)) {
         dfMods.push(8192);
         desc.defenderItem = defender.item;
-    }
-    if (defender.named('Cofagrigus-Crest') && move.category === 'Special') {
-        dfMods.push(5120);
-    }
-    if (defender.named('Crabominable-Crest')) {
-        dfMods.push(4915);
     }
     if (attacker.named('Electrode-Crest')) {
         dfMods.push(2048);

@@ -141,8 +141,16 @@ export function getRecovery(
     }
   }
 
-  if (attacker.named('Dusknoir-Crest') && move.named('Shadow Punch')) {
-    const percentHealed = 0.5;
+  // Crests - Draining
+
+  if ((attacker.named('Dusknoir-Crest') && move.named('Shadow Punch')) || attacker.named('Gothitelle-Crest-Dark')) {
+    let tempPercentHealed = 0;
+    if (attacker.named('Dusknoir-Crest')) {
+      tempPercentHealed = 0.5;
+    } else if (attacker.named('Gothitelle-Crest-Dark')) {
+      tempPercentHealed = 0.25;
+    }
+    const percentHealed = tempPercentHealed;
     const max = Math.round(defender.maxHP() * percentHealed);
     for (let i = 0; i < minD.length; i++) {
       const range = [minD[i], maxD[i]];
@@ -548,6 +556,7 @@ function getEndOfTurn(
       !defender.hasType('Ice') &&
       !defender.hasAbility('Magic Guard', 'Overcoat', 'Snow Cloak') &&
       !defender.hasItem('Safety Goggles') &&
+      !defender.named('Empoleon-Crest') && 
       field.hasWeather('Hail')
     ) {
       damage -= Math.floor(defender.maxHP() / 16);
@@ -674,6 +683,13 @@ function getEndOfTurn(
       (field.defenderSide.volcalith || move.named('G-Max Volcalith'))) {
     damage -= Math.floor(defender.maxHP() / 6);
     texts.push('Volcalith damage');
+  }
+
+  // Crests - Text Stuff
+
+  if (defender.named('Gothitelle-Crest')) {
+    damage += Math.floor(defender.maxHP() / 16);
+    texts.push('Crest recovery');
   }
 
   return {damage, texts};
