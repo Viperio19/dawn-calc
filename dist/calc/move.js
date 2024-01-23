@@ -57,6 +57,9 @@ var Move = (function () {
                     ? 5
                     : 3;
             }
+            else if (options.species == 'Ledian-Crest' && data.flags.punch) {
+                this.hits = 4;
+            }
             this.timesUsedWithMetronome = options.timesUsedWithMetronome;
         }
         this.gen = gen;

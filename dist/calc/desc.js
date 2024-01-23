@@ -540,6 +540,14 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
         damage += Math.floor(defender.maxHP() / 16);
         texts.push('Crest recovery');
     }
+    if (defender.named('Meganium-Crest')) {
+        damage += Math.floor(defender.maxHP() / 16);
+        texts.push('Crest recovery');
+    }
+    if (defender.named('Phione-Crest')) {
+        damage += Math.floor(defender.maxHP() / 16);
+        texts.push('Aqua Ring recovery');
+    }
     return { damage: damage, texts: texts };
 }
 function computeKOChance(damage, hp, eot, hits, timesUsed, maxHP, toxicCounter) {

@@ -164,6 +164,12 @@ function getFinalSpeed(gen, pokemon, field, side) {
     if (pokemon.named('Ariados-Crest')) {
         speedMods.push(6144);
     }
+    if (pokemon.named('Magcargo-Crest')) {
+        speed = getModifiedStat(pokemon.rawStats.def, pokemon.boosts.def, gen);
+    }
+    if (pokemon.named('Oricorio-Crest-Baile') || pokemon.named('Oricorio-Crest-Pa\'u') || pokemon.named('Oricorio-Crest-Pom-Pom') || pokemon.named('Oricorio-Crest-Sensu')) {
+        speedMods.push(5120);
+    }
     speed = OF32(pokeRound((speed * chainMods(speedMods, 410, 131172)) / 4096));
     if (pokemon.hasStatus('par') && !pokemon.hasAbility('Quick Feet')) {
         speed = Math.floor(OF32(speed * (gen.num < 7 ? 25 : 50)) / 100);

@@ -106,6 +106,8 @@ export class Move implements State.Move {
         this.hits = (options.ability === 'Skill Link')
           ? 5
           : 3;
+      } else if (options.species == 'Ledian-Crest' && data.flags.punch) {
+        this.hits = 4;
       }
       this.timesUsedWithMetronome = options.timesUsedWithMetronome;
     }

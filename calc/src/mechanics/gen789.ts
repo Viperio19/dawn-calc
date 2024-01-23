@@ -232,7 +232,7 @@ export function calculateSMSSSV(
     const normal = move.hasType('Normal');
     if ((isAerilate = attacker.hasAbility('Aerilate') && normal)) {
       type = 'Flying';
-    } else if ((isGalvanize = attacker.hasAbility('Galvanize') && normal)) {
+    } else if ((isGalvanize = (attacker.hasAbility('Galvanize') || attacker.named('Luxray-Crest')) && normal)) {
       type = 'Electric';
     } else if ((isLiquidVoice = attacker.hasAbility('Liquid Voice') && !!move.flags.sound)) {
       type = 'Water';
@@ -293,6 +293,17 @@ export function calculateSMSSSV(
   
   if (defender.named('Glaceon-Crest') && move.hasType('Fighting', 'Rock')) {
     typeEffectiveness = 0.5;
+  }
+
+  if (defender.named('Leafeon-Crest') && move.hasType('Fire', 'Flying')) {
+    typeEffectiveness = 0.5;
+  }
+
+  if (defender.named('Luxray-Crest')) {
+    if (move.hasType('Dark', 'Ghost'))
+      typeEffectiveness *= 0.5;
+    if (move.hasType('Psychic'))
+      typeEffectiveness = 0;
   }
 
   if (defender.teraType && defender.teraType !== 'Stellar') {
@@ -489,7 +500,14 @@ export function calculateSMSSSV(
   const defense = calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCritical);
   const hitsPhysical = move.overrideDefensiveStat === 'def' || move.category === 'Physical' ||
     (move.named('Shell Side Arm') && getShellSideArmCategory(attacker, defender) === 'Physical');
-  const defenseStat = hitsPhysical ? 'def' : 'spd';
+  const defenseStat =
+    (defender.named('Infernape-Crest'))
+      ? (move.category === 'Special' ? 'spa' : 'atk')
+      : (defender.named('Magcargo-Crest') && hitsPhysical)
+        ? 'spe'
+        : hitsPhysical
+          ? 'def'
+          : 'spd';
 
   // #endregion
   // #region Damage
@@ -524,6 +542,8 @@ export function calculateSMSSSV(
     stabMod += 2048;
     desc.attackerAbility = attacker.ability;
   } else if (attacker.named('Empoleon-Crest') && move.hasType('Ice')) {
+    stabMod += 2048;
+  } else if (attacker.named('Luxray-Crest') && move.hasType('Dark')) {
     stabMod += 2048;
   }
   const teraType = attacker.teraType;
@@ -899,6 +919,10 @@ export function calculateBasePowerSMSSSV(
 
   if (attacker.named('Cinccino-Crest')) {
     basePower *= 0.35;
+  }
+
+  if (attacker.named('Luvdisc-Crest') && basePower != 0) {
+    basePower = 250;
   }
 
   if (basePower === 0) {
@@ -1310,6 +1334,15 @@ export function calculateAttackSMSSSV(
     attack = pokeRound((attack * 3) / 2);
   }
 
+  if (attacker.named('Magcargo-Crest') && move.category === 'Special') {
+    attack = pokeRound((attack * 13) / 10);
+  }
+
+  if ((attacker.named('Oricorio-Crest-Baile') || attacker.named('Oricorio-Crest-Pa\'u') || attacker.named('Oricorio-Crest-Pom-Pom') || attacker.named('Oricorio-Crest-Sensu'))
+    && move.category === 'Special') {
+    attack = pokeRound((attack * 5) / 4);
+  }
+
   const atMods = calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc);
   attack = OF16(Math.max(1, pokeRound((attack * chainMods(atMods, 410, 131072)) / 4096)));
 
@@ -1480,7 +1513,14 @@ export function calculateDefenseSMSSSV(
   let defense: number;
   const hitsPhysical = move.overrideDefensiveStat === 'def' || move.category === 'Physical' ||
     (move.named('Shell Side Arm') && getShellSideArmCategory(attacker, defender) === 'Physical');
-  const defenseStat = hitsPhysical ? 'def' : 'spd';
+  const defenseStat = 
+    (defender.named('Infernape-Crest'))
+      ? (move.category === 'Special' ? 'spa' : 'atk')
+      : (defender.named('Magcargo-Crest') && hitsPhysical)
+        ? 'spe'
+        : hitsPhysical
+          ? 'def'
+          : 'spd';
   desc.defenseEVs = getEVDescriptionText(gen, defender, defenseStat, defender.nature);
   if (defender.boosts[defenseStat] === 0 ||
       (isCritical && defender.boosts[defenseStat] > 0) ||
@@ -1512,6 +1552,14 @@ export function calculateDefenseSMSSSV(
 
   if (defender.named('Crabominable-Crest')) {
     defense = pokeRound((defense * 6) / 5);
+  }
+
+  if (defender.named('Noctowl-Crest') && move.category === 'Physical') {
+    defense = pokeRound((defense * 6) / 5);
+  }
+
+  if (defender.named('Phione-Crest')) {
+    defense = pokeRound((defense * 3) / 2);
   }
 
   const dfMods = calculateDfModsSMSSSV(
@@ -1621,6 +1669,10 @@ export function calculateDfModsSMSSSV(
 
   if (attacker.named('Electrode-Crest')) {
     dfMods.push(2048);
+  }
+
+  if (defender.named('Meganium-Crest')) {
+    dfMods.push(4915);
   }
 
   return dfMods;

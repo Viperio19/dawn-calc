@@ -123,9 +123,18 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
     speedMods.push(8192);
   }
 
-  // Crests
+  // Crests - Speed Modifiers
+
   if (pokemon.named('Ariados-Crest')) {
     speedMods.push(6144);
+  }
+
+  if (pokemon.named('Magcargo-Crest')) {
+    speed = getModifiedStat(pokemon.rawStats.def, pokemon.boosts.def, gen);
+  }
+
+  if (pokemon.named('Oricorio-Crest-Baile') || pokemon.named('Oricorio-Crest-Pa\'u') || pokemon.named('Oricorio-Crest-Pom-Pom') || pokemon.named('Oricorio-Crest-Sensu')) {
+    speedMods.push(5120);
   }
 
   speed = OF32(pokeRound((speed * chainMods(speedMods, 410, 131172)) / 4096));

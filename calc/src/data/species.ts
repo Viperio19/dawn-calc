@@ -10446,7 +10446,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   },
   'Magcargo-Crest': {
     types: ['Fire', 'Rock'],
-    bs: {hp: 50, at: 50, df: 120, sa: 80, sd: 80, sp: 30},
+    bs: {hp: 60, at: 50, df: 120, sa: 90, sd: 80, sp: 30},
     weightkg: 55,
     abilities: {0: 'Magma Armor'},
     baseSpecies: 'Magcargo',
