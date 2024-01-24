@@ -612,7 +612,7 @@ export function calculateSMSSSV(
   let noseElectricDamage: number[] | undefined;
   let noseRockDamage: number[] | undefined;
   let noseSteelDamage: number[] | undefined;
-  if (attacker.named('Probopass-Crest') && move.hits === 1) {
+  if (attacker.named('Probopass-Crest') && !['Electric POGCHAMPION', 'Rock POGCHAMPION', 'Steel POGCHAMPION'].includes(move.name) && move.hits === 1) {
     const noseElectric = attacker.clone();
     const noseRock = attacker.clone();
     const noseSteel = attacker.clone();

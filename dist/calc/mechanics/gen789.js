@@ -431,7 +431,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     var noseElectricDamage;
     var noseRockDamage;
     var noseSteelDamage;
-    if (attacker.named('Probopass-Crest') && move.hits === 1) {
+    if (attacker.named('Probopass-Crest') && !['Electric POGCHAMPION', 'Rock POGCHAMPION', 'Steel POGCHAMPION'].includes(move.name) && move.hits === 1) {
         var noseElectric = attacker.clone();
         var noseRock = attacker.clone();
         var noseSteel = attacker.clone();
@@ -440,7 +440,6 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         noseSteel.name = 'Steel Nose';
         move.bp = 20;
         move.category = 'Special';
-        desc.attackerAbility = attacker.ability;
         move.type = 'Electric';
         (0, util_2.checkMultihitBoost)(gen, noseElectric, defender, move, field, desc);
         noseElectricDamage = calculateSMSSSV(gen, noseElectric, defender, move, field).damage;
