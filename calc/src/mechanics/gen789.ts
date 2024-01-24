@@ -46,6 +46,7 @@ import {
   isQPActive,
 } from './util';
 import { SpeciesName } from '@pkmn/dex';
+import { MoveName } from '@pkmn/dex';
 
 export function calculateSMSSSV(
   gen: Generation,
@@ -546,7 +547,7 @@ export function calculateSMSSSV(
     stabMod += 2048;
   } else if (attacker.named('Luxray-Crest') && move.hasType('Dark')) {
     stabMod += 2048;
-  } else if (attacker.named('Probopass-Crest') && move.hasType('Electric')) {
+  } else if ((attacker.named('Probopass-Crest') || attacker.named('Electric Nose')) && move.hasType('Electric')) {
     stabMod += 2048;
   }
   const teraType = attacker.teraType;
@@ -609,9 +610,7 @@ export function calculateSMSSSV(
     desc.attackerAbility = attacker.ability;
   }
 
-  let noseElectricDamage: number[] | undefined;
-  let noseRockDamage: number[] | undefined;
-  let noseSteelDamage: number[] | undefined;
+  let noseDamage: number[] | undefined;;
   if (attacker.named('Probopass-Crest') && !['Electric POGCHAMPION', 'Rock POGCHAMPION', 'Steel POGCHAMPION'].includes(move.name) && move.hits === 1) {
     const noseElectric = attacker.clone();
     const noseRock = attacker.clone();
@@ -623,16 +622,25 @@ export function calculateSMSSSV(
     move.category = 'Special';
 
     move.type = 'Electric';
+    move.name = 'Electric POGCHAMPION' as MoveName;
     checkMultihitBoost(gen, noseElectric, defender, move, field, desc);
-    noseElectricDamage = calculateSMSSSV(gen, noseElectric, defender, move, field).damage as number[];
+    let noseElectricDamage = calculateSMSSSV(gen, noseElectric, defender, move, field).damage as number[];
 
     move.type = 'Rock';
+    move.name = 'Rock POGCHAMPION' as MoveName;
     checkMultihitBoost(gen, noseRock, defender, move, field, desc);
-    noseRockDamage = calculateSMSSSV(gen, noseRock, defender, move, field).damage as number[];
+    let noseRockDamage = calculateSMSSSV(gen, noseRock, defender, move, field).damage as number[];
 
     move.type = 'Steel';
+    move.name = 'Steel POGCHAMPION' as MoveName;
     checkMultihitBoost(gen, noseSteel, defender, move, field, desc);
-    noseSteelDamage = calculateSMSSSV(gen, noseSteel, defender, move, field).damage as number[];
+    let noseSteelDamage = calculateSMSSSV(gen, noseSteel, defender, move, field).damage as number[];
+
+    noseDamage = [];
+
+    for (let i = 0; i < 16; i++) {
+      noseDamage[i] = noseElectricDamage[i] + noseRockDamage[i] + noseSteelDamage[i];
+    }
   }
 
   let damage = [];
@@ -749,8 +757,8 @@ export function calculateSMSSSV(
   result.damage =
     childDamage
       ? [damage, childDamage]
-      : noseRockDamage
-        ? [damage, noseRockDamage]
+      : noseDamage
+        ? [damage, noseDamage]
         : damage;
 
   // #endregion
