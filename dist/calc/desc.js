@@ -74,7 +74,7 @@ function getRecovery(gen, attacker, defender, move, damage, notation) {
             var range = [minD[i], maxD[i]];
             for (var j in recovery) {
                 var drained = Math.round(range[j] * percentHealed);
-                if (attacker.hasItem('Big Root'))
+                if (attacker.hasItem('Big Root') || attacker.named('Shiinotic-Crest'))
                     drained = Math.trunc(drained * 5324 / 4096);
                 recovery[j] += Math.min(drained * move.hits, max);
             }
@@ -548,6 +548,14 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
     if (defender.named('Phione-Crest')) {
         damage += Math.floor(defender.maxHP() / 16);
         texts.push('Aqua Ring recovery');
+    }
+    if (attacker.named('Shiinotic-Crest') && defender.status) {
+        damage -= Math.floor(defender.maxHP() / 16);
+        texts.push('Crest damage');
+    }
+    if (defender.named('Shiinotic-Crest') && attacker.status) {
+        damage += Math.floor(attacker.maxHP() / 16);
+        texts.push('Crest recovery');
     }
     return { damage: damage, texts: texts };
 }

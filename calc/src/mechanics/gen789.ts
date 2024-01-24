@@ -143,9 +143,16 @@ export function calculateSMSSSV(
 
   // Merciless does not ignore Shell Armor, damage dealt to a poisoned Pokemon with Shell Armor
   // will not be a critical hit (UltiMario)
-  const isCritical = !defender.hasAbility('Battle Armor', 'Shell Armor') &&
-    (move.isCrit || (attacker.hasAbility('Merciless') && defender.hasStatus('psn', 'tox')) || (attacker.named('Ariados-Crest')) && (defender.status || defender.boosts.spe < 0)) &&
+  let tempCritical = !defender.hasAbility('Battle Armor', 'Shell Armor') &&
+    (move.isCrit || (attacker.hasAbility('Merciless') && defender.hasStatus('psn', 'tox')) ||
+    (attacker.named('Ariados-Crest') && (defender.status || defender.boosts.spe < 0)) ||
+    (attacker.named('Samurott-Crest') && move.flags.slicing)) &&
     move.timesUsed === 1;
+
+  if (tempCritical == 0)
+    tempCritical = false;
+
+  const isCritical = tempCritical;
 
   let type = move.type;
   if (move.named('Weather Ball')) {
@@ -218,6 +225,7 @@ export function calculateSMSSSV(
   let isGalvanize = false;
   let isLiquidVoice = false;
   let isNormalize = false;
+  let isSawsbuckCrest = false;
   const noTypeChange = move.named(
     'Revelation Dance',
     'Judgment',
@@ -244,8 +252,11 @@ export function calculateSMSSSV(
       type = 'Ice';
     } else if ((isNormalize = attacker.hasAbility('Normalize'))) { // Boosts any type
       type = 'Normal';
+    } else if (isSawsbuckCrest = (attacker.named('Sawsbuck-Crest-Autumn') || attacker.named('Sawsbuck-Crest-Spring') ||
+                attacker.named('Sawsbuck-Crest-Summer') || attacker.named('Sawsbuck-Crest-Winter')) && normal) {
+      type = attacker.types[0];
     }
-    if (isGalvanize || isPixilate || isRefrigerate || isAerilate || isNormalize) {
+    if (isGalvanize || isPixilate || isRefrigerate || isAerilate || isNormalize || isSawsbuckCrest) {
       desc.attackerAbility = attacker.ability;
       hasAteAbilityTypeChange = true;
     } else if (isLiquidVoice) {
@@ -306,6 +317,11 @@ export function calculateSMSSSV(
       typeEffectiveness *= 0.5;
     if (move.hasType('Psychic'))
       typeEffectiveness = 0;
+  }
+
+  if (defender.named('Samurott-Crest')) {
+    if (move.hasType('Dark', 'Bug', 'Rock'))
+      typeEffectiveness *= 0.5;
   }
 
   if (defender.teraType && defender.teraType !== 'Stellar') {
@@ -485,23 +501,29 @@ export function calculateSMSSSV(
       (move.named('Tera Blast') && attackSource.teraType)) {
     move.category = attackSource.stats.atk > attackSource.stats.spa ? 'Physical' : 'Special';
   }
+
+  // Crests - Attack Stat Swaps (if combat stages included)
   const attackStat =
     move.named('Shell Side Arm') &&
     getShellSideArmCategory(attacker, defender) === 'Physical'
       ? 'atk'
       : move.named('Body Press')
         ? 'def'
-        : (attacker.named('Infernape-Crest'))
+        : attacker.named('Infernape-Crest')
           ? (move.category === 'Special' ? 'spd' : 'def')
-          : move.category === 'Special'
-              ? 'spa'
-              : 'atk';
+          : attacker.named('Reuniclus-Crest-Fighting')
+            ? (move.category === 'Special' ? 'atk' : 'spa')
+            : move.category === 'Special'
+                ? 'spa'
+                : 'atk';
   // #endregion
   // #region (Special) Defense
 
   const defense = calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCritical);
   const hitsPhysical = move.overrideDefensiveStat === 'def' || move.category === 'Physical' ||
     (move.named('Shell Side Arm') && getShellSideArmCategory(attacker, defender) === 'Physical');
+
+  // Crests - Defense Stat Swaps (if combat stages included)
   const defenseStat =
     (defender.named('Infernape-Crest'))
       ? (move.category === 'Special' ? 'spa' : 'atk')
@@ -548,6 +570,8 @@ export function calculateSMSSSV(
   } else if (attacker.named('Luxray-Crest') && move.hasType('Dark')) {
     stabMod += 2048;
   } else if ((attacker.named('Probopass-Crest') || attacker.named('Electric Nose')) && move.hasType('Electric')) {
+    stabMod += 2048;
+  } else if (attacker.named('Samurott-Crest') && move.hasType('Fighting')) {
     stabMod += 2048;
   }
   const teraType = attacker.teraType;
@@ -1312,19 +1336,23 @@ export function calculateAttackSMSSSV(
       (move.named('Tera Blast') && attackSource.teraType)) {
     move.category = attackSource.stats.atk > attackSource.stats.spa ? 'Physical' : 'Special';
   }
+  
+  // Crests - Attack Stat Swaps (in general)
   const attackStat =
     move.named('Shell Side Arm') &&
     getShellSideArmCategory(attacker, defender) === 'Physical'
       ? 'atk'
       : (attacker.named('Claydol-Crest') && move.category === 'Special') || move.named('Body Press')
         ? 'def'
-        : (attacker.named('Dedenne-Crest'))
+        : attacker.named('Dedenne-Crest')
           ? 'spe'
-          : (attacker.named('Infernape-Crest'))
+          : attacker.named('Infernape-Crest')
             ? (move.category === 'Special' ? 'spd' : 'def')
-            : move.category === 'Special'
-                ? 'spa'
-                : 'atk';
+            : attacker.named('Reuniclus-Crest-Fighting')
+              ? (move.category === 'Special' ? 'atk' : 'spa')
+              : move.category === 'Special'
+                  ? 'spa'
+                  : 'atk';
   desc.attackEVs =
     move.named('Foul Play')
       ? getEVDescriptionText(gen, defender, attackStat, defender.nature)
@@ -1383,6 +1411,12 @@ export function calculateAttackSMSSSV(
   if ((attacker.named('Oricorio-Crest-Baile') || attacker.named('Oricorio-Crest-Pa\'u') || attacker.named('Oricorio-Crest-Pom-Pom') || attacker.named('Oricorio-Crest-Sensu'))
     && move.category === 'Special') {
     attack = pokeRound((attack * 5) / 4);
+  }
+
+  let relicanthBoost = 125; // + 10 * attacker.turns;
+
+  if (attacker.named('Relicanth-Crest')) {
+    attack = pokeRound((attack * relicanthBoost) / 100);
   }
 
   const atMods = calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc);
@@ -1540,6 +1574,10 @@ export function calculateAtModsSMSSSV(
 
   // Crests - Attack Modifiers
 
+  if (attacker.named('Seviper-Crest')) {
+    atMods.push(4096 + pokeRound(Math.floor((defender.curHP() * 4096) / defender.maxHP()) / 2));
+  }
+
   return atMods;
 }
 
@@ -1555,6 +1593,8 @@ export function calculateDefenseSMSSSV(
   let defense: number;
   const hitsPhysical = move.overrideDefensiveStat === 'def' || move.category === 'Physical' ||
     (move.named('Shell Side Arm') && getShellSideArmCategory(attacker, defender) === 'Physical');
+  
+  // Crests - Defense Stat Swaps (in general)
   const defenseStat = 
     (defender.named('Infernape-Crest'))
       ? (move.category === 'Special' ? 'spa' : 'atk')
@@ -1602,6 +1642,12 @@ export function calculateDefenseSMSSSV(
 
   if (defender.named('Phione-Crest')) {
     defense = pokeRound((defense * 3) / 2);
+  }
+
+  let relicanthBoost = 125; // + 10 * defender.turns;
+
+  if (defender.named('Relicanth-Crest') && move.category === 'Special') {
+    defense = pokeRound((defense * relicanthBoost) / 100);
   }
 
   const dfMods = calculateDfModsSMSSSV(
