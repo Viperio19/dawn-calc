@@ -524,8 +524,12 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     }
     desc.attackBoost =
         move.named('Foul Play') ? defender.boosts[attackStat] : attacker.boosts[attackStat];
-    result.damage = childDamage ? [damage, childDamage] : damage;
-    result.damage = noseRockDamage ? [damage, noseRockDamage] : damage;
+    result.damage =
+        childDamage
+            ? [damage, childDamage]
+            : noseRockDamage
+                ? [damage, noseRockDamage]
+                : damage;
     return result;
 }
 exports.calculateSMSSSV = calculateSMSSSV;
