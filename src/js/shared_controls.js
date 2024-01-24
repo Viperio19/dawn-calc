@@ -413,13 +413,14 @@ function autosetTerrain(ability, i) {
 }
 
 $("#p1 .item").bind("keyup change", function () {
-	autosetStatus("#p1", $(this).val());
+	autosetStatus("#p1", $(this).val(), $(this).closest(".poke-info"));
 });
 
 var lastManualStatus = {"#p1": "Healthy"};
 var lastAutoStatus = {"#p1": "Healthy"};
-function autosetStatus(p, item) {
+function autosetStatus(p, item, pokeObj) {
 	var currentStatus = $(p + " .status").val();
+	var pokemon = createPokemon(pokeObj);
 	if (currentStatus !== lastAutoStatus[p]) {
 		lastManualStatus[p] = currentStatus;
 	}
@@ -427,7 +428,7 @@ function autosetStatus(p, item) {
 		lastAutoStatus[p] = "Burned";
 		$(p + " .status").val("Burned");
 		$(p + " .status").change();
-	} else if (item === "Toxic Orb") {
+	} else if (item === "Toxic Orb" || pokemon.named('Zangoose-Crest')) {
 		lastAutoStatus[p] = "Badly Poisoned";
 		$(p + " .status").val("Badly Poisoned");
 		$(p + " .status").change();

@@ -473,7 +473,11 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side) {
     const effectiveness =
       rockType.effectiveness[defender.types[0]]! *
       (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
-    damage += Math.floor((effectiveness * defender.maxHP()) / 8);
+    if (defender.named('Torterra-Crest')) {
+      damage += Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
+    } else {
+      damage += Math.floor((effectiveness * defender.maxHP()) / 8);
+    }
     texts.push('Stealth Rock');
   }
   if (defenderSide.steelsurge && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
@@ -610,7 +614,7 @@ function getEndOfTurn(
   }
 
   if (defender.hasStatus('psn')) {
-    if (defender.hasAbility('Poison Heal')) {
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) {
       damage += Math.floor(defender.maxHP() / 8);
       texts.push('Poison Heal');
     } else if (!defender.hasAbility('Magic Guard')) {
@@ -618,7 +622,7 @@ function getEndOfTurn(
       texts.push('poison damage');
     }
   } else if (defender.hasStatus('tox')) {
-    if (defender.hasAbility('Poison Heal')) {
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) {
       damage += Math.floor(defender.maxHP() / 8);
       texts.push('Poison Heal');
     } else if (!defender.hasAbility('Magic Guard')) {
@@ -710,6 +714,16 @@ function getEndOfTurn(
 
   if (defender.named('Shiinotic-Crest') && attacker.status) {
     damage += Math.floor(attacker.maxHP() / 16);
+    texts.push('Crest recovery');
+  }
+
+  if (defender.named('Spiritomb-Crest')) {
+    damage += Math.floor(defender.maxHP() / 32); // Crests - TODO: * fainted allies
+    texts.push('Crest recovery');
+  }
+
+  if (defender.named('Vespiquen-Crest-Defense')) {
+    damage += Math.floor(defender.maxHP() / 16);
     texts.push('Crest recovery');
   }
 

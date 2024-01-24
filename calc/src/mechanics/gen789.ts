@@ -226,6 +226,9 @@ export function calculateSMSSSV(
   let isLiquidVoice = false;
   let isNormalize = false;
   let isSawsbuckCrest = false;
+  let isSimipourCrest = false;
+  let isSimisageCrest = false;
+  let isSimisearCrest = false;
   const noTypeChange = move.named(
     'Revelation Dance',
     'Judgment',
@@ -255,8 +258,14 @@ export function calculateSMSSSV(
     } else if (isSawsbuckCrest = (attacker.named('Sawsbuck-Crest-Autumn') || attacker.named('Sawsbuck-Crest-Spring') ||
                 attacker.named('Sawsbuck-Crest-Summer') || attacker.named('Sawsbuck-Crest-Winter')) && normal) {
       type = attacker.types[0];
+    } else if ((isSimipourCrest = attacker.named('Simipour-Crest') && normal)) {
+      type = 'Grass';
+    } else if ((isSimisageCrest = attacker.named('Simisage-Crest') && normal)) {
+      type = 'Fire';
+    } else if ((isSimisearCrest = attacker.named('Simisear-Crest') && normal)) {
+      type = 'Water';
     }
-    if (isGalvanize || isPixilate || isRefrigerate || isAerilate || isNormalize || isSawsbuckCrest) {
+    if (isGalvanize || isPixilate || isRefrigerate || isAerilate || isNormalize) {
       desc.attackerAbility = attacker.ability;
       hasAteAbilityTypeChange = true;
     } else if (isLiquidVoice) {
@@ -284,7 +293,7 @@ export function calculateSMSSSV(
       field.defenderSide.isForesight;
   const isRingTarget =
     defender.hasItem('Ring Target') && !defender.hasAbility('Klutz');
-  const type1Effectiveness = getMoveEffectiveness(
+  let type1Effectiveness = getMoveEffectiveness(
     gen,
     move,
     defender.types[0],
@@ -292,7 +301,7 @@ export function calculateSMSSSV(
     field.isGravity,
     isRingTarget
   );
-  const type2Effectiveness = defender.types[1]
+  let type2Effectiveness = defender.types[1]
     ? getMoveEffectiveness(
       gen,
       move,
@@ -302,8 +311,28 @@ export function calculateSMSSSV(
       isRingTarget
     )
     : 1;
+
+  if (defender.named('Torterra-Crest')) {
+    if (type1Effectiveness == 0)
+      type1Effectiveness = 2;
+    else
+      type1Effectiveness = 1 / type1Effectiveness;
+
+    if (type2Effectiveness == 0)
+      type2Effectiveness = 2;
+    else
+      type2Effectiveness = 1 / type2Effectiveness;
+  }
+
   let typeEffectiveness = type1Effectiveness * type2Effectiveness;
   
+  // Crests - Resistances
+
+  if (defender.named('Druddigon-Crest')) {
+    if (move.hasType('Fire')) // Fire Immunity
+      typeEffectiveness = 0;
+  }
+
   if (defender.named('Glaceon-Crest') && move.hasType('Fighting', 'Rock')) {
     typeEffectiveness = 0.5;
   }
@@ -313,15 +342,40 @@ export function calculateSMSSSV(
   }
 
   if (defender.named('Luxray-Crest')) {
-    if (move.hasType('Dark', 'Ghost'))
+    if (move.hasType('Dark', 'Ghost')) // Dark Resistances
       typeEffectiveness *= 0.5;
-    if (move.hasType('Psychic'))
+    if (move.hasType('Psychic')) // Dark Immunities
       typeEffectiveness = 0;
   }
 
   if (defender.named('Samurott-Crest')) {
-    if (move.hasType('Dark', 'Bug', 'Rock'))
+    if (move.hasType('Dark', 'Bug', 'Rock')) // Fighting Resistances
       typeEffectiveness *= 0.5;
+  }
+
+  if (defender.named('Simipour-Crest')) {
+    if (move.hasType('Grass', 'Water', 'Ground', 'Electric')) // Grass Resistances
+      typeEffectiveness *= 0.5;
+  }
+
+  if (defender.named('Simisage-Crest')) {
+    if (move.hasType('Grass', 'Fire', 'Bug', 'Ice', 'Steel', 'Fairy')) // Fire Resistances
+      typeEffectiveness *= 0.5;
+  }
+
+  if (defender.named('Simisear-Crest')) {
+    if (move.hasType('Fire', 'Water', 'Ice', 'Steel')) // Water Resistances
+      typeEffectiveness *= 0.5;
+  }
+
+  if (defender.named('Skuntank-Crest')) {
+    if (move.hasType('Ground')) // Ground Immunity
+      typeEffectiveness = 0;
+  }
+
+  if (defender.named('Whiscash-Crest')) {
+    if (move.hasType('Grass')) // Grass Immunity
+      typeEffectiveness = 0;
   }
 
   if (defender.teraType && defender.teraType !== 'Stellar') {
@@ -390,7 +444,7 @@ export function calculateSMSSSV(
 
   if ((defender.hasAbility('Wonder Guard') && typeEffectiveness <= 1) ||
       (move.hasType('Grass') && defender.hasAbility('Sap Sipper')) ||
-      (move.hasType('Fire') && (defender.hasAbility('Flash Fire', 'Well-Baked Body') || defender.named('Druddigon-Crest'))) ||
+      (move.hasType('Fire') && (defender.hasAbility('Flash Fire', 'Well-Baked Body'))) ||
       (move.hasType('Water') && defender.hasAbility('Dry Skin', 'Storm Drain', 'Water Absorb')) ||
       (move.hasType('Electric') &&
         defender.hasAbility('Lightning Rod', 'Motor Drive', 'Volt Absorb')) ||
@@ -513,7 +567,9 @@ export function calculateSMSSSV(
           ? (move.category === 'Special' ? 'spd' : 'def')
           : attacker.named('Reuniclus-Crest-Fighting')
             ? (move.category === 'Special' ? 'atk' : 'spa')
-            : move.category === 'Special'
+            : attacker.named('Typhlosion-Crest') && move.category === 'Physical'
+              ? 'spa'
+              : move.category === 'Special'
                 ? 'spa'
                 : 'atk';
   // #endregion
@@ -565,6 +621,7 @@ export function calculateSMSSSV(
   } else if ((attacker.hasAbility('Protean', 'Libero') || attacker.named('Boltund-Crest')) && !attacker.teraType) {
     stabMod += 2048;
     desc.attackerAbility = attacker.ability;
+  // Crests - STAB additions
   } else if (attacker.named('Empoleon-Crest') && move.hasType('Ice')) {
     stabMod += 2048;
   } else if (attacker.named('Luxray-Crest') && move.hasType('Dark')) {
@@ -573,7 +630,13 @@ export function calculateSMSSSV(
     stabMod += 2048;
   } else if (attacker.named('Samurott-Crest') && move.hasType('Fighting')) {
     stabMod += 2048;
-  }
+  } else if (attacker.named('Simipour-Crest') && move.hasType('Grass')) {
+    stabMod += 2048;
+  } else if (attacker.named('Simisage-Crest') && move.hasType('Fire')) {
+    stabMod += 2048;
+  } else if (attacker.named('Simisear-Crest') && move.hasType('Water')) {
+    stabMod += 2048;
+  } 
   const teraType = attacker.teraType;
   if (teraType === move.type && teraType !== 'Stellar') {
     stabMod += 2048;
@@ -642,29 +705,65 @@ export function calculateSMSSSV(
     noseElectric.name = 'Electric Nose' as SpeciesName;
     noseRock.name = 'Rock Nose' as SpeciesName;
     noseSteel.name = 'Steel Nose' as SpeciesName;
-    move.bp = 20;
-    move.category = 'Special';
+    let noseMove = move.clone(); 
+    noseMove.bp = 20;
+    noseMove.category = 'Special';
+    desc.attackerAbility = "POGCHAMPION";
 
-    move.type = 'Electric';
-    move.name = 'Electric POGCHAMPION' as MoveName;
-    checkMultihitBoost(gen, noseElectric, defender, move, field, desc);
-    let noseElectricDamage = calculateSMSSSV(gen, noseElectric, defender, move, field).damage as number[];
+    noseMove.type = 'Electric';
+    noseMove.name = 'Electric POGCHAMPION' as MoveName;
+    checkMultihitBoost(gen, noseElectric, defender, noseMove, field, desc);
+    let noseElectricDamage = calculateSMSSSV(gen, noseElectric, defender, noseMove, field).damage as number[];
 
-    move.type = 'Rock';
-    move.name = 'Rock POGCHAMPION' as MoveName;
-    checkMultihitBoost(gen, noseRock, defender, move, field, desc);
-    let noseRockDamage = calculateSMSSSV(gen, noseRock, defender, move, field).damage as number[];
+    noseMove.type = 'Rock';
+    noseMove.name = 'Rock POGCHAMPION' as MoveName;
+    checkMultihitBoost(gen, noseRock, defender, noseMove, field, desc);
+    let noseRockDamage = calculateSMSSSV(gen, noseRock, defender, noseMove, field).damage as number[];
 
-    move.type = 'Steel';
-    move.name = 'Steel POGCHAMPION' as MoveName;
-    checkMultihitBoost(gen, noseSteel, defender, move, field, desc);
-    let noseSteelDamage = calculateSMSSSV(gen, noseSteel, defender, move, field).damage as number[];
+    noseMove.type = 'Steel';
+    noseMove.name = 'Steel POGCHAMPION' as MoveName;
+    checkMultihitBoost(gen, noseSteel, defender, noseMove, field, desc);
+    let noseSteelDamage = calculateSMSSSV(gen, noseSteel, defender, noseMove, field).damage as number[];
 
     noseDamage = [];
 
     for (let i = 0; i < 16; i++) {
       noseDamage[i] = noseElectricDamage[i] + noseRockDamage[i] + noseSteelDamage[i];
     }
+  }
+
+  let spitUpDamage: number[] | undefined;
+  if (attacker.named('Swalot-Crest') && move.named('Belch') && Math.min(attacker.boosts.def, attacker.boosts.spd) > 0 && move.hits === 1 && !isSpread) {
+    const spitUp = move.clone();
+    spitUp.name = 'Spit Up' as MoveName;
+    spitUp.type = 'Normal';
+    spitUp.category = 'Special';
+    spitUp.bp = Math.min(Math.min(attacker.boosts.def, attacker.boosts.spd), 3) * 100; // Crests - TODO: make actual Stockpile counter
+
+    checkMultihitBoost(gen, attacker, defender, spitUp, field, desc);
+    spitUpDamage = calculateSMSSSV(gen, attacker, defender, spitUp, field).damage as number[];
+    switch (Math.min(Math.min(attacker.boosts.def, attacker.boosts.spd), 3))
+    {
+      case 1:
+        desc.attackerAbility = "Spit Up (100 BP)";
+        break;
+      case 2:
+        desc.attackerAbility = "Spit Up (200 BP)";
+        break;
+      case 3:
+      default:
+        desc.attackerAbility = "Spit Up (300 BP)";
+        break;
+    }
+  }
+
+  let typhlosionDamage: number[] | undefined;
+  if (attacker.named('Typhlosion-Crest') && !attacker.hasAbility('Parental Bond (Typhlosion)') && move.flags.contact && !handleFixedDamageMoves(attacker, move) && move.hits === 1 && !isSpread) {
+    const clone = attacker.clone();
+    clone.ability = 'Parental Bond (Typhlosion)' as AbilityName;
+    checkMultihitBoost(gen, clone, defender, move, field, desc);
+    typhlosionDamage = calculateSMSSSV(gen, clone, defender, move, field).damage as number[];
+    desc.attackerAbility = "Parental Bond";
   }
 
   let damage = [];
@@ -783,7 +882,11 @@ export function calculateSMSSSV(
       ? [damage, childDamage]
       : noseDamage
         ? [damage, noseDamage]
-        : damage;
+        : spitUpDamage
+          ? [damage, spitUpDamage]
+          : typhlosionDamage
+            ? [damage, typhlosionDamage]
+            : damage;
 
   // #endregion
 
@@ -977,6 +1080,10 @@ export function calculateBasePowerSMSSSV(
     break;
   case 'Tera Blast':
     basePower = attacker.teraType === 'Stellar' ? 100 : 80;
+    desc.moveBP = basePower;
+    break;
+  case 'Spit Up':
+    basePower = Math.max(Math.min(Math.min(attacker.boosts.def, attacker.boosts.spd), 3), 0) * 100; // Crests - TODO: make actual Stockpile counter
     desc.moveBP = basePower;
     break;
   default:
@@ -1350,7 +1457,9 @@ export function calculateAttackSMSSSV(
             ? (move.category === 'Special' ? 'spd' : 'def')
             : attacker.named('Reuniclus-Crest-Fighting')
               ? (move.category === 'Special' ? 'atk' : 'spa')
-              : move.category === 'Special'
+              : attacker.named('Typhlosion-Crest') && move.category === 'Physical'
+                ? 'spa'
+                : move.category === 'Special'
                   ? 'spa'
                   : 'atk';
   desc.attackEVs =
@@ -1413,10 +1522,24 @@ export function calculateAttackSMSSSV(
     attack = pokeRound((attack * 5) / 4);
   }
 
-  let relicanthBoost = 125; // + 10 * attacker.turns;
-
   if (attacker.named('Relicanth-Crest')) {
-    attack = pokeRound((attack * relicanthBoost) / 100);
+    attack = pokeRound((attack * 125) / 100); // Crests - TODO: + 10 * attacker.turns
+  }
+
+  if (attacker.named('Simipour-Crest') || attacker.named('Simisage-Crest') || attacker.named('Simisear-Crest')) {
+    attack = pokeRound((attack * 6) / 5);
+  }
+
+  if (attacker.named('Skuntank-Crest')) {
+    attack = pokeRound((attack * 6) / 5);
+  }
+
+  if (attacker.named('Spiritomb-Crest')) {
+    attack = pokeRound((attack * (5 + 1)) / 5); // Crests - TODO: 1 -> fainted foes
+  }
+
+  if (attacker.named('Whiscash-Crest')) {
+    attack = pokeRound((attack * 6) / 5);
   }
 
   const atMods = calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc);
@@ -1424,6 +1547,10 @@ export function calculateAttackSMSSSV(
 
   if (attacker.named('Cryogonal-Crest')) {
     attack += pokeRound(((attacker.stats['spd'] * 12) / 100));
+  }
+
+  if ((attacker.named('Stantler-Crest') || attacker.named('Wyrdeer-Crest')) && move.category === 'Physical') {
+    attack = pokeRound((attack * 3) / 2);
   }
 
   return attack;
@@ -1644,10 +1771,12 @@ export function calculateDefenseSMSSSV(
     defense = pokeRound((defense * 3) / 2);
   }
 
-  let relicanthBoost = 125; // + 10 * defender.turns;
-
   if (defender.named('Relicanth-Crest') && move.category === 'Special') {
-    defense = pokeRound((defense * relicanthBoost) / 100);
+    defense = pokeRound((defense * 125) / 100); // Crests - TODO: + 10 * attacker.turns
+  }
+
+  if (defender.named('Vespiquen-Crest-Defense')) {
+    defense = pokeRound((defense * 3) / 2);
   }
 
   const dfMods = calculateDfModsSMSSSV(
@@ -1787,6 +1916,10 @@ function calculateBaseDamageSMSSSV(
 
   if (attacker.hasAbility('Parental Bond (Child)')) {
     baseDamage = pokeRound(OF32(baseDamage * 1024) / 4096);
+  }
+
+  if (attacker.hasAbility('Parental Bond (Typhlosion)')) {
+    baseDamage = pokeRound(OF32(baseDamage * 1229) / 4096);
   }
 
   if (

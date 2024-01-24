@@ -272,6 +272,21 @@ function checkIntimidate(gen, source, target) {
             target.boosts.spa = Math.min(6, target.boosts.spa + 2);
         }
     }
+    if (source.named('Thievul-Crest') && !blocked) {
+        if (target.hasAbility('Contrary', 'Competitive')) {
+            target.boosts.spa = Math.min(6, target.boosts.spa + 1);
+        }
+        else if (target.hasAbility('Simple')) {
+            target.boosts.spa = Math.max(-6, target.boosts.spa - 2);
+        }
+        else {
+            target.boosts.spa = Math.max(-6, target.boosts.spa - 1);
+        }
+        if (target.hasAbility('Defiant')) {
+            target.boosts.atk = Math.min(6, target.boosts.atk + 2);
+        }
+        source.boosts.spa = Math.min(6, source.boosts.atk + 1);
+    }
 }
 exports.checkIntimidate = checkIntimidate;
 function checkDownload(source, target, wonderRoomActive) {
@@ -293,6 +308,10 @@ exports.checkDownload = checkDownload;
 function checkIntrepidSword(source, gen) {
     if (source.hasAbility('Intrepid Sword') && gen.num > 7) {
         source.boosts.atk = Math.min(6, source.boosts.atk + 1);
+    }
+    if (source.named('Vespiquen-Crest-Offense')) {
+        source.boosts.atk = Math.min(6, source.boosts.atk + 1);
+        source.boosts.spa = Math.min(6, source.boosts.spa + 1);
     }
 }
 exports.checkIntrepidSword = checkIntrepidSword;

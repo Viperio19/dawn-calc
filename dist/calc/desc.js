@@ -335,7 +335,12 @@ function getHazards(gen, defender, defenderSide) {
         var rockType = gen.types.get('rock');
         var effectiveness = rockType.effectiveness[defender.types[0]] *
             (defender.types[1] ? rockType.effectiveness[defender.types[1]] : 1);
-        damage += Math.floor((effectiveness * defender.maxHP()) / 8);
+        if (defender.named('Torterra-Crest')) {
+            damage += Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
+        }
+        else {
+            damage += Math.floor((effectiveness * defender.maxHP()) / 8);
+        }
         texts.push('Stealth Rock');
     }
     if (defenderSide.steelsurge && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
@@ -462,7 +467,7 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
         }
     }
     if (defender.hasStatus('psn')) {
-        if (defender.hasAbility('Poison Heal')) {
+        if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) {
             damage += Math.floor(defender.maxHP() / 8);
             texts.push('Poison Heal');
         }
@@ -472,7 +477,7 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
         }
     }
     else if (defender.hasStatus('tox')) {
-        if (defender.hasAbility('Poison Heal')) {
+        if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) {
             damage += Math.floor(defender.maxHP() / 8);
             texts.push('Poison Heal');
         }
@@ -555,6 +560,14 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
     }
     if (defender.named('Shiinotic-Crest') && attacker.status) {
         damage += Math.floor(attacker.maxHP() / 16);
+        texts.push('Crest recovery');
+    }
+    if (defender.named('Spiritomb-Crest')) {
+        damage += Math.floor(defender.maxHP() / 32);
+        texts.push('Crest recovery');
+    }
+    if (defender.named('Vespiquen-Crest-Defense')) {
+        damage += Math.floor(defender.maxHP() / 16);
         texts.push('Crest recovery');
     }
     return { damage: damage, texts: texts };
