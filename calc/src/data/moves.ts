@@ -4939,6 +4939,27 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<MoveData>} = {
   'Branch Poke': {isStabbing: true},
   'False Surrender': {isStabbing: true},
   'Glacial Lance': {isStabbing: true},
+  'Electric POGCHAMPION': {
+    bp: 20,
+    type: 'Electric',
+    category: 'Special',
+    zp: 20,
+    maxPower: 20,
+  },
+  'Steel POGCHAMPION': {
+    bp: 20,
+    type: 'Steel',
+    category: 'Special',
+    zp: 20,
+    maxPower: 20,
+  },
+  'Rock POGCHAMPION': {
+    bp: 20,
+    type: 'Rock',
+    category: 'Special',
+    zp: 20,
+    maxPower: 20,
+  },
 };
 
 const SV: {[name: string]: MoveData} = extend(true, {}, SS, SV_PATCH, CHROMATIC_PATCH);

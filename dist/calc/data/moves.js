@@ -4925,7 +4925,28 @@ var CHROMATIC_PATCH = {
     'Smart Strike': { isStabbing: true },
     'Branch Poke': { isStabbing: true },
     'False Surrender': { isStabbing: true },
-    'Glacial Lance': { isStabbing: true }
+    'Glacial Lance': { isStabbing: true },
+    'Electric POGCHAMPION': {
+        bp: 20,
+        type: 'Electric',
+        category: 'Special',
+        zp: 20,
+        maxPower: 20
+    },
+    'Steel POGCHAMPION': {
+        bp: 20,
+        type: 'Steel',
+        category: 'Special',
+        zp: 20,
+        maxPower: 20
+    },
+    'Rock POGCHAMPION': {
+        bp: 20,
+        type: 'Rock',
+        category: 'Special',
+        zp: 20,
+        maxPower: 20
+    }
 };
 var SV = (0, util_1.extend)(true, {}, SS, SV_PATCH, CHROMATIC_PATCH);
 exports.MOVES = [{}, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV];

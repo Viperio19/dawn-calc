@@ -347,7 +347,8 @@ function getHazards(gen, defender, defenderSide) {
     }
     if (!defender.hasType('Flying') &&
         !defender.hasAbility('Magic Guard', 'Levitate') &&
-        !defender.hasItem('Air Balloon')) {
+        !defender.hasItem('Air Balloon') &&
+        !defender.named('Probopass-Crest')) {
         if (defenderSide.spikes === 1) {
             damage += Math.floor(defender.maxHP() / 8);
             if (gen.num === 2) {
