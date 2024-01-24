@@ -262,7 +262,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
             defender.hasAbility('Lightning Rod', 'Motor Drive', 'Volt Absorb')) ||
         (move.hasType('Ground') &&
             !field.isGravity && !move.named('Thousand Arrows') &&
-            !defender.hasItem('Iron Ball') && defender.hasAbility('Levitate')) ||
+            !defender.hasItem('Iron Ball') && (defender.hasAbility('Levitate') || defender.named('Probopass-Crest'))) ||
         (move.flags.bullet && defender.hasAbility('Bulletproof')) ||
         (move.flags.sound && !move.named('Clangorous Soul') && defender.hasAbility('Soundproof')) ||
         (move.priority > 0 && defender.hasAbility('Queenly Majesty', 'Dazzling', 'Armor Tail')) ||
@@ -383,6 +383,9 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     else if (attacker.named('Luxray-Crest') && move.hasType('Dark')) {
         stabMod += 2048;
     }
+    else if ((attacker.named('Probopass-Crest') || attacker.named('Electric Nose')) && move.hasType('Electric')) {
+        stabMod += 2048;
+    }
     var teraType = attacker.teraType;
     if (teraType === move.type && teraType !== 'Stellar') {
         stabMod += 2048;
@@ -424,6 +427,34 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         (0, util_2.checkMultihitBoost)(gen, child, defender, move, field, desc);
         childDamage = calculateSMSSSV(gen, child, defender, move, field).damage;
         desc.attackerAbility = attacker.ability;
+    }
+    var noseDamage;
+    ;
+    if (attacker.named('Probopass-Crest') && !['Electric POGCHAMPION', 'Rock POGCHAMPION', 'Steel POGCHAMPION'].includes(move.name) && move.hits === 1) {
+        var noseElectric = attacker.clone();
+        var noseRock = attacker.clone();
+        var noseSteel = attacker.clone();
+        noseElectric.name = 'Electric Nose';
+        noseRock.name = 'Rock Nose';
+        noseSteel.name = 'Steel Nose';
+        move.bp = 20;
+        move.category = 'Special';
+        move.type = 'Electric';
+        move.name = 'Electric POGCHAMPION';
+        (0, util_2.checkMultihitBoost)(gen, noseElectric, defender, move, field, desc);
+        var noseElectricDamage = calculateSMSSSV(gen, noseElectric, defender, move, field).damage;
+        move.type = 'Rock';
+        move.name = 'Rock POGCHAMPION';
+        (0, util_2.checkMultihitBoost)(gen, noseRock, defender, move, field, desc);
+        var noseRockDamage = calculateSMSSSV(gen, noseRock, defender, move, field).damage;
+        move.type = 'Steel';
+        move.name = 'Steel POGCHAMPION';
+        (0, util_2.checkMultihitBoost)(gen, noseSteel, defender, move, field, desc);
+        var noseSteelDamage = calculateSMSSSV(gen, noseSteel, defender, move, field).damage;
+        noseDamage = [];
+        for (var i = 0; i < 16; i++) {
+            noseDamage[i] = noseElectricDamage[i] + noseRockDamage[i] + noseSteelDamage[i];
+        }
     }
     var damage = [];
     for (var i = 0; i < 16; i++) {
@@ -499,7 +530,12 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     }
     desc.attackBoost =
         move.named('Foul Play') ? defender.boosts[attackStat] : attacker.boosts[attackStat];
-    result.damage = childDamage ? [damage, childDamage] : damage;
+    result.damage =
+        childDamage
+            ? [damage, childDamage]
+            : noseDamage
+                ? [damage, noseDamage]
+                : damage;
     return result;
 }
 exports.calculateSMSSSV = calculateSMSSSV;
