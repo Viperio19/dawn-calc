@@ -383,6 +383,9 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     else if (attacker.named('Luxray-Crest') && move.hasType('Dark')) {
         stabMod += 2048;
     }
+    else if (attacker.named('Probopass-Crest') && move.hasType('Electric')) {
+        stabMod += 2048;
+    }
     var teraType = attacker.teraType;
     if (teraType === move.type && teraType !== 'Stellar') {
         stabMod += 2048;
@@ -424,6 +427,29 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         (0, util_2.checkMultihitBoost)(gen, child, defender, move, field, desc);
         childDamage = calculateSMSSSV(gen, child, defender, move, field).damage;
         desc.attackerAbility = attacker.ability;
+    }
+    var noseElectricDamage;
+    var noseRockDamage;
+    var noseSteelDamage;
+    if (attacker.named('Probopass-Crest') && move.hits === 1) {
+        var noseElectric = attacker.clone();
+        var noseRock = attacker.clone();
+        var noseSteel = attacker.clone();
+        noseElectric.name = 'Electric Nose';
+        noseRock.name = 'Rock Nose';
+        noseSteel.name = 'Steel Nose';
+        move.bp = 20;
+        move.category = 'Special';
+        desc.attackerAbility = attacker.ability;
+        move.type = 'Electric';
+        (0, util_2.checkMultihitBoost)(gen, noseElectric, defender, move, field, desc);
+        noseElectricDamage = calculateSMSSSV(gen, noseElectric, defender, move, field).damage;
+        move.type = 'Rock';
+        (0, util_2.checkMultihitBoost)(gen, noseRock, defender, move, field, desc);
+        noseRockDamage = calculateSMSSSV(gen, noseRock, defender, move, field).damage;
+        move.type = 'Steel';
+        (0, util_2.checkMultihitBoost)(gen, noseSteel, defender, move, field, desc);
+        noseSteelDamage = calculateSMSSSV(gen, noseSteel, defender, move, field).damage;
     }
     var damage = [];
     for (var i = 0; i < 16; i++) {
@@ -500,6 +526,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     desc.attackBoost =
         move.named('Foul Play') ? defender.boosts[attackStat] : attacker.boosts[attackStat];
     result.damage = childDamage ? [damage, childDamage] : damage;
+    result.damage = noseRockDamage ? [damage, noseRockDamage] : damage;
     return result;
 }
 exports.calculateSMSSSV = calculateSMSSSV;
