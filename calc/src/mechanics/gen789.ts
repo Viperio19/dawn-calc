@@ -621,7 +621,6 @@ export function calculateSMSSSV(
     noseSteel.name = 'Steel Nose' as SpeciesName;
     move.bp = 20;
     move.category = 'Special';
-    desc.attackerAbility = attacker.ability;
 
     move.type = 'Electric';
     checkMultihitBoost(gen, noseElectric, defender, move, field, desc);
