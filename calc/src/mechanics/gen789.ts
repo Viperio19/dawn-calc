@@ -45,6 +45,7 @@ import {
   pokeRound,
   isQPActive,
 } from './util';
+import { SpeciesName } from '@pkmn/dex';
 
 export function calculateSMSSSV(
   gen: Generation,
@@ -608,6 +609,33 @@ export function calculateSMSSSV(
     desc.attackerAbility = attacker.ability;
   }
 
+  let noseElectricDamage: number[] | undefined;
+  let noseRockDamage: number[] | undefined;
+  let noseSteelDamage: number[] | undefined;
+  if (attacker.named('Probopass-Crest') && move.hits === 1) {
+    const noseElectric = attacker.clone();
+    const noseRock = attacker.clone();
+    const noseSteel = attacker.clone();
+    noseElectric.name = 'Electric Nose' as SpeciesName;
+    noseRock.name = 'Rock Nose' as SpeciesName;
+    noseSteel.name = 'Steel Nose' as SpeciesName;
+    move.bp = 20;
+    move.category = 'Special';
+    desc.attackerAbility = attacker.ability;
+
+    move.type = 'Electric';
+    checkMultihitBoost(gen, noseElectric, defender, move, field, desc);
+    noseElectricDamage = calculateSMSSSV(gen, noseElectric, defender, move, field).damage as number[];
+
+    move.type = 'Rock';
+    checkMultihitBoost(gen, noseRock, defender, move, field, desc);
+    noseRockDamage = calculateSMSSSV(gen, noseRock, defender, move, field).damage as number[];
+
+    move.type = 'Steel';
+    checkMultihitBoost(gen, noseSteel, defender, move, field, desc);
+    noseSteelDamage = calculateSMSSSV(gen, noseSteel, defender, move, field).damage as number[];
+  }
+
   let damage = [];
   for (let i = 0; i < 16; i++) {
     damage[i] =
@@ -716,372 +744,16 @@ export function calculateSMSSSV(
     }
   }
 
-  if (attacker.named('Probopass-Crest')) {
-    damage += calculatePOGCHAMPIONDamage(
-      gen,
-      attacker,
-      defender,
-      field
-    );
-  }
-
   desc.attackBoost =
     move.named('Foul Play') ? defender.boosts[attackStat] : attacker.boosts[attackStat];
 
   result.damage = childDamage ? [damage, childDamage] : damage;
 
+  result.damage = noseRockDamage ? [damage, noseRockDamage] : damage;
+
   // #endregion
 
   return result;
-}
-
-function calculatePOGCHAMPIONDamage(
-  gen: Generation,
-  attacker: Pokemon,
-  defender: Pokemon,
-  field: Field
-) {
-  // #region Initial
-
-  let move = gen.moves.get(toID('Electric POGCHAMPION'));
-
-  if (typeof move === "undefined")
-  {
-    return;
-  }
-
-  checkAirLock(attacker, field);
-  checkAirLock(defender, field);
-  checkTeraformZero(attacker, field);
-  checkTeraformZero(defender, field);
-  checkForecast(attacker, field.weather);
-  checkForecast(defender, field.weather);
-  checkItem(attacker, field.isMagicRoom);
-  checkItem(defender, field.isMagicRoom);
-  checkWonderRoom(attacker, field.isWonderRoom);
-  checkWonderRoom(defender, field.isWonderRoom);
-  checkSeedBoost(attacker, field);
-  checkSeedBoost(defender, field);
-  checkDauntlessShield(attacker, gen);
-  checkDauntlessShield(defender, gen);
-  checkEmbody(attacker, gen);
-  checkEmbody(defender, gen);
-
-  computeFinalStats(gen, attacker, defender, field, 'def', 'spd', 'spe');
-
-  checkIntimidate(gen, attacker, defender);
-  checkIntimidate(gen, defender, attacker);
-  checkDownload(attacker, defender, field.isWonderRoom);
-  checkDownload(defender, attacker, field.isWonderRoom);
-  checkIntrepidSword(attacker, gen);
-  checkIntrepidSword(defender, gen);
-
-  computeFinalStats(gen, attacker, defender, field, 'atk', 'spa');
-
-  checkInfiltrator(attacker, field.defenderSide);
-  checkInfiltrator(defender, field.attackerSide);
-
-  const desc: RawDesc = {
-    attackerName: attacker.name,
-    attackerTera: attacker.teraType,
-    moveName: move.name,
-    defenderName: defender.name,
-    defenderTera: defender.teraType,
-    isDefenderDynamaxed: defender.isDynamaxed,
-    isWonderRoom: field.isWonderRoom,
-  };
-
-  const result = new Result(gen, attacker, defender, move, field, 0, desc);
-
-  if (move.category === 'Status' && !move.named('Nature Power')) {
-    return result;
-  }
-
-  const breaksProtect = move.breaksProtect || move.isZ || attacker.isDynamaxed ||
-  (attacker.hasAbility('Unseen Fist') && move.flags.contact);
-
-  if (field.defenderSide.isProtected && !breaksProtect) {
-    desc.isProtected = true;
-    return result;
-  }
-
-  // Merciless does not ignore Shell Armor, damage dealt to a poisoned Pokemon with Shell Armor
-  // will not be a critical hit (UltiMario)
-  const isCritical = !defender.hasAbility('Battle Armor', 'Shell Armor') &&
-    (move.isCrit || (attacker.hasAbility('Merciless') && defender.hasStatus('psn', 'tox')) || (attacker.named('Ariados-Crest')) && (defender.status || defender.boosts.spe < 0)) &&
-    move.timesUsed === 1;
-
-  let type = move.type;
-
-  move.type = type;
-
-  const isGhostRevealed =
-    attacker.hasAbility('Scrappy') || attacker.hasAbility('Mind\'s Eye') ||
-      field.defenderSide.isForesight;
-  const isRingTarget =
-    defender.hasItem('Ring Target') && !defender.hasAbility('Klutz');
-  const type1Effectiveness = getMoveEffectiveness(
-    gen,
-    move,
-    defender.types[0],
-    isGhostRevealed,
-    field.isGravity,
-    isRingTarget
-  );
-  const type2Effectiveness = defender.types[1]
-    ? getMoveEffectiveness(
-      gen,
-      move,
-      defender.types[1],
-      isGhostRevealed,
-      field.isGravity,
-      isRingTarget
-    )
-    : 1;
-  let typeEffectiveness = type1Effectiveness * type2Effectiveness;
-  
-  if (defender.named('Glaceon-Crest') && move.hasType('Fighting', 'Rock')) {
-    typeEffectiveness = 0.5;
-  }
-
-  if (defender.named('Leafeon-Crest') && move.hasType('Fire', 'Flying')) {
-    typeEffectiveness = 0.5;
-  }
-
-  if (defender.named('Luxray-Crest')) {
-    if (move.hasType('Dark', 'Ghost'))
-      typeEffectiveness *= 0.5;
-    if (move.hasType('Psychic'))
-      typeEffectiveness = 0;
-  }
-
-  if (defender.teraType && defender.teraType !== 'Stellar') {
-    typeEffectiveness = getMoveEffectiveness(
-      gen,
-      move,
-      defender.teraType,
-      isGhostRevealed,
-      field.isGravity,
-      isRingTarget
-    );
-  }
-
-  if (typeEffectiveness === 0) {
-    return result;
-  }
-
-  if ((defender.hasAbility('Wonder Guard') && typeEffectiveness <= 1) ||
-      (move.hasType('Grass') && defender.hasAbility('Sap Sipper')) ||
-      (move.hasType('Fire') && (defender.hasAbility('Flash Fire', 'Well-Baked Body') || defender.named('Druddigon-Crest'))) ||
-      (move.hasType('Water') && defender.hasAbility('Dry Skin', 'Storm Drain', 'Water Absorb')) ||
-      (move.hasType('Electric') &&
-        defender.hasAbility('Lightning Rod', 'Motor Drive', 'Volt Absorb')) ||
-      (move.hasType('Ground') &&
-        !field.isGravity && !move.named('Thousand Arrows') &&
-        !defender.hasItem('Iron Ball') && (defender.hasAbility('Levitate') || defender.named('Probopass-Crest'))) ||
-      (move.flags.bullet && defender.hasAbility('Bulletproof')) ||
-      (move.flags.sound && !move.named('Clangorous Soul') && defender.hasAbility('Soundproof')) ||
-      (move.priority > 0 && defender.hasAbility('Queenly Majesty', 'Dazzling', 'Armor Tail')) ||
-      (move.hasType('Ground') && defender.hasAbility('Earth Eater')) ||
-      (move.flags.wind && defender.hasAbility('Wind Rider'))
-  ) {
-    desc.defenderAbility = defender.ability;
-    return result;
-  }
-
-  desc.HPEVs = `${defender.evs.hp} HP`;
-
-  if (move.hits > 1) {
-    desc.hits = move.hits;
-  }
-
-  const turnOrder = attacker.stats.spe > defender.stats.spe ? 'first' : 'last';
-
-  // #endregion
-  // #region Base Power
-
-  const basePower = calculateBasePowerSMSSSV(
-    gen,
-    attacker,
-    defender,
-    move,
-    field,
-    false, // hasAteAbilityTypeChange
-    desc
-  );
-  if (basePower === 0) {
-    return result;
-  }
-
-  // #endregion
-  // #region (Special) Attack
-  const attack = calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCritical);
-  const attackSource = attacker;
-  const attackStat = 'spa';
-  // #endregion
-  // #region (Special) Defense
-
-  const defense = calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCritical);
-  const hitsPhysical = false;
-  const defenseStat =
-    (defender.named('Infernape-Crest'))
-      ? (move.category === 'Special' ? 'spa' : 'atk')
-      : (defender.named('Magcargo-Crest') && hitsPhysical)
-        ? 'spe'
-        : hitsPhysical
-          ? 'def'
-          : 'spd';
-
-  // #endregion
-  // #region Damage
-
-  const baseDamage = calculateBaseDamageSMSSSV(
-    gen,
-    attacker,
-    defender,
-    basePower,
-    attack,
-    defense,
-    move,
-    field,
-    desc,
-    isCritical
-  );
-
-  if (hasTerrainSeed(defender) &&
-    field.hasTerrain(defender.item!.substring(0, defender.item!.indexOf(' ')) as Terrain) &&
-    SEED_BOOSTED_STAT[defender.item!] === defenseStat) {
-    // Last condition applies so the calc doesn't show a seed where it wouldn't affect the outcome
-    // (like Grassy Seed when being hit by a special move)
-    desc.defenderItem = defender.item;
-  }
-
-  // the random factor is applied between the crit mod and the stab mod, so don't apply anything
-  // below this until we're inside the loop
-  let stabMod = 4096;
-  // Probopass gets STAB on all nose attacks
-  if (attacker.named('Probopass-Crest')) {
-    stabMod += 2048;
-  }
-
-  const teraType = attacker.teraType;
-  if (teraType === move.type && teraType !== 'Stellar') {
-    stabMod += 2048;
-    desc.attackerTera = teraType;
-  }
-  if (attacker.hasAbility('Adaptability') && attacker.hasType(move.type)) {
-    stabMod += teraType && attacker.hasOriginalType(teraType) ? 1024 : 2048;
-    desc.attackerAbility = attacker.ability;
-  }
-
-  // TODO: For now all moves are always boosted
-  const isStellarBoosted =
-    attacker.teraType === 'Stellar' &&
-    (move.isStellarFirstUse || attacker.named('Terapagos-Stellar'));
-  if (isStellarBoosted) {
-    if (attacker.hasOriginalType(move.type)) {
-      stabMod += 2048;
-    } else {
-      stabMod = 4915;
-    }
-  }
-
-  const applyBurn =
-    attacker.hasStatus('brn') &&
-    move.category === 'Physical' &&
-    !attacker.hasAbility('Guts') &&
-    !move.named('Facade');
-  desc.isBurned = applyBurn;
-  const finalMods = calculateFinalModsSMSSSV(
-    gen,
-    attacker,
-    defender,
-    move,
-    field,
-    desc,
-    isCritical,
-    typeEffectiveness
-  );
-
-  let protect = false;
-  if (field.defenderSide.isProtected &&
-    (attacker.isDynamaxed || (move.isZ && attacker.item && attacker.item.includes(' Z')))) {
-    protect = true;
-    desc.isProtected = true;
-  }
-
-  const finalMod = chainMods(finalMods, 41, 131072);
-
-  const isSpread = field.gameType !== 'Singles' &&
-     ['allAdjacent', 'allAdjacentFoes'].includes(move.target);
-
-  let childDamage: number[] | undefined;
-  if (attacker.hasAbility('Parental Bond') && move.hits === 1 && !isSpread) {
-    const child = attacker.clone();
-    child.ability = 'Parental Bond (Child)' as AbilityName;
-    checkMultihitBoost(gen, child, defender, move, field, desc);
-    childDamage = calculateSMSSSV(gen, child, defender, move, field).damage as number[];
-    desc.attackerAbility = attacker.ability;
-  }
-
-  let damage = [];
-  for (let i = 0; i < 16; i++) {
-    damage[i] =
-      getFinalDamage(baseDamage, i, typeEffectiveness, applyBurn, stabMod, finalMod, protect);
-  }
-
-  if (move.dropsStats && move.timesUsed! > 1) {
-    const simpleMultiplier = attacker.hasAbility('Simple') ? 2 : 1;
-
-    desc.moveTurns = `over ${move.timesUsed} turns`;
-    const hasWhiteHerb = attacker.hasItem('White Herb');
-    let usedWhiteHerb = false;
-    let dropCount = 0;
-    for (let times = 0; times < move.timesUsed!; times++) {
-      const newAttack = getModifiedStat(attack, dropCount);
-      let damageMultiplier = 0;
-      damage = damage.map(affectedAmount => {
-        if (times) {
-          const newBaseDamage = getBaseDamage(attacker.level, basePower, newAttack, defense);
-          const newFinalDamage = getFinalDamage(
-            newBaseDamage,
-            damageMultiplier,
-            typeEffectiveness,
-            applyBurn,
-            stabMod,
-            finalMod,
-            protect
-          );
-          damageMultiplier++;
-          return affectedAmount + newFinalDamage;
-        }
-        return affectedAmount;
-      });
-
-      if (attacker.hasAbility('Contrary')) {
-        dropCount = Math.min(6, dropCount + move.dropsStats);
-        desc.attackerAbility = attacker.ability;
-      } else {
-        dropCount = Math.max(-6, dropCount - move.dropsStats * simpleMultiplier);
-        if (attacker.hasAbility('Simple')) {
-          desc.attackerAbility = attacker.ability;
-        }
-      }
-
-      // the Pokémon hits THEN the stat rises / lowers
-      if (hasWhiteHerb && attacker.boosts[attackStat] < 0 && !usedWhiteHerb) {
-        dropCount += move.dropsStats * simpleMultiplier;
-        usedWhiteHerb = true;
-        desc.attackerItem = attacker.item;
-      }
-    }
-  }
-
-  result.damage = childDamage ? [damage, childDamage] : damage;
-
-  // #endregion
-
-  return damage;
 }
 
 export function calculateBasePowerSMSSSV(
