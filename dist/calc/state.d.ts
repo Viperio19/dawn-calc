@@ -10,6 +10,7 @@ export declare namespace State {
         isSaltCure?: boolean;
         alliesFainted?: number;
         boostedStat?: I.StatIDExceptHP | 'auto';
+        relicanthTurns?: number;
         item?: I.ItemName;
         gender?: I.GenderName;
         nature?: I.NatureName;

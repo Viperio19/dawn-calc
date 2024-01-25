@@ -760,6 +760,10 @@ function buildDescription(description, attacker, defender) {
         output += Math.min(5, description.alliesFainted) +
             " ".concat(description.alliesFainted === 1 ? 'ally' : 'allies', " fainted ");
     }
+    if (description.relicanthTurns) {
+        output += Math.min(10, description.relicanthTurns) +
+            " ".concat(description.relicanthTurns === 1 ? 'Turn' : 'Turns', " ");
+    }
     if (description.attackerTera) {
         output += "Tera ".concat(description.attackerTera, " ");
     }

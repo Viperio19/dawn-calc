@@ -23,6 +23,7 @@ export interface RawDesc {
   defenseEVs?: string;
   hits?: number;
   alliesFainted?: number;
+  relicanthTurns?: number;
   isBeadsOfRuin?: boolean;
   isSwordOfRuin?: boolean;
   isTabletsOfRuin?: boolean;
@@ -933,6 +934,10 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   if (description.alliesFainted) {
     output += Math.min(5, description.alliesFainted) +
       ` ${description.alliesFainted === 1 ? 'ally' : 'allies'} fainted `;
+  }
+  if (description.relicanthTurns) {
+    output += Math.min(10, description.relicanthTurns) +
+      ` ${description.relicanthTurns === 1 ? 'Turn' : 'Turns'} `;
   }
   if (description.attackerTera) {
     output += `Tera ${description.attackerTera} `;

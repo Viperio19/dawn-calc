@@ -1522,7 +1522,9 @@ export function calculateAttackSMSSSV(
   }
 
   if (attacker.named('Relicanth-Crest')) {
-    attack = pokeRound((attack * 125) / 100); // Crests - TODO: + 10 * attacker.turns
+    let turns = attacker.relicanthTurns === undefined ? 0 : attacker.relicanthTurns;
+    attack = pokeRound((attack * (125 + (10 * turns))) / 100); // Crests - TODO: + 10 * attacker.turns
+    desc.relicanthTurns = turns;
   }
 
   if (attacker.named('Simipour-Crest') || attacker.named('Simisage-Crest') || attacker.named('Simisear-Crest')) {

@@ -278,8 +278,18 @@ $(".ability").bind("keyup change", function () {
 	} else {
 		$(this).closest(".poke-info").find(".alliesFainted").val('0');
 		$(this).closest(".poke-info").find(".alliesFainted").hide();
-
 	}
+
+	var pokeObj = $(this).closest(".poke-info");
+	var pokemon = createPokemon(pokeObj);
+
+	if (pokemon.name === "Relicanth-Crest") {
+		$(this).closest(".poke-info").find(".relicanthTurns").show();
+	} else {
+		$(this).closest(".poke-info").find(".relicanthTurns").val('0');
+		$(this).closest(".poke-info").find(".relicanthTurns").hide();
+	}
+
 });
 
 function autosetQP(pokemon) {
@@ -1026,6 +1036,7 @@ function createPokemon(pokeInfo) {
 			isSaltCure: pokeInfo.find(".saltcure").is(":checked"),
 			alliesFainted: parseInt(pokeInfo.find(".alliesFainted").val()),
 			boostedStat: pokeInfo.find(".boostedStat").val() || undefined,
+			relicanthTurns: parseInt(pokeInfo.find(".relicanthTurns").val()),
 			teraType: teraType,
 			boosts: boosts,
 			curHP: curHP,

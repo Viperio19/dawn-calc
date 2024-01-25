@@ -1161,7 +1161,9 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
         attack = (0, util_2.pokeRound)((attack * 5) / 4);
     }
     if (attacker.named('Relicanth-Crest')) {
-        attack = (0, util_2.pokeRound)((attack * 125) / 100);
+        var turns = attacker.relicanthTurns === undefined ? 0 : attacker.relicanthTurns;
+        attack = (0, util_2.pokeRound)((attack * (125 + (10 * turns))) / 100);
+        desc.relicanthTurns = turns;
     }
     if (attacker.named('Simipour-Crest') || attacker.named('Simisage-Crest') || attacker.named('Simisear-Crest')) {
         attack = (0, util_2.pokeRound)((attack * 6) / 5);

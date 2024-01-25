@@ -163,13 +163,6 @@
                 <div class="hide">
                     <label>Forme</label>
                     <select class="forme calc-trigger"></select>
-                    <select hidden aria-label="Boosted Stat" title="What stat is boosted by this ability?" class="boostedStat calc-trigger">
-                        <option value="atk">0 turns</option>
-                        <option value="def">1 turn</option>
-                        <option value="spa">2 turns</option>
-                        <option value="spa">3 turns</option>
-                        <option value="spa">4 turns</option>
-                    </select>
                 </div>
                 <div class="hide">
                     <label>Gender</label>
@@ -485,17 +478,23 @@
                         <option value="spd">Special Defense</option>
                         <option value="spe">Speed</option>
                     </select>
+                    <select hidden aria-label="Relicanth Turns" title="How many turns has Relicanth been on the field?" class="relicanthTurns calc-trigger">
+                        <option value="0">0 turns</option>
+                        <option value="1">1 turn</option>
+                        <option value="2">2 turns</option>
+                        <option value="3">3 turns</option>
+                        <option value="4">4 turns</option>
+                        <option value="5">5 turns</option>
+                        <option value="6">6 turns</option>
+                        <option value="7">7 turns</option>
+                        <option value="8">8 turns</option>
+                        <option value="9">9 turns</option>
+                        <option value="10">10+ turns</option>
+                    </select>
                 </div>
                 <div class="gen-specific g2 g3 g4 g5 g6 g7 g8 g9">
                     <label for="itemL1">Item</label>
                     <select class="item terrain-trigger calc-trigger" id="itemL1"></select>
-                    <select hidden aria-label="Boosted Stat" title="What stat is boosted by this ability?" class="boostedStat calc-trigger">
-                        <option value="atk">0 turns</option>
-                        <option value="def">1 turn</option>
-                        <option value="spa">2 turns</option>
-                        <option value="spa">3 turns</option>
-                        <option value="spa">4 turns</option>
-                    </select>
                 </div>
                 <div>
                     <label for="statusL1">Status</label>
@@ -1100,19 +1099,6 @@
                 <div class="hide">
                     <label>Forme</label>
                     <select class="forme calc-trigger"></select>
-                    <select hidden aria-label="Boosted Stat" title="What stat is boosted by this ability?" class="boostedStat calc-trigger">
-                        <option value="0">0 turns</option>
-                        <option value="1">1 turn</option>
-                        <option value="2">2 turns</option>
-                        <option value="3">3 turns</option>
-                        <option value="4">4 turns</option>
-                        <option value="5">5 turns</option>
-                        <option value="6">6 turns</option>
-                        <option value="7">7 turns</option>
-                        <option value="8">8 turns</option>
-                        <option value="9">9 turns</option>
-                        <option value="10">10 turns</option>
-                    </select>
                 </div>
                 <div class="hide">
                     <label>Gender</label>
@@ -1427,6 +1413,19 @@
                             <option value="spa">Special Attack</option>
                             <option value="spd">Special Defense</option>
                             <option value="spe">Speed</option>
+                        </select>
+                        <select hidden aria-label="Relicanth Turns" title="How many turns has Relicanth been on the field?" class="relicanthTurns calc-trigger">
+                            <option value="0">0 turns</option>
+                            <option value="1">1 turn</option>
+                            <option value="2">2 turns</option>
+                            <option value="3">3 turns</option>
+                            <option value="4">4 turns</option>
+                            <option value="5">5 turns</option>
+                            <option value="6">6 turns</option>
+                            <option value="7">7 turns</option>
+                            <option value="8">8 turns</option>
+                            <option value="9">9 turns</option>
+                            <option value="10">10+ turns</option>
                         </select>
                 </div>
                 <div class="gen-specific g2 g3 g4 g5 g6 g7 g8 g9">

@@ -23,6 +23,7 @@ export class Pokemon implements State.Pokemon {
   dynamaxLevel?: number;
   isSaltCure?: boolean;
   alliesFainted?: number;
+  relicanthTurns?: number;
   boostedStat?: I.StatIDExceptHP | 'auto';
   item?: I.ItemName;
   teraType?: I.TypeName;
@@ -68,6 +69,7 @@ export class Pokemon implements State.Pokemon {
     this.isSaltCure = !!options.isSaltCure;
     this.alliesFainted = options.alliesFainted;
     this.boostedStat = options.boostedStat;
+    this.relicanthTurns = options.relicanthTurns;
     this.teraType = options.teraType;
     this.item = options.item;
     this.nature = options.nature || ('Serious' as I.NatureName);
@@ -166,6 +168,7 @@ export class Pokemon implements State.Pokemon {
       isSaltCure: this.isSaltCure,
       alliesFainted: this.alliesFainted,
       boostedStat: this.boostedStat,
+      relicanthTurns: this.relicanthTurns,
       item: this.item,
       gender: this.gender,
       nature: this.nature,
