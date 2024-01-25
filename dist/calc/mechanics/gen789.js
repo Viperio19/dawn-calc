@@ -535,15 +535,14 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         }
     }
     var spitUpDamage;
-    if (attacker.named('Swalot-Crest') && move.named('Belch') && Math.min(attacker.boosts.def, attacker.boosts.spd) > 0 && move.hits === 1 && !isSpread) {
+    if (attacker.named('Swalot-Crest') && move.named('Belch') && !(move.stockpiles === undefined) && move.stockpiles > 0 && move.hits === 1 && !isSpread) {
         var spitUp = move.clone();
         spitUp.name = 'Spit Up';
         spitUp.type = 'Normal';
         spitUp.category = 'Special';
-        spitUp.bp = Math.min(Math.min(attacker.boosts.def, attacker.boosts.spd), 3) * 100;
         (0, util_2.checkMultihitBoost)(gen, attacker, defender, spitUp, field, desc);
         spitUpDamage = calculateSMSSSV(gen, attacker, defender, spitUp, field).damage;
-        switch (Math.min(Math.min(attacker.boosts.def, attacker.boosts.spd), 3)) {
+        switch (move.stockpiles) {
             case 1:
                 desc.attackerAbility = "Spit Up (100 BP)";
                 break;
@@ -831,7 +830,7 @@ function calculateBasePowerSMSSSV(gen, attacker, defender, move, field, hasAteAb
             desc.moveBP = basePower;
             break;
         case 'Spit Up':
-            basePower = Math.max(Math.min(Math.min(attacker.boosts.def, attacker.boosts.spd), 3), 0) * 100;
+            basePower = move.stockpiles === undefined ? 0 : move.stockpiles * 100;
             desc.moveBP = basePower;
             break;
         default:

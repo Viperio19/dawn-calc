@@ -211,6 +211,8 @@ function getKOChance(gen, attacker, defender, move, field, damage, err) {
         move.timesUsed = 1;
     if (move.timesUsedWithMetronome === undefined)
         move.timesUsedWithMetronome = 1;
+    if (move.stockpiles === undefined)
+        move.stockpiles = 0;
     if (damage[0] >= defender.maxHP() && move.timesUsed === 1 && move.timesUsedWithMetronome === 1) {
         return { chance: 1, n: 1, text: 'guaranteed OHKO' };
     }

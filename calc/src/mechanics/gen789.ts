@@ -733,16 +733,15 @@ export function calculateSMSSSV(
   }
 
   let spitUpDamage: number[] | undefined;
-  if (attacker.named('Swalot-Crest') && move.named('Belch') && Math.min(attacker.boosts.def, attacker.boosts.spd) > 0 && move.hits === 1 && !isSpread) {
+  if (attacker.named('Swalot-Crest') && move.named('Belch') && !(move.stockpiles === undefined) && move.stockpiles > 0 && move.hits === 1 && !isSpread) {
     const spitUp = move.clone();
     spitUp.name = 'Spit Up' as MoveName;
     spitUp.type = 'Normal';
     spitUp.category = 'Special';
-    spitUp.bp = Math.min(Math.min(attacker.boosts.def, attacker.boosts.spd), 3) * 100; // Crests - TODO: make actual Stockpile counter
 
     checkMultihitBoost(gen, attacker, defender, spitUp, field, desc);
     spitUpDamage = calculateSMSSSV(gen, attacker, defender, spitUp, field).damage as number[];
-    switch (Math.min(Math.min(attacker.boosts.def, attacker.boosts.spd), 3))
+    switch (move.stockpiles)
     {
       case 1:
         desc.attackerAbility = "Spit Up (100 BP)";
@@ -1083,7 +1082,7 @@ export function calculateBasePowerSMSSSV(
     desc.moveBP = basePower;
     break;
   case 'Spit Up':
-    basePower = Math.max(Math.min(Math.min(attacker.boosts.def, attacker.boosts.spd), 3), 0) * 100; // Crests - TODO: make actual Stockpile counter
+    basePower = move.stockpiles === undefined ? 0 : move.stockpiles * 100;
     desc.moveBP = basePower;
     break;
   default:

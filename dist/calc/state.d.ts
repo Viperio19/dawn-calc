@@ -32,6 +32,7 @@ export declare namespace State {
         hits?: number;
         timesUsed?: number;
         timesUsedWithMetronome?: number;
+        stockpiles?: number;
         overrides?: Partial<I.Move>;
     }
     interface Field {

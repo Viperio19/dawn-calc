@@ -296,6 +296,7 @@ export function getKOChance(
   // Code doesn't really work if these aren't set.
   if (move.timesUsed === undefined) move.timesUsed = 1;
   if (move.timesUsedWithMetronome === undefined) move.timesUsedWithMetronome = 1;
+  if (move.stockpiles === undefined) move.stockpiles = 0;
 
   if (damage[0] >= defender.maxHP() && move.timesUsed === 1 && move.timesUsedWithMetronome === 1) {
     return {chance: 1, n: 1, text: 'guaranteed OHKO'};

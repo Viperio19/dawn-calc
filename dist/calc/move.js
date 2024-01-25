@@ -61,6 +61,7 @@ var Move = (function () {
                 this.hits = 4;
             }
             this.timesUsedWithMetronome = options.timesUsedWithMetronome;
+            this.stockpiles = options.stockpiles;
         }
         this.gen = gen;
         this.name = data.name;
@@ -133,6 +134,7 @@ var Move = (function () {
             hits: this.hits,
             timesUsed: this.timesUsed,
             timesUsedWithMetronome: this.timesUsedWithMetronome,
+            stockpiles: this.stockpiles,
             overrides: this.overrides
         });
     };

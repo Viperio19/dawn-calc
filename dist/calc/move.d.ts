@@ -13,6 +13,7 @@ export declare class Move implements State.Move {
     hits: number;
     timesUsed?: number;
     timesUsedWithMetronome?: number;
+    stockpiles?: number;
     bp: number;
     type: I.TypeName;
     category: I.MoveCategory;

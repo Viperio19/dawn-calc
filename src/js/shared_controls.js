@@ -509,9 +509,14 @@ $(".move-selector").change(function () {
 	var stat = move.category === 'Special' ? 'spa' : 'atk';
 	var dropsStats =
 		move.self && move.self.boosts && move.self.boosts[stat] && move.self.boosts[stat] < 0;
+	var pokeObj = $(this).closest(".poke-info");
+	var fullSetName = pokeObj.find("input.set-selector").val();
+	var pokemonName = fullSetName.substring(0, fullSetName.indexOf(" ("));
+	var stockpile = moveName === 'Spit Up' || (moveName === 'Belch' && startsWith(pokemonName, "Swalot")); 
 	if (Array.isArray(move.multihit)) {
 		moveGroupObj.children(".stat-drops").hide();
 		moveGroupObj.children(".move-hits").show();
+		moveGroupObj.children(".stockpile").hide();
 		var pokemon = $(this).closest(".poke-info");
 		var moveHits =
 			pokemon.find(".ability").val() === 'Skill Link' ? 5 :
@@ -520,9 +525,15 @@ $(".move-selector").change(function () {
 	} else if (dropsStats) {
 		moveGroupObj.children(".move-hits").hide();
 		moveGroupObj.children(".stat-drops").show();
+		moveGroupObj.children(".stockpile").hide();
+	} else if (stockpile) {
+		moveGroupObj.children(".move-hits").hide();
+		moveGroupObj.children(".stat-drops").hide();
+		moveGroupObj.children(".stockpile").show();
 	} else {
 		moveGroupObj.children(".move-hits").hide();
 		moveGroupObj.children(".stat-drops").hide();
+		moveGroupObj.children(".stockpile").hide();
 	}
 	moveGroupObj.children(".move-z").prop("checked", false);
 });
@@ -1048,6 +1059,7 @@ function getMoveDetails(moveInfo, species, ability, item, useMax) {
 	var hits = +moveInfo.find(".move-hits").val();
 	var timesUsed = +moveInfo.find(".stat-drops").val();
 	var timesUsedWithMetronome = moveInfo.find(".metronome").is(':visible') ? +moveInfo.find(".metronome").val() : 1;
+	var stockpiles = +moveInfo.find(".stockpile").val();
 	var overrides = {
 		basePower: +moveInfo.find(".move-bp").val(),
 		type: moveInfo.find(".move-type").val()
@@ -1056,7 +1068,7 @@ function getMoveDetails(moveInfo, species, ability, item, useMax) {
 	return new calc.Move(gen, moveName, {
 		ability: ability, item: item, useZ: isZMove, species: species, isCrit: isCrit, hits: hits,
 		isStellarFirstUse: isStellarFirstUse, timesUsed: timesUsed, timesUsedWithMetronome: timesUsedWithMetronome,
-		overrides: overrides, useMax: useMax
+		stockpiles: stockpiles, overrides: overrides, useMax: useMax
 	});
 }
 
