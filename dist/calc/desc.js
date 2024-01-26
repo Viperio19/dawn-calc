@@ -701,6 +701,12 @@ function buildDescription(description, attacker, defender) {
     if (description.isSwordOfRuin) {
         output += 'Sword of Ruin ';
     }
+    if (description.reflectorOffenseTypes) {
+        output += 'Reflector ' + description.reflectorOffenseTypes;
+    }
+    if (description.mimicryOffenseType) {
+        output += 'Mimicry ' + description.mimicryOffenseType + ' ';
+    }
     output += description.attackerName + ' ';
     if (description.isHelpingHand) {
         output += 'Helping Hand ';
@@ -759,6 +765,12 @@ function buildDescription(description, attacker, defender) {
     }
     if (description.defenderTera) {
         output += "Tera ".concat(description.defenderTera, " ");
+    }
+    if (description.reflectorDefenseTypes) {
+        output += 'Reflector ' + description.reflectorDefenseTypes;
+    }
+    if (description.mimicryDefenseType) {
+        output += 'Mimicry ' + description.mimicryDefenseType + ' ';
     }
     output += description.defenderName;
     if (description.weather && description.terrain) {

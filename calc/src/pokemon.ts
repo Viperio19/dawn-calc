@@ -2,6 +2,8 @@ import * as I from './data/interface';
 import {Stats} from './stats';
 import {toID, extend, assignWithout} from './util';
 import {State} from './state';
+import {Field, Side} from './field';
+import { getMimicryType } from './mechanics/util';
 
 const STATS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as I.StatID[];
 const SPC = new Set(['spc']);
@@ -150,6 +152,28 @@ export class Pokemon implements State.Pokemon {
       if (this.types.includes(type)) return true;
     }
     return false;
+  }
+
+  // Checks if the Pokemon has an "invisble" type change due to abilities
+  hasInvisisbleType(opponent: Pokemon, field: Field, ...types: I.TypeName[]) {
+    for (const type of types) {
+      if (this.hasReflectorType(opponent, type) || this.hasMimicryType(field, type)) return true;
+    }
+    return false;
+  }
+
+  hasReflectorType(opponent: Pokemon, type: I.TypeName) {
+    return this.ability != "Reflector"
+      ? false
+      : opponent.types[1]
+        ? opponent.types[1] === type
+        : opponent.types[0] === type;
+  }
+
+  hasMimicryType(field: Field, type: I.TypeName) {
+    return this.ability != "Mimicry"
+      ? false
+      : getMimicryType(field) === type;
   }
 
   named(...names: string[]) {

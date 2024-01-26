@@ -43,6 +43,7 @@ import {
   isGrounded,
   OF16, OF32,
   pokeRound,
+  getMimicryType,
   isQPActive,
 } from './util';
 
@@ -271,19 +272,38 @@ export function calculateSMSSSV(
       field.defenderSide.isForesight;
   const isRingTarget =
     defender.hasItem('Ring Target') && !defender.hasAbility('Klutz');
+
+  let type1 = defender.types[0];
+  let type2 = defender.types[1];
+
+  if (defender.hasAbility('Mimicry') && getMimicryType(field) != "???") {
+    type1 = getMimicryType(field);
+    type2 = "???";
+
+    desc.mimicryDefenseType = type1;
+  }
+
+  if (defender.hasAbility('Reflector')) {
+    type2 = (attacker.types[1]
+      ? (defender.hasType(attacker.types[1]) ? defender.types[1] : attacker.types[1])
+      : (defender.hasType(attacker.types[0]) ? defender.types[1] : attacker.types[0]));
+
+    desc.reflectorDefenseTypes = defender.types[0] + (type2 === "???" ? '' : ' / ' + type2) + ' ';
+  }
+
   const type1Effectiveness = getMoveEffectiveness(
     gen,
     move,
-    defender.types[0],
+    type1,
     isGhostRevealed,
     field.isGravity,
     isRingTarget
   );
-  const type2Effectiveness = defender.types[1]
+  const type2Effectiveness = type2
     ? getMoveEffectiveness(
       gen,
       move,
-      defender.types[1],
+      type2,
       isGhostRevealed,
       field.isGravity,
       isRingTarget
@@ -316,8 +336,8 @@ export function calculateSMSSSV(
   }
 
   if ((move.named('Sky Drop') &&
-        (defender.hasType('Flying') || defender.weightkg >= 200 || field.isGravity)) ||
-      (move.named('Synchronoise') && !defender.hasType(attacker.types[0]) &&
+        ((defender.hasType('Flying') || defender.hasInvisisbleType(attacker, field, 'Flying')) || defender.weightkg >= 200 || field.isGravity)) ||
+      (move.named('Synchronoise') && (!defender.hasType(attacker.types[0]) && !defender.hasInvisisbleType(attacker, field, attacker.types[0])) &&
         (!attacker.types[1] || !defender.hasType(attacker.types[1]))) ||
       (move.named('Dream Eater') &&
         (!(defender.hasStatus('slp') || defender.hasAbility('Comatose')))) ||
@@ -335,7 +355,7 @@ export function calculateSMSSSV(
     return result;
   }
 
-  if (field.hasWeather('Strong Winds') && defender.hasType('Flying') &&
+  if (field.hasWeather('Strong Winds') && (defender.hasType('Flying') || defender.hasInvisisbleType(attacker, field, 'Flying')) &&
       gen.types.get(toID(move.type))!.effectiveness['Flying']! > 1) {
     typeEffectiveness /= 2;
     desc.weather = field.weather;
@@ -517,6 +537,12 @@ export function calculateSMSSSV(
   } else if (attacker.hasAbility('Protean', 'Libero') && !attacker.teraType) {
     stabMod += 2048;
     desc.attackerAbility = attacker.ability;
+  } else if (attacker.hasAbility('Reflector') && (defender.types[1] === move.type || (!defender.types[1] && defender.types[0] === move.type))) {
+    stabMod += 2048;
+    desc.reflectorOffenseTypes = attacker.types[0] + ' / ' + (defender.types[1] ? defender.types[1] : defender.types[0]) + ' ';
+  } else if (attacker.hasAbility('Mimicry') && getMimicryType(field) === move.type) {
+    stabMod += 2048;
+    desc.mimicryOffenseType = getMimicryType(field);
   }
   const teraType = attacker.teraType;
   if (teraType === move.type && teraType !== 'Stellar') {
@@ -914,7 +940,7 @@ export function calculateBasePowerSMSSSV(
   basePower = OF16(Math.max(1, pokeRound((basePower * chainMods(bpMods, 41, 2097152)) / 4096)));
   if (
     attacker.teraType && move.type === attacker.teraType &&
-    attacker.hasType(attacker.teraType) && move.hits === 1 &&
+    (attacker.hasType(attacker.teraType) || attacker.hasInvisisbleType(defender, field, attacker.teraType)) && move.hits === 1 &&
     move.priority <= 0 && move.bp > 0 && !move.named('Dragon Energy', 'Eruption', 'Water Spout') &&
     basePower < 60 && gen.num >= 9
   ) {
@@ -1419,11 +1445,11 @@ export function calculateDefenseSMSSSV(
   }
 
   // unlike all other defense modifiers, Sandstorm SpD boost gets applied directly
-  if (field.hasWeather('Sand') && defender.hasType('Rock') && !hitsPhysical) {
+  if (field.hasWeather('Sand') && (defender.hasType('Rock') || defender.hasInvisisbleType(attacker, field, 'Rock')) && !hitsPhysical) {
     defense = pokeRound((defense * 3) / 2);
     desc.weather = field.weather;
   }
-  if (field.hasWeather('Snow') && defender.hasType('Ice') && hitsPhysical) {
+  if (field.hasWeather('Snow') && (defender.hasType('Ice') || defender.hasInvisisbleType(attacker, field, 'Ice')) && hitsPhysical) {
     defense = pokeRound((defense * 3) / 2);
     desc.weather = field.weather;
   }

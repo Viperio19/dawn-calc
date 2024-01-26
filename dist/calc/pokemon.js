@@ -25,6 +25,7 @@ exports.__esModule = true;
 
 var stats_1 = require("./stats");
 var util_1 = require("./util");
+var util_2 = require("./mechanics/util");
 var STATS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
 var SPC = new Set(['spc']);
 var Pokemon = (function () {
@@ -165,6 +166,40 @@ var Pokemon = (function () {
             finally { if (e_3) throw e_3.error; }
         }
         return false;
+    };
+    Pokemon.prototype.hasInvisisbleType = function (opponent, field) {
+        var e_4, _a;
+        var types = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            types[_i - 2] = arguments[_i];
+        }
+        try {
+            for (var types_3 = __values(types), types_3_1 = types_3.next(); !types_3_1.done; types_3_1 = types_3.next()) {
+                var type = types_3_1.value;
+                if (this.hasReflectorType(opponent, type) || this.hasMimicryType(field, type))
+                    return true;
+            }
+        }
+        catch (e_4_1) { e_4 = { error: e_4_1 }; }
+        finally {
+            try {
+                if (types_3_1 && !types_3_1.done && (_a = types_3["return"])) _a.call(types_3);
+            }
+            finally { if (e_4) throw e_4.error; }
+        }
+        return false;
+    };
+    Pokemon.prototype.hasReflectorType = function (opponent, type) {
+        return this.ability != "Reflector"
+            ? false
+            : opponent.types[1]
+                ? opponent.types[1] === type
+                : opponent.types[0] === type;
+    };
+    Pokemon.prototype.hasMimicryType = function (field, type) {
+        return this.ability != "Mimicry"
+            ? false
+            : (0, util_2.getMimicryType)(field) === type;
     };
     Pokemon.prototype.named = function () {
         var names = [];

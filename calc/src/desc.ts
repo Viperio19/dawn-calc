@@ -49,6 +49,10 @@ export interface RawDesc {
   terrain?: Terrain;
   weather?: Weather;
   isDefenderDynamaxed?: boolean;
+  reflectorOffenseTypes?: string;
+  reflectorDefenseTypes?: string;
+  mimicryOffenseType?: string;
+  mimicryDefenseType?: string;
 }
 
 export function display(
@@ -864,6 +868,12 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   if (description.isSwordOfRuin) {
     output += 'Sword of Ruin ';
   }
+  if (description.reflectorOffenseTypes) {
+    output += 'Reflector ' + description.reflectorOffenseTypes;
+  }
+  if (description.mimicryOffenseType) {
+    output += 'Mimicry ' + description.mimicryOffenseType + ' ';
+  }
   output += description.attackerName + ' ';
   if (description.isHelpingHand) {
     output += 'Helping Hand ';
@@ -920,6 +930,12 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   }
   if (description.defenderTera) {
     output += `Tera ${description.defenderTera} `;
+  }
+  if (description.reflectorDefenseTypes) {
+    output += 'Reflector ' + description.reflectorDefenseTypes;
+  }
+  if (description.mimicryDefenseType) {
+    output += 'Mimicry ' + description.mimicryDefenseType + ' ';
   }
   output += description.defenderName;
   if (description.weather && description.terrain) {
