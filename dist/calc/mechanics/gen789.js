@@ -1163,7 +1163,7 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
     if (attacker.named('Relicanth-Crest')) {
         var turns = attacker.relicanthTurns === undefined ? 0 : attacker.relicanthTurns;
         attack = (0, util_2.pokeRound)((attack * (125 + (10 * turns))) / 100);
-        desc.relicanthTurns = turns;
+        desc.relicanthTurnsAttack = turns;
     }
     if (attacker.named('Simipour-Crest') || attacker.named('Simisage-Crest') || attacker.named('Simisear-Crest')) {
         attack = (0, util_2.pokeRound)((attack * 6) / 5);
@@ -1363,7 +1363,9 @@ function calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCr
         defense = (0, util_2.pokeRound)((defense * 3) / 2);
     }
     if (defender.named('Relicanth-Crest') && move.category === 'Special') {
-        defense = (0, util_2.pokeRound)((defense * 125) / 100);
+        var turns = defender.relicanthTurns === undefined ? 0 : defender.relicanthTurns;
+        defense = (0, util_2.pokeRound)((defense * (125 + (10 * turns))) / 100);
+        desc.relicanthTurnsDefense = turns;
     }
     if (defender.named('Vespiquen-Crest-Defense')) {
         defense = (0, util_2.pokeRound)((defense * 3) / 2);

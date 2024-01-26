@@ -764,9 +764,9 @@ function buildDescription(description, attacker, defender) {
         output += Math.min(5, description.foesFainted) +
             " ".concat(description.alliesFainted === 1 ? 'foe' : 'foes', " fainted ");
     }
-    if (description.relicanthTurns) {
-        output += Math.min(10, description.relicanthTurns) +
-            " ".concat(description.relicanthTurns === 1 ? 'Turn' : 'Turns', " ");
+    if (description.relicanthTurnsAttack) {
+        output += Math.min(10, description.relicanthTurnsAttack) +
+            " ".concat(description.relicanthTurnsAttack === 1 ? 'Turn' : 'Turns', " ");
     }
     if (description.attackerTera) {
         output += "Tera ".concat(description.attackerTera, " ");
@@ -821,6 +821,10 @@ function buildDescription(description, attacker, defender) {
     }
     output = appendIfSet(output, description.defenderItem);
     output = appendIfSet(output, description.defenderAbility);
+    if (description.relicanthTurnsDefense) {
+        output += Math.min(10, description.relicanthTurnsDefense) +
+            " ".concat(description.relicanthTurnsDefense === 1 ? 'Turn' : 'Turns', " ");
+    }
     if (description.isTabletsOfRuin) {
         output += 'Tablets of Ruin ';
     }

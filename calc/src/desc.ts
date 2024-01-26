@@ -24,7 +24,8 @@ export interface RawDesc {
   hits?: number;
   alliesFainted?: number;
   foesFainted?: number;
-  relicanthTurns?: number;
+  relicanthTurnsAttack?: number;
+  relicanthTurnsDefense?: number;
   isBeadsOfRuin?: boolean;
   isSwordOfRuin?: boolean;
   isTabletsOfRuin?: boolean;
@@ -940,9 +941,9 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     output += Math.min(5, description.foesFainted) +
       ` ${description.alliesFainted === 1 ? 'foe' : 'foes'} fainted `;
   }
-  if (description.relicanthTurns) {
-    output += Math.min(10, description.relicanthTurns) +
-      ` ${description.relicanthTurns === 1 ? 'Turn' : 'Turns'} `;
+  if (description.relicanthTurnsAttack) {
+    output += Math.min(10, description.relicanthTurnsAttack) +
+      ` ${description.relicanthTurnsAttack === 1 ? 'Turn' : 'Turns'} `;
   }
   if (description.attackerTera) {
     output += `Tera ${description.attackerTera} `;
@@ -995,6 +996,12 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   }
   output = appendIfSet(output, description.defenderItem);
   output = appendIfSet(output, description.defenderAbility);
+  
+  if (description.relicanthTurnsDefense) {
+    output += Math.min(10, description.relicanthTurnsDefense) +
+      ` ${description.relicanthTurnsDefense === 1 ? 'Turn' : 'Turns'} `;
+  }
+
   if (description.isTabletsOfRuin) {
     output += 'Tablets of Ruin ';
   }
