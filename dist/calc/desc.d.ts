@@ -20,7 +20,8 @@ export interface RawDesc {
     hits?: number;
     alliesFainted?: number;
     foesFainted?: number;
-    relicanthTurns?: number;
+    relicanthTurnsAttack?: number;
+    relicanthTurnsDefense?: number;
     isBeadsOfRuin?: boolean;
     isSwordOfRuin?: boolean;
     isTabletsOfRuin?: boolean;
