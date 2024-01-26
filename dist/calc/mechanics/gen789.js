@@ -1173,8 +1173,8 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
     }
     if (attacker.named('Spiritomb-Crest')) {
         var foesFainted = attacker.foesFainted === undefined ? 0 : attacker.foesFainted;
-        attack = (0, util_2.pokeRound)((attack * (5 + foesFainted)) / 5);
         if (foesFainted > 0) {
+            attack = (0, util_2.pokeRound)((attack * (5 + foesFainted)) / 5);
             desc.foesFainted = foesFainted;
         }
     }
