@@ -23,6 +23,8 @@ export interface RawDesc {
   defenseEVs?: string;
   hits?: number;
   alliesFainted?: number;
+  foesFainted?: number;
+  relicanthTurns?: number;
   isBeadsOfRuin?: boolean;
   isSwordOfRuin?: boolean;
   isTabletsOfRuin?: boolean;
@@ -135,6 +137,27 @@ export function getRecovery(
       const range = [minD[i], maxD[i]];
       for (const j in recovery) {
         let drained = Math.round(range[j] * percentHealed);
+        if (attacker.hasItem('Big Root') || attacker.named('Shiinotic-Crest')) drained = Math.trunc(drained * 5324 / 4096);
+        recovery[j] += Math.min(drained * move.hits, max);
+      }
+    }
+  }
+
+  // Crests - Draining
+
+  if ((attacker.named('Dusknoir-Crest') && move.named('Shadow Punch')) || attacker.named('Gothitelle-Crest-Dark')) {
+    let tempPercentHealed = 0;
+    if (attacker.named('Dusknoir-Crest')) {
+      tempPercentHealed = 0.5;
+    } else if (attacker.named('Gothitelle-Crest-Dark')) {
+      tempPercentHealed = 0.25;
+    }
+    const percentHealed = tempPercentHealed;
+    const max = Math.round(defender.maxHP() * percentHealed);
+    for (let i = 0; i < minD.length; i++) {
+      const range = [minD[i], maxD[i]];
+      for (const j in recovery) {
+        let drained = Math.round(range[j] * percentHealed);
         if (attacker.hasItem('Big Root')) drained = Math.trunc(drained * 5324 / 4096);
         recovery[j] += Math.min(drained * move.hits, max);
       }
@@ -167,8 +190,18 @@ export function getRecoil(
   let text = '';
 
   const damageOverflow = minDamage > defender.curHP() || maxDamage > defender.curHP();
-  if (move.recoil) {
-    const mod = (move.recoil[0] / move.recoil[1]) * 100;
+  if (move.recoil || defender.named('Bastiodon-Crest')) {
+    let tempMod = 0;
+    
+    if (move.recoil) {
+      tempMod += (move.recoil[0] / move.recoil[1]) * 100;
+    }
+    if (defender.named('Bastiodon-Crest')) {
+      tempMod += 50;
+    }
+
+    const mod = tempMod;
+
     let minRecoilDamage, maxRecoilDamage;
     if (damageOverflow) {
       minRecoilDamage =
@@ -183,7 +216,7 @@ export function getRecoil(
         notation, Math.min(max, defender.curHP()) * mod, attacker.maxHP(), 100
       );
     }
-    if (!attacker.hasAbility('Rock Head')) {
+    if (!attacker.hasAbility('Rock Head') && !attacker.named('Rampardos-Crest')) {
       recoil = [minRecoilDamage, maxRecoilDamage];
       text = `${minRecoilDamage} - ${maxRecoilDamage}${notation} recoil damage`;
     }
@@ -265,6 +298,7 @@ export function getKOChance(
   // Code doesn't really work if these aren't set.
   if (move.timesUsed === undefined) move.timesUsed = 1;
   if (move.timesUsedWithMetronome === undefined) move.timesUsedWithMetronome = 1;
+  if (move.stockpiles === undefined) move.stockpiles = 0;
 
   if (damage[0] >= defender.maxHP() && move.timesUsed === 1 && move.timesUsedWithMetronome === 1) {
     return {chance: 1, n: 1, text: 'guaranteed OHKO'};
@@ -442,7 +476,11 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side) {
     const effectiveness =
       rockType.effectiveness[defender.types[0]]! *
       (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
-    damage += Math.floor((effectiveness * defender.maxHP()) / 8);
+    if (defender.named('Torterra-Crest')) {
+      damage += Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
+    } else {
+      damage += Math.floor((effectiveness * defender.maxHP()) / 8);
+    }
     texts.push('Stealth Rock');
   }
   if (defenderSide.steelsurge && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
@@ -456,7 +494,8 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side) {
 
   if (!defender.hasType('Flying') &&
       !defender.hasAbility('Magic Guard', 'Levitate') &&
-      !defender.hasItem('Air Balloon')
+      !defender.hasItem('Air Balloon') &&
+      !defender.named('Probopass-Crest')
   ) {
     if (defenderSide.spikes === 1) {
       damage += Math.floor(defender.maxHP() / 8);
@@ -496,6 +535,10 @@ function getEndOfTurn(
       damage -= Math.floor(defender.maxHP() / 8);
       texts.push(defender.ability + ' damage');
     }
+    if (defender.named('Druddigon-Crest')) {
+      damage += Math.floor(defender.maxHP() / 8);
+      texts.push('Crest recovery');
+    }
   } else if (field.hasWeather('Rain', 'Heavy Rain')) {
     if (defender.hasAbility('Dry Skin')) {
       damage += Math.floor(defender.maxHP() / 8);
@@ -521,6 +564,7 @@ function getEndOfTurn(
       !defender.hasType('Ice') &&
       !defender.hasAbility('Magic Guard', 'Overcoat', 'Snow Cloak') &&
       !defender.hasItem('Safety Goggles') &&
+      !defender.named('Empoleon-Crest') && 
       field.hasWeather('Hail')
     ) {
       damage -= Math.floor(defender.maxHP() / 16);
@@ -573,7 +617,7 @@ function getEndOfTurn(
   }
 
   if (defender.hasStatus('psn')) {
-    if (defender.hasAbility('Poison Heal')) {
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) {
       damage += Math.floor(defender.maxHP() / 8);
       texts.push('Poison Heal');
     } else if (!defender.hasAbility('Magic Guard')) {
@@ -581,7 +625,7 @@ function getEndOfTurn(
       texts.push('poison damage');
     }
   } else if (defender.hasStatus('tox')) {
-    if (defender.hasAbility('Poison Heal')) {
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) {
       damage += Math.floor(defender.maxHP() / 8);
       texts.push('Poison Heal');
     } else if (!defender.hasAbility('Magic Guard')) {
@@ -647,6 +691,43 @@ function getEndOfTurn(
       (field.defenderSide.volcalith || move.named('G-Max Volcalith'))) {
     damage -= Math.floor(defender.maxHP() / 6);
     texts.push('Volcalith damage');
+  }
+
+  // Crests - Text Stuff
+
+  if (defender.named('Gothitelle-Crest')) {
+    damage += Math.floor(defender.maxHP() / 16);
+    texts.push('Crest recovery');
+  }
+
+  if (defender.named('Meganium-Crest')) {
+    damage += Math.floor(defender.maxHP() / 16);
+    texts.push('Crest recovery');
+  }
+
+  if (defender.named('Phione-Crest')) {
+    damage += Math.floor(defender.maxHP() / 16);
+    texts.push('Aqua Ring recovery');
+  }
+
+  if (attacker.named('Shiinotic-Crest') && defender.status) {
+    damage -= Math.floor(defender.maxHP() / 16);
+    texts.push('Crest damage');
+  }
+
+  if (defender.named('Shiinotic-Crest') && attacker.status) {
+    damage += Math.floor(attacker.maxHP() / 16);
+    texts.push('Crest recovery');
+  }
+
+  if (defender.named('Spiritomb-Crest') && defender.alliesFainted != undefined && defender.alliesFainted > 0) {
+    damage += Math.floor(defender.maxHP() * defender.alliesFainted / 32);
+    texts.push('Crest recovery (' + Math.min(5, defender.alliesFainted) + ` ${defender.alliesFainted === 1 ? 'ally' : 'allies'} fainted)`);
+  }
+
+  if (defender.named('Vespiquen-Crest-Defense')) {
+    damage += Math.floor(defender.maxHP() / 16);
+    texts.push('Crest recovery');
   }
 
   return {damage, texts};
@@ -854,6 +935,14 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   if (description.alliesFainted) {
     output += Math.min(5, description.alliesFainted) +
       ` ${description.alliesFainted === 1 ? 'ally' : 'allies'} fainted `;
+  }
+  if (description.foesFainted) {
+    output += Math.min(5, description.foesFainted) +
+      ` ${description.alliesFainted === 1 ? 'foe' : 'foes'} fainted `;
+  }
+  if (description.relicanthTurns) {
+    output += Math.min(10, description.relicanthTurns) +
+      ` ${description.relicanthTurns === 1 ? 'Turn' : 'Turns'} `;
   }
   if (description.attackerTera) {
     output += `Tera ${description.attackerTera} `;

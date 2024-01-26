@@ -31,7 +31,8 @@ export function isGrounded(pokemon: Pokemon, field: Field) {
   return (field.isGravity || pokemon.hasItem('Iron Ball') ||
     (!pokemon.hasType('Flying') &&
       !pokemon.hasAbility('Levitate') &&
-      !pokemon.hasItem('Air Balloon')));
+      !pokemon.hasItem('Air Balloon') &&
+      !pokemon.named('Probopass-Crest')));
 }
 
 export function getModifiedStat(stat: number, mod: number, gen?: Generation) {
@@ -103,7 +104,7 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
       (pokemon.hasAbility('Chlorophyll') && weather.includes('Sun')) ||
       (pokemon.hasAbility('Sand Rush') && weather === 'Sand') ||
       (pokemon.hasAbility('Swift Swim') && weather.includes('Rain')) ||
-      (pokemon.hasAbility('Slush Rush') && ['Hail', 'Snow'].includes(weather)) ||
+      ((pokemon.hasAbility('Slush Rush') || pokemon.named('Empoleon-Crest')) && ['Hail', 'Snow'].includes(weather)) ||
       (pokemon.hasAbility('Surge Surfer') && terrain === 'Electric')
   ) {
     speedMods.push(8192);
@@ -123,10 +124,33 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
     speedMods.push(8192);
   }
 
+  // Crests - Speed Modifiers
+
+  if (pokemon.named('Ariados-Crest')) {
+    speedMods.push(6144);
+  }
+
+  if (pokemon.named('Magcargo-Crest')) {
+    speed = getModifiedStat(pokemon.rawStats.def, pokemon.boosts.def, gen);
+  }
+
+  if (pokemon.named('Oricorio-Crest-Baile') || pokemon.named('Oricorio-Crest-Pa\'u') || pokemon.named('Oricorio-Crest-Pom-Pom') || pokemon.named('Oricorio-Crest-Sensu')) {
+    speedMods.push(5120);
+  }
+
+  if (pokemon.named('Seviper-Crest')) {
+    speedMods.push(6144);
+  }
+
   speed = OF32(pokeRound((speed * chainMods(speedMods, 410, 131172)) / 4096));
   if (pokemon.hasStatus('par') && !pokemon.hasAbility('Quick Feet')) {
     speed = Math.floor(OF32(speed * (gen.num < 7 ? 25 : 50)) / 100);
   }
+
+  if (pokemon.named('Cryogonal-Crest')) {
+    speed += pokeRound(((pokemon.stats['spd'] * 12) / 100));
+  }
+
 
   speed = Math.min(gen.num <= 2 ? 999 : 10000, speed);
   return Math.max(0, speed);
@@ -225,6 +249,21 @@ export function checkIntimidate(gen: Generation, source: Pokemon, target: Pokemo
       target.boosts.spa = Math.min(6, target.boosts.spa + 2);
     }
   }
+
+  if (source.named('Thievul-Crest') && !blocked) {
+    if (target.hasAbility('Contrary', 'Competitive')) {
+      target.boosts.spa = Math.min(6, target.boosts.spa + 1);
+    } else if (target.hasAbility('Simple')) {
+      target.boosts.spa = Math.max(-6, target.boosts.spa - 2);
+    } else {
+      target.boosts.spa = Math.max(-6, target.boosts.spa - 1);
+    }
+    if (target.hasAbility('Defiant')) {
+      target.boosts.atk = Math.min(6, target.boosts.atk + 2);
+    }
+
+    source.boosts.spa = Math.min(6, source.boosts.atk + 1);
+  }
 }
 
 export function checkDownload(source: Pokemon, target: Pokemon, wonderRoomActive?: boolean) {
@@ -244,6 +283,11 @@ export function checkDownload(source: Pokemon, target: Pokemon, wonderRoomActive
 export function checkIntrepidSword(source: Pokemon, gen: Generation) {
   if (source.hasAbility('Intrepid Sword') && gen.num > 7) {
     source.boosts.atk = Math.min(6, source.boosts.atk + 1);
+  }
+
+  if (source.named('Vespiquen-Crest-Offense')) {
+    source.boosts.atk = Math.min(6, source.boosts.atk + 1);
+    source.boosts.spa = Math.min(6, source.boosts.spa + 1);
   }
 }
 
@@ -516,7 +560,7 @@ export function countBoosts(gen: Generation, boosts: StatsTable) {
 export function getEVDescriptionText(
   gen: Generation,
   pokemon: Pokemon,
-  stat: 'atk' | 'def' | 'spd' | 'spa',
+  stat: 'atk' | 'def' | 'spd' | 'spa' | 'spe',
   natureName: NatureName
 ): string {
   const nature = gen.natures.get(toID(natureName))!;

@@ -4901,7 +4901,54 @@ var SV_PATCH = {
         target: 'allAdjacentFoes'
     }
 };
-var SV = (0, util_1.extend)(true, {}, SS, SV_PATCH);
+var CHROMATIC_PATCH = {
+    'Charge Beam': { isBeam: true },
+    'Hyper Beam': { isBeam: true },
+    'Ice Beam': { isBeam: true },
+    'Psybeam': { isBeam: true },
+    'Signal Beam': { isBeam: true },
+    'Solar Beam': { isBeam: true },
+    'Horn Attack': { isStabbing: true },
+    'Fury Attack': { isStabbing: true },
+    'Poison Sting': { isStabbing: true },
+    'Twineedle': { isStabbing: true },
+    'Pin Missile': { isStabbing: true },
+    'Peck': { isStabbing: true },
+    'Drill Peck': { isStabbing: true },
+    'Megahorn': { isStabbing: true },
+    'Poison Jab': { isStabbing: true },
+    'Needle Arm': { isStabbing: true },
+    'Pluck': { isStabbing: true },
+    'Drill Run': { isStabbing: true },
+    'Horn Leech': { isStabbing: true },
+    'Fell Stinger': { isStabbing: true },
+    'Smart Strike': { isStabbing: true },
+    'Branch Poke': { isStabbing: true },
+    'False Surrender': { isStabbing: true },
+    'Glacial Lance': { isStabbing: true },
+    'Electric POGCHAMPION': {
+        bp: 20,
+        type: 'Electric',
+        category: 'Special',
+        zp: 20,
+        maxPower: 20
+    },
+    'Steel POGCHAMPION': {
+        bp: 20,
+        type: 'Steel',
+        category: 'Special',
+        zp: 20,
+        maxPower: 20
+    },
+    'Rock POGCHAMPION': {
+        bp: 20,
+        type: 'Rock',
+        category: 'Special',
+        zp: 20,
+        maxPower: 20
+    }
+};
+var SV = (0, util_1.extend)(true, {}, SS, SV_PATCH, CHROMATIC_PATCH);
 exports.MOVES = [{}, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV];
 var Moves = (function () {
     function Moves(gen) {
@@ -4962,6 +5009,10 @@ var Move = (function () {
             this.flags.slicing = 1;
         if (data.isWind)
             this.flags.wind = 1;
+        if (data.isBeam)
+            this.flags.beam = 1;
+        if (data.isStabbing)
+            this.flags.stabbing = 1;
         (0, util_1.assignWithout)(this, data, Move.FLAGS);
         this.basePower = data.bp;
         if (data.zp)

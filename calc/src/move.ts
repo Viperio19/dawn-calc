@@ -19,6 +19,7 @@ export class Move implements State.Move {
   hits: number;
   timesUsed?: number;
   timesUsedWithMetronome?: number;
+  stockpiles?: number;
   bp: number;
   type: I.TypeName;
   category: I.MoveCategory;
@@ -102,8 +103,15 @@ export class Move implements State.Move {
             ? data.multihit[1]
             : data.multihit[0] + 1;
         }
+      } else if (options.species == 'Cinccino-Crest') {
+        this.hits = (options.ability === 'Skill Link')
+          ? 5
+          : 3;
+      } else if (options.species == 'Ledian-Crest' && data.flags.punch) {
+        this.hits = 4;
       }
       this.timesUsedWithMetronome = options.timesUsedWithMetronome;
+      this.stockpiles = options.stockpiles;
     }
     this.gen = gen;
     this.name = data.name;
@@ -136,7 +144,7 @@ export class Move implements State.Move {
     this.hasCrashDamage = !!data.hasCrashDamage;
     this.mindBlownRecoil = !!data.mindBlownRecoil;
     this.struggleRecoil = !!data.struggleRecoil;
-    this.isCrit = !!options.isCrit || !!data.willCrit ||
+    this.isCrit = (['futuresight', 'doomdesire'].includes(data.id)) || !!options.isCrit || !!data.willCrit ||
       // These don't *always* crit (255/256 chance), but for the purposes of the calc they do
       gen.num === 1 && ['crabhammer', 'razorleaf', 'slash', 'karate chop'].includes(data.id);
     this.isStellarFirstUse = !!options.isStellarFirstUse;
@@ -182,6 +190,7 @@ export class Move implements State.Move {
       hits: this.hits,
       timesUsed: this.timesUsed,
       timesUsedWithMetronome: this.timesUsedWithMetronome,
+      stockpiles: this.stockpiles,
       overrides: this.overrides,
     });
   }

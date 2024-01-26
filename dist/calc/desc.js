@@ -74,6 +74,26 @@ function getRecovery(gen, attacker, defender, move, damage, notation) {
             var range = [minD[i], maxD[i]];
             for (var j in recovery) {
                 var drained = Math.round(range[j] * percentHealed);
+                if (attacker.hasItem('Big Root') || attacker.named('Shiinotic-Crest'))
+                    drained = Math.trunc(drained * 5324 / 4096);
+                recovery[j] += Math.min(drained * move.hits, max);
+            }
+        }
+    }
+    if ((attacker.named('Dusknoir-Crest') && move.named('Shadow Punch')) || attacker.named('Gothitelle-Crest-Dark')) {
+        var tempPercentHealed = 0;
+        if (attacker.named('Dusknoir-Crest')) {
+            tempPercentHealed = 0.5;
+        }
+        else if (attacker.named('Gothitelle-Crest-Dark')) {
+            tempPercentHealed = 0.25;
+        }
+        var percentHealed = tempPercentHealed;
+        var max = Math.round(defender.maxHP() * percentHealed);
+        for (var i = 0; i < minD.length; i++) {
+            var range = [minD[i], maxD[i]];
+            for (var j in recovery) {
+                var drained = Math.round(range[j] * percentHealed);
                 if (attacker.hasItem('Big Root'))
                     drained = Math.trunc(drained * 5324 / 4096);
                 recovery[j] += Math.min(drained * move.hits, max);
@@ -96,8 +116,15 @@ function getRecoil(gen, attacker, defender, move, damage, notation) {
     var recoil = [0, 0];
     var text = '';
     var damageOverflow = minDamage > defender.curHP() || maxDamage > defender.curHP();
-    if (move.recoil) {
-        var mod = (move.recoil[0] / move.recoil[1]) * 100;
+    if (move.recoil || defender.named('Bastiodon-Crest')) {
+        var tempMod = 0;
+        if (move.recoil) {
+            tempMod += (move.recoil[0] / move.recoil[1]) * 100;
+        }
+        if (defender.named('Bastiodon-Crest')) {
+            tempMod += 50;
+        }
+        var mod = tempMod;
         var minRecoilDamage = void 0, maxRecoilDamage = void 0;
         if (damageOverflow) {
             minRecoilDamage =
@@ -109,7 +136,7 @@ function getRecoil(gen, attacker, defender, move, damage, notation) {
             minRecoilDamage = toDisplay(notation, Math.min(min, defender.curHP()) * mod, attacker.maxHP(), 100);
             maxRecoilDamage = toDisplay(notation, Math.min(max, defender.curHP()) * mod, attacker.maxHP(), 100);
         }
-        if (!attacker.hasAbility('Rock Head')) {
+        if (!attacker.hasAbility('Rock Head') && !attacker.named('Rampardos-Crest')) {
             recoil = [minRecoilDamage, maxRecoilDamage];
             text = "".concat(minRecoilDamage, " - ").concat(maxRecoilDamage).concat(notation, " recoil damage");
         }
@@ -184,6 +211,8 @@ function getKOChance(gen, attacker, defender, move, field, damage, err) {
         move.timesUsed = 1;
     if (move.timesUsedWithMetronome === undefined)
         move.timesUsedWithMetronome = 1;
+    if (move.stockpiles === undefined)
+        move.stockpiles = 0;
     if (damage[0] >= defender.maxHP() && move.timesUsed === 1 && move.timesUsedWithMetronome === 1) {
         return { chance: 1, n: 1, text: 'guaranteed OHKO' };
     }
@@ -308,7 +337,12 @@ function getHazards(gen, defender, defenderSide) {
         var rockType = gen.types.get('rock');
         var effectiveness = rockType.effectiveness[defender.types[0]] *
             (defender.types[1] ? rockType.effectiveness[defender.types[1]] : 1);
-        damage += Math.floor((effectiveness * defender.maxHP()) / 8);
+        if (defender.named('Torterra-Crest')) {
+            damage += Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
+        }
+        else {
+            damage += Math.floor((effectiveness * defender.maxHP()) / 8);
+        }
         texts.push('Stealth Rock');
     }
     if (defenderSide.steelsurge && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
@@ -320,7 +354,8 @@ function getHazards(gen, defender, defenderSide) {
     }
     if (!defender.hasType('Flying') &&
         !defender.hasAbility('Magic Guard', 'Levitate') &&
-        !defender.hasItem('Air Balloon')) {
+        !defender.hasItem('Air Balloon') &&
+        !defender.named('Probopass-Crest')) {
         if (defenderSide.spikes === 1) {
             damage += Math.floor(defender.maxHP() / 8);
             if (gen.num === 2) {
@@ -352,6 +387,10 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
             damage -= Math.floor(defender.maxHP() / 8);
             texts.push(defender.ability + ' damage');
         }
+        if (defender.named('Druddigon-Crest')) {
+            damage += Math.floor(defender.maxHP() / 8);
+            texts.push('Crest recovery');
+        }
     }
     else if (field.hasWeather('Rain', 'Heavy Rain')) {
         if (defender.hasAbility('Dry Skin')) {
@@ -379,6 +418,7 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
         else if (!defender.hasType('Ice') &&
             !defender.hasAbility('Magic Guard', 'Overcoat', 'Snow Cloak') &&
             !defender.hasItem('Safety Goggles') &&
+            !defender.named('Empoleon-Crest') &&
             field.hasWeather('Hail')) {
             damage -= Math.floor(defender.maxHP() / 16);
             texts.push('hail damage');
@@ -429,7 +469,7 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
         }
     }
     if (defender.hasStatus('psn')) {
-        if (defender.hasAbility('Poison Heal')) {
+        if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) {
             damage += Math.floor(defender.maxHP() / 8);
             texts.push('Poison Heal');
         }
@@ -439,7 +479,7 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
         }
     }
     else if (defender.hasStatus('tox')) {
-        if (defender.hasAbility('Poison Heal')) {
+        if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) {
             damage += Math.floor(defender.maxHP() / 8);
             texts.push('Poison Heal');
         }
@@ -503,6 +543,34 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
         (field.defenderSide.volcalith || move.named('G-Max Volcalith'))) {
         damage -= Math.floor(defender.maxHP() / 6);
         texts.push('Volcalith damage');
+    }
+    if (defender.named('Gothitelle-Crest')) {
+        damage += Math.floor(defender.maxHP() / 16);
+        texts.push('Crest recovery');
+    }
+    if (defender.named('Meganium-Crest')) {
+        damage += Math.floor(defender.maxHP() / 16);
+        texts.push('Crest recovery');
+    }
+    if (defender.named('Phione-Crest')) {
+        damage += Math.floor(defender.maxHP() / 16);
+        texts.push('Aqua Ring recovery');
+    }
+    if (attacker.named('Shiinotic-Crest') && defender.status) {
+        damage -= Math.floor(defender.maxHP() / 16);
+        texts.push('Crest damage');
+    }
+    if (defender.named('Shiinotic-Crest') && attacker.status) {
+        damage += Math.floor(attacker.maxHP() / 16);
+        texts.push('Crest recovery');
+    }
+    if (defender.named('Spiritomb-Crest') && defender.alliesFainted != undefined && defender.alliesFainted > 0) {
+        damage += Math.floor(defender.maxHP() * defender.alliesFainted / 32);
+        texts.push('Crest recovery (' + Math.min(5, defender.alliesFainted) + " ".concat(defender.alliesFainted === 1 ? 'ally' : 'allies', " fainted)"));
+    }
+    if (defender.named('Vespiquen-Crest-Defense')) {
+        damage += Math.floor(defender.maxHP() / 16);
+        texts.push('Crest recovery');
     }
     return { damage: damage, texts: texts };
 }
@@ -691,6 +759,14 @@ function buildDescription(description, attacker, defender) {
     if (description.alliesFainted) {
         output += Math.min(5, description.alliesFainted) +
             " ".concat(description.alliesFainted === 1 ? 'ally' : 'allies', " fainted ");
+    }
+    if (description.foesFainted) {
+        output += Math.min(5, description.foesFainted) +
+            " ".concat(description.alliesFainted === 1 ? 'foe' : 'foes', " fainted ");
+    }
+    if (description.relicanthTurns) {
+        output += Math.min(10, description.relicanthTurns) +
+            " ".concat(description.relicanthTurns === 1 ? 'Turn' : 'Turns', " ");
     }
     if (description.attackerTera) {
         output += "Tera ".concat(description.attackerTera, " ");

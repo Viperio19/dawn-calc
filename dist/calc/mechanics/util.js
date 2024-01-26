@@ -52,7 +52,8 @@ function isGrounded(pokemon, field) {
     return (field.isGravity || pokemon.hasItem('Iron Ball') ||
         (!pokemon.hasType('Flying') &&
             !pokemon.hasAbility('Levitate') &&
-            !pokemon.hasItem('Air Balloon')));
+            !pokemon.hasItem('Air Balloon') &&
+            !pokemon.named('Probopass-Crest')));
 }
 exports.isGrounded = isGrounded;
 function getModifiedStat(stat, mod, gen) {
@@ -139,7 +140,7 @@ function getFinalSpeed(gen, pokemon, field, side) {
         (pokemon.hasAbility('Chlorophyll') && weather.includes('Sun')) ||
         (pokemon.hasAbility('Sand Rush') && weather === 'Sand') ||
         (pokemon.hasAbility('Swift Swim') && weather.includes('Rain')) ||
-        (pokemon.hasAbility('Slush Rush') && ['Hail', 'Snow'].includes(weather)) ||
+        ((pokemon.hasAbility('Slush Rush') || pokemon.named('Empoleon-Crest')) && ['Hail', 'Snow'].includes(weather)) ||
         (pokemon.hasAbility('Surge Surfer') && terrain === 'Electric')) {
         speedMods.push(8192);
     }
@@ -161,9 +162,24 @@ function getFinalSpeed(gen, pokemon, field, side) {
     else if (pokemon.hasItem('Quick Powder') && pokemon.named('Ditto')) {
         speedMods.push(8192);
     }
+    if (pokemon.named('Ariados-Crest')) {
+        speedMods.push(6144);
+    }
+    if (pokemon.named('Magcargo-Crest')) {
+        speed = getModifiedStat(pokemon.rawStats.def, pokemon.boosts.def, gen);
+    }
+    if (pokemon.named('Oricorio-Crest-Baile') || pokemon.named('Oricorio-Crest-Pa\'u') || pokemon.named('Oricorio-Crest-Pom-Pom') || pokemon.named('Oricorio-Crest-Sensu')) {
+        speedMods.push(5120);
+    }
+    if (pokemon.named('Seviper-Crest')) {
+        speedMods.push(6144);
+    }
     speed = OF32(pokeRound((speed * chainMods(speedMods, 410, 131172)) / 4096));
     if (pokemon.hasStatus('par') && !pokemon.hasAbility('Quick Feet')) {
         speed = Math.floor(OF32(speed * (gen.num < 7 ? 25 : 50)) / 100);
+    }
+    if (pokemon.named('Cryogonal-Crest')) {
+        speed += pokeRound(((pokemon.stats['spd'] * 12) / 100));
     }
     speed = Math.min(gen.num <= 2 ? 999 : 10000, speed);
     return Math.max(0, speed);
@@ -256,6 +272,21 @@ function checkIntimidate(gen, source, target) {
             target.boosts.spa = Math.min(6, target.boosts.spa + 2);
         }
     }
+    if (source.named('Thievul-Crest') && !blocked) {
+        if (target.hasAbility('Contrary', 'Competitive')) {
+            target.boosts.spa = Math.min(6, target.boosts.spa + 1);
+        }
+        else if (target.hasAbility('Simple')) {
+            target.boosts.spa = Math.max(-6, target.boosts.spa - 2);
+        }
+        else {
+            target.boosts.spa = Math.max(-6, target.boosts.spa - 1);
+        }
+        if (target.hasAbility('Defiant')) {
+            target.boosts.atk = Math.min(6, target.boosts.atk + 2);
+        }
+        source.boosts.spa = Math.min(6, source.boosts.atk + 1);
+    }
 }
 exports.checkIntimidate = checkIntimidate;
 function checkDownload(source, target, wonderRoomActive) {
@@ -277,6 +308,10 @@ exports.checkDownload = checkDownload;
 function checkIntrepidSword(source, gen) {
     if (source.hasAbility('Intrepid Sword') && gen.num > 7) {
         source.boosts.atk = Math.min(6, source.boosts.atk + 1);
+    }
+    if (source.named('Vespiquen-Crest-Offense')) {
+        source.boosts.atk = Math.min(6, source.boosts.atk + 1);
+        source.boosts.spa = Math.min(6, source.boosts.spa + 1);
     }
 }
 exports.checkIntrepidSword = checkIntrepidSword;

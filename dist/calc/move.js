@@ -52,7 +52,16 @@ var Move = (function () {
                         : data.multihit[0] + 1;
                 }
             }
+            else if (options.species == 'Cinccino-Crest') {
+                this.hits = (options.ability === 'Skill Link')
+                    ? 5
+                    : 3;
+            }
+            else if (options.species == 'Ledian-Crest' && data.flags.punch) {
+                this.hits = 4;
+            }
             this.timesUsedWithMetronome = options.timesUsedWithMetronome;
+            this.stockpiles = options.stockpiles;
         }
         this.gen = gen;
         this.name = data.name;
@@ -79,7 +88,7 @@ var Move = (function () {
         this.hasCrashDamage = !!data.hasCrashDamage;
         this.mindBlownRecoil = !!data.mindBlownRecoil;
         this.struggleRecoil = !!data.struggleRecoil;
-        this.isCrit = !!options.isCrit || !!data.willCrit ||
+        this.isCrit = (['futuresight', 'doomdesire'].includes(data.id)) || !!options.isCrit || !!data.willCrit ||
             gen.num === 1 && ['crabhammer', 'razorleaf', 'slash', 'karate chop'].includes(data.id);
         this.isStellarFirstUse = !!options.isStellarFirstUse;
         this.drain = data.drain;
@@ -125,6 +134,7 @@ var Move = (function () {
             hits: this.hits,
             timesUsed: this.timesUsed,
             timesUsedWithMetronome: this.timesUsedWithMetronome,
+            stockpiles: this.stockpiles,
             overrides: this.overrides
         });
     };

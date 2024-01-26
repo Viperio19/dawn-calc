@@ -10,6 +10,8 @@ export declare namespace State {
         isSaltCure?: boolean;
         alliesFainted?: number;
         boostedStat?: I.StatIDExceptHP | 'auto';
+        foesFainted?: number;
+        relicanthTurns?: number;
         item?: I.ItemName;
         gender?: I.GenderName;
         nature?: I.NatureName;
@@ -32,6 +34,7 @@ export declare namespace State {
         hits?: number;
         timesUsed?: number;
         timesUsedWithMetronome?: number;
+        stockpiles?: number;
         overrides?: Partial<I.Move>;
     }
     interface Field {

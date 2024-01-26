@@ -273,13 +273,30 @@ $(".ability").bind("keyup change", function () {
 		boostedStat.hide();
 	}
 
-	if (ability === "Supreme Overlord") {
+	var pokeObj = $(this).closest(".poke-info");
+	var pokemon = createPokemon(pokeObj);
+
+	if (pokemon.name === "Spiritomb-Crest") {
 		$(this).closest(".poke-info").find(".alliesFainted").show();
+		$(this).closest(".poke-info").find(".foesFainted").show();
+	} else if (ability === "Supreme Overlord") {
+		$(this).closest(".poke-info").find(".alliesFainted").show();
+		$(this).closest(".poke-info").find(".foesFainted").val('0');
+		$(this).closest(".poke-info").find(".foesFainted").hide();
 	} else {
 		$(this).closest(".poke-info").find(".alliesFainted").val('0');
 		$(this).closest(".poke-info").find(".alliesFainted").hide();
-
+		$(this).closest(".poke-info").find(".foesFainted").val('0');
+		$(this).closest(".poke-info").find(".foesFainted").hide();
 	}
+
+	if (pokemon.name === "Relicanth-Crest") {
+		$(this).closest(".poke-info").find(".relicanthTurns").show();
+	} else {
+		$(this).closest(".poke-info").find(".relicanthTurns").val('0');
+		$(this).closest(".poke-info").find(".relicanthTurns").hide();
+	}
+
 });
 
 function autosetQP(pokemon) {
@@ -413,13 +430,14 @@ function autosetTerrain(ability, i) {
 }
 
 $("#p1 .item").bind("keyup change", function () {
-	autosetStatus("#p1", $(this).val());
+	autosetStatus("#p1", $(this).val(), $(this).closest(".poke-info"));
 });
 
 var lastManualStatus = {"#p1": "Healthy"};
 var lastAutoStatus = {"#p1": "Healthy"};
-function autosetStatus(p, item) {
+function autosetStatus(p, item, pokeObj) {
 	var currentStatus = $(p + " .status").val();
+	var pokemon = createPokemon(pokeObj);
 	if (currentStatus !== lastAutoStatus[p]) {
 		lastManualStatus[p] = currentStatus;
 	}
@@ -427,7 +445,7 @@ function autosetStatus(p, item) {
 		lastAutoStatus[p] = "Burned";
 		$(p + " .status").val("Burned");
 		$(p + " .status").change();
-	} else if (item === "Toxic Orb") {
+	} else if (item === "Toxic Orb" || pokemon.named('Zangoose-Crest')) {
 		lastAutoStatus[p] = "Badly Poisoned";
 		$(p + " .status").val("Badly Poisoned");
 		$(p + " .status").change();
@@ -508,9 +526,14 @@ $(".move-selector").change(function () {
 	var stat = move.category === 'Special' ? 'spa' : 'atk';
 	var dropsStats =
 		move.self && move.self.boosts && move.self.boosts[stat] && move.self.boosts[stat] < 0;
+	var pokeObj = $(this).closest(".poke-info");
+	var fullSetName = pokeObj.find("input.set-selector").val();
+	var pokemonName = fullSetName.substring(0, fullSetName.indexOf(" ("));
+	var stockpile = moveName === 'Spit Up' || (moveName === 'Belch' && startsWith(pokemonName, "Swalot")); 
 	if (Array.isArray(move.multihit)) {
 		moveGroupObj.children(".stat-drops").hide();
 		moveGroupObj.children(".move-hits").show();
+		moveGroupObj.children(".stockpile").hide();
 		var pokemon = $(this).closest(".poke-info");
 		var moveHits =
 			pokemon.find(".ability").val() === 'Skill Link' ? 5 :
@@ -519,9 +542,15 @@ $(".move-selector").change(function () {
 	} else if (dropsStats) {
 		moveGroupObj.children(".move-hits").hide();
 		moveGroupObj.children(".stat-drops").show();
+		moveGroupObj.children(".stockpile").hide();
+	} else if (stockpile) {
+		moveGroupObj.children(".move-hits").hide();
+		moveGroupObj.children(".stat-drops").hide();
+		moveGroupObj.children(".stockpile").show();
 	} else {
 		moveGroupObj.children(".move-hits").hide();
 		moveGroupObj.children(".stat-drops").hide();
+		moveGroupObj.children(".stockpile").hide();
 	}
 	moveGroupObj.children(".move-z").prop("checked", false);
 });
@@ -680,6 +709,8 @@ $(".set-selector").change(function () {
 			setSelectValueIfValid(abilityObj, pokemon.abilities[0], "");
 			if (startsWith(pokemonName, "Ogerpon-") && !startsWith(pokemonName, "Ogerpon-Teal")) {
 				itemObj.val(pokemonName.split("-")[1] + " Mask");
+			} else if (endsWith(pokemonName, "-Crest")) {
+				itemObj.val("Up-Grade");
 			} else {
 				itemObj.val("");
 			}
@@ -1014,6 +1045,8 @@ function createPokemon(pokeInfo) {
 			isSaltCure: pokeInfo.find(".saltcure").is(":checked"),
 			alliesFainted: parseInt(pokeInfo.find(".alliesFainted").val()),
 			boostedStat: pokeInfo.find(".boostedStat").val() || undefined,
+			foesFainted: parseInt(pokeInfo.find(".foesFainted").val()),
+			relicanthTurns: parseInt(pokeInfo.find(".relicanthTurns").val()),
 			teraType: teraType,
 			boosts: boosts,
 			curHP: curHP,
@@ -1047,6 +1080,7 @@ function getMoveDetails(moveInfo, species, ability, item, useMax) {
 	var hits = +moveInfo.find(".move-hits").val();
 	var timesUsed = +moveInfo.find(".stat-drops").val();
 	var timesUsedWithMetronome = moveInfo.find(".metronome").is(':visible') ? +moveInfo.find(".metronome").val() : 1;
+	var stockpiles = +moveInfo.find(".stockpile").val();
 	var overrides = {
 		basePower: +moveInfo.find(".move-bp").val(),
 		type: moveInfo.find(".move-type").val()
@@ -1055,7 +1089,7 @@ function getMoveDetails(moveInfo, species, ability, item, useMax) {
 	return new calc.Move(gen, moveName, {
 		ability: ability, item: item, useZ: isZMove, species: species, isCrit: isCrit, hits: hits,
 		isStellarFirstUse: isStellarFirstUse, timesUsed: timesUsed, timesUsedWithMetronome: timesUsedWithMetronome,
-		overrides: overrides, useMax: useMax
+		stockpiles: stockpiles, overrides: overrides, useMax: useMax
 	});
 }
 
