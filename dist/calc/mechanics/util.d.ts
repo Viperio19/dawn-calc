@@ -34,3 +34,4 @@ export declare function handleFixedDamageMoves(attacker: Pokemon, move: Move): n
 export declare function pokeRound(num: number): number;
 export declare function OF16(n: number): number;
 export declare function OF32(n: number): number;
+export declare function getMimicryType(field: Field): TypeName;

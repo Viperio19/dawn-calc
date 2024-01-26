@@ -1,5 +1,6 @@
 import * as I from './data/interface';
 import { State } from './state';
+import { Field } from './field';
 export declare class Pokemon implements State.Pokemon {
     gen: I.Generation;
     name: I.SpeciesName;
@@ -48,6 +49,9 @@ export declare class Pokemon implements State.Pokemon {
     hasStatus(...statuses: I.StatusName[]): boolean;
     hasType(...types: I.TypeName[]): boolean;
     hasOriginalType(...types: I.TypeName[]): boolean;
+    hasInvisisbleType(opponent: Pokemon, field: Field, ...types: I.TypeName[]): boolean;
+    hasReflectorType(opponent: Pokemon, type: I.TypeName): boolean;
+    hasMimicryType(field: Field, type: I.TypeName): boolean;
     named(...names: string[]): boolean;
     clone(): Pokemon;
     private calcStat;

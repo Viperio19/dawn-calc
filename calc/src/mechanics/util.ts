@@ -597,3 +597,17 @@ export function OF16(n: number) {
 export function OF32(n: number) {
   return n > 4294967295 ? n % 4294967296 : n;
 }
+
+export function getMimicryType(field: Field) {
+  if (field.hasTerrain('Electric')) {
+    return "Electric" as TypeName;
+  } else if (field.hasTerrain('Grassy')) {
+    return "Grass" as TypeName;
+  } else if (field.hasTerrain('Misty')) {
+    return "Fairy" as TypeName;
+  } else if (field.hasTerrain('Psychic')) {
+    return "Psychic" as TypeName;
+  } else {
+    return "???" as TypeName;
+  }
+}

@@ -587,4 +587,22 @@ function OF32(n) {
     return n > 4294967295 ? n % 4294967296 : n;
 }
 exports.OF32 = OF32;
+function getMimicryType(field) {
+    if (field.hasTerrain('Electric')) {
+        return "Electric";
+    }
+    else if (field.hasTerrain('Grassy')) {
+        return "Grass";
+    }
+    else if (field.hasTerrain('Misty')) {
+        return "Fairy";
+    }
+    else if (field.hasTerrain('Psychic')) {
+        return "Psychic";
+    }
+    else {
+        return "???";
+    }
+}
+exports.getMimicryType = getMimicryType;
 //# sourceMappingURL=util.js.map
