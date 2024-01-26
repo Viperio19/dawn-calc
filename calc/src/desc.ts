@@ -23,6 +23,7 @@ export interface RawDesc {
   defenseEVs?: string;
   hits?: number;
   alliesFainted?: number;
+  foesFainted?: number;
   relicanthTurns?: number;
   isBeadsOfRuin?: boolean;
   isSwordOfRuin?: boolean;
@@ -719,9 +720,9 @@ function getEndOfTurn(
     texts.push('Crest recovery');
   }
 
-  if (defender.named('Spiritomb-Crest')) {
-    damage += Math.floor(defender.maxHP() / 32); // Crests - TODO: * fainted allies
-    texts.push('Crest recovery');
+  if (defender.named('Spiritomb-Crest') && defender.alliesFainted != undefined && defender.alliesFainted > 0) {
+    damage += Math.floor(defender.maxHP() * defender.alliesFainted / 32);
+    texts.push('Crest recovery (' + Math.min(5, defender.alliesFainted) + ` ${defender.alliesFainted === 1 ? 'ally' : 'allies'} fainted)`);
   }
 
   if (defender.named('Vespiquen-Crest-Defense')) {
@@ -934,6 +935,10 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   if (description.alliesFainted) {
     output += Math.min(5, description.alliesFainted) +
       ` ${description.alliesFainted === 1 ? 'ally' : 'allies'} fainted `;
+  }
+  if (description.foesFainted) {
+    output += Math.min(5, description.foesFainted) +
+      ` ${description.alliesFainted === 1 ? 'foe' : 'foes'} fainted `;
   }
   if (description.relicanthTurns) {
     output += Math.min(10, description.relicanthTurns) +

@@ -478,6 +478,10 @@
                         <option value="spd">Special Defense</option>
                         <option value="spe">Speed</option>
                     </select>
+                </div>
+                <div class="gen-specific g2 g3 g4 g5 g6 g7 g8 g9">
+                    <label for="itemL1">Item</label>
+                    <select class="item terrain-trigger calc-trigger" id="itemL1"></select>
                     <select hidden aria-label="Relicanth Turns" title="How many turns has Relicanth been on the field?" class="relicanthTurns calc-trigger">
                         <option value="0">0 turns</option>
                         <option value="1">1 turn</option>
@@ -491,10 +495,14 @@
                         <option value="9">9 turns</option>
                         <option value="10">10+ turns</option>
                     </select>
-                </div>
-                <div class="gen-specific g2 g3 g4 g5 g6 g7 g8 g9">
-                    <label for="itemL1">Item</label>
-                    <select class="item terrain-trigger calc-trigger" id="itemL1"></select>
+                    <select hidden aria-label="Foes fainted" class="foesFainted calc-trigger">
+                        <option value="0">Zero foes fainted</option>
+                        <option value="1">One foe fainted</option>
+                        <option value="2">Two foes fainted</option>
+                        <option value="3">Three foes fainted</option>
+                        <option value="4">Four foes fainted</option>
+                        <option value="5">Five foes fainted</option>
+                    </select>
                 </div>
                 <div>
                     <label for="statusL1">Status</label>
@@ -1414,23 +1422,31 @@
                             <option value="spd">Special Defense</option>
                             <option value="spe">Speed</option>
                         </select>
-                        <select hidden aria-label="Relicanth Turns" title="How many turns has Relicanth been on the field?" class="relicanthTurns calc-trigger">
-                            <option value="0">0 turns</option>
-                            <option value="1">1 turn</option>
-                            <option value="2">2 turns</option>
-                            <option value="3">3 turns</option>
-                            <option value="4">4 turns</option>
-                            <option value="5">5 turns</option>
-                            <option value="6">6 turns</option>
-                            <option value="7">7 turns</option>
-                            <option value="8">8 turns</option>
-                            <option value="9">9 turns</option>
-                            <option value="10">10+ turns</option>
-                        </select>
                 </div>
                 <div class="gen-specific g2 g3 g4 g5 g6 g7 g8 g9">
                     <label for="itemR1">Item</label>
                     <select class="item terrain-trigger calc-trigger" id="itemR1"></select>
+                    <select hidden aria-label="Relicanth Turns" title="How many turns has Relicanth been on the field?" class="relicanthTurns calc-trigger">
+                        <option value="0">0 turns</option>
+                        <option value="1">1 turn</option>
+                        <option value="2">2 turns</option>
+                        <option value="3">3 turns</option>
+                        <option value="4">4 turns</option>
+                        <option value="5">5 turns</option>
+                        <option value="6">6 turns</option>
+                        <option value="7">7 turns</option>
+                        <option value="8">8 turns</option>
+                        <option value="9">9 turns</option>
+                        <option value="10">10+ turns</option>
+                    </select>
+                    <select hidden aria-label="Foes fainted" class="foesFainted calc-trigger">
+                        <option value="0">Zero foes fainted</option>
+                        <option value="1">One foe fainted</option>
+                        <option value="2">Two foes fainted</option>
+                        <option value="3">Three foes fainted</option>
+                        <option value="4">Four foes fainted</option>
+                        <option value="5">Five foes fainted</option>
+                    </select>
                 </div>
                 <div>
                     <label for="statusR1">Status</label>
@@ -1683,21 +1699,21 @@
     <script type="text/javascript" src="./calc/data/items.js?81a1fe7e"></script>
     <script type="text/javascript" src="./calc/data/index.js?083d2bc9"></script>
     <script type="text/javascript" src="./calc/move.js?ffe9f2b9"></script>
-    <script type="text/javascript" src="./calc/pokemon.js?efb5e49d"></script>
+    <script type="text/javascript" src="./calc/pokemon.js?b5955334"></script>
     <script type="text/javascript" src="./calc/field.js?2c7f95da"></script>
     <script type="text/javascript" src="./calc/items.js?3cbea98f"></script>
     <script type="text/javascript" src="./calc/mechanics/util.js?adb49a50"></script>
-    <script type="text/javascript" src="./calc/mechanics/gen789.js?9209bb14"></script>
+    <script type="text/javascript" src="./calc/mechanics/gen789.js?ecbf37ce"></script>
     <script type="text/javascript" src="./calc/mechanics/gen56.js?c5b0789a"></script>
     <script type="text/javascript" src="./calc/mechanics/gen4.js?ab7837a9"></script>
     <script type="text/javascript" src="./calc/mechanics/gen3.js?5064940a"></script>
     <script type="text/javascript" src="./calc/mechanics/gen12.js?9c9fcd6e"></script>
     <script type="text/javascript" src="./calc/calc.js?cd072314"></script>
-    <script type="text/javascript" src="./calc/desc.js?7476b366"></script>
+    <script type="text/javascript" src="./calc/desc.js?d4da8a0e"></script>
     <script type="text/javascript" src="./calc/result.js?d5c7552b"></script>
     <script type="text/javascript" src="./calc/adaptable.js?afeb3759"></script>
     <script type="text/javascript" src="./calc/index.js?2377cbc8"></script>
-    <script type="text/javascript" src="./js/shared_controls.js?e6498f9c"></script>
+    <script type="text/javascript" src="./js/shared_controls.js?f78616a1"></script>
     <script type="text/javascript" src="./js/index_randoms_controls.js?47d5fb48"></script>
     <script type="text/javascript" src="./js/moveset_import.js?60db7f40"></script>
 </div>

@@ -1536,7 +1536,11 @@ export function calculateAttackSMSSSV(
   }
 
   if (attacker.named('Spiritomb-Crest')) {
-    attack = pokeRound((attack * (5 + 1)) / 5); // Crests - TODO: 1 -> fainted foes
+    let foesFainted = attacker.foesFainted === undefined ? 0 : attacker.foesFainted;
+    if (foesFainted > 0) {
+      attack = pokeRound((attack * (5 + foesFainted)) / 5);
+      desc.foesFainted = foesFainted;
+    }
   }
 
   if (attacker.named('Whiscash-Crest')) {

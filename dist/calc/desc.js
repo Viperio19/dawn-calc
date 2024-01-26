@@ -564,9 +564,9 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
         damage += Math.floor(attacker.maxHP() / 16);
         texts.push('Crest recovery');
     }
-    if (defender.named('Spiritomb-Crest')) {
-        damage += Math.floor(defender.maxHP() / 32);
-        texts.push('Crest recovery');
+    if (defender.named('Spiritomb-Crest') && defender.alliesFainted != undefined && defender.alliesFainted > 0) {
+        damage += Math.floor(defender.maxHP() * defender.alliesFainted / 32);
+        texts.push('Crest recovery (' + Math.min(5, defender.alliesFainted) + " ".concat(defender.alliesFainted === 1 ? 'ally' : 'allies', " fainted)"));
     }
     if (defender.named('Vespiquen-Crest-Defense')) {
         damage += Math.floor(defender.maxHP() / 16);
@@ -759,6 +759,10 @@ function buildDescription(description, attacker, defender) {
     if (description.alliesFainted) {
         output += Math.min(5, description.alliesFainted) +
             " ".concat(description.alliesFainted === 1 ? 'ally' : 'allies', " fainted ");
+    }
+    if (description.foesFainted) {
+        output += Math.min(5, description.foesFainted) +
+            " ".concat(description.alliesFainted === 1 ? 'foe' : 'foes', " fainted ");
     }
     if (description.relicanthTurns) {
         output += Math.min(10, description.relicanthTurns) +

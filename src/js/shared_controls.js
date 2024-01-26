@@ -273,15 +273,22 @@ $(".ability").bind("keyup change", function () {
 		boostedStat.hide();
 	}
 
-	if (ability === "Supreme Overlord") {
+	var pokeObj = $(this).closest(".poke-info");
+	var pokemon = createPokemon(pokeObj);
+
+	if (pokemon.name === "Spiritomb-Crest") {
 		$(this).closest(".poke-info").find(".alliesFainted").show();
+		$(this).closest(".poke-info").find(".foesFainted").show();
+	} else if (ability === "Supreme Overlord") {
+		$(this).closest(".poke-info").find(".alliesFainted").show();
+		$(this).closest(".poke-info").find(".foesFainted").val('0');
+		$(this).closest(".poke-info").find(".foesFainted").hide();
 	} else {
 		$(this).closest(".poke-info").find(".alliesFainted").val('0');
 		$(this).closest(".poke-info").find(".alliesFainted").hide();
+		$(this).closest(".poke-info").find(".foesFainted").val('0');
+		$(this).closest(".poke-info").find(".foesFainted").hide();
 	}
-
-	var pokeObj = $(this).closest(".poke-info");
-	var pokemon = createPokemon(pokeObj);
 
 	if (pokemon.name === "Relicanth-Crest") {
 		$(this).closest(".poke-info").find(".relicanthTurns").show();
@@ -702,6 +709,8 @@ $(".set-selector").change(function () {
 			setSelectValueIfValid(abilityObj, pokemon.abilities[0], "");
 			if (startsWith(pokemonName, "Ogerpon-") && !startsWith(pokemonName, "Ogerpon-Teal")) {
 				itemObj.val(pokemonName.split("-")[1] + " Mask");
+			} else if (endsWith(pokemonName, "-Crest")) {
+				itemObj.val("Up-Grade");
 			} else {
 				itemObj.val("");
 			}
@@ -1036,6 +1045,7 @@ function createPokemon(pokeInfo) {
 			isSaltCure: pokeInfo.find(".saltcure").is(":checked"),
 			alliesFainted: parseInt(pokeInfo.find(".alliesFainted").val()),
 			boostedStat: pokeInfo.find(".boostedStat").val() || undefined,
+			foesFainted: parseInt(pokeInfo.find(".foesFainted").val()),
 			relicanthTurns: parseInt(pokeInfo.find(".relicanthTurns").val()),
 			teraType: teraType,
 			boosts: boosts,

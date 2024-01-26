@@ -1172,7 +1172,11 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
         attack = (0, util_2.pokeRound)((attack * 6) / 5);
     }
     if (attacker.named('Spiritomb-Crest')) {
-        attack = (0, util_2.pokeRound)((attack * (5 + 1)) / 5);
+        var foesFainted = attacker.foesFainted === undefined ? 0 : attacker.foesFainted;
+        attack = (0, util_2.pokeRound)((attack * (5 + foesFainted)) / 5);
+        if (foesFainted > 0) {
+            desc.foesFainted = foesFainted;
+        }
     }
     if (attacker.named('Whiscash-Crest')) {
         attack = (0, util_2.pokeRound)((attack * 6) / 5);

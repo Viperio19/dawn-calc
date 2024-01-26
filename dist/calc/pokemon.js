@@ -47,6 +47,7 @@ var Pokemon = (function () {
         this.isSaltCure = !!options.isSaltCure;
         this.alliesFainted = options.alliesFainted;
         this.boostedStat = options.boostedStat;
+        this.foesFainted = options.foesFainted;
         this.relicanthTurns = options.relicanthTurns;
         this.teraType = options.teraType;
         this.item = options.item;
@@ -184,6 +185,7 @@ var Pokemon = (function () {
             isSaltCure: this.isSaltCure,
             alliesFainted: this.alliesFainted,
             boostedStat: this.boostedStat,
+            foesFainted: this.foesFainted,
             relicanthTurns: this.relicanthTurns,
             item: this.item,
             gender: this.gender,
