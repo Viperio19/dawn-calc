@@ -371,6 +371,9 @@ var SV = SS.concat([
     'Zero to Hero',
     'Mastery',
     'Type Sync',
+    'Inexorable',
+    'Reflector',
+    'Resuscitation',
 ]);
 exports.ABILITIES = [[], RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV];
 var Abilities = (function () {

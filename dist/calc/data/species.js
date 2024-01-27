@@ -10115,8 +10115,8 @@ var CHROMATIC_PATCH = {
     Orbeetle: { otherFormes: ['Orbeetle-Gmax', 'Orbeetle-Mega-Gmax'] },
     Oricorio: { otherFormes: ['Oricorio-Pa\'u', 'Oricorio-Pom-Pom', 'Oricorio-Sensu', 'Oricorio-Crest-Baile', 'Oricorio-Crest-Pa\'u', 'Oricorio-Crest-Pom-Pom', 'Oricorio-Crest-Sensu'] },
     Palossand: { otherFormes: ['Palossand-Aevian-Fiery', 'Palossand-Aevian-Icy', 'Palossand-Aevian-Rocky'] },
-    Paras: { otherFormes: ['Paras-Aevian', 'Paras-Aevian-Zombie'] },
-    Parasect: { otherFormes: ['Parasect-Aevian', 'Parasect-Aevian-Zombie'] },
+    Paras: { otherFormes: ['Paras-Aevian', 'Paras-Aevian-Z'] },
+    Parasect: { otherFormes: ['Parasect-Aevian', 'Parasect-Aevian-Z'] },
     Phione: { otherFormes: ['Phione-Crest'] },
     Probopass: { otherFormes: ['Probopass-Crest'] },
     Rampardos: { otherFormes: ['Rampardos-Crest'] },
@@ -10204,12 +10204,208 @@ var CHROMATIC_PATCH = {
         abilities: { 0: 'Aroma Veil' },
         baseSpecies: 'Alcremie'
     },
-    'Ampharos-Aevian': {
-        types: ['Ice', 'Electric'],
-        bs: { hp: 90, at: 75, df: 90, sa: 115, sd: 85, sp: 55 },
-        weightkg: 11,
-        abilities: { 0: 'Filter' },
-        baseSpecies: 'Ampharos'
+    'Appletun-Mega-Gmax': {
+        types: ['Grass', 'Dragon'],
+        bs: { hp: 110, at: 95, df: 110, sa: 140, sd: 110, sp: 20 },
+        weightkg: 245.6,
+        abilities: { 0: 'Thick Fat' },
+        baseSpecies: 'Appletun'
+    },
+    'Butterfree-Mega-Gmax': {
+        types: ['Bug', 'Flying'],
+        bs: { hp: 60, at: 45, df: 50, sa: 140, sd: 80, sp: 120 },
+        weightkg: 70.5,
+        abilities: { 0: 'Tinted Lens' },
+        baseSpecies: 'Butterfree'
+    },
+    'Blastoise-Mega-Gmax': {
+        types: ['Water'],
+        bs: { hp: 79, at: 103, df: 130, sa: 105, sd: 135, sp: 78 },
+        weightkg: 221.6,
+        abilities: { 0: 'Rain Dish' },
+        baseSpecies: 'Blastoise'
+    },
+    'Centiskorch-Mega-Gmax': {
+        types: ['Fire', 'Bug'],
+        bs: { hp: 100, at: 140, df: 75, sa: 90, sd: 110, sp: 110 },
+        weightkg: 245.6,
+        abilities: { 0: 'Flash Fire' },
+        baseSpecies: 'Centiskorch'
+    },
+    'Charizard-Mega-Gmax': {
+        types: ['Fire', 'Flying'],
+        bs: { hp: 78, at: 119, df: 98, sa: 134, sd: 100, sp: 105 },
+        weightkg: 221.6,
+        abilities: { 0: 'Solar Power' },
+        baseSpecies: 'Charizard'
+    },
+    'Cinderace-Mega-Gmax': {
+        types: ['Fire'],
+        bs: { hp: 80, at: 145, df: 82, sa: 102, sd: 82, sp: 139 },
+        weightkg: 165.3,
+        abilities: { 0: 'Libero' },
+        baseSpecies: 'Cinderace'
+    },
+    'Coalossal-Mega-Gmax': {
+        types: ['Rock', 'Fire'],
+        bs: { hp: 110, at: 135, df: 150, sa: 80, sd: 100, sp: 35 },
+        weightkg: 884.5,
+        abilities: { 0: 'Steam Engine' },
+        baseSpecies: 'Coalossal'
+    },
+    'Copperajah-Mega-Gmax': {
+        types: ['Steel'],
+        bs: { hp: 122, at: 155, df: 84, sa: 105, sd: 94, sp: 40 },
+        weightkg: 1300.0,
+        abilities: { 0: 'Sheer Force' },
+        baseSpecies: 'Copperajah'
+    },
+    'Corviknight-Mega-Gmax': {
+        types: ['Flying', 'Steel'],
+        bs: { hp: 98, at: 122, df: 145, sa: 53, sd: 110, sp: 67 },
+        weightkg: 165.3,
+        abilities: { 0: 'Mirror Armor' },
+        baseSpecies: 'Corviknight'
+    },
+    'Drednaw-Mega-Gmax': {
+        types: ['Water', 'Rock'],
+        bs: { hp: 90, at: 155, df: 110, sa: 48, sd: 88, sp: 94 },
+        weightkg: 245.6,
+        abilities: { 0: 'Strong Jaw' },
+        baseSpecies: 'Drednaw'
+    },
+    'Duraludon-Mega-Gmax': {
+        types: ['Steel', 'Dragon'],
+        bs: { hp: 70, at: 95, df: 130, sa: 150, sd: 80, sp: 110 },
+        weightkg: 245.6,
+        abilities: { 0: 'Lightning Rod' },
+        baseSpecies: 'Duraludon'
+    },
+    'Flapple-Mega-Gmax': {
+        types: ['Grass', 'Dragon'],
+        bs: { hp: 70, at: 130, df: 105, sa: 110, sd: 80, sp: 90 },
+        weightkg: 245.6,
+        abilities: { 0: 'Own Tempo' },
+        baseSpecies: 'Flapple'
+    },
+    'Garbodor-Mega-Gmax': {
+        types: ['Poison'],
+        bs: { hp: 80, at: 135, df: 107, sa: 60, sd: 107, sp: 85 },
+        weightkg: 236.6,
+        abilities: { 0: 'Neutralizing Gas' },
+        baseSpecies: 'Garbodor'
+    },
+    'Gengar-Mega-Gmax': {
+        types: ['Ghost', 'Poison'],
+        bs: { hp: 60, at: 150, df: 100, sa: 65, sd: 115, sp: 110 },
+        weightkg: 61.1,
+        abilities: { 0: 'Cursed Body' },
+        baseSpecies: 'Gengar'
+    },
+    'Grimmsnarl-Mega-Gmax': {
+        types: ['Dark', 'Fairy'],
+        bs: { hp: 95, at: 145, df: 105, sa: 75, sd: 100, sp: 90 },
+        weightkg: 245.6,
+        abilities: { 0: 'Prankster' },
+        baseSpecies: 'Grimmsnarl'
+    },
+    'Hatterene-Mega-Gmax': {
+        types: ['Psychic', 'Fairy'],
+        bs: { hp: 57, at: 107, df: 115, sa: 166, sd: 130, sp: 25 },
+        weightkg: 245.6,
+        abilities: { 0: 'Magic Bounce' },
+        baseSpecies: 'Hatterene'
+    },
+    'Inteleon-Mega-Gmax': {
+        types: ['Water'],
+        bs: { hp: 70, at: 125, df: 75, sa: 145, sd: 75, sp: 140 },
+        weightkg: 165.3,
+        abilities: { 0: 'Sniper' },
+        baseSpecies: 'Inteleon'
+    },
+    'Kingler-Mega-Gmax': {
+        types: ['Water'],
+        bs: { hp: 55, at: 169, df: 135, sa: 60, sd: 60, sp: 96 },
+        weightkg: 133.2,
+        abilities: { 0: 'Sheer Force' },
+        baseSpecies: 'Kingler'
+    },
+    'Lapras-Mega-Gmax': {
+        types: ['Water', 'Ice'],
+        bs: { hp: 130, at: 125, df: 90, sa: 105, sd: 105, sp: 80 },
+        weightkg: 245.6,
+        abilities: { 0: 'Hydration' },
+        baseSpecies: 'Lapras'
+    },
+    'Machamp-Mega-Gmax': {
+        types: ['Fighting'],
+        bs: { hp: 90, at: 170, df: 105, sa: 70, sd: 105, sp: 65 },
+        weightkg: 286.6,
+        abilities: { 0: 'No Guard' },
+        baseSpecies: 'Machamp'
+    },
+    'Melmetal-Mega-Gmax': {
+        types: ['Steel'],
+        bs: { hp: 135, at: 183, df: 163, sa: 85, sd: 85, sp: 45 },
+        weightkg: 1763.7,
+        abilities: { 0: 'Iron Fist' },
+        baseSpecies: 'Melmetal'
+    },
+    'Orbeetle-Mega-Gmax': {
+        types: ['Bug', 'Psychic'],
+        bs: { hp: 60, at: 75, df: 130, sa: 95, sd: 140, sp: 105 },
+        weightkg: 89.9,
+        abilities: { 0: 'Prankster' },
+        baseSpecies: 'Orbeetle'
+    },
+    'Rillaboom-Mega-Gmax': {
+        types: ['Grass'],
+        bs: { hp: 100, at: 150, df: 115, sa: 120, sd: 90, sp: 55 },
+        weightkg: 165.3,
+        abilities: { 0: 'Grassy Surge' },
+        baseSpecies: 'Rillaboom'
+    },
+    'Sandaconda-Mega-Gmax': {
+        types: ['Ground'],
+        bs: { hp: 72, at: 127, df: 125, sa: 105, sd: 90, sp: 91 },
+        weightkg: 245.6,
+        abilities: { 0: 'Thick Fat' },
+        baseSpecies: 'Sandaconda'
+    },
+    'Snorlax-Mega-Gmax': {
+        types: ['Normal'],
+        bs: { hp: 160, at: 140, df: 95, sa: 75, sd: 150, sp: 20 },
+        weightkg: 10014.1,
+        abilities: { 0: 'Thick Fat' },
+        baseSpecies: 'Snorlax'
+    },
+    'Toxtricity-Mega-Gmax': {
+        types: ['Electric', 'Poison'],
+        bs: { hp: 75, at: 123, df: 95, sa: 139, sd: 70, sp: 100 },
+        weightkg: 245.6,
+        abilities: { 0: 'Technician' },
+        baseSpecies: 'Toxtricity'
+    },
+    'Urshifu-Mega-Gmax': {
+        types: ['Fighting', 'Dark'],
+        bs: { hp: 100, at: 165, df: 120, sa: 73, sd: 80, sp: 112 },
+        weightkg: 221.6,
+        abilities: { 0: 'Unseen Fist' },
+        baseSpecies: 'Urshifu'
+    },
+    'Urshifu-Rapid-Strike-Mega-Gmax': {
+        types: ['Fighting', 'Water'],
+        bs: { hp: 100, at: 165, df: 110, sa: 73, sd: 70, sp: 132 },
+        weightkg: 221.6,
+        abilities: { 0: 'Unseen Fist' },
+        baseSpecies: 'Urshifu'
+    },
+    'Venusaur-Mega-Gmax': {
+        types: ['Grass', 'Poison'],
+        bs: { hp: 80, at: 107, df: 108, sa: 125, sd: 125, sp: 80 },
+        weightkg: 221.6,
+        abilities: { 0: 'Chlorophyll' },
+        baseSpecies: 'Venusaur'
     },
     'Alateon': {
         types: ['Bug'],
@@ -10929,12 +11125,387 @@ var CHROMATIC_PATCH = {
         abilities: { 0: 'Illusion' },
         baseSpecies: 'Zoroark'
     },
-    'Dummmy-Aevian': {
-        types: ['Poison', 'Ground'],
-        bs: { hp: 55, at: 45, df: 45, sa: 25, sd: 25, sp: 15 },
-        weightkg: 11,
+    'Ampharos-Aevian': {
+        types: ['Ice', 'Electric'],
+        bs: { hp: 90, at: 75, df: 90, sa: 115, sd: 85, sp: 55 },
+        weightkg: 61.5,
+        abilities: { 0: 'Filter' },
+        baseSpecies: 'Ampharos'
+    },
+    'Breloom-Aevian': {
+        types: ['Grass', 'Electric'],
+        bs: { hp: 60, at: 130, df: 80, sa: 60, sd: 60, sp: 70 },
+        weightkg: 39.2,
+        abilities: { 0: 'Tough Claws' },
+        baseSpecies: 'Breloom'
+    },
+    'Bronzong-Aevian': {
+        types: ['Steel', '???'],
+        bs: { hp: 67, at: 79, df: 116, sa: 89, sd: 116, sp: 33 },
+        weightkg: 187,
+        abilities: { 0: 'Reflector' },
+        baseSpecies: 'Bronzong'
+    },
+    'Bronzor-Aevian': {
+        types: ['Steel', '???'],
+        bs: { hp: 57, at: 24, df: 86, sa: 24, sd: 86, sp: 23 },
+        weightkg: 57,
+        abilities: { 0: 'Reflector' },
+        baseSpecies: 'Bronzor',
+        nfe: true
+    },
+    'Budew-Aevian': {
+        types: ['Ground'],
+        bs: { hp: 40, at: 30, df: 35, sa: 50, sd: 70, sp: 55 },
+        weightkg: 1.2,
+        abilities: { 0: 'Dry Skin' },
+        baseSpecies: 'Budew',
+        nfe: true
+    },
+    'Chandelure-Aevian': {
+        types: ['Ghost', 'Electric'],
+        bs: { hp: 65, at: 55, df: 90, sa: 145, sd: 90, sp: 80 },
+        weightkg: 34.3,
+        abilities: { 0: 'Illuminate' },
+        baseSpecies: 'Chandelure'
+    },
+    'Feebas-Aevian': {
+        types: ['Poison', 'Fairy'],
+        bs: { hp: 20, at: 15, df: 20, sa: 10, sd: 55, sp: 80 },
+        weightkg: 7.4,
         abilities: { 0: 'Poison Point' },
-        baseSpecies: 'Dummmy',
+        baseSpecies: 'Feebas',
+        nfe: true
+    },
+    'Flaaffy-Aevian': {
+        types: ['Ice', 'Electric'],
+        bs: { hp: 70, at: 55, df: 60, sa: 80, sd: 50, sp: 45 },
+        weightkg: 13.3,
+        abilities: { 0: 'Filter' },
+        baseSpecies: 'Flaaffy',
+        nfe: true
+    },
+    'Froslass-Aevian': {
+        types: ['Grass', 'Water'],
+        bs: { hp: 70, at: 80, df: 70, sa: 80, sd: 70, sp: 110 },
+        weightkg: 26.6,
+        abilities: { 0: 'Adaptability' },
+        baseSpecies: 'Froslass'
+    },
+    'Gastrodon-Aevian-East': {
+        types: ['Ground', 'Fairy'],
+        bs: { hp: 111, at: 83, df: 68, sa: 92, sd: 82, sp: 39 },
+        weightkg: 29.9,
+        abilities: { 0: 'Storm Drain' },
+        baseSpecies: 'Gastrodon'
+    },
+    'Gastrodon-Aevian-West': {
+        types: ['Ground', 'Fairy'],
+        bs: { hp: 111, at: 83, df: 68, sa: 92, sd: 82, sp: 39 },
+        weightkg: 29.9,
+        abilities: { 0: 'Storm Drain' },
+        baseSpecies: 'Gastrodon'
+    },
+    'Glalie-Aevian': {
+        types: ['Grass', 'Rock'],
+        bs: { hp: 110, at: 100, df: 90, sa: 50, sd: 80, sp: 50 },
+        weightkg: 256.5,
+        abilities: { 0: 'Grassy Surge' },
+        baseSpecies: 'Glalie'
+    },
+    'Golisopod-Aevian': {
+        types: ['Bug', 'Ground'],
+        bs: { hp: 75, at: 125, df: 130, sa: 50, sd: 100, sp: 50 },
+        weightkg: 108,
+        abilities: { 0: 'Battle Armor' },
+        baseSpecies: 'Golisopod'
+    },
+    'Gyarados-Aevian': {
+        types: ['Fire', 'Dragon'],
+        bs: { hp: 95, at: 60, df: 79, sa: 125, sd: 100, sp: 81 },
+        weightkg: 235,
+        abilities: { 0: 'Intimidate' },
+        baseSpecies: 'Gyarados'
+    },
+    'Hakamo-o-Aevian': {
+        types: ['Dragon', 'Poison'],
+        bs: { hp: 70, at: 85, df: 85, sa: 60, sd: 60, sp: 60 },
+        weightkg: 47,
+        abilities: { 0: 'Inexorable' },
+        baseSpecies: 'Hakamo-o',
+        nfe: true
+    },
+    'Jangmo-o-Aevian': {
+        types: ['Dragon', 'Poison'],
+        bs: { hp: 50, at: 65, df: 55, sa: 40, sd: 40, sp: 40 },
+        weightkg: 29.7,
+        abilities: { 0: 'Analytic' },
+        baseSpecies: 'Jangmo-o',
+        nfe: true
+    },
+    'Kommo-o-Aevian': {
+        types: ['Dragon', 'Poison'],
+        bs: { hp: 95, at: 125, df: 125, sa: 95, sd: 95, sp: 65 },
+        weightkg: 78.2,
+        abilities: { 0: 'Inexorable' },
+        baseSpecies: 'Kommo-o'
+    },
+    'Lampent-Aevian': {
+        types: ['Ghost', 'Electric'],
+        bs: { hp: 60, at: 40, df: 60, sa: 95, sd: 60, sp: 55 },
+        weightkg: 13,
+        abilities: { 0: 'Illuminate' },
+        baseSpecies: 'Lampent',
+        nfe: true
+    },
+    'Lapras-Aevian': {
+        types: ['Poison', 'Ground'],
+        bs: { hp: 135, at: 95, df: 80, sa: 85, sd: 85, sp: 60 },
+        weightkg: 220,
+        abilities: { 0: 'Solid Rock' },
+        baseSpecies: 'Lapras'
+    },
+    'Larvesta-Aevian': {
+        types: ['Flying'],
+        bs: { hp: 55, at: 85, df: 50, sa: 50, sd: 50, sp: 70 },
+        weightkg: 28.8,
+        abilities: { 0: 'Wonder Skin' },
+        baseSpecies: 'Larvesta',
+        nfe: true
+    },
+    'Leavanny-Aevian': {
+        types: ['Bug', 'Dragon'],
+        bs: { hp: 75, at: 108, df: 75, sa: 70, sd: 75, sp: 97 },
+        weightkg: 20.5,
+        abilities: { 0: 'Swarm' },
+        baseSpecies: 'Leavanny'
+    },
+    'Litwick-Aevian': {
+        types: ['Ghost', 'Fire'],
+        bs: { hp: 50, at: 35, df: 55, sa: 65, sd: 55, sp: 20 },
+        weightkg: 3.1,
+        abilities: { 0: 'Illuminate' },
+        baseSpecies: 'Litwick',
+        nfe: true
+    },
+    'Magikarp-Aevian': {
+        types: ['Fire'],
+        bs: { hp: 20, at: 10, df: 55, sa: 15, sd: 20, sp: 80 },
+        weightkg: 10,
+        abilities: { 0: 'Rattled' },
+        baseSpecies: 'Magikarp',
+        nfe: true
+    },
+    'Mareep-Aevian': {
+        types: ['Ice', 'Electric'],
+        bs: { hp: 55, at: 40, df: 45, sa: 65, sd: 40, sp: 35 },
+        weightkg: 7.8,
+        abilities: { 0: 'Filter' },
+        baseSpecies: 'Mareep',
+        nfe: true
+    },
+    'Milotic-Aevian': {
+        types: ['Poison', 'Fairy'],
+        bs: { hp: 95, at: 100, df: 79, sa: 60, sd: 125, sp: 81 },
+        weightkg: 162,
+        abilities: { 0: 'Poison Point' },
+        baseSpecies: 'Milotic'
+    },
+    'Misdreavus-Aevian': {
+        types: ['Grass', 'Ghost'],
+        bs: { hp: 60, at: 85, df: 60, sa: 85, sd: 60, sp: 85 },
+        weightkg: 1,
+        abilities: { 0: 'Magic Bounce' },
+        baseSpecies: 'Misdreavus',
+        nfe: true
+    },
+    'Mismagius-Aevian': {
+        types: ['Grass', 'Ghost'],
+        bs: { hp: 60, at: 105, df: 60, sa: 105, sd: 60, sp: 105 },
+        weightkg: 4.4,
+        abilities: { 0: 'Magic Bounce' },
+        baseSpecies: 'Mismagius'
+    },
+    'Munna-Aevian': {
+        types: ['Dark', 'Fairy'],
+        bs: { hp: 76, at: 67, df: 45, sa: 25, sd: 45, sp: 24 },
+        weightkg: 23.3,
+        abilities: { 0: 'Bad Dreams' },
+        baseSpecies: 'Munna',
+        nfe: true
+    },
+    'Musharna-Aevian': {
+        types: ['Dark', 'Fairy'],
+        bs: { hp: 116, at: 107, df: 85, sa: 65, sd: 85, sp: 29 },
+        weightkg: 60.5,
+        abilities: { 0: 'Bad Dreams' },
+        baseSpecies: 'Musharna'
+    },
+    'Palossand-Aevian-Fiery': {
+        types: ['Ghost', 'Fire'],
+        bs: { hp: 85, at: 75, df: 110, sa: 100, sd: 75, sp: 35 },
+        weightkg: 250,
+        abilities: { 0: 'Flame Body' },
+        baseSpecies: 'Palossand'
+    },
+    'Palossand-Aevian-Icy': {
+        types: ['Ghost', 'Ice'],
+        bs: { hp: 85, at: 75, df: 110, sa: 100, sd: 75, sp: 35 },
+        weightkg: 250,
+        abilities: { 0: 'Ice Body' },
+        baseSpecies: 'Palossand'
+    },
+    'Palossand-Aevian-Rocky': {
+        types: ['Ghost', 'Rock'],
+        bs: { hp: 85, at: 75, df: 110, sa: 100, sd: 75, sp: 35 },
+        weightkg: 250,
+        abilities: { 0: 'Clear Body' },
+        baseSpecies: 'Palossand'
+    },
+    'Paras-Aevian-Z': {
+        types: ['Ghost', 'Poison'],
+        bs: { hp: 35, at: 100, df: 25, sa: 45, sd: 25, sp: 75 },
+        weightkg: 4.2,
+        abilities: { 0: 'Resuscitation' },
+        baseSpecies: 'Paras',
+        nfe: true
+    },
+    'Paras-Aevian': {
+        types: ['Bug', 'Poison'],
+        bs: { hp: 35, at: 70, df: 55, sa: 45, sd: 55, sp: 25 },
+        weightkg: 4.2,
+        abilities: { 0: 'Resuscitation' },
+        baseSpecies: 'Paras',
+        nfe: true
+    },
+    'Parasect-Aevian-Z': {
+        types: ['Ghost', 'Poison'],
+        bs: { hp: 40, at: 130, df: 40, sa: 50, sd: 40, sp: 105 },
+        weightkg: 29.5,
+        abilities: { 0: 'Resuscitation' },
+        baseSpecies: 'Parasect'
+    },
+    'Parasect-Aevian': {
+        types: ['Bug', 'Poison'],
+        bs: { hp: 60, at: 90, df: 80, sa: 60, sd: 80, sp: 30 },
+        weightkg: 29.5,
+        abilities: { 0: 'Resuscitation' },
+        baseSpecies: 'Parasect'
+    },
+    'Roselia-Aevian': {
+        types: ['Ground', 'Fighting'],
+        bs: { hp: 50, at: 60, df: 45, sa: 100, sd: 80, sp: 65 },
+        weightkg: 2,
+        abilities: { 0: 'Dry Skin' },
+        baseSpecies: 'Roselia',
+        nfe: true
+    },
+    'Roserade-Aevian': {
+        types: ['Ground', 'Fighting'],
+        bs: { hp: 60, at: 75, df: 65, sa: 125, sd: 105, sp: 90 },
+        weightkg: 14.5,
+        abilities: { 0: 'Dry Skin' },
+        baseSpecies: 'Roserade'
+    },
+    'Sandygast-Aevian-Fire': {
+        types: ['Ghost', 'Fire'],
+        bs: { hp: 55, at: 55, df: 80, sa: 70, sd: 45, sp: 15 },
+        weightkg: 70,
+        abilities: { 0: 'Flame Body' },
+        baseSpecies: 'Sandygast',
+        nfe: true
+    },
+    'Sandygast-Aevian-Icy': {
+        types: ['Ghost', 'Ice'],
+        bs: { hp: 55, at: 55, df: 80, sa: 70, sd: 45, sp: 15 },
+        weightkg: 70,
+        abilities: { 0: 'Ice Body' },
+        baseSpecies: 'Sandygast',
+        nfe: true
+    },
+    'Sandygast-Aevian-Rocky': {
+        types: ['Ghost', 'Rock'],
+        bs: { hp: 55, at: 55, df: 80, sa: 70, sd: 45, sp: 15 },
+        weightkg: 70,
+        abilities: { 0: 'Clear Body' },
+        baseSpecies: 'Sandygast',
+        nfe: true
+    },
+    'Sewaddle-Aevian': {
+        types: ['Bug', 'Dragon'],
+        bs: { hp: 45, at: 63, df: 65, sa: 50, sd: 55, sp: 42 },
+        weightkg: 2.5,
+        abilities: { 0: 'Swarm' },
+        baseSpecies: 'Sewaddle',
+        nfe: true
+    },
+    'Shellos-Aevian-East': {
+        types: ['Ground', 'Fairy'],
+        bs: { hp: 76, at: 48, df: 48, sa: 57, sd: 62, sp: 35 },
+        weightkg: 6.3,
+        abilities: { 0: 'Storm Drain' },
+        baseSpecies: 'Shellos',
+        nfe: true
+    },
+    'Shellos-Aevian-West': {
+        types: ['Ground', 'Fairy'],
+        bs: { hp: 76, at: 48, df: 48, sa: 57, sd: 62, sp: 35 },
+        weightkg: 6.3,
+        abilities: { 0: 'Storm Drain' },
+        baseSpecies: 'Shellos',
+        nfe: true
+    },
+    'Shroomish-Aevian': {
+        types: ['Grass'],
+        bs: { hp: 60, at: 40, df: 60, sa: 40, sd: 60, sp: 35 },
+        weightkg: 4.5,
+        abilities: { 0: 'Rattled' },
+        baseSpecies: 'Shroomish',
+        nfe: true
+    },
+    'Sigilyph-Aevian': {
+        types: ['Fairy', 'Ghost'],
+        bs: { hp: 72, at: 58, df: 80, sa: 103, sd: 80, sp: 97 },
+        weightkg: 14,
+        abilities: { 0: 'Flare Boost' },
+        baseSpecies: 'Sigilyph'
+    },
+    'Snorunt-Aevian': {
+        types: ['Grass', 'Rock'],
+        bs: { hp: 50, at: 50, df: 50, sa: 50, sd: 50, sp: 50 },
+        weightkg: 16.8,
+        abilities: { 0: 'Grass Pelt' },
+        baseSpecies: 'Snorunt',
+        nfe: true
+    },
+    'Swadloon-Aevian': {
+        types: ['Bug', 'Dragon'],
+        bs: { hp: 55, at: 73, df: 85, sa: 50, sd: 75, sp: 42 },
+        weightkg: 7.3,
+        abilities: { 0: 'Swarm' },
+        baseSpecies: 'Swadloon',
+        nfe: true
+    },
+    'Toxtricity-Aevian': {
+        types: ['Poison', 'Fire'],
+        bs: { hp: 70, at: 75, df: 70, sa: 114, sd: 70, sp: 98 },
+        weightkg: 40,
+        abilities: { 0: 'Galvanize' },
+        baseSpecies: 'Toxtricity'
+    },
+    'Volcarona-Aevian': {
+        types: ['Flying'],
+        bs: { hp: 85, at: 60, df: 60, sa: 135, sd: 100, sp: 110 },
+        weightkg: 46,
+        abilities: { 0: 'Shield Dust' },
+        baseSpecies: 'Volcarona'
+    },
+    'Wimpod-Aevian': {
+        types: ['Bug', 'Ground'],
+        bs: { hp: 25, at: 40, df: 35, sa: 15, sd: 35, sp: 80 },
+        weightkg: 12,
+        abilities: { 0: 'Wimp Out' },
+        baseSpecies: 'Wimpod',
         nfe: true
     }
 };

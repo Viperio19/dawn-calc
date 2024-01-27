@@ -220,9 +220,22 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     var isGhostRevealed = attacker.hasAbility('Scrappy') || attacker.hasAbility('Mind\'s Eye') ||
         field.defenderSide.isForesight;
     var isRingTarget = defender.hasItem('Ring Target') && !defender.hasAbility('Klutz');
-    var type1Effectiveness = (0, util_2.getMoveEffectiveness)(gen, move, defender.types[0], isGhostRevealed, field.isGravity, isRingTarget);
-    var type2Effectiveness = defender.types[1]
-        ? (0, util_2.getMoveEffectiveness)(gen, move, defender.types[1], isGhostRevealed, field.isGravity, isRingTarget)
+    var type1 = defender.types[0];
+    var type2 = defender.types[1];
+    if (defender.hasAbility('Mimicry') && (0, util_2.getMimicryType)(field) != "???") {
+        type1 = (0, util_2.getMimicryType)(field);
+        type2 = "???";
+        desc.mimicryDefenseType = type1;
+    }
+    if (defender.hasAbility('Reflector')) {
+        type2 = (attacker.types[1]
+            ? (defender.hasType(attacker.types[1]) ? defender.types[1] : attacker.types[1])
+            : (defender.hasType(attacker.types[0]) ? defender.types[1] : attacker.types[0]));
+        desc.reflectorDefenseTypes = defender.types[0] + (type2 === "???" ? '' : ' / ' + type2) + ' ';
+    }
+    var type1Effectiveness = (0, util_2.getMoveEffectiveness)(gen, move, type1, isGhostRevealed, field.isGravity, isRingTarget);
+    var type2Effectiveness = type2
+        ? (0, util_2.getMoveEffectiveness)(gen, move, type2, isGhostRevealed, field.isGravity, isRingTarget)
         : 1;
     if (defender.named('Torterra-Crest')) {
         if (type1Effectiveness == 0)
@@ -289,8 +302,8 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         return result;
     }
     if ((move.named('Sky Drop') &&
-        (defender.hasType('Flying') || defender.weightkg >= 200 || field.isGravity)) ||
-        (move.named('Synchronoise') && !defender.hasType(attacker.types[0]) &&
+        ((defender.hasType('Flying') || defender.hasInvisisbleType(attacker, field, 'Flying')) || defender.weightkg >= 200 || field.isGravity)) ||
+        (move.named('Synchronoise') && (!defender.hasType(attacker.types[0]) && !defender.hasInvisisbleType(attacker, field, attacker.types[0])) &&
             (!attacker.types[1] || !defender.hasType(attacker.types[1]))) ||
         (move.named('Dream Eater') &&
             (!(defender.hasStatus('slp') || defender.hasAbility('Comatose')))) ||
@@ -303,7 +316,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         desc.weather = field.weather;
         return result;
     }
-    if (field.hasWeather('Strong Winds') && defender.hasType('Flying') &&
+    if (field.hasWeather('Strong Winds') && (defender.hasType('Flying') || defender.hasInvisisbleType(attacker, field, 'Flying')) &&
         gen.types.get((0, util_1.toID)(move.type)).effectiveness['Flying'] > 1) {
         typeEffectiveness /= 2;
         desc.weather = field.weather;
@@ -444,6 +457,14 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     else if ((attacker.hasAbility('Protean', 'Libero') || attacker.named('Boltund-Crest')) && !attacker.teraType) {
         stabMod += 2048;
         desc.attackerAbility = attacker.ability;
+    }
+    else if (attacker.hasAbility('Reflector') && (defender.types[1] === move.type || (!defender.types[1] && defender.types[0] === move.type))) {
+        stabMod += 2048;
+        desc.reflectorOffenseTypes = attacker.types[0] + ' / ' + (defender.types[1] ? defender.types[1] : defender.types[0]) + ' ';
+    }
+    else if (attacker.hasAbility('Mimicry') && (0, util_2.getMimicryType)(field) === move.type) {
+        stabMod += 2048;
+        desc.mimicryOffenseType = (0, util_2.getMimicryType)(field);
     }
     else if (attacker.named('Empoleon-Crest') && move.hasType('Ice')) {
         stabMod += 2048;
@@ -855,7 +876,7 @@ function calculateBasePowerSMSSSV(gen, attacker, defender, move, field, hasAteAb
     var bpMods = calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, basePower, hasAteAbilityTypeChange, turnOrder);
     basePower = (0, util_2.OF16)(Math.max(1, (0, util_2.pokeRound)((basePower * (0, util_2.chainMods)(bpMods, 41, 2097152)) / 4096)));
     if (attacker.teraType && move.type === attacker.teraType &&
-        attacker.hasType(attacker.teraType) && move.hits === 1 &&
+        (attacker.hasType(attacker.teraType) || attacker.hasInvisisbleType(defender, field, attacker.teraType)) && move.hits === 1 &&
         move.priority <= 0 && move.bp > 0 && !move.named('Dragon Energy', 'Eruption', 'Water Spout') &&
         basePower < 60 && gen.num >= 9) {
         basePower = 60;
@@ -987,6 +1008,8 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
             field.hasWeather('Sand') && move.hasType('Rock', 'Ground', 'Steel')) ||
         (attacker.hasAbility('Analytic') &&
             (turnOrder !== 'first' || field.defenderSide.isSwitching === 'out')) ||
+        (attacker.hasAbility('Inexorable') && move.hasType('Dragon') &&
+            (turnOrder === 'first' || field.defenderSide.isSwitching === 'out')) ||
         (attacker.hasAbility('Tough Claws') && move.flags.contact) ||
         (attacker.hasAbility('Punk Rock') && move.flags.sound)) {
         bpMods.push(5325);
@@ -1352,11 +1375,11 @@ function calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCr
         defense = defender.stats[defenseStat];
         desc.defenseBoost = defender.boosts[defenseStat];
     }
-    if (field.hasWeather('Sand') && defender.hasType('Rock') && !hitsPhysical) {
+    if (field.hasWeather('Sand') && (defender.hasType('Rock') || defender.hasInvisisbleType(attacker, field, 'Rock')) && !hitsPhysical) {
         defense = (0, util_2.pokeRound)((defense * 3) / 2);
         desc.weather = field.weather;
     }
-    if (field.hasWeather('Snow') && (defender.hasType('Ice') || defender.named('Empoleon-Crest')) && hitsPhysical) {
+    if (field.hasWeather('Snow') && (defender.hasType('Ice') || defender.hasInvisisbleType(attacker, field, 'Ice') || defender.named('Empoleon-Crest')) && hitsPhysical) {
         defense = (0, util_2.pokeRound)((defense * 3) / 2);
         desc.weather = field.weather;
     }
