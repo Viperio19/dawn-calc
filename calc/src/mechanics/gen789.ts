@@ -269,9 +269,10 @@ export function calculateSMSSSV(
     } else if ((isSimisearCrest = attacker.named('Simisear-Crest') && normal)) {
       type = 'Water';
     } else if (move.named('Mirror Beam')) {
-      if (attacker.hasAbility('Reflector') && defender.types[1] && defender.types[1] != attacker.types[0]) {
-        type = defender.types[1];
-      } else if (attacker.types[1] != undefined && attacker.types[1] != ("???" as TypeName)) {
+      // if (attacker.hasAbility('Reflector') && defender.types[1] && defender.types[1] != attacker.types[0]) {
+      //   type = defender.types[1];
+      // } else 
+      if (attacker.types[1] != undefined && attacker.types[1] != ("???" as TypeName)) {
         type = attacker.types[1];
       }
       desc.mirrorBeamType = type;
@@ -317,11 +318,11 @@ export function calculateSMSSSV(
     desc.mimicryDefenseType = type1;
   }
 
-  if (defender.hasAbility('Reflector') && attacker.types[1] && !defender.hasType(attacker.types[1])) {
-    type2 = attacker.types[1];
+  // if (defender.hasAbility('Reflector') && attacker.types[1] && !defender.hasType(attacker.types[1])) {
+  //   type2 = attacker.types[1];
 
-    desc.reflectorDefenseTypes = defender.types[0] + ' / ' + type2 + ' ';
-  }
+  //   desc.reflectorDefenseTypes = defender.types[0] + ' / ' + type2 + ' ';
+  // }
 
   let type1Effectiveness = getMoveEffectiveness(
     gen,
@@ -651,9 +652,9 @@ export function calculateSMSSSV(
   } else if ((attacker.hasAbility('Protean', 'Libero') || attacker.named('Boltund-Crest')) && !attacker.teraType) {
     stabMod += 2048;
     desc.attackerAbility = attacker.ability;
-  } else if (attacker.hasAbility('Reflector') && (defender.types[1] === move.type)) {
-    stabMod += 2048;
-    desc.reflectorOffenseTypes = attacker.types[0] + ' / ' + defender.types[1] + ' ';
+  // } else if (attacker.hasAbility('Reflector') && (defender.types[1] === move.type)) {
+  //   stabMod += 2048;
+  //   desc.reflectorOffenseTypes = attacker.types[0] + ' / ' + defender.types[1] + ' ';
   } else if (attacker.hasAbility('Mimicry') && getMimicryType(field) === move.type) {
     stabMod += 2048;
     desc.mimicryOffenseType = getMimicryType(field);

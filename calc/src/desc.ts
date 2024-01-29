@@ -960,9 +960,9 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   if (description.isSwordOfRuin) {
     output += 'Sword of Ruin ';
   }
-  if (description.reflectorOffenseTypes) {
-    output += 'Reflector ' + description.reflectorOffenseTypes;
-  }
+  // if (description.reflectorOffenseTypes) {
+  //   output += 'Reflector ' + description.reflectorOffenseTypes;
+  // }
   if (description.mimicryOffenseType) {
     output += 'Mimicry ' + description.mimicryOffenseType + ' ';
   }
@@ -1032,9 +1032,9 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   if (description.defenderTera) {
     output += `Tera ${description.defenderTera} `;
   }
-  if (description.reflectorDefenseTypes) {
-    output += 'Reflector ' + description.reflectorDefenseTypes;
-  }
+  // if (description.reflectorDefenseTypes) {
+  //   output += 'Reflector ' + description.reflectorDefenseTypes;
+  // }
   if (description.mimicryDefenseType) {
     output += 'Mimicry ' + description.mimicryDefenseType + ' ';
   }
