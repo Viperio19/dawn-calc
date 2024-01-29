@@ -40,6 +40,7 @@ export declare class Side implements State.Side {
     isFlowerGift: boolean;
     isFriendGuard: boolean;
     isAuroraVeil: boolean;
+    isAreniteWall: boolean;
     isBattery: boolean;
     isPowerSpot: boolean;
     isSwitching?: 'out' | 'in';

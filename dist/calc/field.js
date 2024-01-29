@@ -97,6 +97,7 @@ var Side = (function () {
         this.isFlowerGift = !!side.isFlowerGift;
         this.isFriendGuard = !!side.isFriendGuard;
         this.isAuroraVeil = !!side.isAuroraVeil;
+        this.isAreniteWall = !!side.isAreniteWall;
         this.isBattery = !!side.isBattery;
         this.isPowerSpot = !!side.isPowerSpot;
         this.isSwitching = side.isSwitching;

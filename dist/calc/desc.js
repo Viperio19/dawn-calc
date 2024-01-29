@@ -799,6 +799,9 @@ function buildDescription(description, attacker, defender) {
     if (description.isSwitching) {
         output += 'switching boosted ';
     }
+    if (description.mirrorBeamType) {
+        output += description.mirrorBeamType + ' ';
+    }
     output += description.moveName + ' ';
     if (description.moveBP && description.moveType) {
         output += '(' + description.moveBP + ' BP ' + description.moveType + ') ';
@@ -875,6 +878,9 @@ function buildDescription(description, attacker, defender) {
     }
     if (description.isAuroraVeil) {
         output += ' with an ally\'s Aurora Veil';
+    }
+    if (description.isAreniteWall) {
+        output += ' with an ally\'s Arenite Wall';
     }
     if (description.isCritical) {
         output += ' on a critical hit';

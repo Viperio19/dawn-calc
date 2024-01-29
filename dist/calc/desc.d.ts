@@ -27,6 +27,7 @@ export interface RawDesc {
     isTabletsOfRuin?: boolean;
     isVesselOfRuin?: boolean;
     isAuroraVeil?: boolean;
+    isAreniteWall?: boolean;
     isFlowerGiftAttacker?: boolean;
     isFlowerGiftDefender?: boolean;
     isFriendGuard?: boolean;
@@ -52,6 +53,7 @@ export interface RawDesc {
     reflectorDefenseTypes?: string;
     mimicryOffenseType?: string;
     mimicryDefenseType?: string;
+    mirrorBeamType?: string;
 }
 export declare function display(gen: Generation, attacker: Pokemon, defender: Pokemon, move: Move, field: Field, damage: Damage, rawDesc: RawDesc, notation?: string, err?: boolean): string;
 export declare function displayMove(gen: Generation, attacker: Pokemon, defender: Pokemon, move: Move, damage: Damage, notation?: string): string;

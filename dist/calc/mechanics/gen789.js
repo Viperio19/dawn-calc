@@ -198,12 +198,24 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         else if ((isSimisearCrest = attacker.named('Simisear-Crest') && normal)) {
             type = 'Water';
         }
+        else if (move.named('Mirror Beam')) {
+            if (attacker.hasAbility('Reflector') && defender.types[1] && defender.types[1] != attacker.types[0]) {
+                type = defender.types[1];
+            }
+            else if (attacker.types[1] != undefined && attacker.types[1] != "???") {
+                type = attacker.types[1];
+            }
+            desc.mirrorBeamType = type;
+        }
         if (isGalvanize || isPixilate || isRefrigerate || isAerilate || isNormalize || isTypeSync) {
             desc.attackerAbility = attacker.ability;
             hasAteAbilityTypeChange = true;
         }
         else if (isLiquidVoice) {
             desc.attackerAbility = attacker.ability;
+        }
+        else if (isSawsbuckCrest) {
+            hasAteAbilityTypeChange = true;
         }
     }
     if (move.named('Tera Blast') && attacker.teraType) {
@@ -227,11 +239,9 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         type2 = "???";
         desc.mimicryDefenseType = type1;
     }
-    if (defender.hasAbility('Reflector')) {
-        type2 = (attacker.types[1]
-            ? (defender.hasType(attacker.types[1]) ? defender.types[1] : attacker.types[1])
-            : (defender.hasType(attacker.types[0]) ? defender.types[1] : attacker.types[0]));
-        desc.reflectorDefenseTypes = defender.types[0] + (type2 === "???" ? '' : ' / ' + type2) + ' ';
+    if (defender.hasAbility('Reflector') && attacker.types[1] && !defender.hasType(attacker.types[1])) {
+        type2 = attacker.types[1];
+        desc.reflectorDefenseTypes = defender.types[0] + ' / ' + type2 + ' ';
     }
     var type1Effectiveness = (0, util_2.getMoveEffectiveness)(gen, move, type1, isGhostRevealed, field.isGravity, isRingTarget);
     var type2Effectiveness = type2
@@ -458,9 +468,9 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         stabMod += 2048;
         desc.attackerAbility = attacker.ability;
     }
-    else if (attacker.hasAbility('Reflector') && (defender.types[1] === move.type || (!defender.types[1] && defender.types[0] === move.type))) {
+    else if (attacker.hasAbility('Reflector') && (defender.types[1] === move.type)) {
         stabMod += 2048;
-        desc.reflectorOffenseTypes = attacker.types[0] + ' / ' + (defender.types[1] ? defender.types[1] : defender.types[0]) + ' ';
+        desc.reflectorOffenseTypes = attacker.types[0] + ' / ' + defender.types[1] + ' ';
     }
     else if (attacker.hasAbility('Mimicry') && (0, util_2.getMimicryType)(field) === move.type) {
         stabMod += 2048;
@@ -721,6 +731,7 @@ function calculateBasePowerSMSSSV(gen, attacker, defender, move, field, hasAteAb
             break;
         case 'Hex':
         case 'Infernal Parade':
+        case 'Irritation':
             basePower = move.bp * (defender.status || defender.hasAbility('Comatose') ? 2 : 1);
             desc.moveBP = basePower;
             break;
@@ -749,6 +760,7 @@ function calculateBasePowerSMSSSV(gen, attacker, defender, move, field, hasAteAb
             basePower = move.bp * (defender.hasAbility('Parental Bond (Child)') ? 2 : 1);
             break;
         case 'Wake-Up Slap':
+        case 'Waking Shock':
             basePower = move.bp * (defender.hasStatus('slp') || defender.hasAbility('Comatose') ? 2 : 1);
             desc.moveBP = basePower;
             break;
@@ -1543,6 +1555,10 @@ function calculateFinalModsSMSSSV(gen, attacker, defender, move, field, desc, is
     if (field.defenderSide.isAuroraVeil && !isCritical) {
         finalMods.push(field.gameType !== 'Singles' ? 2732 : 2048);
         desc.isAuroraVeil = true;
+    }
+    if (field.defenderSide.isAreniteWall && typeEffectiveness > 1) {
+        finalMods.push(2048);
+        desc.isAreniteWall = true;
     }
     if (attacker.hasAbility('Neuroforce') && typeEffectiveness > 1) {
         finalMods.push(5120);

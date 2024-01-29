@@ -192,14 +192,14 @@ var Pokemon = (function () {
         return false;
     };
     Pokemon.prototype.hasReflectorType = function (opponent, type) {
-        return this.ability != "Reflector"
+        return this.ability != 'Reflector'
             ? false
             : opponent.types[1]
                 ? opponent.types[1] === type
                 : opponent.types[0] === type;
     };
     Pokemon.prototype.hasMimicryType = function (field, type) {
-        return this.ability != "Mimicry"
+        return this.ability != 'Mimicry'
             ? false
             : (0, util_2.getMimicryType)(field) === type;
     };

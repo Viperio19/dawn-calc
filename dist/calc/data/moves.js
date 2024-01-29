@@ -4946,6 +4946,110 @@ var CHROMATIC_PATCH = {
         category: 'Special',
         zp: 20,
         maxPower: 20
+    },
+    'Deluge': {
+        bp: 60,
+        type: 'Water',
+        category: 'Physical',
+        zp: 120,
+        maxPower: 110
+    },
+    'Ethereal Tempest': {
+        bp: 90,
+        type: 'Flying',
+        category: 'Special',
+        zp: 175,
+        maxPower: 130,
+        secondaries: true
+    },
+    'Hexing Slash': {
+        bp: 90,
+        type: 'Ghost',
+        category: 'Physical',
+        zp: 175,
+        maxPower: 130,
+        makesContact: true,
+        isSlicing: true,
+        secondaries: true,
+        drain: [1, 2]
+    },
+    'Irritation': {
+        bp: 60,
+        type: 'Bug',
+        category: 'Special',
+        zp: 120,
+        maxPower: 110
+    },
+    'Magma Drift': {
+        bp: 90,
+        type: 'Fire',
+        category: 'Special',
+        zp: 175,
+        maxPower: 130,
+        target: 'allAdjacentFoes'
+    },
+    'Mirror Beam': {
+        bp: 90,
+        type: 'Steel',
+        category: 'Special',
+        zp: 175,
+        maxPower: 130
+    },
+    'Mud Barrage': {
+        bp: 25,
+        type: 'Ground',
+        category: 'Special',
+        multihit: [2, 5],
+        zp: 140,
+        maxPower: 130
+    },
+    'Poison Sweep': {
+        bp: 50,
+        type: 'Poison',
+        category: 'Physical',
+        zp: 100,
+        maxPower: 100,
+        secondaries: true,
+        makesContact: true
+    },
+    'Quicksilver Spear': {
+        bp: 80,
+        type: 'Steel',
+        category: 'Physical',
+        zp: 160,
+        maxPower: 130,
+        secondaries: true
+    },
+    'Slash and Burn': {
+        bp: 90,
+        type: 'Grass',
+        category: 'Physical',
+        zp: 175,
+        maxPower: 130,
+        secondaries: true,
+        makesContact: true
+    },
+    'Stacking Shot': {
+        bp: 40,
+        type: 'Fighting',
+        category: 'Physical',
+        zp: 100,
+        maxPower: 70,
+        makesContact: true
+    },
+    'Waking Shock': {
+        bp: 80,
+        type: 'Electric',
+        category: 'Physical',
+        zp: 160,
+        maxPower: 130
+    },
+    'Vile Assault': {
+        bp: 90,
+        type: 'Poison',
+        category: 'Physical',
+        zp: 175,
+        maxPower: 90
     }
 };
 var SV = (0, util_1.extend)(true, {}, SS, SV_PATCH, CHROMATIC_PATCH);

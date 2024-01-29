@@ -1,4 +1,4 @@
-import {Generation, AbilityName, StatID, Terrain} from '../data/interface';
+import {Generation, AbilityName, StatID, Terrain, TypeName} from '../data/interface';
 import {toID} from '../util';
 import {
   getBerryResistType,
@@ -268,12 +268,21 @@ export function calculateSMSSSV(
       type = 'Fire';
     } else if ((isSimisearCrest = attacker.named('Simisear-Crest') && normal)) {
       type = 'Water';
+    } else if (move.named('Mirror Beam')) {
+      if (attacker.hasAbility('Reflector') && defender.types[1] && defender.types[1] != attacker.types[0]) {
+        type = defender.types[1];
+      } else if (attacker.types[1] != undefined && attacker.types[1] != ("???" as TypeName)) {
+        type = attacker.types[1];
+      }
+      desc.mirrorBeamType = type;
     }
     if (isGalvanize || isPixilate || isRefrigerate || isAerilate || isNormalize || isTypeSync) {
       desc.attackerAbility = attacker.ability;
       hasAteAbilityTypeChange = true;
     } else if (isLiquidVoice) {
       desc.attackerAbility = attacker.ability;
+    } else if (isSawsbuckCrest) {
+      hasAteAbilityTypeChange = true;
     }
   }
 
@@ -308,12 +317,10 @@ export function calculateSMSSSV(
     desc.mimicryDefenseType = type1;
   }
 
-  if (defender.hasAbility('Reflector')) {
-    type2 = (attacker.types[1]
-      ? (defender.hasType(attacker.types[1]) ? defender.types[1] : attacker.types[1])
-      : (defender.hasType(attacker.types[0]) ? defender.types[1] : attacker.types[0]));
+  if (defender.hasAbility('Reflector') && attacker.types[1] && !defender.hasType(attacker.types[1])) {
+    type2 = attacker.types[1];
 
-    desc.reflectorDefenseTypes = defender.types[0] + (type2 === "???" ? '' : ' / ' + type2) + ' ';
+    desc.reflectorDefenseTypes = defender.types[0] + ' / ' + type2 + ' ';
   }
 
   let type1Effectiveness = getMoveEffectiveness(
@@ -644,9 +651,9 @@ export function calculateSMSSSV(
   } else if ((attacker.hasAbility('Protean', 'Libero') || attacker.named('Boltund-Crest')) && !attacker.teraType) {
     stabMod += 2048;
     desc.attackerAbility = attacker.ability;
-  } else if (attacker.hasAbility('Reflector') && (defender.types[1] === move.type || (!defender.types[1] && defender.types[0] === move.type))) {
+  } else if (attacker.hasAbility('Reflector') && (defender.types[1] === move.type)) {
     stabMod += 2048;
-    desc.reflectorOffenseTypes = attacker.types[0] + ' / ' + (defender.types[1] ? defender.types[1] : defender.types[0]) + ' ';
+    desc.reflectorOffenseTypes = attacker.types[0] + ' / ' + defender.types[1] + ' ';
   } else if (attacker.hasAbility('Mimicry') && getMimicryType(field) === move.type) {
     stabMod += 2048;
     desc.mimicryOffenseType = getMimicryType(field);
@@ -974,6 +981,7 @@ export function calculateBasePowerSMSSSV(
     break;
   case 'Hex':
   case 'Infernal Parade':
+  case 'Irritation':
     // Hex deals double damage to Pokemon with Comatose (ih8ih8sn0w)
     basePower = move.bp * (defender.status || defender.hasAbility('Comatose') ? 2 : 1);
     desc.moveBP = basePower;
@@ -1005,6 +1013,7 @@ export function calculateBasePowerSMSSSV(
     // NOTE: desc.attackerAbility = 'Parental Bond' will already reflect this boost
     break;
   case 'Wake-Up Slap':
+  case 'Waking Shock':
     // Wake-Up Slap deals double damage to Pokemon with Comatose (ih8ih8sn0w)
     basePower = move.bp * (defender.hasStatus('slp') || defender.hasAbility('Comatose') ? 2 : 1);
     desc.moveBP = basePower;
@@ -2025,6 +2034,10 @@ export function calculateFinalModsSMSSSV(
   if (field.defenderSide.isAuroraVeil && !isCritical) {
     finalMods.push(field.gameType !== 'Singles' ? 2732 : 2048);
     desc.isAuroraVeil = true;
+  }
+  if (field.defenderSide.isAreniteWall && typeEffectiveness > 1) {
+    finalMods.push(2048);
+    desc.isAreniteWall = true;
   }
 
   if (attacker.hasAbility('Neuroforce') && typeEffectiveness > 1) {

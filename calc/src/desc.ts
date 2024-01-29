@@ -31,6 +31,7 @@ export interface RawDesc {
   isTabletsOfRuin?: boolean;
   isVesselOfRuin?: boolean;
   isAuroraVeil?: boolean;
+  isAreniteWall?: boolean;
   isFlowerGiftAttacker?: boolean;
   isFlowerGiftDefender?: boolean;
   isFriendGuard?: boolean;
@@ -56,6 +57,7 @@ export interface RawDesc {
   reflectorDefenseTypes?: string;
   mimicryOffenseType?: string;
   mimicryDefenseType?: string;
+  mirrorBeamType?: string;
 }
 
 export function display(
@@ -980,6 +982,9 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   if (description.isSwitching) {
     output += 'switching boosted ';
   }
+  if (description.mirrorBeamType) {
+    output += description.mirrorBeamType + ' ';
+  }
   output += description.moveName + ' ';
   if (description.moveBP && description.moveType) {
     output += '(' + description.moveBP + ' BP ' + description.moveType + ') ';
@@ -1054,6 +1059,9 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   }
   if (description.isAuroraVeil) {
     output += ' with an ally\'s Aurora Veil';
+  }
+  if (description.isAreniteWall) {
+    output += ' with an ally\'s Arenite Wall';
   }
   if (description.isCritical) {
     output += ' on a critical hit';
