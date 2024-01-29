@@ -11140,14 +11140,14 @@ var CHROMATIC_PATCH = {
         baseSpecies: 'Breloom'
     },
     'Bronzong-Aevian': {
-        types: ['Steel', '???'],
+        types: ['Steel'],
         bs: { hp: 67, at: 79, df: 116, sa: 89, sd: 116, sp: 33 },
         weightkg: 187,
         abilities: { 0: 'Reflector' },
         baseSpecies: 'Bronzong'
     },
     'Bronzor-Aevian': {
-        types: ['Steel', '???'],
+        types: ['Steel'],
         bs: { hp: 57, at: 24, df: 86, sa: 24, sd: 86, sp: 23 },
         weightkg: 57,
         abilities: { 0: 'Reflector' },

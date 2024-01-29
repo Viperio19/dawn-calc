@@ -199,10 +199,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
             type = 'Water';
         }
         else if (move.named('Mirror Beam')) {
-            if (attacker.hasAbility('Reflector') && defender.types[1] && defender.types[1] != attacker.types[0]) {
-                type = defender.types[1];
-            }
-            else if (attacker.types[1] != undefined && attacker.types[1] != "???") {
+            if (attacker.types[1] && attacker.types[1] != "???") {
                 type = attacker.types[1];
             }
             desc.mirrorBeamType = type;
@@ -238,10 +235,6 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         type1 = (0, util_2.getMimicryType)(field);
         type2 = "???";
         desc.mimicryDefenseType = type1;
-    }
-    if (defender.hasAbility('Reflector') && attacker.types[1] && !defender.hasType(attacker.types[1])) {
-        type2 = attacker.types[1];
-        desc.reflectorDefenseTypes = defender.types[0] + ' / ' + type2 + ' ';
     }
     var type1Effectiveness = (0, util_2.getMoveEffectiveness)(gen, move, type1, isGhostRevealed, field.isGravity, isRingTarget);
     var type2Effectiveness = type2
@@ -467,10 +460,6 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     else if ((attacker.hasAbility('Protean', 'Libero') || attacker.named('Boltund-Crest')) && !attacker.teraType) {
         stabMod += 2048;
         desc.attackerAbility = attacker.ability;
-    }
-    else if (attacker.hasAbility('Reflector') && (defender.types[1] === move.type)) {
-        stabMod += 2048;
-        desc.reflectorOffenseTypes = attacker.types[0] + ' / ' + defender.types[1] + ' ';
     }
     else if (attacker.hasAbility('Mimicry') && (0, util_2.getMimicryType)(field) === move.type) {
         stabMod += 2048;

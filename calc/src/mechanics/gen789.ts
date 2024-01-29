@@ -46,7 +46,7 @@ import {
   getMimicryType,
   isQPActive,
 } from './util';
-import { SpeciesName } from '@pkmn/dex';
+import { SpeciesName, Type } from '@pkmn/dex';
 import { MoveName } from '@pkmn/dex';
 
 export function calculateSMSSSV(
@@ -272,7 +272,7 @@ export function calculateSMSSSV(
       // if (attacker.hasAbility('Reflector') && defender.types[1] && defender.types[1] != attacker.types[0]) {
       //   type = defender.types[1];
       // } else 
-      if (attacker.types[1] != undefined && attacker.types[1] != ("???" as TypeName)) {
+      if (attacker.types[1] && attacker.types[1] != ("???" as TypeName)) {
         type = attacker.types[1];
       }
       desc.mirrorBeamType = type;

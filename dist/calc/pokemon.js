@@ -178,7 +178,7 @@ var Pokemon = (function () {
         try {
             for (var types_3 = __values(types), types_3_1 = types_3.next(); !types_3_1.done; types_3_1 = types_3.next()) {
                 var type = types_3_1.value;
-                if (this.hasReflectorType(opponent, type) || this.hasMimicryType(field, type))
+                if (this.hasMimicryType(field, type))
                     return true;
             }
         }
