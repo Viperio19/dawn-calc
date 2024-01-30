@@ -1457,7 +1457,7 @@ export function calculateBPModsSMSSSV(
   }
 
   if (attacker.named('Boltund-Crest') && move.flags.bite && attacker.stats.spe >= defender.stats.spe) {
-    bpMods.push(6144);
+    bpMods.push(5324);
   }
 
   if (attacker.named('Claydol-Crest') && move.flags.beam) {
