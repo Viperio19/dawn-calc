@@ -553,7 +553,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         noseMove.name = 'Steel POGCHAMPION';
         (0, util_2.checkMultihitBoost)(gen, noseSteel, defender, noseMove, field, desc);
         var noseSteelDamage = calculateSMSSSV(gen, noseSteel, defender, noseMove, field).damage;
-        noseDamage = [];
+        noseDamage = noseElectricDamage;
         for (var i = 0; i < 16; i++) {
             noseDamage[i] = noseElectricDamage[i] + noseRockDamage[i] + noseSteelDamage[i];
         }
@@ -1103,7 +1103,7 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
         bpMods.push(2732);
     }
     if (attacker.named('Boltund-Crest') && move.flags.bite && attacker.stats.spe >= defender.stats.spe) {
-        bpMods.push(6144);
+        bpMods.push(5324);
     }
     if (attacker.named('Claydol-Crest') && move.flags.beam) {
         bpMods.push(6144);

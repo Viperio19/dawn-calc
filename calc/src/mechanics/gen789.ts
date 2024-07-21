@@ -763,7 +763,7 @@ export function calculateSMSSSV(
     checkMultihitBoost(gen, noseSteel, defender, noseMove, field, desc);
     let noseSteelDamage = calculateSMSSSV(gen, noseSteel, defender, noseMove, field).damage as number[];
 
-    noseDamage = [];
+    noseDamage = noseElectricDamage
 
     for (let i = 0; i < 16; i++) {
       noseDamage[i] = noseElectricDamage[i] + noseRockDamage[i] + noseSteelDamage[i];
