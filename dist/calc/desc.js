@@ -761,7 +761,7 @@ function buildDescription(description, attacker, defender) {
             " ".concat(description.alliesFainted === 1 ? 'ally' : 'allies', " fainted ");
     }
     if (description.foesFainted) {
-        output += Math.min(5, description.foesFainted) +
+        output += Math.max(5, description.foesFainted) +
             " ".concat(description.alliesFainted === 1 ? 'foe' : 'foes', " fainted ");
     }
     if (description.relicanthTurnsAttack) {

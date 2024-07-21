@@ -10019,7 +10019,7 @@ const SV_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
 
 const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   Alcremie: {otherFormes: ['Alcremie-Gmax', 'Alcremie-Mega-Gmax']},
-  Ampharos: {otherFormes: ['Ampharos-Aevian', 'Ampharos-Mega']},
+  Ampharos: {otherFormes: ['Ampharos-Aevian', 'Ampharos-Aevian-Crest', 'Ampharos-Mega']},
   Appletun: {otherFormes: ['Appletun-Gmax', 'Appletun-Mega-Gmax']},
   Ariados: {otherFormes: ['Ariados-Crest']},
   Bastiodon: {otherFormes: ['Bastiodon-Crest']},
@@ -10472,6 +10472,13 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     bs: {hp: 65, at: 65, df: 60, sa: 130, sd: 95, sp: 110},
     weightkg: 29,
     abilities: {0: 'Inner Focus'},
+  },
+  'Ampharos-Aevian-Crest': {
+    types: ['Ice', 'Electric'],
+    bs: {hp: 90, at: 75, df: 90, sa: 115, sd: 85, sp: 55},
+    weightkg: 61.5,
+    abilities: {0: 'Filter'},
+    baseSpecies: 'Ampharos',
   },
   'Ariados-Crest': {
     types: ['Bug', 'Poison'],
