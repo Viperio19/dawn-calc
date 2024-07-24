@@ -1563,8 +1563,9 @@ export function calculateAttackSMSSSV(
 
   // Aevian Ampharos Crest: Buffs move in first move slot by 20% (STAB) or 50% (non-STAB)
   // TODO: does not detect first moveslot
-  if (attacker.named('Ampharos-Aevian-Crest') && attacker.moves[1] === move.name) {
+  if (attacker.named('Ampharos-Aevian-Crest') && move.moveSlot === 1) {
     attack = (move.type === 'Ice' || move.type === 'Electric') ? pokeRound((attack * 6) / 5) : pokeRound((attack * 3) / 2);
+    desc.attackerAbility = attacker.ability;
   }
 
   // Cofagrigus Crest: Buffs special attack by 25%

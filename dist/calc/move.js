@@ -62,6 +62,7 @@ var Move = (function () {
             }
             this.timesUsedWithMetronome = options.timesUsedWithMetronome;
             this.stockpiles = options.stockpiles;
+            this.moveSlot = options.moveSlot;
         }
         this.gen = gen;
         this.name = data.name;
@@ -135,6 +136,7 @@ var Move = (function () {
             timesUsed: this.timesUsed,
             timesUsedWithMetronome: this.timesUsedWithMetronome,
             stockpiles: this.stockpiles,
+            moveSlot: this.moveSlot,
             overrides: this.overrides
         });
     };

@@ -37,6 +37,7 @@ export namespace State {
     timesUsed?: number;
     timesUsedWithMetronome?: number;
     stockpiles?: number;
+    moveSlot?: number;
     overrides?: Partial<I.Move>;
   }
 

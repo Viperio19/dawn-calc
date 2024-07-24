@@ -213,6 +213,8 @@ function getKOChance(gen, attacker, defender, move, field, damage, err) {
         move.timesUsedWithMetronome = 1;
     if (move.stockpiles === undefined)
         move.stockpiles = 0;
+    if (move.moveSlot === undefined)
+        move.moveSlot = 1;
     if (damage[0] >= defender.maxHP() && move.timesUsed === 1 && move.timesUsedWithMetronome === 1) {
         return { chance: 1, n: 1, text: 'guaranteed OHKO' };
     }
@@ -761,7 +763,7 @@ function buildDescription(description, attacker, defender) {
             " ".concat(description.alliesFainted === 1 ? 'ally' : 'allies', " fainted ");
     }
     if (description.foesFainted) {
-        output += Math.max(5, description.foesFainted) +
+        output += Math.min(5, description.foesFainted) +
             " ".concat(description.alliesFainted === 1 ? 'foe' : 'foes', " fainted ");
     }
     if (description.relicanthTurnsAttack) {

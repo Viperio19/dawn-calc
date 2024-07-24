@@ -1128,20 +1128,38 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
     var attackStat = move.named('Shell Side Arm') &&
         (0, util_2.getShellSideArmCategory)(attacker, defender) === 'Physical'
         ? 'atk'
-        : attacker.named('Infernape-Crest')
-            ? (move.category === 'Special' ? 'spd' : 'def')
-            : attacker.named('Reuniclus-Crest-Fighting')
-                ? (move.category === 'Special' ? 'atk' : 'spa')
-                : attacker.named('Typhlosion-Crest') && move.category === 'Physical'
-                    ? 'spa'
-                    : move.category === 'Special'
-                        ? 'spa'
-                        : 'atk';
+        : (attacker.named('Claydol-Crest') && move.category === 'Special') || move.named('Body Press')
+            ? 'def'
+            : attacker.named('Dedenne-Crest')
+                ? 'spe'
+                : attacker.named('Infernape-Crest')
+                    ? (move.category === 'Special' ? 'spd' : 'def')
+                    : attacker.named('Reuniclus-Crest-Fighting')
+                        ? (move.category === 'Special' ? 'atk' : 'spa')
+                        : attacker.named('Typhlosion-Crest') && move.category === 'Physical'
+                            ? 'spa'
+                            : move.category === 'Special'
+                                ? 'spa'
+                                : 'atk';
     desc.attackEVs =
         move.named('Foul Play')
             ? (0, util_2.getEVDescriptionText)(gen, defender, attackStat, defender.nature)
             : (0, util_2.getEVDescriptionText)(gen, attacker, attackStat, attacker.nature);
-    if (attackSource.boosts[attackStat] === 0 ||
+    if (attacker.named('Claydol-Crest') && move.category === 'Special') {
+        attack = (0, util_2.getModifiedStat)(attacker.rawStats['def'], attacker.boosts['spa']);
+        desc.attackBoost = attackSource.boosts['spa'];
+    }
+    else if (attacker.named('Dedenne-Crest')) {
+        if (move.category === 'Special') {
+            attack = (0, util_2.getModifiedStat)(attacker.rawStats['spe'], attacker.boosts['spa']);
+            desc.attackBoost = attackSource.boosts['spa'];
+        }
+        else {
+            attack = (0, util_2.getModifiedStat)(attacker.rawStats['spe'], attacker.boosts['atk']);
+            desc.attackBoost = attackSource.boosts['atk'];
+        }
+    }
+    else if (attackSource.boosts[attackStat] === 0 ||
         (isCritical && attackSource.boosts[attackStat] < 0)) {
         attack = attackSource.rawStats[attackStat];
     }
@@ -1157,8 +1175,9 @@ function calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCri
         attack = (0, util_2.pokeRound)((attack * 3) / 2);
         desc.attackerAbility = attacker.ability;
     }
-    if (attacker.named('Ampharos-Aevian-Crest') && attacker.moves[1] === move.name) {
+    if (attacker.named('Ampharos-Aevian-Crest') && move.moveSlot === 1) {
         attack = (move.type === 'Ice' || move.type === 'Electric') ? (0, util_2.pokeRound)((attack * 6) / 5) : (0, util_2.pokeRound)((attack * 3) / 2);
+        desc.attackerAbility = attacker.ability;
     }
     if (attacker.named('Cofagrigus-Crest') && move.category === 'Special') {
         attack = (0, util_2.pokeRound)((attack * 5) / 4);
@@ -1375,6 +1394,9 @@ function calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCr
     if (defender.named('Crabominable-Crest')) {
         defense = (0, util_2.pokeRound)((defense * 6) / 5);
     }
+    if (defender.named('Meganium-Crest')) {
+        defense = (0, util_2.pokeRound)((defense * 6) / 5);
+    }
     if (defender.named('Noctowl-Crest') && move.category === 'Physical') {
         defense = (0, util_2.pokeRound)((defense * 6) / 5);
     }
@@ -1467,11 +1489,8 @@ function calculateDfModsSMSSSV(gen, attacker, defender, move, field, desc, isCri
         dfMods.push(8192);
         desc.defenderItem = defender.item;
     }
-    if (attacker.named('Electrode-Crest')) {
+    if (attacker.named('Electrode-Crest') && hitsPhysical) {
         dfMods.push(2048);
-    }
-    if (defender.named('Meganium-Crest')) {
-        dfMods.push(4915);
     }
     return dfMods;
 }
