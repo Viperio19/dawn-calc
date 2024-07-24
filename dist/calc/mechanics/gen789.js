@@ -1267,7 +1267,7 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
                 (attacker.hasAbility('Blaze') && move.hasType('Fire')) ||
                 (attacker.hasAbility('Torrent') && move.hasType('Water')) ||
                 (attacker.hasAbility('Swarm') && move.hasType('Bug')))) ||
-        (move.category === 'Special' && attacker.abilityOn && attacker.hasAbility('Plus', 'Minus'))) {
+        (move.category === 'Special' && (attacker.abilityOn || field.chromaticField === 'Thunder-Storm') && attacker.hasAbility('Plus', 'Minus'))) {
         atMods.push(6144);
         desc.attackerAbility = attacker.ability;
     }

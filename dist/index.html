@@ -772,7 +772,19 @@
                     <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Misty" id="misty" /><label class="btn btn-xxxwide btn-right" for="misty">Misty Terrain</label>
                     <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Psychic" id="psychic" /><label class="btn btn-xxxwide btn-mid" for="psychic">Psychic Terrain</label>
                 </div>
-                <div aria-labelledby="selectRuinInstruction" class="gen-specific g9 format-specific doubles" role="group" style="margin: 5px auto auto;" title="Select the ruin abilities from other Pok&eacute;mon on the field.">
+                <div class="fields">
+                    <label>Field</label>
+                    <select class="chromaticField gen-specific g9" id="chromatic-field" style="margin: 5px auto;">
+                        <option value="Jungle">Jungle (Bug)</option>
+                        <option value="Eclipse">Eclipse (Dark)</option>
+                        <option value="Dragon's Den">Dragon's Den (Dragon)</option>
+                        <option value="Thunder-Storm">Thunder-Storm (Electric)</option>
+                    </select>
+                    <span hidden id="confirmFieldInstruction">Confirm chosen field</span>
+                    <input aria-describedby="confirmFieldInstruction" class="visually-hidden calc-trigger" type="checkbox" id="confirm-field" />
+                    <label class="btn btn-xwide" for="confirm-field">Confirm field</label>
+                </div>
+                <div aria-labelledby="selectRuinInstruction" class="gen-specific g9 format-specific doubles" role="group" style="margin: 10px auto auto;" title="Select the ruin abilities from other Pok&eacute;mon on the field.">
                     <span class="visually-hidden" id="selectRuinInstruction">Select the active Ruin abilities from other Poke&eacute;mon on the field.</span>
                     <input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Beads" id="beads" />
                     <label class="btn btn-xxxwide btn-left" for="beads">Beads of Ruin</label>
@@ -1755,10 +1767,10 @@
     <script type="text/javascript" src="./calc/data/index.js?083d2bc9"></script>
     <script type="text/javascript" src="./calc/move.js?19a3f3b5"></script>
     <script type="text/javascript" src="./calc/pokemon.js?1aa7cdbd"></script>
-    <script type="text/javascript" src="./calc/field.js?644bf7a7"></script>
+    <script type="text/javascript" src="./calc/field.js?b19d3652"></script>
     <script type="text/javascript" src="./calc/items.js?3cbea98f"></script>
     <script type="text/javascript" src="./calc/mechanics/util.js?0dacfa99"></script>
-    <script type="text/javascript" src="./calc/mechanics/gen789.js?6e53c3bb"></script>
+    <script type="text/javascript" src="./calc/mechanics/gen789.js?a8bc8635"></script>
     <script type="text/javascript" src="./calc/mechanics/gen56.js?c5b0789a"></script>
     <script type="text/javascript" src="./calc/mechanics/gen4.js?ab7837a9"></script>
     <script type="text/javascript" src="./calc/mechanics/gen3.js?5064940a"></script>
@@ -1768,7 +1780,7 @@
     <script type="text/javascript" src="./calc/result.js?d5c7552b"></script>
     <script type="text/javascript" src="./calc/adaptable.js?afeb3759"></script>
     <script type="text/javascript" src="./calc/index.js?2377cbc8"></script>
-    <script type="text/javascript" src="./js/shared_controls.js?56aac2da"></script>
+    <script type="text/javascript" src="./js/shared_controls.js?990f21d6"></script>
     <script type="text/javascript" src="./js/index_randoms_controls.js?47d5fb48"></script>
     <script type="text/javascript" src="./js/moveset_import.js?60db7f40"></script>
 </div>

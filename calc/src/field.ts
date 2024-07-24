@@ -5,6 +5,7 @@ export class Field implements State.Field {
   gameType: GameType;
   weather?: Weather;
   terrain?: Terrain;
+  chromaticField?: string;
   isMagicRoom: boolean;
   isWonderRoom: boolean;
   isGravity: boolean;
@@ -21,6 +22,7 @@ export class Field implements State.Field {
   constructor(field: Partial<State.Field> = {}) {
     this.gameType = field.gameType || 'Singles';
     this.terrain = field.terrain;
+    this.chromaticField = field.chromaticField;
     this.weather = field.weather;
     this.isMagicRoom = !!field.isMagicRoom;
     this.isWonderRoom = !!field.isWonderRoom;
@@ -55,6 +57,7 @@ export class Field implements State.Field {
       gameType: this.gameType,
       weather: this.weather,
       terrain: this.terrain,
+      chromaticField: this.chromaticField,
       isMagicRoom: this.isMagicRoom,
       isWonderRoom: this.isWonderRoom,
       isGravity: this.isGravity,
