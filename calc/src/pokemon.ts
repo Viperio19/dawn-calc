@@ -161,7 +161,7 @@ export class Pokemon implements State.Pokemon {
   // Checks if the Pokemon has an "invisble" type change due to abilities
   hasInvisisbleType(opponent: Pokemon, field: Field, ...types: I.TypeName[]) {
     for (const type of types) {
-      if (this.hasReflectorType(opponent, type) || this.hasMimicryType(field, type)) return true;
+      if (this.hasMimicryType(field, type)) return true;
     }
     return false;
   }

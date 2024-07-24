@@ -530,6 +530,7 @@ $(".move-selector").change(function () {
 	var fullSetName = pokeObj.find("input.set-selector").val();
 	var pokemonName = fullSetName.substring(0, fullSetName.indexOf(" ("));
 	var stockpile = moveName === 'Spit Up' || (moveName === 'Belch' && startsWith(pokemonName, "Swalot")); 
+	var moveSlot = startsWith(pokemonName, "Ampharos-Aevian"); 
 	if (Array.isArray(move.multihit)) {
 		moveGroupObj.children(".stat-drops").hide();
 		moveGroupObj.children(".move-hits").show();
@@ -553,6 +554,11 @@ $(".move-selector").change(function () {
 		moveGroupObj.children(".stockpile").hide();
 	}
 	moveGroupObj.children(".move-z").prop("checked", false);
+	if (moveSlot) {
+		moveGroupObj.children(".move-slot").show();
+	} else {
+		moveGroupObj.children(".move-slot").hide();
+	}
 });
 
 $(".item").change(function () {
@@ -1081,6 +1087,7 @@ function getMoveDetails(moveInfo, species, ability, item, useMax) {
 	var timesUsed = +moveInfo.find(".stat-drops").val();
 	var timesUsedWithMetronome = moveInfo.find(".metronome").is(':visible') ? +moveInfo.find(".metronome").val() : 1;
 	var stockpiles = +moveInfo.find(".stockpile").val();
+	var moveSlot = +moveInfo.find(".move-slot").val();
 	var overrides = {
 		basePower: +moveInfo.find(".move-bp").val(),
 		type: moveInfo.find(".move-type").val()
@@ -1089,7 +1096,7 @@ function getMoveDetails(moveInfo, species, ability, item, useMax) {
 	return new calc.Move(gen, moveName, {
 		ability: ability, item: item, useZ: isZMove, species: species, isCrit: isCrit, hits: hits,
 		isStellarFirstUse: isStellarFirstUse, timesUsed: timesUsed, timesUsedWithMetronome: timesUsedWithMetronome,
-		stockpiles: stockpiles, overrides: overrides, useMax: useMax
+		stockpiles: stockpiles, moveSlot: moveSlot, overrides: overrides, useMax: useMax
 	});
 }
 

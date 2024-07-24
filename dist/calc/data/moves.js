@@ -4960,7 +4960,8 @@ var CHROMATIC_PATCH = {
         category: 'Special',
         zp: 175,
         maxPower: 130,
-        secondaries: true
+        secondaries: true,
+        isWind: true
     },
     'Hexing Slash': {
         bp: 90,
@@ -4993,7 +4994,8 @@ var CHROMATIC_PATCH = {
         type: 'Steel',
         category: 'Special',
         zp: 175,
-        maxPower: 130
+        maxPower: 130,
+        isBeam: true
     },
     'Mud Barrage': {
         bp: 25,
@@ -5027,7 +5029,8 @@ var CHROMATIC_PATCH = {
         zp: 175,
         maxPower: 130,
         secondaries: true,
-        makesContact: true
+        makesContact: true,
+        isSlicing: true
     },
     'Stacking Shot': {
         bp: 40,

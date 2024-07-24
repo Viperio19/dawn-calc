@@ -213,6 +213,8 @@ function getKOChance(gen, attacker, defender, move, field, damage, err) {
         move.timesUsedWithMetronome = 1;
     if (move.stockpiles === undefined)
         move.stockpiles = 0;
+    if (move.moveSlot === undefined)
+        move.moveSlot = 1;
     if (damage[0] >= defender.maxHP() && move.timesUsed === 1 && move.timesUsedWithMetronome === 1) {
         return { chance: 1, n: 1, text: 'guaranteed OHKO' };
     }
@@ -777,9 +779,6 @@ function buildDescription(description, attacker, defender) {
     if (description.isSwordOfRuin) {
         output += 'Sword of Ruin ';
     }
-    if (description.reflectorOffenseTypes) {
-        output += 'Reflector ' + description.reflectorOffenseTypes;
-    }
     if (description.mimicryOffenseType) {
         output += 'Mimicry ' + description.mimicryOffenseType + ' ';
     }
@@ -848,9 +847,6 @@ function buildDescription(description, attacker, defender) {
     }
     if (description.defenderTera) {
         output += "Tera ".concat(description.defenderTera, " ");
-    }
-    if (description.reflectorDefenseTypes) {
-        output += 'Reflector ' + description.reflectorDefenseTypes;
     }
     if (description.mimicryDefenseType) {
         output += 'Mimicry ' + description.mimicryDefenseType + ' ';

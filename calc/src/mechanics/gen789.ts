@@ -46,7 +46,7 @@ import {
   getMimicryType,
   isQPActive,
 } from './util';
-import { SpeciesName } from '@pkmn/dex';
+import { SpeciesName, Type } from '@pkmn/dex';
 import { MoveName } from '@pkmn/dex';
 
 export function calculateSMSSSV(
@@ -269,9 +269,10 @@ export function calculateSMSSSV(
     } else if ((isSimisearCrest = attacker.named('Simisear-Crest') && normal)) {
       type = 'Water';
     } else if (move.named('Mirror Beam')) {
-      if (attacker.hasAbility('Reflector') && defender.types[1] && defender.types[1] != attacker.types[0]) {
-        type = defender.types[1];
-      } else if (attacker.types[1] != undefined && attacker.types[1] != ("???" as TypeName)) {
+      // if (attacker.hasAbility('Reflector') && defender.types[1] && defender.types[1] != attacker.types[0]) {
+      //   type = defender.types[1];
+      // } else 
+      if (attacker.types[1] && attacker.types[1] != ("???" as TypeName)) {
         type = attacker.types[1];
       }
       desc.mirrorBeamType = type;
@@ -317,11 +318,11 @@ export function calculateSMSSSV(
     desc.mimicryDefenseType = type1;
   }
 
-  if (defender.hasAbility('Reflector') && attacker.types[1] && !defender.hasType(attacker.types[1])) {
-    type2 = attacker.types[1];
+  // if (defender.hasAbility('Reflector') && attacker.types[1] && !defender.hasType(attacker.types[1])) {
+  //   type2 = attacker.types[1];
 
-    desc.reflectorDefenseTypes = defender.types[0] + ' / ' + type2 + ' ';
-  }
+  //   desc.reflectorDefenseTypes = defender.types[0] + ' / ' + type2 + ' ';
+  // }
 
   let type1Effectiveness = getMoveEffectiveness(
     gen,
@@ -356,21 +357,25 @@ export function calculateSMSSSV(
 
   let typeEffectiveness = type1Effectiveness * type2Effectiveness;
   
-  // Crests - Resistances
+  // Crests - Resistances and Immunities
 
+  // Druddigon Crest: Gives immunity to fire type moves
   if (defender.named('Druddigon-Crest')) {
     if (move.hasType('Fire')) // Fire Immunity
       typeEffectiveness = 0;
   }
 
+  // Glaceon Crest: Gives resistance to fighting and rock type moves
   if (defender.named('Glaceon-Crest') && move.hasType('Fighting', 'Rock')) {
     typeEffectiveness = 0.5;
   }
 
+  // Leafeon Crest: Gives resistance to fire and flying type moves
   if (defender.named('Leafeon-Crest') && move.hasType('Fire', 'Flying')) {
     typeEffectiveness = 0.5;
   }
 
+  // Luxray Crest: Gives resistance to dark and ghost type moves, and immunity to psychic type moves (dark pseudo-typing)
   if (defender.named('Luxray-Crest')) {
     if (move.hasType('Dark', 'Ghost')) // Dark Resistances
       typeEffectiveness *= 0.5;
@@ -378,31 +383,37 @@ export function calculateSMSSSV(
       typeEffectiveness = 0;
   }
 
+  // Samurott Crest: Gives resistances to dark, bug and rock type moves (fighting pseudo-typing)
   if (defender.named('Samurott-Crest')) {
     if (move.hasType('Dark', 'Bug', 'Rock')) // Fighting Resistances
       typeEffectiveness *= 0.5;
   }
 
+  // Simipour Crest: Gives resistance to grass, water, ground and electric type moves (grass pseudo-typing)
   if (defender.named('Simipour-Crest')) {
     if (move.hasType('Grass', 'Water', 'Ground', 'Electric')) // Grass Resistances
       typeEffectiveness *= 0.5;
   }
 
+  // Simisage Crest: Gives resistance to grass, fire, bug, ice, steel and fairy type moves (fire pseudo-typing)
   if (defender.named('Simisage-Crest')) {
     if (move.hasType('Grass', 'Fire', 'Bug', 'Ice', 'Steel', 'Fairy')) // Fire Resistances
       typeEffectiveness *= 0.5;
   }
 
+  // Simisear Crest: Gives resistance to fire, water, ice and steel type moves (water pseudo-typing)
   if (defender.named('Simisear-Crest')) {
     if (move.hasType('Fire', 'Water', 'Ice', 'Steel')) // Water Resistances
       typeEffectiveness *= 0.5;
   }
 
+  // Skuntank Crest: Gives ground immunity
   if (defender.named('Skuntank-Crest')) {
     if (move.hasType('Ground')) // Ground Immunity
       typeEffectiveness = 0;
   }
 
+  // Whiscash Crest: Gives grass immunity
   if (defender.named('Whiscash-Crest')) {
     if (move.hasType('Grass')) // Grass Immunity
       typeEffectiveness = 0;
@@ -594,11 +605,11 @@ export function calculateSMSSSV(
       : move.named('Body Press')
         ? 'def'
         : attacker.named('Infernape-Crest')
-          ? (move.category === 'Special' ? 'spd' : 'def')
+          ? (move.category === 'Special' ? 'spd' : 'def') // Infernape Crest: Uses defense stat (changes) instead of offense stat (changes)
           : attacker.named('Reuniclus-Crest-Fighting')
-            ? (move.category === 'Special' ? 'atk' : 'spa')
+            ? (move.category === 'Special' ? 'atk' : 'spa') // Reuniclus Crest (Fighting): Swaps offense stat (changes)
             : attacker.named('Typhlosion-Crest') && move.category === 'Physical'
-              ? 'spa'
+              ? 'spa' // Typhlosion Crest: Uses special attack stat (changes) instead of physical attack stat (changes)
               : move.category === 'Special'
                 ? 'spa'
                 : 'atk';
@@ -612,9 +623,9 @@ export function calculateSMSSSV(
   // Crests - Defense Stat Swaps (if combat stages included)
   const defenseStat =
     (defender.named('Infernape-Crest'))
-      ? (move.category === 'Special' ? 'spa' : 'atk')
+      ? (move.category === 'Special' ? 'spa' : 'atk') // Infernape Crest: Uses offense stat (changes) instead of defense stat (changes)
       : (defender.named('Magcargo-Crest') && hitsPhysical)
-        ? 'spe'
+        ? 'spe' // Magcargo Crest: Uses speed stat (changes) instead of defense stat (changes)
         : hitsPhysical
           ? 'def'
           : 'spd';
@@ -651,9 +662,9 @@ export function calculateSMSSSV(
   } else if ((attacker.hasAbility('Protean', 'Libero') || attacker.named('Boltund-Crest')) && !attacker.teraType) {
     stabMod += 2048;
     desc.attackerAbility = attacker.ability;
-  } else if (attacker.hasAbility('Reflector') && (defender.types[1] === move.type)) {
-    stabMod += 2048;
-    desc.reflectorOffenseTypes = attacker.types[0] + ' / ' + defender.types[1] + ' ';
+  // } else if (attacker.hasAbility('Reflector') && (defender.types[1] === move.type)) {
+  //   stabMod += 2048;
+  //   desc.reflectorOffenseTypes = attacker.types[0] + ' / ' + defender.types[1] + ' ';
   } else if (attacker.hasAbility('Mimicry') && getMimicryType(field) === move.type) {
     stabMod += 2048;
     desc.mimicryOffenseType = getMimicryType(field);
@@ -762,7 +773,7 @@ export function calculateSMSSSV(
     checkMultihitBoost(gen, noseSteel, defender, noseMove, field, desc);
     let noseSteelDamage = calculateSMSSSV(gen, noseSteel, defender, noseMove, field).damage as number[];
 
-    noseDamage = [];
+    noseDamage = noseElectricDamage
 
     for (let i = 0; i < 16; i++) {
       noseDamage[i] = noseElectricDamage[i] + noseRockDamage[i] + noseSteelDamage[i];
@@ -1451,22 +1462,27 @@ export function calculateBPModsSMSSSV(
 
   // Crests - Misc Modifiers
 
+  // Beheeyem Crest: Reduces damage taken from Pokemon moving before it by 33%
   if (defender.named('Beheeyem-Crest') && defender.stats.spe <= attacker.stats.spe) {
     bpMods.push(2732);
   }
 
+  // Boltund Crest: Increases damage dealt with bite moves when moving before the opponent by 30%
   if (attacker.named('Boltund-Crest') && move.flags.bite && attacker.stats.spe >= defender.stats.spe) {
-    bpMods.push(6144);
+    bpMods.push(5324);
   }
 
+  // Claydol Crest: Increases damage dealt with beam moves by 50%
   if (attacker.named('Claydol-Crest') && move.flags.beam) {
     bpMods.push(6144);
   }
 
+  // Druddigon Crest: Increases damage dealt with fire and dragon type moves by 30% 
   if (attacker.named('Druddigon-Crest') && move.hasType('Fire', 'Dragon')) {
     bpMods.push(5324);
   }
 
+  // Fearow Crest: Increases damage dealt with stabbing moves by 50%
   if (attacker.named('Fearow-Crest') && move.flags.stabbing) {
     bpMods.push(6144);
   }
@@ -1496,15 +1512,15 @@ export function calculateAttackSMSSSV(
     getShellSideArmCategory(attacker, defender) === 'Physical'
       ? 'atk'
       : (attacker.named('Claydol-Crest') && move.category === 'Special') || move.named('Body Press')
-        ? 'def'
+        ? 'def' // Claydol Crest: Uses physical defense stat instead of special defense stat
         : attacker.named('Dedenne-Crest')
-          ? 'spe'
+          ? 'spe' // Dedenne Crest: Uses physical defense stat instead of special defense stat
           : attacker.named('Infernape-Crest')
-            ? (move.category === 'Special' ? 'spd' : 'def')
+            ? (move.category === 'Special' ? 'spd' : 'def') // Infernape Crest: Uses defense stats instead of offense stats
             : attacker.named('Reuniclus-Crest-Fighting')
-              ? (move.category === 'Special' ? 'atk' : 'spa')
+              ? (move.category === 'Special' ? 'atk' : 'spa') // Reuniclus Crest (Fighting): Swaps offense stats
               : attacker.named('Typhlosion-Crest') && move.category === 'Physical'
-                ? 'spa'
+                ? 'spa' // Typhlosion Crest: Uses special attack stat instead of physical attack stat
                 : move.category === 'Special'
                   ? 'spa'
                   : 'atk';
@@ -1513,9 +1529,11 @@ export function calculateAttackSMSSSV(
       ? getEVDescriptionText(gen, defender, attackStat, defender.nature)
       : getEVDescriptionText(gen, attacker, attackStat, attacker.nature);
 
+  // Claydol Crest: Uses physical defense stat instead of special defense stat, but uses regular stat changes 
   if (attacker.named('Claydol-Crest') && move.category === 'Special') {
     attack = getModifiedStat(attacker.rawStats['def']!, attacker.boosts['spa']!);
     desc.attackBoost = attackSource.boosts['spa'];
+  // Dedenne Crest: Uses speed stat instead of offenses, but uses regular stat changes
   } else if (attacker.named('Dedenne-Crest')){
     if (move.category === 'Special') {
       attack = getModifiedStat(attacker.rawStats['spe']!, attacker.boosts['spa']!);
@@ -1543,45 +1561,67 @@ export function calculateAttackSMSSSV(
 
   // Crests - Attack Buffs
 
+  // Aevian Ampharos Crest: Buffs move in first move slot by 20% (STAB) or 50% (non-STAB)
+  // TODO: does not detect first moveslot
+  if (attacker.named('Ampharos-Aevian-Crest') && move.moveSlot === 1) {
+    attack = (move.type === 'Ice' || move.type === 'Electric') ? pokeRound((attack * 6) / 5) : pokeRound((attack * 3) / 2);
+    desc.attackerAbility = attacker.ability;
+  }
+
+  // Cofagrigus Crest: Buffs special attack by 25%
   if (attacker.named('Cofagrigus-Crest') && move.category === 'Special') {
     attack = pokeRound((attack * 5) / 4);
   }
 
+  // Crabominable Crest: Buffs physical attack and physical defense by 20%
   if (attacker.named('Crabominable-Crest') && move.named('Body Press')) {
     attack = pokeRound((attack * 6) / 5);
   }
 
+  // Cryogonal Crest: Buffs offenses by 10% of its special defense (which is buffed by 20%)
+  if (attacker.named('Cryogonal-Crest') && attacker.hasAbility('Levitate')) {
+    attack += Math.floor((Math.floor(attacker.stats['spd'] * 6 / 5) / 10));
+  }
+
+  // Dusknoir Crest: Buffs physical attack by 25%
   if (attacker.named('Dusknoir-Crest') && move.category === 'Physical') {
     attack = pokeRound((attack * 5) / 4);
   }
 
+  // Hypno Crest: Buffs special attack by 50%
   if (attacker.named('Hypno-Crest') && move.category === 'Special') {
     attack = pokeRound((attack * 3) / 2);
   }
 
+  // Magcargo Crest: Buffs special attack by 30%
   if (attacker.named('Magcargo-Crest') && move.category === 'Special') {
     attack = pokeRound((attack * 13) / 10);
   }
 
+  // Oricorio Crest: Buffs special attack by 25%
   if ((attacker.named('Oricorio-Crest-Baile') || attacker.named('Oricorio-Crest-Pa\'u') || attacker.named('Oricorio-Crest-Pom-Pom') || attacker.named('Oricorio-Crest-Sensu'))
     && move.category === 'Special') {
     attack = pokeRound((attack * 5) / 4);
   }
 
+  // Relicanth Crest: Buffs offenses by 25% + 10% * consecutive turns that it has been on the field
   if (attacker.named('Relicanth-Crest')) {
     let turns = attacker.relicanthTurns === undefined ? 0 : attacker.relicanthTurns;
     attack = pokeRound((attack * (125 + (10 * turns))) / 100);
     desc.relicanthTurnsAttack = turns;
   }
 
+  // Simi Monkeys Crests: Buffs offenses by 20%
   if (attacker.named('Simipour-Crest') || attacker.named('Simisage-Crest') || attacker.named('Simisear-Crest')) {
     attack = pokeRound((attack * 6) / 5);
   }
 
+  // Skuntank Crest: Buffs offenses by 20%
   if (attacker.named('Skuntank-Crest')) {
     attack = pokeRound((attack * 6) / 5);
   }
 
+  // Spiritomb Crest: Buffs offenses by 
   if (attacker.named('Spiritomb-Crest')) {
     let foesFainted = attacker.foesFainted === undefined ? 0 : attacker.foesFainted;
     if (foesFainted > 0) {
@@ -1590,21 +1630,18 @@ export function calculateAttackSMSSSV(
     }
   }
 
+  // Stantler + Wyrdeer Crest: Buffs physical attack by 50%
+  if ((attacker.named('Stantler-Crest') || attacker.named('Wyrdeer-Crest')) && move.category === 'Physical') {
+    attack = pokeRound((attack * 3) / 2);
+  }
+
+  // Whiscash Crest: Buffs offenses by 20%
   if (attacker.named('Whiscash-Crest')) {
     attack = pokeRound((attack * 6) / 5);
   }
 
   const atMods = calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc);
   attack = OF16(Math.max(1, pokeRound((attack * chainMods(atMods, 410, 131072)) / 4096)));
-
-  if (attacker.named('Cryogonal-Crest')) {
-    attack += pokeRound(((attacker.stats['spd'] * 12) / 100));
-  }
-
-  if ((attacker.named('Stantler-Crest') || attacker.named('Wyrdeer-Crest')) && move.category === 'Physical') {
-    attack = pokeRound((attack * 3) / 2);
-  }
-
   return attack;
 }
 
@@ -1753,6 +1790,7 @@ export function calculateAtModsSMSSSV(
 
   // Crests - Attack Modifiers
 
+  // Seviper Crest: Buffs damage by 50% * percentage of target health left / 100
   if (attacker.named('Seviper-Crest')) {
     atMods.push(4096 + pokeRound(Math.floor((defender.curHP() * 4096) / defender.maxHP()) / 2));
   }
@@ -1776,12 +1814,13 @@ export function calculateDefenseSMSSSV(
   // Crests - Defense Stat Swaps (in general)
   const defenseStat = 
     (defender.named('Infernape-Crest'))
-      ? (move.category === 'Special' ? 'spa' : 'atk')
+      ? (move.category === 'Special' ? 'spa' : 'atk') // Infernape Crest: Uses offense stat (changes) instead of defense stat (changes)
       : (defender.named('Magcargo-Crest') && hitsPhysical)
-        ? 'spe'
+        ? 'spe' // Magcargo Crest: Uses speed stat (changes) instead of defense stat (changes)
         : hitsPhysical
           ? 'def'
           : 'spd';
+  
   desc.defenseEVs = getEVDescriptionText(gen, defender, defenseStat, defender.nature);
   if (defender.boosts[defenseStat] === 0 ||
       (isCritical && defender.boosts[defenseStat] > 0) ||
@@ -1807,28 +1846,39 @@ export function calculateDefenseSMSSSV(
 
   // Crests - Defense Buffs
 
+  // Cofagrigus Crest: Buffs special defense by 25% 
   if (defender.named('Cofagrigus-Crest') && move.category === 'Special') {
     defense = pokeRound((defense * 5) / 4);
   }
 
+  // Cofagrigus Crest: Buffs defenses by 20%
   if (defender.named('Crabominable-Crest')) {
     defense = pokeRound((defense * 6) / 5);
   }
 
+  // Meganium Crest: Buffs defenses by 20%
+  if (defender.named('Meganium-Crest')) {
+    defense = pokeRound((defense * 6) / 5);
+  }
+
+  // Noctowl Crest: Buffs physical defense by 20%
   if (defender.named('Noctowl-Crest') && move.category === 'Physical') {
     defense = pokeRound((defense * 6) / 5);
   }
 
+  // Phione Crest: Buffs defenses by 50%
   if (defender.named('Phione-Crest')) {
     defense = pokeRound((defense * 3) / 2);
   }
 
+  // Relicanth Crest: Buffs special defense by 25% + 10% * consecutive turns that it has been on the field
   if (defender.named('Relicanth-Crest') && move.category === 'Special') {
     let turns = defender.relicanthTurns === undefined ? 0 : defender.relicanthTurns;
     defense = pokeRound((defense * (125 + (10 * turns))) / 100);
     desc.relicanthTurnsDefense = turns;
   }
   
+  // Vespiquen Crest (Defense): Buffs defense by 50%
   if (defender.named('Vespiquen-Crest-Defense')) {
     defense = pokeRound((defense * 3) / 2);
   }
@@ -1844,11 +1894,12 @@ export function calculateDefenseSMSSSV(
     hitsPhysical
   );
 
+  // Cryogonal Crest: Buffs special defense by 20%, and physical defense by 10% of its special defense
   if (defender.named('Cryogonal-Crest')) {
     if (move.category === 'Special') {
       defense = pokeRound((defense * 6) / 5);
     } else {
-      defense += pokeRound(((defender.stats['spd'] * 12) / 100));
+      defense += Math.floor((Math.floor(defender.stats['spd'] * 6 / 5) / 10));
     }
   }
 
@@ -1938,12 +1989,9 @@ export function calculateDfModsSMSSSV(
 
   // Crests - Defense Modifiers
 
-  if (attacker.named('Electrode-Crest')) {
+  // Electrode Crest: Decreases the target's physical defense stat by 50%
+  if (attacker.named('Electrode-Crest') && hitsPhysical) {
     dfMods.push(2048);
-  }
-
-  if (defender.named('Meganium-Crest')) {
-    dfMods.push(4915);
   }
 
   return dfMods;
@@ -2081,6 +2129,10 @@ export function calculateFinalModsSMSSSV(
     desc.defenderAbility = defender.ability;
   }
 
+  if (defender.named('Ampharos-Aevian-Crest') && typeEffectiveness > 1) {
+    finalMods.push(2867);
+  }
+  
   if (field.defenderSide.isFriendGuard) {
     finalMods.push(3072);
     desc.isFriendGuard = true;

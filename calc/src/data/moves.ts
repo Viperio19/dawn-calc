@@ -4973,7 +4973,8 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     category: 'Special',
     zp: 175,
     maxPower: 130,
-    secondaries: true, // wind?
+    secondaries: true,
+    isWind: true,
   },
   'Hexing Slash': {
     bp: 90,
@@ -4982,7 +4983,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     zp: 175,
     maxPower: 130,
     makesContact: true,
-    isSlicing: true, // slicing?
+    isSlicing: true,
     secondaries: true,
     drain: [1, 2],
   },
@@ -5007,6 +5008,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     category: 'Special',
     zp: 175,
     maxPower: 130,
+    isBeam: true,
   },
   'Mud Barrage': {
     bp: 25,
@@ -5041,6 +5043,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     maxPower: 130,
     secondaries: true,
     makesContact: true,
+    isSlicing: true,
   },
   'Stacking Shot': {
     bp: 40,

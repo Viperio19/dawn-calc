@@ -147,8 +147,9 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
     speed = Math.floor(OF32(speed * (gen.num < 7 ? 25 : 50)) / 100);
   }
 
+  // Cryogonal Crest: Buffs speed by 10% of its special defense (which is buffed by 20%)
   if (pokemon.named('Cryogonal-Crest')) {
-    speed += pokeRound(((pokemon.stats['spd'] * 12) / 100));
+    speed += Math.floor((Math.floor(pokemon.stats['spd'] * 6 / 5) / 10));
   }
 
 
