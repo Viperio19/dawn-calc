@@ -5062,6 +5062,6 @@ var SETDEX_SV = {
   },
   "Zangoose-Crest": {
     "NatDex Fields Offense": {"ability":"Toxic Boost","item":"Up-Grade","nature":"Adamant","teraType":"Normal","evs":{"at":252,"sd":4,"sp":252},"moves":["Taunt","Fire Punch","Quick Attack","Facade"]}
-  },
+  }
   // natdex fields Crests sets end
 };
