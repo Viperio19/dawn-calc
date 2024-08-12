@@ -4538,7 +4538,7 @@ var SETDEX_SV = {
   },
   "Glalie": {
     "ZU Showdown Usage": {"ability":"Inner Focus","item":"Focus Sash","nature":"Jolly","teraType":"Ice","evs":{"at":252,"sd":4,"sp":252},"moves":["Spikes","Taunt","Earthquake","Ice Shard"]}
-  }
+  },
   // natdex fields MegaG sets beginning
   "Appletun-Mega-Gmax": {
     "National Dex Fields": {"ability":"Thick Fat","item":"Appletunite","nature":"Bold","teraType":"Grass","ivs":{"at":0},"evs":{"hp":232,"df":252,"sd":20,"sp":4},"moves":["Recover","Iron Defense","Body Press","Apple Acid"]}
