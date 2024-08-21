@@ -1,6 +1,6 @@
-# Dawn Damage Calculator
+# Chromatic Damage Calculator
 
-Damage calculator for Dawn, based on https://github.com/smogon/damage-calc.
+Damage calculator for the Chromatic League, based on https://github.com/smogon/damage-calc.
 
 The added features include:
 - Crests (from Pokemon Rejuvenation)
@@ -8,4 +8,4 @@ The added features include:
 - Gmax megas
 - Custom eeveelutions
 
-Dawn: https://play.dawn-ps.com/.
+Chromatic League discord server: https://discord.gg/Q3WmjYD.
