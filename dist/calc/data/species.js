@@ -11266,7 +11266,7 @@ var CHROMATIC_PATCH = {
         nfe: true
     },
     'Lapras-Aevian': {
-        types: ['Poison', 'Ground'],
+        types: ['Rock', 'Psychic'],
         bs: { hp: 135, at: 95, df: 80, sa: 85, sd: 85, sp: 60 },
         weightkg: 220,
         abilities: { 0: 'Solid Rock' },
