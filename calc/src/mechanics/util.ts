@@ -319,6 +319,12 @@ export function checkFieldBoosts(source: Pokemon, field: Field) {
     } else if (source.hasAbility('Lightning Rod')) {
       source.boosts.spa = Math.min(6, source.boosts.spa + 1);
     }
+  } else if (field.chromaticField === 'Starlight Arena') {
+    if (source.hasAbility('Illuminate')) {
+      source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+    } else if (source.hasAbility('Aroma Veil', 'Pastel Veil', 'Sweet Veil')) {
+      source.boosts.spd = Math.min(6, source.boosts.spd + 1);
+    }
   }
 }
 
@@ -640,8 +646,10 @@ export function getMimicryType(field: Field) {
     return "Dark" as TypeName;
   } else if (field.chromaticField === "Dragon's Den") {
     return "Dragon" as TypeName;
-  } else if (field.chromaticField === "Thundering Plateau") {
+  } else if (field.chromaticField === 'Thundering Plateau') {
     return "Electric" as TypeName;
+  } else if (field.chromaticField === 'Starlight Arena') {
+    return "Fairy" as TypeName;
   } else {
     return "???" as TypeName;
   }

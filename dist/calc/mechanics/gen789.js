@@ -116,8 +116,9 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
                 field.chromaticField === 'Jungle' ? 'Bug'
                     : field.chromaticField === 'Eclipse' ? 'Dark'
                         : field.chromaticField === "Dragon's Den" ? 'Steel'
-                            : field.chromaticField === "Thundering Plateau" ? 'Electric'
-                                : 'Normal';
+                            : field.chromaticField === 'Thundering Plateau' ? 'Electric'
+                                : field.chromaticField === 'Starlight Arena' ? 'Fairy'
+                                    : 'Normal';
             if (!(type === 'Normal')) {
                 desc.chromaticField = field.chromaticField;
             }
@@ -178,6 +179,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     var isSimisageCrest = false;
     var isSimisearCrest = false;
     var isDDenIntimidate = false;
+    var isStarlightFairy = false;
     var noTypeChange = move.named('Revelation Dance', 'Judgment', 'Nature Power', 'Techno Blast', 'Multi Attack', 'Natural Gift', 'Weather Ball', 'Terrain Pulse', 'Struggle') || (move.named('Tera Blast') && attacker.teraType);
     if (!move.isZ && !noTypeChange) {
         var normal = move.hasType('Normal');
@@ -218,6 +220,9 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         else if ((isDDenIntimidate = attacker.hasAbility('Intimidate') && normal && field.chromaticField === "Dragon's Den")) {
             type = 'Dragon';
         }
+        else if ((isStarlightFairy = normal && field.chromaticField === 'Starlight Arena')) {
+            type = 'Fairy';
+        }
         else if (move.named('Mirror Beam')) {
             if (attacker.types[1] && attacker.types[1] != "???") {
                 type = attacker.types[1];
@@ -240,6 +245,10 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
             desc.chromaticField = field.chromaticField;
             hasAteAbilityTypeChange = true;
         }
+        else if (isStarlightFairy) {
+            desc.moveType = type;
+            desc.chromaticField = field.chromaticField;
+        }
     }
     if (move.named('Tera Blast') && attacker.teraType) {
         type = attacker.teraType;
@@ -260,6 +269,10 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     if (defender.hasAbility('Mimicry') && (0, util_2.getMimicryType)(field) != "???") {
         type1 = (0, util_2.getMimicryType)(field);
         type2 = "???";
+        desc.mimicryDefenseType = type1;
+    }
+    if (defender.hasAbility('Victory Star') && field.chromaticField === 'Starlight Arena') {
+        type1 = 'Fairy';
         desc.mimicryDefenseType = type1;
     }
     var type1Effectiveness = (0, util_2.getMoveEffectiveness)(gen, move, type1, field, isGhostRevealed, field.isGravity, isRingTarget);
@@ -365,9 +378,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     if (field.chromaticField === 'Jungle' && move.named('Fell Stinger', 'Silver Wind', 'Steamroller')) {
         desc.chromaticField = field.chromaticField;
     }
-    if (field.chromaticField === 'Thundering Plateau' &&
-        ((attacker.hasAbility("Motor Drive") && move.named('Gyro Ball', 'Electro Ball')) ||
-            (attacker.hasAbility("Lightning Rod") && move.category === 'Special'))) {
+    if (field.chromaticField === 'Starlight Arena' && attacker.hasAbility("Illuminate") && move.category === 'Special') {
         desc.chromaticField = field.chromaticField;
     }
     if (move.type === 'Stellar') {
@@ -513,6 +524,10 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         stabMod += 2048;
         desc.mimicryOffenseType = (0, util_2.getMimicryType)(field);
     }
+    else if (attacker.hasAbility('Victory Star') && field.chromaticField === 'Starlight Arena' && move.hasType('Fairy')) {
+        stabMod += 2048;
+        desc.chromaticField = field.chromaticField;
+    }
     else if (attacker.named('Empoleon-Crest') && move.hasType('Ice')) {
         stabMod += 2048;
     }
@@ -552,6 +567,16 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         else {
             stabMod = 4915;
         }
+    }
+    else if (attacker.hasAbility('Pixilate') && field.chromaticField === 'Starlight Arena') {
+        if (attacker.hasOriginalType(move.type)) {
+            stabMod += 2048;
+        }
+        else {
+            stabMod = 4915;
+        }
+        desc.attackerTera = 'Stellar';
+        desc.chromaticField = field.chromaticField;
     }
     var applyBurn = attacker.hasStatus('brn') &&
         move.category === 'Physical' &&
@@ -901,6 +926,10 @@ function calculateBasePowerSMSSSV(gen, attacker, defender, move, field, hasAteAb
                     case 'Thundering Plateau':
                         basePower = 60;
                         desc.moveName = 'Shock Wave';
+                        break;
+                    case 'Starlight Arena':
+                        basePower = 0;
+                        desc.moveName = 'Lunar Dance';
                         break;
                     default:
                         basePower = 80;

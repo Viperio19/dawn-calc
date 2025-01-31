@@ -196,7 +196,8 @@ export function calculateSMSSSV(
         field.chromaticField === 'Jungle' ? 'Bug'
         : field.chromaticField === 'Eclipse' ? 'Dark'
         : field.chromaticField === "Dragon's Den" ? 'Steel'
-        : field.chromaticField === "Thundering Plateau" ? 'Electric'
+        : field.chromaticField === 'Thundering Plateau' ? 'Electric'
+        : field.chromaticField === 'Starlight Arena' ? 'Fairy'
         : 'Normal';
       if (!(type === 'Normal')) {
         desc.chromaticField = field.chromaticField;
@@ -248,6 +249,7 @@ export function calculateSMSSSV(
   let isSimisageCrest = false;
   let isSimisearCrest = false;
   let isDDenIntimidate = false;
+  let isStarlightFairy = false;
   const noTypeChange = move.named(
     'Revelation Dance',
     'Judgment',
@@ -287,10 +289,9 @@ export function calculateSMSSSV(
       type = 'Water';
     } else if ((isDDenIntimidate = attacker.hasAbility('Intimidate') && normal && field.chromaticField === "Dragon's Den")) {
       type = 'Dragon';
+    } else if ((isStarlightFairy = normal && field.chromaticField === 'Starlight Arena')) {
+      type = 'Fairy';
     } else if (move.named('Mirror Beam')) {
-      // if (attacker.hasAbility('Reflector') && defender.types[1] && defender.types[1] != attacker.types[0]) {
-      //   type = defender.types[1];
-      // } else 
       if (attacker.types[1] && attacker.types[1] != ("???" as TypeName)) {
         type = attacker.types[1];
       }
@@ -308,6 +309,9 @@ export function calculateSMSSSV(
       desc.moveType = type;
       desc.chromaticField = field.chromaticField;
       hasAteAbilityTypeChange = true;
+    } else if (isStarlightFairy) {
+      desc.moveType = type;
+      desc.chromaticField = field.chromaticField;
     }
   }
 
@@ -342,11 +346,10 @@ export function calculateSMSSSV(
     desc.mimicryDefenseType = type1;
   }
 
-  // if (defender.hasAbility('Reflector') && attacker.types[1] && !defender.hasType(attacker.types[1])) {
-  //   type2 = attacker.types[1];
-
-  //   desc.reflectorDefenseTypes = defender.types[0] + ' / ' + type2 + ' ';
-  // }
+  if (defender.hasAbility('Victory Star') && field.chromaticField === 'Starlight Arena') {
+    type1 = 'Fairy' as TypeName;
+    desc.mimicryDefenseType = type1;
+  }
 
   let type1Effectiveness = getMoveEffectiveness(
     gen,
@@ -517,9 +520,7 @@ export function calculateSMSSSV(
     desc.chromaticField = field.chromaticField;
   }
 
-  if (field.chromaticField === 'Thundering Plateau' &&
-      ((attacker.hasAbility("Motor Drive") && move.named('Gyro Ball', 'Electro Ball')) ||
-      (attacker.hasAbility("Lightning Rod") && move.category === 'Special'))) {
+  if (field.chromaticField === 'Starlight Arena' && attacker.hasAbility("Illuminate") && move.category === 'Special') {
     desc.chromaticField = field.chromaticField;
   }
 
@@ -718,12 +719,12 @@ export function calculateSMSSSV(
   } else if ((attacker.hasAbility('Protean', 'Libero') || attacker.named('Boltund-Crest')) && !attacker.teraType) {
     stabMod += 2048;
     desc.attackerAbility = attacker.ability;
-  // } else if (attacker.hasAbility('Reflector') && (defender.types[1] === move.type)) {
-  //   stabMod += 2048;
-  //   desc.reflectorOffenseTypes = attacker.types[0] + ' / ' + defender.types[1] + ' ';
   } else if (attacker.hasAbility('Mimicry') && getMimicryType(field) === move.type) {
     stabMod += 2048;
     desc.mimicryOffenseType = getMimicryType(field);
+  } else if (attacker.hasAbility('Victory Star') && field.chromaticField === 'Starlight Arena' && move.hasType('Fairy')) {
+    stabMod += 2048;
+    desc.chromaticField = field.chromaticField;
   // Crests - STAB additions
   } else if (attacker.named('Empoleon-Crest') && move.hasType('Ice')) {
     stabMod += 2048;
@@ -761,6 +762,14 @@ export function calculateSMSSSV(
     } else {
       stabMod = 4915;
     }
+  } else if (attacker.hasAbility('Pixilate') && field.chromaticField === 'Starlight Arena') {
+    if (attacker.hasOriginalType(move.type)) {
+      stabMod += 2048;
+    } else {
+      stabMod = 4915;
+    }
+    desc.attackerTera = 'Stellar';
+    desc.chromaticField = field.chromaticField;
   }
 
   const applyBurn =
@@ -1185,6 +1194,10 @@ export function calculateBasePowerSMSSSV(
       case 'Thundering Plateau':
         basePower = 60;
         desc.moveName = 'Shock Wave';
+        break;
+      case 'Starlight Arena':
+        basePower = 0;
+        desc.moveName = 'Lunar Dance';
         break;
       default:
         basePower = 80;

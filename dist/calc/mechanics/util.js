@@ -342,6 +342,14 @@ function checkFieldBoosts(source, field) {
             source.boosts.spa = Math.min(6, source.boosts.spa + 1);
         }
     }
+    else if (field.chromaticField === 'Starlight Arena') {
+        if (source.hasAbility('Illuminate')) {
+            source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+        }
+        else if (source.hasAbility('Aroma Veil', 'Pastel Veil', 'Sweet Veil')) {
+            source.boosts.spd = Math.min(6, source.boosts.spd + 1);
+        }
+    }
 }
 exports.checkFieldBoosts = checkFieldBoosts;
 function checkEmbody(source, gen) {
@@ -633,8 +641,11 @@ function getMimicryType(field) {
     else if (field.chromaticField === "Dragon's Den") {
         return "Dragon";
     }
-    else if (field.chromaticField === "Thundering Plateau") {
+    else if (field.chromaticField === 'Thundering Plateau') {
         return "Electric";
+    }
+    else if (field.chromaticField === 'Starlight Arena') {
+        return "Fairy";
     }
     else {
         return "???";
