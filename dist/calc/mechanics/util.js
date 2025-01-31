@@ -185,7 +185,10 @@ function getFinalSpeed(gen, pokemon, field, side) {
     return Math.max(0, speed);
 }
 exports.getFinalSpeed = getFinalSpeed;
-function getMoveEffectiveness(gen, move, type, isGhostRevealed, isGravity, isRingTarget) {
+var JUNGLE_GRASS_MOVES = [
+    'Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash',
+];
+function getMoveEffectiveness(gen, move, type, field, isGhostRevealed, isGravity, isRingTarget) {
     if ((isRingTarget || isGhostRevealed) && type === 'Ghost' && move.hasType('Normal', 'Fighting')) {
         return 1;
     }
@@ -198,6 +201,10 @@ function getMoveEffectiveness(gen, move, type, isGhostRevealed, isGravity, isRin
     else if (move.named('Flying Press')) {
         return (gen.types.get('fighting').effectiveness[type] *
             gen.types.get('flying').effectiveness[type]);
+    }
+    else if (field.chromaticField === 'Jungle' && JUNGLE_GRASS_MOVES.includes(move.name)) {
+        return (gen.types.get((0, util_1.toID)(move.type)).effectiveness[type] *
+            gen.types.get('grass').effectiveness[type]);
     }
     else {
         return gen.types.get((0, util_1.toID)(move.type)).effectiveness[type];
@@ -599,6 +606,9 @@ function getMimicryType(field) {
     }
     else if (field.hasTerrain('Psychic')) {
         return "Psychic";
+    }
+    else if (field.chromaticField === 'Jungle') {
+        return "Bug";
     }
     else {
         return "???";

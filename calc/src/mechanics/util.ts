@@ -157,10 +157,15 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
   return Math.max(0, speed);
 }
 
+const JUNGLE_GRASS_MOVES = [
+  'Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash',
+];
+
 export function getMoveEffectiveness(
   gen: Generation,
   move: Move,
   type: TypeName,
+  field: Field,
   isGhostRevealed?: boolean,
   isGravity?: boolean,
   isRingTarget?: boolean,
@@ -175,6 +180,11 @@ export function getMoveEffectiveness(
     return (
       gen.types.get('fighting' as ID)!.effectiveness[type]! *
       gen.types.get('flying' as ID)!.effectiveness[type]!
+    );
+  } else if (field.chromaticField === 'Jungle' &&  JUNGLE_GRASS_MOVES.includes(move.name)) {
+    return (
+      gen.types.get(toID(move.type))!.effectiveness[type]! *
+      gen.types.get('grass' as ID)!.effectiveness[type]!
     );
   } else {
     return gen.types.get(toID(move.type))!.effectiveness[type]!;
@@ -608,6 +618,8 @@ export function getMimicryType(field: Field) {
     return "Fairy" as TypeName;
   } else if (field.hasTerrain('Psychic')) {
     return "Psychic" as TypeName;
+  } else if (field.chromaticField === 'Jungle') {
+    return "Bug" as TypeName;
   } else {
     return "???" as TypeName;
   }

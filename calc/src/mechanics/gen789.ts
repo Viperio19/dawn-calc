@@ -187,6 +187,11 @@ export function calculateSMSSSV(
       : field.hasTerrain('Misty') ? 'Fairy'
       : field.hasTerrain('Psychic') ? 'Psychic'
       : 'Normal';
+    if (move.named('Nature Power') && type === 'Normal') {
+      type =
+        field.chromaticField === 'Jungle' ? 'Bug'
+        : 'Normal';
+    }
     desc.terrain = field.terrain;
     desc.moveType = type;
   } else if (move.named('Revelation Dance')) {
@@ -328,6 +333,7 @@ export function calculateSMSSSV(
     gen,
     move,
     type1,
+    field,
     isGhostRevealed,
     field.isGravity,
     isRingTarget
@@ -337,6 +343,7 @@ export function calculateSMSSSV(
       gen,
       move,
       type2,
+      field,
       isGhostRevealed,
       field.isGravity,
       isRingTarget
@@ -424,6 +431,7 @@ export function calculateSMSSSV(
       gen,
       move,
       defender.teraType,
+      field,
       isGhostRevealed,
       field.isGravity,
       isRingTarget
@@ -1105,6 +1113,16 @@ export function calculateBasePowerSMSSSV(
       basePower = 80;
       desc.moveName = 'Tri Attack';
     }
+    if (desc.moveName = 'Tri Attack')
+      switch (field.chromaticField) {
+      case 'Jungle':
+        basePower = 90;
+        desc.moveName = 'Bug Buzz';
+        break;
+      default:
+        basePower = 80;
+        desc.moveName = 'Tri Attack';
+      }
     break;
   case 'Water Shuriken':
     basePower = attacker.named('Greninja-Ash') && attacker.hasAbility('Battle Bond') ? 20 : 15;
@@ -1264,6 +1282,7 @@ export function calculateBPModsSMSSSV(
       gen,
       move,
       types[0],
+      field,
       isGhostRevealed,
       field.isGravity,
       isRingTarget
@@ -1272,6 +1291,7 @@ export function calculateBPModsSMSSSV(
       gen,
       move,
       types[1],
+      field,
       isGhostRevealed,
       field.isGravity,
       isRingTarget
@@ -1693,6 +1713,7 @@ export function calculateAtModsSMSSSV(
        (attacker.hasAbility('Blaze') && move.hasType('Fire')) ||
        (attacker.hasAbility('Torrent') && move.hasType('Water')) ||
        (attacker.hasAbility('Swarm') && move.hasType('Bug')))) ||
+    (field.chromaticField === 'Jungle' && attacker.hasAbility('Swarm') && move.hasType('Bug')) ||
     (move.category === 'Special' && (attacker.abilityOn || field.chromaticField === 'Thunder-Storm') && attacker.hasAbility('Plus', 'Minus'))
   ) {
     atMods.push(6144);
@@ -2067,23 +2088,27 @@ export function calculateFinalModsSMSSSV(
   const finalMods = [];
 
   if (field.defenderSide.isReflect && move.category === 'Physical' &&
-      !isCritical && !field.defenderSide.isAuroraVeil) {
+      !isCritical && !field.defenderSide.isAuroraVeil &&
+      !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
     // doesn't stack with Aurora Veil
     finalMods.push(field.gameType !== 'Singles' ? 2732 : 2048);
     desc.isReflect = true;
   } else if (
     field.defenderSide.isLightScreen && move.category === 'Special' &&
-    !isCritical && !field.defenderSide.isAuroraVeil
+    !isCritical && !field.defenderSide.isAuroraVeil &&
+    !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')
   ) {
     // doesn't stack with Aurora Veil
     finalMods.push(field.gameType !== 'Singles' ? 2732 : 2048);
     desc.isLightScreen = true;
   }
-  if (field.defenderSide.isAuroraVeil && !isCritical) {
+  if (field.defenderSide.isAuroraVeil && !isCritical &&
+      !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
     finalMods.push(field.gameType !== 'Singles' ? 2732 : 2048);
     desc.isAuroraVeil = true;
   }
-  if (field.defenderSide.isAreniteWall && typeEffectiveness > 1) {
+  if (field.defenderSide.isAreniteWall && typeEffectiveness > 1 &&
+      !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
     finalMods.push(2048);
     desc.isAreniteWall = true;
   }
