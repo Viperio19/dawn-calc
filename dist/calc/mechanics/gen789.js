@@ -347,7 +347,9 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
             defender.hasAbility('Lightning Rod', 'Motor Drive', 'Volt Absorb')) ||
         (move.hasType('Ground') &&
             !field.isGravity && !move.named('Thousand Arrows') &&
-            !defender.hasItem('Iron Ball') && (defender.hasAbility('Levitate') || defender.named('Probopass-Crest'))) ||
+            !defender.hasItem('Iron Ball') &&
+            (defender.hasAbility('Levitate') || defender.hasAbility('Lunar Idol') ||
+                defender.hasAbility('Solar Idol') || defender.named('Probopass-Crest'))) ||
         (move.flags.bullet && defender.hasAbility('Bulletproof')) ||
         (move.flags.sound && !move.named('Clangorous Soul') && defender.hasAbility('Soundproof')) ||
         (move.priority > 0 && defender.hasAbility('Queenly Majesty', 'Dazzling', 'Armor Tail')) ||
@@ -991,6 +993,8 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
         (attacker.hasAbility('Mega Launcher') && move.flags.pulse) ||
         ((attacker.hasAbility('Strong Jaw') || attacker.named('Feraligatr-Crest')) && move.flags.bite) ||
         (attacker.hasAbility('Steely Spirit') && move.hasType('Steel')) ||
+        (attacker.hasAbility('Lunar Idol') && move.hasType('Ice')) ||
+        (attacker.hasAbility('Solar Idol') && move.hasType('Fire')) ||
         (attacker.hasAbility('Sharpness') && move.flags.slicing)) {
         bpMods.push(6144);
         desc.attackerAbility = attacker.ability;
@@ -1259,7 +1263,13 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
         (attacker.named('Cherrim') &&
             attacker.hasAbility('Flower Gift') &&
             field.hasWeather('Sun', 'Harsh Sunshine') &&
-            move.category === 'Physical')) {
+            move.category === 'Physical') ||
+        (attacker.hasAbility('Solar Idol') &&
+            field.hasWeather('Sun', 'Harsh Sunshine') &&
+            move.category === 'Physical') ||
+        (attacker.hasAbility('Lunar Idol') &&
+            field.hasWeather('Hail', 'Snow') &&
+            move.category === 'Special')) {
         atMods.push(6144);
         desc.attackerAbility = attacker.ability;
         desc.weather = field.weather;

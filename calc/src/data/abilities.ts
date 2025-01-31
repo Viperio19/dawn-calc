@@ -343,6 +343,8 @@ const SV = SS.concat([
   'Inexorable',
   'Reflector',
   'Resuscitation',
+  'Lunar Idol',
+  'Solar Idol',
 ]);
 
 export const ABILITIES = [[], RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV];

@@ -5067,6 +5067,23 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     zp: 175,
     maxPower: 90,
   },
+  'Hoarfrost Moon': {
+    bp: 90,
+    type: 'Ice',
+    category: 'Special',
+    zp: 175,
+    maxPower: 130,
+    secondaries: true,
+    target: 'allAdjacentFoes',
+  },
+  'Solar Flare': {
+    bp: 100,
+    type: 'Fire',
+    category: 'Physical',
+    zp: 180,
+    maxPower: 130,
+    secondaries: true,
+  },
 };
 
 const SV: {[name: string]: MoveData} = extend(true, {}, SS, SV_PATCH, CHROMATIC_PATCH);

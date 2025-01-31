@@ -52,6 +52,8 @@ function isGrounded(pokemon, field) {
     return (field.isGravity || pokemon.hasItem('Iron Ball') ||
         (!pokemon.hasType('Flying') &&
             !pokemon.hasAbility('Levitate') &&
+            !pokemon.hasAbility('Lunar Idol') &&
+            !pokemon.hasAbility('Solar Idol') &&
             !pokemon.hasItem('Air Balloon') &&
             !pokemon.named('Probopass-Crest')));
 }

@@ -10098,6 +10098,7 @@ var CHROMATIC_PATCH = {
     Leavanny: { otherFormes: ['Leavanny-Aevian'] },
     Ledian: { otherFormes: ['Ledian-Crest'] },
     Litwick: { otherFormes: ['Litwick-Aevian'] },
+    Lunatone: { otherFormes: ['Lunatone-Fusion'] },
     Luvdisc: { otherFormes: ['Luvdisc-Crest'] },
     Luxray: { otherFormes: ['Luxray-Crest'] },
     Machamp: { otherFormes: ['Machamp-Gmax', 'Machamp-Mega-Gmax'] },
@@ -10180,6 +10181,7 @@ var CHROMATIC_PATCH = {
     Skuntank: { otherFormes: ['Skuntank-Crest'] },
     Snorlax: { otherFormes: ['Snorlax-Gmax', 'Snorlax-Mega-Gmax'] },
     Snorunt: { otherFormes: ['Snorunt-Aevian'] },
+    Solrock: { otherFormes: ['Solrock-Fusion'] },
     Spiritomb: { otherFormes: ['Spiritomb-Crest'] },
     Stantler: { otherFormes: ['Stantler-Crest'] },
     Swadloon: { otherFormes: ['Swadloon-Aevian'] },
@@ -11266,7 +11268,7 @@ var CHROMATIC_PATCH = {
         nfe: true
     },
     'Lapras-Aevian': {
-        types: ['Poison', 'Ground'],
+        types: ['Rock', 'Psychic'],
         bs: { hp: 135, at: 95, df: 80, sa: 85, sd: 85, sp: 60 },
         weightkg: 220,
         abilities: { 0: 'Solid Rock' },
@@ -11514,6 +11516,20 @@ var CHROMATIC_PATCH = {
         abilities: { 0: 'Wimp Out' },
         baseSpecies: 'Wimpod',
         nfe: true
+    },
+    'Lunatone-Fusion': {
+        types: ['Rock', 'Psychic'],
+        bs: { hp: 90, at: 44, df: 90, sa: 110, sd: 90, sp: 75 },
+        weightkg: 168,
+        abilities: { 0: 'Lunar Idol' },
+        baseSpecies: 'Lunatone'
+    },
+    'Solrock-Fusion': {
+        types: ['Rock', 'Psychic'],
+        bs: { hp: 90, at: 110, df: 90, sa: 75, sd: 90, sp: 44 },
+        weightkg: 154,
+        abilities: { 0: 'Solar Idol' },
+        baseSpecies: 'Solrock'
     }
 };
 var SV = (0, util_1.extend)(true, {}, SS, SV_PATCH, PLA_PATCH, CHROMATIC_PATCH);
