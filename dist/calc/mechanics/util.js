@@ -429,18 +429,19 @@ function checkMultihitBoost(gen, attacker, defender, move, field, desc, usedWhit
         }
         else {
             var stat = move.category === 'Special' ? 'spa' : 'atk';
+            var dropsStats = field.chromaticField === "Dragon's Den" && move.named("Draco Meteor") ? 1 : move.dropsStats;
             var boosts = attacker.boosts[stat];
             if (attacker.hasAbility('Contrary')) {
-                boosts = Math.min(6, boosts + move.dropsStats);
+                boosts = Math.min(6, boosts + dropsStats);
                 desc.attackerAbility = attacker.ability;
             }
             else {
-                boosts = Math.max(-6, boosts - move.dropsStats * simple);
+                boosts = Math.max(-6, boosts - dropsStats * simple);
                 if (simple > 1)
                     desc.attackerAbility = attacker.ability;
             }
             if (attacker.hasItem('White Herb') && attacker.boosts[stat] < 0 && !usedWhiteHerb) {
-                boosts += move.dropsStats * simple;
+                boosts += dropsStats * simple;
                 desc.attackerItem = attacker.item;
                 usedWhiteHerb = true;
             }
@@ -614,6 +615,9 @@ function getMimicryType(field) {
     }
     else if (field.chromaticField === 'Eclipse') {
         return "Dark";
+    }
+    else if (field.chromaticField === "Dragon's Den") {
+        return "Dragon";
     }
     else {
         return "???";

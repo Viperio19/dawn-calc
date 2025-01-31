@@ -415,18 +415,19 @@ export function checkMultihitBoost(
     } else {
       // No move with dropsStats has fancy logic regarding category here
       const stat = move.category === 'Special' ? 'spa' : 'atk';
+      let dropsStats = field.chromaticField === "Dragon's Den" && move.named("Draco Meteor") ? 1 : move.dropsStats;
 
       let boosts = attacker.boosts[stat];
       if (attacker.hasAbility('Contrary')) {
-        boosts = Math.min(6, boosts + move.dropsStats);
+        boosts = Math.min(6, boosts + dropsStats);
         desc.attackerAbility = attacker.ability;
       } else {
-        boosts = Math.max(-6, boosts - move.dropsStats * simple);
+        boosts = Math.max(-6, boosts - dropsStats * simple);
         if (simple > 1) desc.attackerAbility = attacker.ability;
       }
 
       if (attacker.hasItem('White Herb') && attacker.boosts[stat] < 0 && !usedWhiteHerb) {
-        boosts += move.dropsStats * simple;
+        boosts += dropsStats * simple;
         desc.attackerItem = attacker.item;
         usedWhiteHerb = true;
       }
@@ -624,6 +625,8 @@ export function getMimicryType(field: Field) {
     return "Bug" as TypeName;
   } else if (field.chromaticField === 'Eclipse') {
     return "Dark" as TypeName;
+  } else if (field.chromaticField === "Dragon's Den") {
+    return "Dragon" as TypeName;
   } else {
     return "???" as TypeName;
   }
