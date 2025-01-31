@@ -1072,6 +1072,9 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   } else if (description.terrain) {
     output += ' in ' + description.terrain + ' Terrain';
   }
+  if (description.chromaticField) {
+    output += ' on ' + description.chromaticField + ' Field';
+  }
   if (description.isReflect) {
     output += ' through Reflect';
   } else if (description.isLightScreen) {

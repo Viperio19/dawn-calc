@@ -883,6 +883,9 @@ function buildDescription(description, attacker, defender) {
     else if (description.terrain) {
         output += ' in ' + description.terrain + ' Terrain';
     }
+    if (description.chromaticField) {
+        output += ' on ' + description.chromaticField + ' Field';
+    }
     if (description.isReflect) {
         output += ' through Reflect';
     }

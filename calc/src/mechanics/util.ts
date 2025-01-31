@@ -183,7 +183,7 @@ export function getMoveEffectiveness(
       gen.types.get('fighting' as ID)!.effectiveness[type]! *
       gen.types.get('flying' as ID)!.effectiveness[type]!
     );
-  } else if (field.chromaticField === 'Jungle' &&  JUNGLE_GRASS_MOVES.includes(move.name)) {
+  } else if (field.chromaticField === 'Jungle' && JUNGLE_GRASS_MOVES.includes(move.name)) {
     return (
       gen.types.get(toID(move.type))!.effectiveness[type]! *
       gen.types.get('grass' as ID)!.effectiveness[type]!
@@ -622,6 +622,8 @@ export function getMimicryType(field: Field) {
     return "Psychic" as TypeName;
   } else if (field.chromaticField === 'Jungle') {
     return "Bug" as TypeName;
+  } else if (field.chromaticField === 'Eclipse') {
+    return "Dark" as TypeName;
   } else {
     return "???" as TypeName;
   }

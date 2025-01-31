@@ -190,9 +190,14 @@ export function calculateSMSSSV(
     if (move.named('Nature Power') && type === 'Normal') {
       type =
         field.chromaticField === 'Jungle' ? 'Bug'
+        : field.chromaticField === 'Eclipse' ? 'Dark'
         : 'Normal';
+      if (!(type === 'Normal')) {
+        desc.chromaticField = field.chromaticField;
+      }
+    } else {
+      desc.terrain = field.terrain;
     }
-    desc.terrain = field.terrain;
     desc.moveType = type;
   } else if (move.named('Revelation Dance')) {
     if (attacker.teraType) {
@@ -475,6 +480,20 @@ export function calculateSMSSSV(
       gen.types.get(toID(move.type))!.effectiveness['Flying']! > 1) {
     typeEffectiveness /= 2;
     desc.weather = field.weather;
+  }
+
+  if (field.chromaticField === 'Eclipse' && move.named('Solar Beam', 'Solar Blade')) {
+    desc.chromaticField = field.chromaticField;
+    return result;
+  }
+
+  if (field.chromaticField === 'Jungle' && move.named('Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash')) {
+    desc.moveType = '+ Grass' as TypeName;
+    desc.chromaticField = field.chromaticField;
+  }
+
+  if (field.chromaticField === 'Jungle' && move.named('Fell Stinger', 'Silver Wind', 'Steamroller')) {
+    desc.chromaticField = field.chromaticField;
   }
 
   if (move.type === 'Stellar') {
@@ -1115,11 +1134,15 @@ export function calculateBasePowerSMSSSV(
       basePower = 80;
       desc.moveName = 'Tri Attack';
     }
-    if (desc.moveName = 'Tri Attack')
+    if (desc.moveName === 'Tri Attack')
       switch (field.chromaticField) {
       case 'Jungle':
         basePower = 90;
         desc.moveName = 'Bug Buzz';
+        break;
+      case 'Eclipse':
+        basePower = 80;
+        desc.moveName = 'Dark Pulse';
         break;
       default:
         basePower = 80;
@@ -1327,6 +1350,21 @@ export function calculateBPModsSMSSSV(
     ) {
       bpMods.push(2048);
       desc.terrain = field.terrain;
+    }
+  }
+
+  if (field.chromaticField === 'Eclipse' && attacker.hasType('Dark')) {
+    let doBoost = false;
+    let stat: StatID;
+    for (stat in defender.boosts) {
+      if (defender.boosts[stat] < 0 || attacker.boosts[stat] < 0) {
+        doBoost = true;
+        break;
+      }
+    }
+    if (doBoost) {
+      bpMods.push(5324);
+      desc.chromaticField = field.chromaticField;
     }
   }
 

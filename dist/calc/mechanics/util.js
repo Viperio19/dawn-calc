@@ -612,6 +612,9 @@ function getMimicryType(field) {
     else if (field.chromaticField === 'Jungle') {
         return "Bug";
     }
+    else if (field.chromaticField === 'Eclipse') {
+        return "Dark";
+    }
     else {
         return "???";
     }
