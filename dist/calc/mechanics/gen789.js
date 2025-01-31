@@ -22,14 +22,17 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     (0, util_2.checkDauntlessShield)(defender, gen);
     (0, util_2.checkEmbody)(attacker, gen);
     (0, util_2.checkEmbody)(defender, gen);
-    (0, util_2.computeFinalStats)(gen, attacker, defender, field, 'def', 'spd', 'spe');
     (0, util_2.checkIntimidate)(gen, attacker, defender);
     (0, util_2.checkIntimidate)(gen, defender, attacker);
     (0, util_2.checkDownload)(attacker, defender, field.isWonderRoom);
     (0, util_2.checkDownload)(defender, attacker, field.isWonderRoom);
     (0, util_2.checkIntrepidSword)(attacker, gen);
     (0, util_2.checkIntrepidSword)(defender, gen);
-    (0, util_2.computeFinalStats)(gen, attacker, defender, field, 'atk', 'spa');
+    (0, util_2.checkCrestBoosts)(attacker);
+    (0, util_2.checkCrestBoosts)(defender);
+    (0, util_2.checkFieldBoosts)(attacker, field);
+    (0, util_2.checkFieldBoosts)(defender, field);
+    (0, util_2.computeFinalStats)(gen, attacker, defender, field, 'def', 'spd', 'spe', 'atk', 'spa');
     (0, util_2.checkInfiltrator)(attacker, field.defenderSide);
     (0, util_2.checkInfiltrator)(defender, field.attackerSide);
     var desc = {
@@ -108,7 +111,21 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
                     : field.hasTerrain('Misty') ? 'Fairy'
                         : field.hasTerrain('Psychic') ? 'Psychic'
                             : 'Normal';
-        desc.terrain = field.terrain;
+        if (move.named('Nature Power') && type === 'Normal') {
+            type =
+                field.chromaticField === 'Jungle' ? 'Bug'
+                    : field.chromaticField === 'Eclipse' ? 'Dark'
+                        : field.chromaticField === "Dragon's Den" ? 'Steel'
+                            : field.chromaticField === 'Thundering Plateau' ? 'Electric'
+                                : field.chromaticField === 'Starlight Arena' ? 'Fairy'
+                                    : 'Normal';
+            if (!(type === 'Normal')) {
+                desc.chromaticField = field.chromaticField;
+            }
+        }
+        else {
+            desc.terrain = field.terrain;
+        }
         desc.moveType = type;
     }
     else if (move.named('Revelation Dance')) {
@@ -161,6 +178,8 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     var isSimipourCrest = false;
     var isSimisageCrest = false;
     var isSimisearCrest = false;
+    var isDDenIntimidate = false;
+    var isStarlightFairy = false;
     var noTypeChange = move.named('Revelation Dance', 'Judgment', 'Nature Power', 'Techno Blast', 'Multi Attack', 'Natural Gift', 'Weather Ball', 'Terrain Pulse', 'Struggle') || (move.named('Tera Blast') && attacker.teraType);
     if (!move.isZ && !noTypeChange) {
         var normal = move.hasType('Normal');
@@ -198,6 +217,12 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         else if ((isSimisearCrest = attacker.named('Simisear-Crest') && normal)) {
             type = 'Water';
         }
+        else if ((isDDenIntimidate = attacker.hasAbility('Intimidate') && normal && field.chromaticField === "Dragon's Den")) {
+            type = 'Dragon';
+        }
+        else if ((isStarlightFairy = normal && field.chromaticField === 'Starlight Arena')) {
+            type = 'Fairy';
+        }
         else if (move.named('Mirror Beam')) {
             if (attacker.types[1] && attacker.types[1] != "???") {
                 type = attacker.types[1];
@@ -213,6 +238,16 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         }
         else if (isSawsbuckCrest) {
             hasAteAbilityTypeChange = true;
+        }
+        else if (isDDenIntimidate) {
+            desc.attackerAbility = attacker.ability;
+            desc.moveType = type;
+            desc.chromaticField = field.chromaticField;
+            hasAteAbilityTypeChange = true;
+        }
+        else if (isStarlightFairy) {
+            desc.moveType = type;
+            desc.chromaticField = field.chromaticField;
         }
     }
     if (move.named('Tera Blast') && attacker.teraType) {
@@ -236,9 +271,13 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         type2 = "???";
         desc.mimicryDefenseType = type1;
     }
-    var type1Effectiveness = (0, util_2.getMoveEffectiveness)(gen, move, type1, isGhostRevealed, field.isGravity, isRingTarget);
+    if (defender.hasAbility('Victory Star') && field.chromaticField === 'Starlight Arena') {
+        type1 = 'Fairy';
+        desc.mimicryDefenseType = type1;
+    }
+    var type1Effectiveness = (0, util_2.getMoveEffectiveness)(gen, move, type1, field, isGhostRevealed, field.isGravity, isRingTarget);
     var type2Effectiveness = type2
-        ? (0, util_2.getMoveEffectiveness)(gen, move, type2, isGhostRevealed, field.isGravity, isRingTarget)
+        ? (0, util_2.getMoveEffectiveness)(gen, move, type2, field, isGhostRevealed, field.isGravity, isRingTarget)
         : 1;
     if (defender.named('Torterra-Crest')) {
         if (type1Effectiveness == 0)
@@ -292,7 +331,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
             typeEffectiveness = 0;
     }
     if (defender.teraType && defender.teraType !== 'Stellar') {
-        typeEffectiveness = (0, util_2.getMoveEffectiveness)(gen, move, defender.teraType, isGhostRevealed, field.isGravity, isRingTarget);
+        typeEffectiveness = (0, util_2.getMoveEffectiveness)(gen, move, defender.teraType, field, isGhostRevealed, field.isGravity, isRingTarget);
     }
     if (typeEffectiveness === 0 && move.hasType('Ground') &&
         defender.hasItem('Iron Ball') && !defender.hasAbility('Klutz')) {
@@ -300,6 +339,10 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     }
     if (typeEffectiveness === 0 && move.named('Thousand Arrows')) {
         typeEffectiveness = 1;
+    }
+    if (typeEffectiveness === 0 && field.chromaticField === "Dragon's Den" && move.named('Dragon Pulse')) {
+        typeEffectiveness = 0.5;
+        desc.chromaticField = field.chromaticField;
     }
     if (typeEffectiveness === 0) {
         return result;
@@ -323,6 +366,20 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         gen.types.get((0, util_1.toID)(move.type)).effectiveness['Flying'] > 1) {
         typeEffectiveness /= 2;
         desc.weather = field.weather;
+    }
+    if (field.chromaticField === 'Eclipse' && move.named('Solar Beam', 'Solar Blade')) {
+        desc.chromaticField = field.chromaticField;
+        return result;
+    }
+    if (field.chromaticField === 'Jungle' && move.named('Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash')) {
+        desc.moveType = '+ Grass';
+        desc.chromaticField = field.chromaticField;
+    }
+    if (field.chromaticField === 'Jungle' && move.named('Fell Stinger', 'Silver Wind', 'Steamroller')) {
+        desc.chromaticField = field.chromaticField;
+    }
+    if (field.chromaticField === 'Starlight Arena' && attacker.hasAbility("Illuminate") && move.category === 'Special') {
+        desc.chromaticField = field.chromaticField;
     }
     if (move.type === 'Stellar') {
         typeEffectiveness = !defender.teraType ? 1 : 2;
@@ -467,6 +524,10 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         stabMod += 2048;
         desc.mimicryOffenseType = (0, util_2.getMimicryType)(field);
     }
+    else if (attacker.hasAbility('Victory Star') && field.chromaticField === 'Starlight Arena' && move.hasType('Fairy')) {
+        stabMod += 2048;
+        desc.chromaticField = field.chromaticField;
+    }
     else if (attacker.named('Empoleon-Crest') && move.hasType('Ice')) {
         stabMod += 2048;
     }
@@ -506,6 +567,16 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         else {
             stabMod = 4915;
         }
+    }
+    else if (attacker.hasAbility('Pixilate') && field.chromaticField === 'Starlight Arena') {
+        if (attacker.hasOriginalType(move.type)) {
+            stabMod += 2048;
+        }
+        else {
+            stabMod = 4915;
+        }
+        desc.attackerTera = 'Stellar';
+        desc.chromaticField = field.chromaticField;
     }
     var applyBurn = attacker.hasStatus('brn') &&
         move.category === 'Physical' &&
@@ -596,6 +667,11 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     }
     if (move.dropsStats && move.timesUsed > 1) {
         var simpleMultiplier = attacker.hasAbility('Simple') ? 2 : 1;
+        var dropsStats = move.dropsStats;
+        if (field.chromaticField === "Dragon's Den" && move.named("Draco Meteor")) {
+            move.dropsStats = 1;
+            desc.chromaticField = field.chromaticField;
+        }
         desc.moveTurns = "over ".concat(move.timesUsed, " turns");
         var hasWhiteHerb = attacker.hasItem('White Herb');
         var usedWhiteHerb = false;
@@ -613,17 +689,17 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
                 return affectedAmount;
             });
             if (attacker.hasAbility('Contrary')) {
-                dropCount = Math.min(6, dropCount + move.dropsStats);
+                dropCount = Math.min(6, dropCount + dropsStats);
                 desc.attackerAbility = attacker.ability;
             }
             else {
-                dropCount = Math.max(-6, dropCount - move.dropsStats * simpleMultiplier);
+                dropCount = Math.max(-6, dropCount - dropsStats * simpleMultiplier);
                 if (attacker.hasAbility('Simple')) {
                     desc.attackerAbility = attacker.ability;
                 }
             }
             if (hasWhiteHerb && attacker.boosts[attackStat] < 0 && !usedWhiteHerb) {
-                dropCount += move.dropsStats * simpleMultiplier;
+                dropCount += dropsStats * simpleMultiplier;
                 usedWhiteHerb = true;
                 desc.attackerItem = attacker.item;
             }
@@ -833,6 +909,32 @@ function calculateBasePowerSMSSSV(gen, attacker, defender, move, field, hasAteAb
                     basePower = 80;
                     desc.moveName = 'Tri Attack';
             }
+            if (desc.moveName === 'Tri Attack')
+                switch (field.chromaticField) {
+                    case 'Jungle':
+                        basePower = 90;
+                        desc.moveName = 'Bug Buzz';
+                        break;
+                    case 'Eclipse':
+                        basePower = 80;
+                        desc.moveName = 'Dark Pulse';
+                        break;
+                    case "Dragon's Den":
+                        basePower = 120;
+                        desc.moveName = 'Make It Rain';
+                        break;
+                    case 'Thundering Plateau':
+                        basePower = 60;
+                        desc.moveName = 'Shock Wave';
+                        break;
+                    case 'Starlight Arena':
+                        basePower = 0;
+                        desc.moveName = 'Lunar Dance';
+                        break;
+                    default:
+                        basePower = 80;
+                        desc.moveName = 'Tri Attack';
+                }
             break;
         case 'Water Shuriken':
             basePower = attacker.named('Greninja-Ash') && attacker.hasAbility('Battle Bond') ? 20 : 15;
@@ -943,8 +1045,8 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
             field.defenderSide.isForesight;
         var isRingTarget = defender.hasItem('Ring Target') && !defender.hasAbility('Klutz');
         var types = defender.teraType ? [defender.teraType] : defender.types;
-        var type1Effectiveness = (0, util_2.getMoveEffectiveness)(gen, move, types[0], isGhostRevealed, field.isGravity, isRingTarget);
-        var type2Effectiveness = types[1] ? (0, util_2.getMoveEffectiveness)(gen, move, types[1], isGhostRevealed, field.isGravity, isRingTarget) : 1;
+        var type1Effectiveness = (0, util_2.getMoveEffectiveness)(gen, move, types[0], field, isGhostRevealed, field.isGravity, isRingTarget);
+        var type2Effectiveness = types[1] ? (0, util_2.getMoveEffectiveness)(gen, move, types[1], field, isGhostRevealed, field.isGravity, isRingTarget) : 1;
         if (type1Effectiveness * type2Effectiveness >= 2) {
             bpMods.push(5461);
             desc.moveBP = basePower * (5461 / 4096);
@@ -968,6 +1070,20 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
             (field.hasTerrain('Grassy') && move.named('Bulldoze', 'Earthquake'))) {
             bpMods.push(2048);
             desc.terrain = field.terrain;
+        }
+    }
+    if (field.chromaticField === 'Eclipse' && attacker.hasType('Dark')) {
+        var doBoost = false;
+        var stat = void 0;
+        for (stat in defender.boosts) {
+            if (defender.boosts[stat] < 0 || attacker.boosts[stat] < 0) {
+                doBoost = true;
+                break;
+            }
+        }
+        if (doBoost) {
+            bpMods.push(5324);
+            desc.chromaticField = field.chromaticField;
         }
     }
     if (((attacker.hasAbility('Technician') || attacker.named('Dusknoir-Crest')) && basePower <= 60) ||
@@ -1281,6 +1397,12 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
         atMods.push(6144);
         desc.attackerAbility = attacker.ability;
     }
+    else if ((field.chromaticField === 'Jungle' && attacker.hasAbility('Swarm') && move.hasType('Bug')) ||
+        (field.chromaticField === 'Thundering Plateau' && attacker.hasAbility('Plus', 'Minus') && move.category === 'Special')) {
+        atMods.push(6144);
+        desc.attackerAbility = attacker.ability;
+        desc.chromaticField = field.chromaticField;
+    }
     else if (attacker.hasAbility('Flash Fire') && attacker.abilityOn && move.hasType('Fire')) {
         atMods.push(6144);
         desc.attackerAbility = 'Flash Fire';
@@ -1438,9 +1560,16 @@ function calculateDfModsSMSSSV(gen, attacker, defender, move, field, desc, isCri
     if (isCritical === void 0) { isCritical = false; }
     if (hitsPhysical === void 0) { hitsPhysical = false; }
     var dfMods = [];
-    if (defender.hasAbility('Marvel Scale') && defender.status && hitsPhysical) {
-        dfMods.push(6144);
-        desc.defenderAbility = defender.ability;
+    if (defender.hasAbility('Marvel Scale') && hitsPhysical) {
+        if (defender.status) {
+            dfMods.push(6144);
+            desc.defenderAbility = defender.ability;
+        }
+        else if (field.chromaticField === "Dragon's Den") {
+            dfMods.push(6144);
+            desc.defenderAbility = defender.ability;
+            desc.chromaticField = field.chromaticField;
+        }
     }
     else if (defender.named('Cherrim') &&
         defender.hasAbility('Flower Gift') &&
@@ -1546,20 +1675,24 @@ function calculateFinalModsSMSSSV(gen, attacker, defender, move, field, desc, is
     if (hitCount === void 0) { hitCount = 0; }
     var finalMods = [];
     if (field.defenderSide.isReflect && move.category === 'Physical' &&
-        !isCritical && !field.defenderSide.isAuroraVeil) {
+        !isCritical && !field.defenderSide.isAuroraVeil &&
+        !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
         finalMods.push(field.gameType !== 'Singles' ? 2732 : 2048);
         desc.isReflect = true;
     }
     else if (field.defenderSide.isLightScreen && move.category === 'Special' &&
-        !isCritical && !field.defenderSide.isAuroraVeil) {
+        !isCritical && !field.defenderSide.isAuroraVeil &&
+        !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
         finalMods.push(field.gameType !== 'Singles' ? 2732 : 2048);
         desc.isLightScreen = true;
     }
-    if (field.defenderSide.isAuroraVeil && !isCritical) {
+    if (field.defenderSide.isAuroraVeil && !isCritical &&
+        !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
         finalMods.push(field.gameType !== 'Singles' ? 2732 : 2048);
         desc.isAuroraVeil = true;
     }
-    if (field.defenderSide.isAreniteWall && typeEffectiveness > 1) {
+    if (field.defenderSide.isAreniteWall && typeEffectiveness > 1 &&
+        !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
         finalMods.push(2048);
         desc.isAreniteWall = true;
     }
@@ -1578,13 +1711,38 @@ function calculateFinalModsSMSSSV(gen, attacker, defender, move, field, desc, is
     if (defender.isDynamaxed && move.named('Dynamax Cannon', 'Behemoth Blade', 'Behemoth Bash')) {
         finalMods.push(8192);
     }
-    if (defender.hasAbility('Multiscale', 'Shadow Shield') &&
-        defender.curHP() === defender.maxHP() &&
-        hitCount === 0 &&
-        (!field.defenderSide.isSR && (!field.defenderSide.spikes || defender.hasType('Flying')) ||
-            defender.hasItem('Heavy-Duty Boots')) && !attacker.hasAbility('Parental Bond (Child)')) {
-        finalMods.push(2048);
-        desc.defenderAbility = defender.ability;
+    if (defender.hasAbility('Multiscale', 'Shadow Shield')) {
+        if (defender.curHP() === defender.maxHP() &&
+            hitCount === 0 &&
+            (!field.defenderSide.isSR && (!field.defenderSide.spikes || defender.hasType('Flying')) ||
+                defender.hasItem('Heavy-Duty Boots')) && !attacker.hasAbility('Parental Bond (Child)')) {
+            finalMods.push(2048);
+            desc.defenderAbility = defender.ability;
+        }
+        else if (defender.hasAbility('Multiscale') && field.chromaticField === "Dragon's Den") {
+            var curHP = defender.curHP();
+            if (!defender.hasItem('Heavy-Duty Boots')) {
+                if (field.defenderSide.spikes && !defender.hasType('Flying')) {
+                    curHP -= defender.maxHP() / (10 - field.defenderSide.spikes * 2);
+                }
+                if (field.defenderSide.isSR) {
+                    var rockType = gen.types.get('rock');
+                    var effectiveness = rockType.effectiveness[defender.types[0]] *
+                        (defender.types[1] ? rockType.effectiveness[defender.types[1]] : 1);
+                    if (defender.named('Torterra-Crest')) {
+                        curHP -= Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
+                    }
+                    else {
+                        curHP -= Math.floor((effectiveness * defender.maxHP()) / 8);
+                    }
+                }
+            }
+            if (curHP >= (0, util_2.pokeRound)(defender.maxHP() * 3 / 4)) {
+                finalMods.push(2048);
+                desc.defenderAbility = defender.ability;
+                desc.chromaticField = field.chromaticField;
+            }
+        }
     }
     if (defender.hasAbility('Fluffy') && move.flags.contact && !attacker.hasAbility('Long Reach')) {
         finalMods.push(2048);

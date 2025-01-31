@@ -47,6 +47,7 @@ export interface RawDesc {
     moveType?: TypeName;
     rivalry?: 'buffed' | 'nerfed';
     terrain?: Terrain;
+    chromaticField?: string;
     weather?: Weather;
     isDefenderDynamaxed?: boolean;
     reflectorOffenseTypes?: string;
