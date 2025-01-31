@@ -179,7 +179,7 @@ function getFinalSpeed(gen, pokemon, field, side) {
         speed = Math.floor(OF32(speed * (gen.num < 7 ? 25 : 50)) / 100);
     }
     if (pokemon.named('Cryogonal-Crest')) {
-        speed += pokeRound(((pokemon.stats['spd'] * 12) / 100));
+        speed += Math.floor((Math.floor(pokemon.stats['spd'] * 6 / 5) / 10));
     }
     speed = Math.min(gen.num <= 2 ? 999 : 10000, speed);
     return Math.max(0, speed);

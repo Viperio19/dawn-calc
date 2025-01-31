@@ -20,6 +20,7 @@ export class Move implements State.Move {
   timesUsed?: number;
   timesUsedWithMetronome?: number;
   stockpiles?: number;
+  moveSlot?: number;
   bp: number;
   type: I.TypeName;
   category: I.MoveCategory;
@@ -112,6 +113,7 @@ export class Move implements State.Move {
       }
       this.timesUsedWithMetronome = options.timesUsedWithMetronome;
       this.stockpiles = options.stockpiles;
+      this.moveSlot = options.moveSlot;
     }
     this.gen = gen;
     this.name = data.name;
@@ -191,6 +193,7 @@ export class Move implements State.Move {
       timesUsed: this.timesUsed,
       timesUsedWithMetronome: this.timesUsedWithMetronome,
       stockpiles: this.stockpiles,
+      moveSlot: this.moveSlot,
       overrides: this.overrides,
     });
   }

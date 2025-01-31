@@ -10032,7 +10032,7 @@ var SV_PATCH = {
 };
 var CHROMATIC_PATCH = {
     Alcremie: { otherFormes: ['Alcremie-Gmax', 'Alcremie-Mega-Gmax'] },
-    Ampharos: { otherFormes: ['Ampharos-Aevian', 'Ampharos-Mega'] },
+    Ampharos: { otherFormes: ['Ampharos-Aevian', 'Ampharos-Aevian-Crest', 'Ampharos-Mega'] },
     Appletun: { otherFormes: ['Appletun-Gmax', 'Appletun-Mega-Gmax'] },
     Ariados: { otherFormes: ['Ariados-Crest'] },
     Bastiodon: { otherFormes: ['Bastiodon-Crest'] },
@@ -10486,6 +10486,13 @@ var CHROMATIC_PATCH = {
         bs: { hp: 65, at: 65, df: 60, sa: 130, sd: 95, sp: 110 },
         weightkg: 29,
         abilities: { 0: 'Inner Focus' }
+    },
+    'Ampharos-Aevian-Crest': {
+        types: ['Ice', 'Electric'],
+        bs: { hp: 90, at: 75, df: 90, sa: 115, sd: 85, sp: 55 },
+        weightkg: 61.5,
+        abilities: { 0: 'Filter' },
+        baseSpecies: 'Ampharos'
     },
     'Ariados-Crest': {
         types: ['Bug', 'Poison'],
@@ -11259,7 +11266,7 @@ var CHROMATIC_PATCH = {
         nfe: true
     },
     'Lapras-Aevian': {
-        types: ['Poison', 'Ground'],
+        types: ['Rock', 'Psychic'],
         bs: { hp: 135, at: 95, df: 80, sa: 85, sd: 85, sp: 60 },
         weightkg: 220,
         abilities: { 0: 'Solid Rock' },
