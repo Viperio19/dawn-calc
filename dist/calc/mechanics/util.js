@@ -318,10 +318,6 @@ function checkIntrepidSword(source, gen) {
     if (source.hasAbility('Intrepid Sword') && gen.num > 7) {
         source.boosts.atk = Math.min(6, source.boosts.atk + 1);
     }
-    if (source.named('Vespiquen-Crest-Offense')) {
-        source.boosts.atk = Math.min(6, source.boosts.atk + 1);
-        source.boosts.spa = Math.min(6, source.boosts.spa + 1);
-    }
 }
 exports.checkIntrepidSword = checkIntrepidSword;
 function checkDauntlessShield(source, gen) {
@@ -330,6 +326,24 @@ function checkDauntlessShield(source, gen) {
     }
 }
 exports.checkDauntlessShield = checkDauntlessShield;
+function checkCrestBoosts(source) {
+    if (source.named('Vespiquen-Crest-Offense')) {
+        source.boosts.atk = Math.min(6, source.boosts.atk + 1);
+        source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+    }
+}
+exports.checkCrestBoosts = checkCrestBoosts;
+function checkFieldBoosts(source, field) {
+    if (field.chromaticField === 'Thundering Plateau') {
+        if (source.hasAbility('Motor Drive')) {
+            source.boosts.spe = Math.min(6, source.boosts.spe + 1);
+        }
+        else if (source.hasAbility('Lightning Rod')) {
+            source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+        }
+    }
+}
+exports.checkFieldBoosts = checkFieldBoosts;
 function checkEmbody(source, gen) {
     if (gen.num < 9)
         return;
@@ -618,6 +632,9 @@ function getMimicryType(field) {
     }
     else if (field.chromaticField === "Dragon's Den") {
         return "Dragon";
+    }
+    else if (field.chromaticField === "Thundering Plateau") {
+        return "Electric";
     }
     else {
         return "???";

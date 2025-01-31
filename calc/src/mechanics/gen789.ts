@@ -17,9 +17,11 @@ import {Result} from '../result';
 import {
   chainMods,
   checkAirLock,
+  checkCrestBoosts,
   checkDauntlessShield,
   checkDownload,
   checkEmbody,
+  checkFieldBoosts,
   checkForecast,
   checkInfiltrator,
   checkIntimidate,
@@ -74,17 +76,18 @@ export function calculateSMSSSV(
   checkDauntlessShield(defender, gen);
   checkEmbody(attacker, gen);
   checkEmbody(defender, gen);
-
-  computeFinalStats(gen, attacker, defender, field, 'def', 'spd', 'spe');
-
   checkIntimidate(gen, attacker, defender);
   checkIntimidate(gen, defender, attacker);
   checkDownload(attacker, defender, field.isWonderRoom);
   checkDownload(defender, attacker, field.isWonderRoom);
   checkIntrepidSword(attacker, gen);
   checkIntrepidSword(defender, gen);
+  checkCrestBoosts(attacker);
+  checkCrestBoosts(defender);
+  checkFieldBoosts(attacker, field);
+  checkFieldBoosts(defender, field);
 
-  computeFinalStats(gen, attacker, defender, field, 'atk', 'spa');
+  computeFinalStats(gen, attacker, defender, field, 'def', 'spd', 'spe', 'atk', 'spa');
 
   checkInfiltrator(attacker, field.defenderSide);
   checkInfiltrator(defender, field.attackerSide);
@@ -187,11 +190,13 @@ export function calculateSMSSSV(
       : field.hasTerrain('Misty') ? 'Fairy'
       : field.hasTerrain('Psychic') ? 'Psychic'
       : 'Normal';
+    // Fields - Nature Power
     if (move.named('Nature Power') && type === 'Normal') {
       type =
         field.chromaticField === 'Jungle' ? 'Bug'
         : field.chromaticField === 'Eclipse' ? 'Dark'
         : field.chromaticField === "Dragon's Den" ? 'Steel'
+        : field.chromaticField === "Thundering Plateau" ? 'Electric'
         : 'Normal';
       if (!(type === 'Normal')) {
         desc.chromaticField = field.chromaticField;
@@ -496,6 +501,8 @@ export function calculateSMSSSV(
     desc.weather = field.weather;
   }
 
+  // Fields - Text Stuff
+
   if (field.chromaticField === 'Eclipse' && move.named('Solar Beam', 'Solar Blade')) {
     desc.chromaticField = field.chromaticField;
     return result;
@@ -507,6 +514,12 @@ export function calculateSMSSSV(
   }
 
   if (field.chromaticField === 'Jungle' && move.named('Fell Stinger', 'Silver Wind', 'Steamroller')) {
+    desc.chromaticField = field.chromaticField;
+  }
+
+  if (field.chromaticField === 'Thundering Plateau' &&
+      ((attacker.hasAbility("Motor Drive") && move.named('Gyro Ball', 'Electro Ball')) ||
+      (attacker.hasAbility("Lightning Rod") && move.category === 'Special'))) {
     desc.chromaticField = field.chromaticField;
   }
 
@@ -1154,6 +1167,7 @@ export function calculateBasePowerSMSSSV(
       basePower = 80;
       desc.moveName = 'Tri Attack';
     }
+    // Fields - Nature Power
     if (desc.moveName === 'Tri Attack')
       switch (field.chromaticField) {
       case 'Jungle':
@@ -1167,6 +1181,10 @@ export function calculateBasePowerSMSSSV(
       case "Dragon's Den":
         basePower = 120;
         desc.moveName = 'Make It Rain';
+        break;
+      case 'Thundering Plateau':
+        basePower = 60;
+        desc.moveName = 'Shock Wave';
         break;
       default:
         basePower = 80;
@@ -1785,12 +1803,12 @@ export function calculateAtModsSMSSSV(
        (attacker.hasAbility('Blaze') && move.hasType('Fire')) ||
        (attacker.hasAbility('Torrent') && move.hasType('Water')) ||
        (attacker.hasAbility('Swarm') && move.hasType('Bug')))) ||
-    (move.category === 'Special' && (attacker.abilityOn || field.chromaticField === 'Thunder-Storm') && attacker.hasAbility('Plus', 'Minus'))
+    (move.category === 'Special' && attacker.abilityOn && attacker.hasAbility('Plus', 'Minus'))
   ) {
     atMods.push(6144);
     desc.attackerAbility = attacker.ability;
-  } else if (field.chromaticField === 'Jungle' && attacker.hasAbility('Swarm') && move.hasType('Bug'))
-  {
+  } else if ((field.chromaticField === 'Jungle' && attacker.hasAbility('Swarm') && move.hasType('Bug')) ||
+             (field.chromaticField === 'Thundering Plateau' && attacker.hasAbility('Plus', 'Minus') && move.category === 'Special')) {
     atMods.push(6144);
     desc.attackerAbility = attacker.ability;
     desc.chromaticField = field.chromaticField;

@@ -597,6 +597,10 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
         damage += Math.floor(defender.maxHP() / 16);
         texts.push('Crest recovery');
     }
+    if (field.chromaticField === 'Thundering Plateau' && defender.hasAbility('Volt Absorb')) {
+        damage += Math.floor(defender.maxHP() / 16);
+        texts.push('Volt Absorb recovery on Thundering Plateau');
+    }
     return { damage: damage, texts: texts };
 }
 function computeKOChance(damage, hp, eot, hits, timesUsed, maxHP, toxicCounter) {
@@ -884,7 +888,7 @@ function buildDescription(description, attacker, defender) {
         output += ' in ' + description.terrain + ' Terrain';
     }
     if (description.chromaticField) {
-        output += ' on ' + description.chromaticField + ' Field';
+        output += ' on ' + description.chromaticField + ' (Field)';
     }
     if (description.isReflect) {
         output += ' through Reflect';

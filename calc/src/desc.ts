@@ -726,7 +726,7 @@ function getEndOfTurn(
     texts.push('Volcalith damage');
   }
 
-  // Crests - Text Stuff
+  // Crests - End of turn text
 
   if (defender.named('Gothitelle-Crest')) {
     damage += Math.floor(defender.maxHP() / 16);
@@ -761,6 +761,13 @@ function getEndOfTurn(
   if (defender.named('Vespiquen-Crest-Defense')) {
     damage += Math.floor(defender.maxHP() / 16);
     texts.push('Crest recovery');
+  }
+
+  // Fields - End of turn text
+
+  if (field.chromaticField === 'Thundering Plateau' && defender.hasAbility('Volt Absorb')) {
+    damage += Math.floor(defender.maxHP() / 16);
+    texts.push('Volt Absorb recovery on Thundering Plateau');
   }
 
   return {damage, texts};
@@ -1073,7 +1080,7 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     output += ' in ' + description.terrain + ' Terrain';
   }
   if (description.chromaticField) {
-    output += ' on ' + description.chromaticField + ' Field';
+    output += ' on ' + description.chromaticField + ' (Field)';
   }
   if (description.isReflect) {
     output += ' through Reflect';

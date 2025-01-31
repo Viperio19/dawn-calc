@@ -22,14 +22,17 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     (0, util_2.checkDauntlessShield)(defender, gen);
     (0, util_2.checkEmbody)(attacker, gen);
     (0, util_2.checkEmbody)(defender, gen);
-    (0, util_2.computeFinalStats)(gen, attacker, defender, field, 'def', 'spd', 'spe');
     (0, util_2.checkIntimidate)(gen, attacker, defender);
     (0, util_2.checkIntimidate)(gen, defender, attacker);
     (0, util_2.checkDownload)(attacker, defender, field.isWonderRoom);
     (0, util_2.checkDownload)(defender, attacker, field.isWonderRoom);
     (0, util_2.checkIntrepidSword)(attacker, gen);
     (0, util_2.checkIntrepidSword)(defender, gen);
-    (0, util_2.computeFinalStats)(gen, attacker, defender, field, 'atk', 'spa');
+    (0, util_2.checkCrestBoosts)(attacker);
+    (0, util_2.checkCrestBoosts)(defender);
+    (0, util_2.checkFieldBoosts)(attacker, field);
+    (0, util_2.checkFieldBoosts)(defender, field);
+    (0, util_2.computeFinalStats)(gen, attacker, defender, field, 'def', 'spd', 'spe', 'atk', 'spa');
     (0, util_2.checkInfiltrator)(attacker, field.defenderSide);
     (0, util_2.checkInfiltrator)(defender, field.attackerSide);
     var desc = {
@@ -113,7 +116,8 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
                 field.chromaticField === 'Jungle' ? 'Bug'
                     : field.chromaticField === 'Eclipse' ? 'Dark'
                         : field.chromaticField === "Dragon's Den" ? 'Steel'
-                            : 'Normal';
+                            : field.chromaticField === "Thundering Plateau" ? 'Electric'
+                                : 'Normal';
             if (!(type === 'Normal')) {
                 desc.chromaticField = field.chromaticField;
             }
@@ -359,6 +363,11 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         desc.chromaticField = field.chromaticField;
     }
     if (field.chromaticField === 'Jungle' && move.named('Fell Stinger', 'Silver Wind', 'Steamroller')) {
+        desc.chromaticField = field.chromaticField;
+    }
+    if (field.chromaticField === 'Thundering Plateau' &&
+        ((attacker.hasAbility("Motor Drive") && move.named('Gyro Ball', 'Electro Ball')) ||
+            (attacker.hasAbility("Lightning Rod") && move.category === 'Special'))) {
         desc.chromaticField = field.chromaticField;
     }
     if (move.type === 'Stellar') {
@@ -889,6 +898,10 @@ function calculateBasePowerSMSSSV(gen, attacker, defender, move, field, hasAteAb
                         basePower = 120;
                         desc.moveName = 'Make It Rain';
                         break;
+                    case 'Thundering Plateau':
+                        basePower = 60;
+                        desc.moveName = 'Shock Wave';
+                        break;
                     default:
                         basePower = 80;
                         desc.moveName = 'Tri Attack';
@@ -1351,11 +1364,12 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
                 (attacker.hasAbility('Blaze') && move.hasType('Fire')) ||
                 (attacker.hasAbility('Torrent') && move.hasType('Water')) ||
                 (attacker.hasAbility('Swarm') && move.hasType('Bug')))) ||
-        (move.category === 'Special' && (attacker.abilityOn || field.chromaticField === 'Thunder-Storm') && attacker.hasAbility('Plus', 'Minus'))) {
+        (move.category === 'Special' && attacker.abilityOn && attacker.hasAbility('Plus', 'Minus'))) {
         atMods.push(6144);
         desc.attackerAbility = attacker.ability;
     }
-    else if (field.chromaticField === 'Jungle' && attacker.hasAbility('Swarm') && move.hasType('Bug')) {
+    else if ((field.chromaticField === 'Jungle' && attacker.hasAbility('Swarm') && move.hasType('Bug')) ||
+        (field.chromaticField === 'Thundering Plateau' && attacker.hasAbility('Plus', 'Minus') && move.category === 'Special')) {
         atMods.push(6144);
         desc.attackerAbility = attacker.ability;
         desc.chromaticField = field.chromaticField;

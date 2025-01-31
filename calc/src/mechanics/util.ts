@@ -297,16 +297,28 @@ export function checkIntrepidSword(source: Pokemon, gen: Generation) {
   if (source.hasAbility('Intrepid Sword') && gen.num > 7) {
     source.boosts.atk = Math.min(6, source.boosts.atk + 1);
   }
+}
 
+export function checkDauntlessShield(source: Pokemon, gen: Generation) {
+  if (source.hasAbility('Dauntless Shield') && gen.num > 7) {
+    source.boosts.def = Math.min(6, source.boosts.def + 1);
+  }
+}
+
+export function checkCrestBoosts(source: Pokemon) {
   if (source.named('Vespiquen-Crest-Offense')) {
     source.boosts.atk = Math.min(6, source.boosts.atk + 1);
     source.boosts.spa = Math.min(6, source.boosts.spa + 1);
   }
 }
 
-export function checkDauntlessShield(source: Pokemon, gen: Generation) {
-  if (source.hasAbility('Dauntless Shield') && gen.num > 7) {
-    source.boosts.def = Math.min(6, source.boosts.def + 1);
+export function checkFieldBoosts(source: Pokemon, field: Field) {
+  if (field.chromaticField === 'Thundering Plateau') {
+    if (source.hasAbility('Motor Drive')) {
+      source.boosts.spe = Math.min(6, source.boosts.spe + 1);
+    } else if (source.hasAbility('Lightning Rod')) {
+      source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+    }
   }
 }
 
@@ -621,12 +633,15 @@ export function getMimicryType(field: Field) {
     return "Fairy" as TypeName;
   } else if (field.hasTerrain('Psychic')) {
     return "Psychic" as TypeName;
+  // Fields - Mimicry
   } else if (field.chromaticField === 'Jungle') {
     return "Bug" as TypeName;
   } else if (field.chromaticField === 'Eclipse') {
     return "Dark" as TypeName;
   } else if (field.chromaticField === "Dragon's Den") {
     return "Dragon" as TypeName;
+  } else if (field.chromaticField === "Thundering Plateau") {
+    return "Electric" as TypeName;
   } else {
     return "???" as TypeName;
   }
