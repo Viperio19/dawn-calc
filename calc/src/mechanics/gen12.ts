@@ -76,9 +76,9 @@ export function calculateRBYGSC(
 
 
   const type1Effectiveness =
-    getMoveEffectiveness(gen, move, firstDefenderType, field.defenderSide.isForesight);
+    getMoveEffectiveness(gen, move, firstDefenderType, field, field.defenderSide.isForesight);
   const type2Effectiveness = secondDefenderType
-    ? getMoveEffectiveness(gen, move, secondDefenderType, field.defenderSide.isForesight)
+    ? getMoveEffectiveness(gen, move, secondDefenderType, field, field.defenderSide.isForesight)
     : 1;
   const typeEffectiveness = type1Effectiveness * type2Effectiveness;
 

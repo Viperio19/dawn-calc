@@ -22,6 +22,7 @@ var Field = (function () {
         if (field === void 0) { field = {}; }
         this.gameType = field.gameType || 'Singles';
         this.terrain = field.terrain;
+        this.chromaticField = field.chromaticField;
         this.weather = field.weather;
         this.isMagicRoom = !!field.isMagicRoom;
         this.isWonderRoom = !!field.isWonderRoom;
@@ -60,6 +61,7 @@ var Field = (function () {
             gameType: this.gameType,
             weather: this.weather,
             terrain: this.terrain,
+            chromaticField: this.chromaticField,
             isMagicRoom: this.isMagicRoom,
             isWonderRoom: this.isWonderRoom,
             isGravity: this.isGravity,

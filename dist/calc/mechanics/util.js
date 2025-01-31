@@ -52,6 +52,8 @@ function isGrounded(pokemon, field) {
     return (field.isGravity || pokemon.hasItem('Iron Ball') ||
         (!pokemon.hasType('Flying') &&
             !pokemon.hasAbility('Levitate') &&
+            !pokemon.hasAbility('Lunar Idol') &&
+            !pokemon.hasAbility('Solar Idol') &&
             !pokemon.hasItem('Air Balloon') &&
             !pokemon.named('Probopass-Crest')));
 }
@@ -179,13 +181,16 @@ function getFinalSpeed(gen, pokemon, field, side) {
         speed = Math.floor(OF32(speed * (gen.num < 7 ? 25 : 50)) / 100);
     }
     if (pokemon.named('Cryogonal-Crest')) {
-        speed += pokeRound(((pokemon.stats['spd'] * 12) / 100));
+        speed += Math.floor((Math.floor(pokemon.stats['spd'] * 6 / 5) / 10));
     }
     speed = Math.min(gen.num <= 2 ? 999 : 10000, speed);
     return Math.max(0, speed);
 }
 exports.getFinalSpeed = getFinalSpeed;
-function getMoveEffectiveness(gen, move, type, isGhostRevealed, isGravity, isRingTarget) {
+var JUNGLE_GRASS_MOVES = [
+    'Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash',
+];
+function getMoveEffectiveness(gen, move, type, field, isGhostRevealed, isGravity, isRingTarget) {
     if ((isRingTarget || isGhostRevealed) && type === 'Ghost' && move.hasType('Normal', 'Fighting')) {
         return 1;
     }
@@ -198,6 +203,10 @@ function getMoveEffectiveness(gen, move, type, isGhostRevealed, isGravity, isRin
     else if (move.named('Flying Press')) {
         return (gen.types.get('fighting').effectiveness[type] *
             gen.types.get('flying').effectiveness[type]);
+    }
+    else if (field.chromaticField === 'Jungle' && JUNGLE_GRASS_MOVES.includes(move.name)) {
+        return (gen.types.get((0, util_1.toID)(move.type)).effectiveness[type] *
+            gen.types.get('grass').effectiveness[type]);
     }
     else {
         return gen.types.get((0, util_1.toID)(move.type)).effectiveness[type];
@@ -309,10 +318,6 @@ function checkIntrepidSword(source, gen) {
     if (source.hasAbility('Intrepid Sword') && gen.num > 7) {
         source.boosts.atk = Math.min(6, source.boosts.atk + 1);
     }
-    if (source.named('Vespiquen-Crest-Offense')) {
-        source.boosts.atk = Math.min(6, source.boosts.atk + 1);
-        source.boosts.spa = Math.min(6, source.boosts.spa + 1);
-    }
 }
 exports.checkIntrepidSword = checkIntrepidSword;
 function checkDauntlessShield(source, gen) {
@@ -321,6 +326,32 @@ function checkDauntlessShield(source, gen) {
     }
 }
 exports.checkDauntlessShield = checkDauntlessShield;
+function checkCrestBoosts(source) {
+    if (source.named('Vespiquen-Crest-Offense')) {
+        source.boosts.atk = Math.min(6, source.boosts.atk + 1);
+        source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+    }
+}
+exports.checkCrestBoosts = checkCrestBoosts;
+function checkFieldBoosts(source, field) {
+    if (field.chromaticField === 'Thundering Plateau') {
+        if (source.hasAbility('Motor Drive')) {
+            source.boosts.spe = Math.min(6, source.boosts.spe + 1);
+        }
+        else if (source.hasAbility('Lightning Rod')) {
+            source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+        }
+    }
+    else if (field.chromaticField === 'Starlight Arena') {
+        if (source.hasAbility('Illuminate')) {
+            source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+        }
+        else if (source.hasAbility('Aroma Veil', 'Pastel Veil', 'Sweet Veil')) {
+            source.boosts.spd = Math.min(6, source.boosts.spd + 1);
+        }
+    }
+}
+exports.checkFieldBoosts = checkFieldBoosts;
 function checkEmbody(source, gen) {
     if (gen.num < 9)
         return;
@@ -420,18 +451,19 @@ function checkMultihitBoost(gen, attacker, defender, move, field, desc, usedWhit
         }
         else {
             var stat = move.category === 'Special' ? 'spa' : 'atk';
+            var dropsStats = field.chromaticField === "Dragon's Den" && move.named("Draco Meteor") ? 1 : move.dropsStats;
             var boosts = attacker.boosts[stat];
             if (attacker.hasAbility('Contrary')) {
-                boosts = Math.min(6, boosts + move.dropsStats);
+                boosts = Math.min(6, boosts + dropsStats);
                 desc.attackerAbility = attacker.ability;
             }
             else {
-                boosts = Math.max(-6, boosts - move.dropsStats * simple);
+                boosts = Math.max(-6, boosts - dropsStats * simple);
                 if (simple > 1)
                     desc.attackerAbility = attacker.ability;
             }
             if (attacker.hasItem('White Herb') && attacker.boosts[stat] < 0 && !usedWhiteHerb) {
-                boosts += move.dropsStats * simple;
+                boosts += dropsStats * simple;
                 desc.attackerItem = attacker.item;
                 usedWhiteHerb = true;
             }
@@ -599,6 +631,21 @@ function getMimicryType(field) {
     }
     else if (field.hasTerrain('Psychic')) {
         return "Psychic";
+    }
+    else if (field.chromaticField === 'Jungle') {
+        return "Bug";
+    }
+    else if (field.chromaticField === 'Eclipse') {
+        return "Dark";
+    }
+    else if (field.chromaticField === "Dragon's Den") {
+        return "Dragon";
+    }
+    else if (field.chromaticField === 'Thundering Plateau') {
+        return "Electric";
+    }
+    else if (field.chromaticField === 'Starlight Arena') {
+        return "Fairy";
     }
     else {
         return "???";

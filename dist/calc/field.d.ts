@@ -4,6 +4,7 @@ export declare class Field implements State.Field {
     gameType: GameType;
     weather?: Weather;
     terrain?: Terrain;
+    chromaticField?: string;
     isMagicRoom: boolean;
     isWonderRoom: boolean;
     isGravity: boolean;

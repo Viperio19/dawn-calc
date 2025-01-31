@@ -35,12 +35,14 @@ export declare namespace State {
         timesUsed?: number;
         timesUsedWithMetronome?: number;
         stockpiles?: number;
+        moveSlot?: number;
         overrides?: Partial<I.Move>;
     }
     interface Field {
         gameType: I.GameType;
         weather?: I.Weather;
         terrain?: I.Terrain;
+        chromaticField?: string;
         isMagicRoom?: boolean;
         isWonderRoom?: boolean;
         isGravity?: boolean;

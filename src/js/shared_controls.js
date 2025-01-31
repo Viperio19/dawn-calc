@@ -276,6 +276,13 @@ $(".ability").bind("keyup change", function () {
 	var pokeObj = $(this).closest(".poke-info");
 	var pokemon = createPokemon(pokeObj);
 
+	var checked = pokeObj.find(".teraToggle").prop("checked");
+	var ability = pokeObj.find(".ability").val();
+	var chromaticField = $("#chromatic-field").val();
+	var teraType = pokeObj.find(".teraType").val();
+	
+	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || (teraType === "Stellar" && checked));
+
 	if (pokemon.name === "Spiritomb-Crest") {
 		$(this).closest(".poke-info").find(".alliesFainted").show();
 		$(this).closest(".poke-info").find(".foesFainted").show();
@@ -391,6 +398,20 @@ $("input[name='terrain']").change(function () {
 	});
 });
 
+$("#chromatic-field").change(function () {
+	var allPokemon = $('.poke-info');
+	allPokemon.each(function () {
+		var pokeObj = $(this);
+	
+		var checked = pokeObj.find(".teraToggle").prop("checked");
+		var ability = pokeObj.find(".ability").val();
+		var chromaticField = $("#chromatic-field").val();
+		var teraType = pokeObj.find(".teraType").val();
+		
+		stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || (teraType === "Stellar" && checked));		
+	});
+});
+
 var lastManualTerrain = "";
 var lastAutoTerrain = ["", ""];
 function autosetTerrain(ability, i) {
@@ -469,7 +490,9 @@ $(".status").bind("keyup change", function () {
 $(".teraType").change(function () {
 	var pokeObj = $(this).closest(".poke-info");
 	var checked = pokeObj.find(".teraToggle").prop("checked");
-	stellarButtonsVisibility(pokeObj, $(this).val() === "Stellar" && checked);
+	var ability = pokeObj.find(".ability").val();
+	var chromaticField = $("#chromatic-field").val();
+	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || ($(this).val() === "Stellar" && checked));
 });
 
 var lockerMove = "";
@@ -530,6 +553,7 @@ $(".move-selector").change(function () {
 	var fullSetName = pokeObj.find("input.set-selector").val();
 	var pokemonName = fullSetName.substring(0, fullSetName.indexOf(" ("));
 	var stockpile = moveName === 'Spit Up' || (moveName === 'Belch' && startsWith(pokemonName, "Swalot")); 
+	var moveSlot = startsWith(pokemonName, "Ampharos-Aevian"); 
 	if (Array.isArray(move.multihit)) {
 		moveGroupObj.children(".stat-drops").hide();
 		moveGroupObj.children(".move-hits").show();
@@ -553,6 +577,11 @@ $(".move-selector").change(function () {
 		moveGroupObj.children(".stockpile").hide();
 	}
 	moveGroupObj.children(".move-z").prop("checked", false);
+	if (moveSlot) {
+		moveGroupObj.children(".move-slot").show();
+	} else {
+		moveGroupObj.children(".move-slot").hide();
+	}
 });
 
 $(".item").change(function () {
@@ -832,7 +861,9 @@ function setSelectValueIfValid(select, value, fallback) {
 
 $(".teraToggle").change(function () {
 	var pokeObj = $(this).closest(".poke-info");
-	stellarButtonsVisibility(pokeObj, pokeObj.find(".teraType").val() === "Stellar" && this.checked);
+	var ability = pokeObj.find(".ability").val();
+	var chromaticField = $("#chromatic-field").val();
+	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || (pokeObj.find(".teraType").val() === "Stellar" && this.checked));
 	var forme = $(this).parent().siblings().find(".forme");
 	var curForme = forme.val();
 	if (forme.is(":hidden")) return;
@@ -1081,6 +1112,7 @@ function getMoveDetails(moveInfo, species, ability, item, useMax) {
 	var timesUsed = +moveInfo.find(".stat-drops").val();
 	var timesUsedWithMetronome = moveInfo.find(".metronome").is(':visible') ? +moveInfo.find(".metronome").val() : 1;
 	var stockpiles = +moveInfo.find(".stockpile").val();
+	var moveSlot = +moveInfo.find(".move-slot").val();
 	var overrides = {
 		basePower: +moveInfo.find(".move-bp").val(),
 		type: moveInfo.find(".move-type").val()
@@ -1089,7 +1121,7 @@ function getMoveDetails(moveInfo, species, ability, item, useMax) {
 	return new calc.Move(gen, moveName, {
 		ability: ability, item: item, useZ: isZMove, species: species, isCrit: isCrit, hits: hits,
 		isStellarFirstUse: isStellarFirstUse, timesUsed: timesUsed, timesUsedWithMetronome: timesUsedWithMetronome,
-		stockpiles: stockpiles, overrides: overrides, useMax: useMax
+		stockpiles: stockpiles, moveSlot: moveSlot, overrides: overrides, useMax: useMax
 	});
 }
 
@@ -1118,6 +1150,7 @@ function createField() {
 	var cannonade = [$("#cannonadeL").prop("checked"), $("#cannonadeR").prop("checked")];
 	var volcalith = [$("#volcalithL").prop("checked"), $("#volcalithR").prop("checked")];
 	var terrain = ($("input:checkbox[name='terrain']:checked").val()) ? $("input:checkbox[name='terrain']:checked").val() : "";
+	var chromaticField = $("#chromatic-field").val();
 	var isReflect = [$("#reflectL").prop("checked"), $("#reflectR").prop("checked")];
 	var isLightScreen = [$("#lightScreenL").prop("checked"), $("#lightScreenR").prop("checked")];
 	var isProtected = [$("#protectL").prop("checked"), $("#protectR").prop("checked")];
@@ -1145,7 +1178,7 @@ function createField() {
 		});
 	};
 	return new calc.Field({
-		gameType: gameType, weather: weather, terrain: terrain,
+		gameType: gameType, weather: weather, terrain: terrain, chromaticField: chromaticField,
 		isMagicRoom: isMagicRoom, isWonderRoom: isWonderRoom, isGravity: isGravity,
 		isBeadsOfRuin: isBeadsOfRuin, isTabletsOfRuin: isTabletsOfRuin,
 		isSwordOfRuin: isSwordOfRuin, isVesselOfRuin: isVesselOfRuin,
