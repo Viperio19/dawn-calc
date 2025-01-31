@@ -374,6 +374,8 @@ var SV = SS.concat([
     'Inexorable',
     'Reflector',
     'Resuscitation',
+    'Lunar Idol',
+    'Solar Idol',
 ]);
 exports.ABILITIES = [[], RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV];
 var Abilities = (function () {
