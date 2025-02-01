@@ -91,6 +91,11 @@ function validate(obj, min, max) {
 }
 
 $("input:radio[name='format']").change(function () {
+	var chromaticField = $("#chromatic-field").val();
+
+	$(".field-specific." + chromaticField).show();
+	$(".field-specific").not("." + chromaticField).hide();
+
 	var gameType = $("input:radio[name='format']:checked").val();
 	if (gameType === 'Singles') {
 		$("input:checkbox[name='ruin']:checked").prop("checked", false);
@@ -281,7 +286,7 @@ $(".ability").bind("keyup change", function () {
 	var chromaticField = $("#chromatic-field").val();
 	var teraType = pokeObj.find(".teraType").val();
 	
-	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || (teraType === "Stellar" && checked));
+	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (teraType === "Stellar" && checked));
 
 	if (pokemon.name === "Spiritomb-Crest") {
 		$(this).closest(".poke-info").find(".alliesFainted").show();
@@ -304,6 +309,30 @@ $(".ability").bind("keyup change", function () {
 		$(this).closest(".poke-info").find(".relicanthTurns").hide();
 	}
 
+	var chromaticField = $("#chromatic-field").val();
+	
+	if (chromaticField === 'Ring-Arena' && (ability === 'Guts' || ability === 'Huge Power' ||
+		ability === 'Iron Fist' || ability === 'Limber' || ability === 'Pure Power' ||
+		ability === 'Sheer Force' || ability === 'Super Luck')) {
+		var id = pokeObj.prop("id");
+		var gritStages = id === 'p1'
+						 ? parseInt(pokeObj.find("input:radio[name='gritL']:checked").val())
+						 : parseInt(pokeObj.find("input:radio[name='gritR']:checked").val());
+		var item = pokeObj.find(".item").val();
+		if (item === 'Prism Scale' && gritStages < 3) {
+			if (id === 'p1') {
+				$("#gritL3").prop("checked", true);
+			} else {
+				$("#gritR3").prop("checked", true);
+			}
+		} else if (gritStages < 1){
+			if (id === 'p1') {
+				$("#gritL1").prop("checked", true);
+			} else {
+				$("#gritR1").prop("checked", true);
+			}
+		}
+	}
 });
 
 function autosetQP(pokemon) {
@@ -399,18 +428,68 @@ $("input[name='terrain']").change(function () {
 });
 
 $("#chromatic-field").change(function () {
+	var chromaticField = $("#chromatic-field").val();
+
+	$(".field-specific." + chromaticField).show();
+	$(".field-specific").not("." + chromaticField).hide();
+
+	$("#starstruckL").prop("checked", false);
+	$("#starstruckR").prop("checked", false);
+	$("#gritL0").prop("checked", true);
+	$("#gritR0").prop("checked", true);
+
 	var allPokemon = $('.poke-info');
 	allPokemon.each(function () {
 		var pokeObj = $(this);
 	
-		var checked = pokeObj.find(".teraToggle").prop("checked");
 		var ability = pokeObj.find(".ability").val();
-		var chromaticField = $("#chromatic-field").val();
+		var item = pokeObj.find(".item").val();
+
 		var teraType = pokeObj.find(".teraType").val();
+		var checked = pokeObj.find(".teraToggle").prop("checked");
 		
-		stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || (teraType === "Stellar" && checked));		
+		if (chromaticField === 'Ring-Arena') {
+			var id = pokeObj.prop("id");
+			var gritStages = 0;
+	
+			if (item === 'Prism Scale') {
+				gritStages += 2;
+			}
+
+			if (ability === 'Guts' || ability === 'Huge Power' || ability === 'Iron Fist' ||
+				ability === 'Limber' || ability === 'Pure Power' || ability === 'Sheer Force' ||
+				ability === 'Super Luck') {
+				gritStages += 1;
+			}
+
+			if (gritStages == 3) {
+				if (id === 'p1') {
+					$("#gritL3").prop("checked", true);
+				} else {
+					$("#gritR3").prop("checked", true);
+				}
+			} else if (gritStages == 2) {
+				if (id === 'p1') {
+					$("#gritL2").prop("checked", true);
+				} else {
+					$("#gritR2").prop("checked", true);
+				}
+			} else if (gritStages == 1) {
+				if (id === 'p1') {
+					$("#gritL1").prop("checked", true);
+				} else {
+					$("#gritR1").prop("checked", true);
+				}
+			}
+		}
+
+		stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (teraType === "Stellar" && checked));		
 	});
 });
+
+// function setGritStages(pokeObj, vis) {
+
+// }
 
 var lastManualTerrain = "";
 var lastAutoTerrain = ["", ""];
@@ -492,7 +571,7 @@ $(".teraType").change(function () {
 	var checked = pokeObj.find(".teraToggle").prop("checked");
 	var ability = pokeObj.find(".ability").val();
 	var chromaticField = $("#chromatic-field").val();
-	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || ($(this).val() === "Stellar" && checked));
+	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || ($(this).val() === "Stellar" && checked));
 });
 
 var lockerMove = "";
@@ -544,7 +623,11 @@ $(".move-selector").change(function () {
 	$(this).attr('data-prev', moveName);
 	moveGroupObj.children(".move-type").val(move.type);
 	moveGroupObj.children(".move-cat").val(move.category);
-	moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true);
+	var pokeObj = $(this).closest(".poke-info");
+	var gritStages = pokeObj.prop("id") === 'p1'
+				   ? parseInt(pokeObj.find("input:radio[name='gritL']:checked").val())
+				   : parseInt(pokeObj.find("input:radio[name='gritR']:checked").val());
+	moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true || gritStages >= 3);
 
 	var stat = move.category === 'Special' ? 'spa' : 'atk';
 	var dropsStats =
@@ -585,6 +668,7 @@ $(".move-selector").change(function () {
 });
 
 $(".item").change(function () {
+	var pokeObj = $(this).closest(".poke-info");
 	var itemName = $(this).val();
 	var $metronomeControl = $(this).closest('.poke-info').find('.metronome');
 	if (itemName === "Metronome") {
@@ -592,11 +676,51 @@ $(".item").change(function () {
 	} else {
 		$metronomeControl.hide();
 	}
+	var ability = $(this).closest(".poke-info").find(".ability").val()
 	var moveHits =
-		$(this).closest(".poke-info").find(".ability").val() === 'Skill Link' ? 5 :
+		ability === 'Skill Link' ? 5 :
 			itemName === 'Loaded Dice' ? 4 : 3;
 	$(this).closest(".poke-info").find(".move-hits").val(moveHits);
 	autosetQP($(this).closest(".poke-info"));
+
+	var chromaticField = $("#chromatic-field").val();
+
+	if (chromaticField === 'Ring-Arena' && itemName === 'Prism Scale') {
+		var id = pokeObj.prop("id");
+		var gritStages = id === 'p1'
+						 ? parseInt(pokeObj.find("input:radio[name='gritL']:checked").val())
+						 : parseInt(pokeObj.find("input:radio[name='gritR']:checked").val());
+		if ((ability === 'Guts' || ability === 'Huge Power' || ability === 'Iron Fist' ||
+			ability === 'Limber' || ability === 'Pure Power' || ability === 'Sheer Force' ||
+			ability === 'Super Luck') && gritStages < 3) {
+			if (id === 'p1') {
+				$("#gritL3").prop("checked", true);
+			} else {
+				$("#gritR3").prop("checked", true);
+			}
+		} else if (gritStages < 2) {
+			if (id === 'p1') {
+				$("#gritL2").prop("checked", true);
+			} else {
+				$("#gritR2").prop("checked", true);
+			}		
+		}
+	}
+});
+
+$(".grit").change(function () {
+	var pokeObj = $(this).closest(".poke-info");
+
+	for (i = 0; i < 4; i++) {
+		var moveObj = pokeObj.find(".move" + (i + 1) + " select.move-selector");
+		var moveGroupObj = moveObj.parent();
+		var moveName = moveObj.	val();
+		var move = moves[moveName] || moves['(No Move)'];
+		var gritStages = pokeObj.prop("id") === 'p1'
+						 ? parseInt(pokeObj.find("input:radio[name='gritL']:checked").val())
+						 : parseInt(pokeObj.find("input:radio[name='gritR']:checked").val());
+		moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true || gritStages >= 3);
+	}			
 });
 
 function smogonAnalysis(pokemonName) {
@@ -863,7 +987,7 @@ $(".teraToggle").change(function () {
 	var pokeObj = $(this).closest(".poke-info");
 	var ability = pokeObj.find(".ability").val();
 	var chromaticField = $("#chromatic-field").val();
-	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || (pokeObj.find(".teraType").val() === "Stellar" && this.checked));
+	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (pokeObj.find(".teraType").val() === "Stellar" && this.checked));
 	var forme = $(this).parent().siblings().find(".forme");
 	var curForme = forme.val();
 	if (forme.is(":hidden")) return;
@@ -1074,6 +1198,10 @@ function createPokemon(pokeInfo) {
 			evs: evs,
 			isDynamaxed: isDynamaxed,
 			isSaltCure: pokeInfo.find(".saltcure").is(":checked"),
+			isStarstruck: pokeInfo.find(".starstruck").is(":checked"),
+			gritStages: pokeInfo.prop("id") === 'p1'
+					    ? parseInt(pokeInfo.find("input:radio[name='gritL']:checked").val())
+						: parseInt(pokeInfo.find("input:radio[name='gritR']:checked").val()),
 			alliesFainted: parseInt(pokeInfo.find(".alliesFainted").val()),
 			boostedStat: pokeInfo.find(".boostedStat").val() || undefined,
 			foesFainted: parseInt(pokeInfo.find(".foesFainted").val()),
@@ -1333,6 +1461,10 @@ function clearField() {
 	$("#clear").prop("checked", true);
 	$("#gscClear").prop("checked", true);
 	$("#gravity").prop("checked", false);
+	$("#starstruckL").prop("checked", false);
+	$("#starstruckR").prop("checked", false);
+	$("#gritL0").prop("checked", true);
+	$("#gritR0").prop("checked", true);
 	$("#srL").prop("checked", false);
 	$("#srR").prop("checked", false);
 	$("#spikesL0").prop("checked", true);

@@ -52,6 +52,8 @@ export interface RawDesc {
   rivalry?: 'buffed' | 'nerfed';
   terrain?: Terrain;
   chromaticField?: string;
+  starstruck?: boolean;
+  gritStages?: number;
   weather?: Weather;
   isDefenderDynamaxed?: boolean;
   reflectorOffenseTypes?: string;
@@ -140,6 +142,19 @@ export function getRecovery(
 
   if (move.drain) {
     const percentHealed = move.drain[0] / move.drain[1];
+    const max = Math.round(defender.maxHP() * percentHealed);
+    for (let i = 0; i < minD.length; i++) {
+      const range = [minD[i], maxD[i]];
+      for (const j in recovery) {
+        let drained = Math.round(range[j] * percentHealed);
+        if (attacker.hasItem('Big Root') || attacker.named('Shiinotic-Crest')) drained = Math.trunc(drained * 5324 / 4096);
+        recovery[j] += Math.min(drained * move.hits, max);
+      }
+    }
+  }
+
+  if (attacker.gritStages && attacker.gritStages >= 2) {
+    const percentHealed = 1 / 6;
     const max = Math.round(defender.maxHP() * percentHealed);
     for (let i = 0; i < minD.length; i++) {
       const range = [minD[i], maxD[i]];
@@ -765,9 +780,9 @@ function getEndOfTurn(
 
   // Fields - End of turn text
 
-  if (field.chromaticField === 'Thundering Plateau' && defender.hasAbility('Volt Absorb')) {
+  if (field.chromaticField === 'Thundering-Plateau' && defender.hasAbility('Volt Absorb')) {
     damage += Math.floor(defender.maxHP() / 16);
-    texts.push('Volt Absorb recovery on Thundering Plateau');
+    texts.push('Volt Absorb recovery on Thundering-Plateau');
   }
 
   return {damage, texts};
@@ -969,8 +984,14 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   output = appendIfSet(output, description.attackerItem);
   output = appendIfSet(output, description.attackerAbility);
   output = appendIfSet(output, description.rivalry);
+  if (description.starstruck) {
+    output += 'Starstruck ';
+  }
   if (description.isBurned) {
     output += 'burned ';
+  }
+  if (description.gritStages) {
+    output += Math.min(5, description.gritStages) + ' Grit Stages ';
   }
   if (description.alliesFainted) {
     output += Math.min(5, description.alliesFainted) +
@@ -1079,8 +1100,25 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   } else if (description.terrain) {
     output += ' in ' + description.terrain + ' Terrain';
   }
-  if (description.chromaticField) {
-    output += ' on ' + description.chromaticField + ' (Field)';
+  if (description.chromaticField !== "None") {
+    switch (description.chromaticField) {
+    case "Jungle":
+    case "Eclipse":
+      output += ' on ' + description.chromaticField + ' Field';
+      break;
+    case "Dragons-Den":
+      output += " on Dragon's Den";
+      break;
+    case "Thundering-Plateau":
+      output += ' on Thundering Plateau';
+      break;
+    case "Starlight-Arena":
+      output += ' on Starlight Arena';
+      break;
+    case "Ring-Arena":
+      output += ' on Ring Arena';
+      break;
+    }
   }
   if (description.isReflect) {
     output += ' through Reflect';

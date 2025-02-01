@@ -35,8 +35,8 @@ function calculateADV(gen, attacker, defender, move, field) {
     (0, util_1.checkAirLock)(defender, field);
     (0, util_1.checkForecast)(attacker, field.weather);
     (0, util_1.checkForecast)(defender, field.weather);
-    (0, util_1.checkIntimidate)(gen, attacker, defender);
-    (0, util_1.checkIntimidate)(gen, defender, attacker);
+    (0, util_1.checkIntimidate)(gen, attacker, defender, field);
+    (0, util_1.checkIntimidate)(gen, defender, attacker, field);
     attacker.stats.spe = (0, util_1.getFinalSpeed)(gen, attacker, field, field.attackerSide);
     defender.stats.spe = (0, util_1.getFinalSpeed)(gen, defender, field, field.defenderSide);
     var desc = {

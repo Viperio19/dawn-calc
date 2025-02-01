@@ -80,6 +80,19 @@ function getRecovery(gen, attacker, defender, move, damage, notation) {
             }
         }
     }
+    if (attacker.gritStages && attacker.gritStages >= 2) {
+        var percentHealed = 1 / 6;
+        var max = Math.round(defender.maxHP() * percentHealed);
+        for (var i = 0; i < minD.length; i++) {
+            var range = [minD[i], maxD[i]];
+            for (var j in recovery) {
+                var drained = Math.round(range[j] * percentHealed);
+                if (attacker.hasItem('Big Root') || attacker.named('Shiinotic-Crest'))
+                    drained = Math.trunc(drained * 5324 / 4096);
+                recovery[j] += Math.min(drained * move.hits, max);
+            }
+        }
+    }
     if ((attacker.named('Dusknoir-Crest') && move.named('Shadow Punch')) || attacker.named('Gothitelle-Crest-Dark')) {
         var tempPercentHealed = 0;
         if (attacker.named('Dusknoir-Crest')) {
@@ -597,9 +610,9 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
         damage += Math.floor(defender.maxHP() / 16);
         texts.push('Crest recovery');
     }
-    if (field.chromaticField === 'Thundering Plateau' && defender.hasAbility('Volt Absorb')) {
+    if (field.chromaticField === 'Thundering-Plateau' && defender.hasAbility('Volt Absorb')) {
         damage += Math.floor(defender.maxHP() / 16);
-        texts.push('Volt Absorb recovery on Thundering Plateau');
+        texts.push('Volt Absorb recovery on Thundering-Plateau');
     }
     return { damage: damage, texts: texts };
 }
@@ -782,8 +795,14 @@ function buildDescription(description, attacker, defender) {
     output = appendIfSet(output, description.attackerItem);
     output = appendIfSet(output, description.attackerAbility);
     output = appendIfSet(output, description.rivalry);
+    if (description.starstruck) {
+        output += 'Starstruck ';
+    }
     if (description.isBurned) {
         output += 'burned ';
+    }
+    if (description.gritStages) {
+        output += Math.min(5, description.gritStages) + ' Grit Stages ';
     }
     if (description.alliesFainted) {
         output += Math.min(5, description.alliesFainted) +
@@ -887,8 +906,25 @@ function buildDescription(description, attacker, defender) {
     else if (description.terrain) {
         output += ' in ' + description.terrain + ' Terrain';
     }
-    if (description.chromaticField) {
-        output += ' on ' + description.chromaticField + ' (Field)';
+    if (description.chromaticField !== "None") {
+        switch (description.chromaticField) {
+            case "Jungle":
+            case "Eclipse":
+                output += ' on ' + description.chromaticField + ' Field';
+                break;
+            case "Dragons-Den":
+                output += " on Dragon's Den";
+                break;
+            case "Thundering-Plateau":
+                output += ' on Thundering Plateau';
+                break;
+            case "Starlight-Arena":
+                output += ' on Starlight Arena';
+                break;
+            case "Ring-Arena":
+                output += ' on Ring Arena';
+                break;
+        }
     }
     if (description.isReflect) {
         output += ' through Reflect';

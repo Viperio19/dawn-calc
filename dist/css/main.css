@@ -396,6 +396,12 @@ select.toxic-counter {
 .move-hits {
     width: 4.5em;
 }
+.poke-info .grit-btn {
+   width: 3.5em;
+}
+.poke-info .grit-5-btn {
+   width: 10em;
+}
 .poke-info .crit-btn {
     font-size: 0.8em;
     width: 2.5em;

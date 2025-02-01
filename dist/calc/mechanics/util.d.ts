@@ -13,7 +13,7 @@ export declare function checkTeraformZero(pokemon: Pokemon, field: Field): void;
 export declare function checkForecast(pokemon: Pokemon, weather?: Weather): void;
 export declare function checkItem(pokemon: Pokemon, magicRoomActive?: boolean): void;
 export declare function checkWonderRoom(pokemon: Pokemon, wonderRoomActive?: boolean): void;
-export declare function checkIntimidate(gen: Generation, source: Pokemon, target: Pokemon): void;
+export declare function checkIntimidate(gen: Generation, source: Pokemon, target: Pokemon, field: Field): void;
 export declare function checkDownload(source: Pokemon, target: Pokemon, wonderRoomActive?: boolean): void;
 export declare function checkIntrepidSword(source: Pokemon, gen: Generation): void;
 export declare function checkDauntlessShield(source: Pokemon, gen: Generation): void;

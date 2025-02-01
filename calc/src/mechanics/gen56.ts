@@ -59,8 +59,8 @@ export function calculateBWXY(
 
   computeFinalStats(gen, attacker, defender, field, 'def', 'spd', 'spe');
 
-  checkIntimidate(gen, attacker, defender);
-  checkIntimidate(gen, defender, attacker);
+  checkIntimidate(gen, attacker, defender, field);
+  checkIntimidate(gen, defender, attacker, field);
   checkDownload(attacker, defender, field.isWonderRoom);
   checkDownload(defender, attacker, field.isWonderRoom);
 

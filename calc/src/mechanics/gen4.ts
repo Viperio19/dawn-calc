@@ -34,8 +34,8 @@ export function calculateDPP(
   checkForecast(defender, field.weather);
   checkItem(attacker);
   checkItem(defender);
-  checkIntimidate(gen, attacker, defender);
-  checkIntimidate(gen, defender, attacker);
+  checkIntimidate(gen, attacker, defender, field);
+  checkIntimidate(gen, defender, attacker, field);
   checkDownload(attacker, defender);
   checkDownload(defender, attacker);
   attacker.stats.spe = getFinalSpeed(gen, attacker, field, field.attackerSide);

@@ -244,14 +244,15 @@ export function checkWonderRoom(pokemon: Pokemon, wonderRoomActive?: boolean) {
   }
 }
 
-export function checkIntimidate(gen: Generation, source: Pokemon, target: Pokemon) {
+export function checkIntimidate(gen: Generation, source: Pokemon, target: Pokemon, field: Field) {
   const blocked =
     target.hasAbility('Clear Body', 'White Smoke', 'Hyper Cutter', 'Full Metal Body') ||
     // More abilities now block Intimidate in Gen 8+ (DaWoblefet, Cloudy Mistral)
     (gen.num >= 8 && target.hasAbility('Inner Focus', 'Own Tempo', 'Oblivious', 'Scrappy')) ||
     target.hasItem('Clear Amulet');
   if (source.hasAbility('Intimidate') && source.abilityOn && !blocked) {
-    if (target.hasAbility('Contrary', 'Defiant', 'Guard Dog')) {
+    if (target.hasAbility('Contrary', 'Defiant', 'Guard Dog') ||
+        (target.hasAbility('Steadfast') && field.chromaticField === 'Ring-Arena')) {
       target.boosts.atk = Math.min(6, target.boosts.atk + 1);
     } else if (target.hasAbility('Simple')) {
       target.boosts.atk = Math.max(-6, target.boosts.atk - 2);
@@ -271,7 +272,7 @@ export function checkIntimidate(gen: Generation, source: Pokemon, target: Pokemo
     } else {
       target.boosts.spa = Math.max(-6, target.boosts.spa - 1);
     }
-    if (target.hasAbility('Defiant')) {
+    if (target.hasAbility('Defiant') || (target.hasAbility('Steadfast') && field.chromaticField === 'Ring-Arena')) {
       target.boosts.atk = Math.min(6, target.boosts.atk + 2);
     }
 
@@ -313,13 +314,20 @@ export function checkCrestBoosts(source: Pokemon) {
 }
 
 export function checkFieldBoosts(source: Pokemon, field: Field) {
-  if (field.chromaticField === 'Thundering Plateau') {
+  if (field.chromaticField === 'Dragons-Den') {
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.spe = Math.min(6, source.boosts.spe + 1);
+    }
+  } else if (field.chromaticField === 'Thundering-Plateau') {
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.spd = Math.min(6, source.boosts.spd + 1);
+    }
     if (source.hasAbility('Motor Drive')) {
       source.boosts.spe = Math.min(6, source.boosts.spe + 1);
     } else if (source.hasAbility('Lightning Rod')) {
       source.boosts.spa = Math.min(6, source.boosts.spa + 1);
     }
-  } else if (field.chromaticField === 'Starlight Arena') {
+  } else if (field.chromaticField === 'Starlight-Arena') {
     if (source.hasAbility('Illuminate')) {
       source.boosts.spa = Math.min(6, source.boosts.spa + 1);
     } else if (source.hasAbility('Aroma Veil', 'Pastel Veil', 'Sweet Veil')) {
@@ -433,7 +441,7 @@ export function checkMultihitBoost(
     } else {
       // No move with dropsStats has fancy logic regarding category here
       const stat = move.category === 'Special' ? 'spa' : 'atk';
-      let dropsStats = field.chromaticField === "Dragon's Den" && move.named("Draco Meteor") ? 1 : move.dropsStats;
+      let dropsStats = field.chromaticField === 'Dragons-Den' && move.named("Draco Meteor") ? 1 : move.dropsStats;
 
       let boosts = attacker.boosts[stat];
       if (attacker.hasAbility('Contrary')) {
@@ -644,12 +652,14 @@ export function getMimicryType(field: Field) {
     return "Bug" as TypeName;
   } else if (field.chromaticField === 'Eclipse') {
     return "Dark" as TypeName;
-  } else if (field.chromaticField === "Dragon's Den") {
+  } else if (field.chromaticField === 'Dragons-Den') {
     return "Dragon" as TypeName;
-  } else if (field.chromaticField === 'Thundering Plateau') {
+  } else if (field.chromaticField === 'Thundering-Plateau') {
     return "Electric" as TypeName;
-  } else if (field.chromaticField === 'Starlight Arena') {
+  } else if (field.chromaticField === 'Starlight-Arena') {
     return "Fairy" as TypeName;
+  } else if (field.chromaticField === 'Ring-Arena') {
+    return "Fighting" as TypeName;
   } else {
     return "???" as TypeName;
   }
