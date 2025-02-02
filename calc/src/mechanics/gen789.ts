@@ -389,7 +389,7 @@ export function calculateSMSSSV(
   let typeEffectiveness = type1Effectiveness * type2Effectiveness;
   
   // Fields - Inverse
-  if (field.chromaticField === 'Inverse')) {
+  if (field.chromaticField === 'Inverse') {
     if (move.hasType('Normal')) // Normal is always neutral
       typeEffectiveness = 1;
   }

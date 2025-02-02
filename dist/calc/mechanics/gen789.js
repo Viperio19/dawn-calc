@@ -119,7 +119,8 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
                             : field.chromaticField === 'Thundering-Plateau' ? 'Electric'
                                 : field.chromaticField === 'Starlight-Arena' ? 'Fairy'
                                     : field.chromaticField === 'Ring-Arena' ? 'Fighting'
-                                        : 'Normal';
+                                        : field.chromaticField === 'Inverse' ? 'Psychic'
+                                            : 'Normal';
             if (!(type === 'Normal')) {
                 desc.chromaticField = field.chromaticField;
             }
@@ -291,6 +292,10 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
             type2Effectiveness = 1 / type2Effectiveness;
     }
     var typeEffectiveness = type1Effectiveness * type2Effectiveness;
+    if (field.chromaticField === 'Inverse') {
+        if (move.hasType('Normal'))
+            typeEffectiveness = 1;
+    }
     if (defender.named('Druddigon-Crest')) {
         if (move.hasType('Fire'))
             typeEffectiveness = 0;
@@ -937,6 +942,10 @@ function calculateBasePowerSMSSSV(gen, attacker, defender, move, field, hasAteAb
                         basePower = 120;
                         desc.moveName = 'Close Combat';
                         break;
+                    case 'Inverse':
+                        basePower = 0;
+                        desc.moveName = 'Trick Room';
+                        break;
                     default:
                         basePower = 80;
                         desc.moveName = 'Tri Attack';
@@ -1495,6 +1504,12 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
             (attacker.hasItem('Choice Specs') && move.category === 'Special'))) {
         atMods.push(6144);
         desc.attackerItem = attacker.item;
+    }
+    if ((attacker.hasItem('Prism Scale') &&
+        !(field.chromaticField === 'None'))) {
+        if ((field.chromaticField === 'Inverse') && (move.hasType('???'))) {
+            atMods.push(6144);
+        }
     }
     if (attacker.named('Seviper-Crest')) {
         atMods.push(4096 + (0, util_2.pokeRound)(Math.floor((defender.curHP() * 4096) / defender.maxHP()) / 2));

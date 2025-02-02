@@ -357,7 +357,7 @@ function getHazards(gen, defender, defenderSide, field) {
         var rockType = gen.types.get('rock');
         var effectiveness = rockType.effectiveness[defender.types[0]] *
             (defender.types[1] ? rockType.effectiveness[defender.types[1]] : 1);
-        if (defender.named('Torterra-Crest')) {
+        if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) {
             damage += Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
         }
         else {
