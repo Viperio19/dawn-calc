@@ -309,29 +309,8 @@ $(".ability").bind("keyup change", function () {
 		$(this).closest(".poke-info").find(".relicanthTurns").hide();
 	}
 
-	var chromaticField = $("#chromatic-field").val();
-	
-	if (chromaticField === 'Ring-Arena' && (ability === 'Guts' || ability === 'Huge Power' ||
-		ability === 'Iron Fist' || ability === 'Limber' || ability === 'Pure Power' ||
-		ability === 'Sheer Force' || ability === 'Super Luck')) {
-		var id = pokeObj.prop("id");
-		var gritStages = id === 'p1'
-						 ? parseInt(pokeObj.find("input:radio[name='gritL']:checked").val())
-						 : parseInt(pokeObj.find("input:radio[name='gritR']:checked").val());
-		var item = pokeObj.find(".item").val();
-		if (item === 'Prism Scale' && gritStages < 3) {
-			if (id === 'p1') {
-				$("#gritL3").prop("checked", true);
-			} else {
-				$("#gritR3").prop("checked", true);
-			}
-		} else if (gritStages < 1){
-			if (id === 'p1') {
-				$("#gritL1").prop("checked", true);
-			} else {
-				$("#gritR1").prop("checked", true);
-			}
-		}
+	if (chromaticField === 'Ring-Arena') {
+		updateGritStages(pokeObj);
 	}
 });
 
@@ -427,6 +406,59 @@ $("input[name='terrain']").change(function () {
 	});
 });
 
+function updateGritStages(pokeObj) {
+	var ability = pokeObj.find(".ability").val();
+	var item = pokeObj.find(".item").val();
+	var id = pokeObj.prop("id");
+	var gritNew = 0;
+
+	var gritCurr = pokeObj.prop("id") === 'p1'
+	? parseInt(pokeObj.find("input:radio[name='gritL']:checked").val())
+	: parseInt(pokeObj.find("input:radio[name='gritR']:checked").val());
+
+	if (item === 'Prism Scale') {
+		gritNew += 2;
+	}
+
+	if (ability === 'Guts' || ability === 'Huge Power' || ability === 'Iron Fist' ||
+		ability === 'Limber' || ability === 'Pure Power' || ability === 'Sheer Force' ||
+		ability === 'Super Luck') {
+		gritNew += 1;
+	}
+
+	if (gritCurr >= gritNew) {
+		return;
+	}
+	
+	if (gritNew == 3) {
+		if (id === 'p1') {
+			$("#gritL3").prop("checked", true);
+		} else {
+			$("#gritR3").prop("checked", true);
+		}
+	} else if (gritNew == 2) {
+		if (id === 'p1') {
+			$("#gritL2").prop("checked", true);
+		} else {
+			$("#gritR2").prop("checked", true);
+		}
+	} else if (gritNew == 1) {
+		if (id === 'p1') {
+			$("#gritL1").prop("checked", true);
+		} else {
+			$("#gritR1").prop("checked", true);
+		}
+	}
+
+	for (i = 0; i < 4; i++) {
+		var moveObj = pokeObj.find(".move" + (i + 1) + " select.move-selector");
+		var moveGroupObj = moveObj.parent();
+		var moveName = moveObj.	val();
+		var move = moves[moveName] || moves['(No Move)'];
+		moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true || gritNew >= 3);
+	}
+}
+
 $("#chromatic-field").change(function () {
 	var chromaticField = $("#chromatic-field").val();
 
@@ -443,53 +475,25 @@ $("#chromatic-field").change(function () {
 		var pokeObj = $(this);
 	
 		var ability = pokeObj.find(".ability").val();
-		var item = pokeObj.find(".item").val();
 
 		var teraType = pokeObj.find(".teraType").val();
 		var checked = pokeObj.find(".teraToggle").prop("checked");
+
+		stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (teraType === "Stellar" && checked));
 		
 		if (chromaticField === 'Ring-Arena') {
-			var id = pokeObj.prop("id");
-			var gritStages = 0;
-	
-			if (item === 'Prism Scale') {
-				gritStages += 2;
-			}
-
-			if (ability === 'Guts' || ability === 'Huge Power' || ability === 'Iron Fist' ||
-				ability === 'Limber' || ability === 'Pure Power' || ability === 'Sheer Force' ||
-				ability === 'Super Luck') {
-				gritStages += 1;
-			}
-
-			if (gritStages == 3) {
-				if (id === 'p1') {
-					$("#gritL3").prop("checked", true);
-				} else {
-					$("#gritR3").prop("checked", true);
-				}
-			} else if (gritStages == 2) {
-				if (id === 'p1') {
-					$("#gritL2").prop("checked", true);
-				} else {
-					$("#gritR2").prop("checked", true);
-				}
-			} else if (gritStages == 1) {
-				if (id === 'p1') {
-					$("#gritL1").prop("checked", true);
-				} else {
-					$("#gritR1").prop("checked", true);
-				}
+			updateGritStages(pokeObj);
+		} else {
+			for (i = 0; i < 4; i++) {
+				var moveObj = pokeObj.find(".move" + (i + 1) + " select.move-selector");
+				var moveGroupObj = moveObj.parent();
+				var moveName = moveObj.	val();
+				var move = moves[moveName] || moves['(No Move)'];
+				moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true);
 			}
 		}
-
-		stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (teraType === "Stellar" && checked));		
 	});
 });
-
-// function setGritStages(pokeObj, vis) {
-
-// }
 
 var lastManualTerrain = "";
 var lastAutoTerrain = ["", ""];
@@ -685,26 +689,8 @@ $(".item").change(function () {
 
 	var chromaticField = $("#chromatic-field").val();
 
-	if (chromaticField === 'Ring-Arena' && itemName === 'Prism Scale') {
-		var id = pokeObj.prop("id");
-		var gritStages = id === 'p1'
-						 ? parseInt(pokeObj.find("input:radio[name='gritL']:checked").val())
-						 : parseInt(pokeObj.find("input:radio[name='gritR']:checked").val());
-		if ((ability === 'Guts' || ability === 'Huge Power' || ability === 'Iron Fist' ||
-			ability === 'Limber' || ability === 'Pure Power' || ability === 'Sheer Force' ||
-			ability === 'Super Luck') && gritStages < 3) {
-			if (id === 'p1') {
-				$("#gritL3").prop("checked", true);
-			} else {
-				$("#gritR3").prop("checked", true);
-			}
-		} else if (gritStages < 2) {
-			if (id === 'p1') {
-				$("#gritL2").prop("checked", true);
-			} else {
-				$("#gritR2").prop("checked", true);
-			}		
-		}
+	if (chromaticField === 'Ring-Arena') {
+		updateGritStages(pokeObj);
 	}
 });
 
