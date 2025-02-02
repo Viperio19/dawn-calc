@@ -199,6 +199,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Thundering-Plateau' ? 'Electric'
         : field.chromaticField === 'Starlight-Arena' ? 'Fairy'
         : field.chromaticField === 'Ring-Arena' ? 'Fighting'
+        : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
       if (!(type === 'Normal')) {
         desc.chromaticField = field.chromaticField;
@@ -387,6 +388,12 @@ export function calculateSMSSSV(
 
   let typeEffectiveness = type1Effectiveness * type2Effectiveness;
   
+  // Fields - Inverse
+  if (field.chromaticField === 'Inverse')) {
+    if (move.hasType('Normal')) // Normal is always neutral
+      typeEffectiveness = 1;
+  }
+
   // Crests - Resistances and Immunities
 
   // Druddigon Crest: Gives immunity to fire type moves
@@ -1204,6 +1211,10 @@ export function calculateBasePowerSMSSSV(
         basePower = 120;
         desc.moveName = 'Close Combat';
         break;
+      case 'Inverse':
+        basePower = 0;
+        desc.moveName = 'Trick Room';
+        break;
       default:
         basePower = 80;
         desc.moveName = 'Tri Attack';
@@ -1931,6 +1942,17 @@ export function calculateAtModsSMSSSV(
   ) {
     atMods.push(6144);
     desc.attackerItem = attacker.item;
+  }
+
+// Fields - Prism Scale Effects
+  if ((attacker.hasItem('Prism Scale') &&
+       !(field.chromaticField === 'None')))
+   {
+    //Inverse
+    if ((field.chromaticField === 'Inverse') && (move.hasType('???')))
+    {
+      atMods.push(6144);
+    }
   }
 
   // Crests - Attack Modifiers

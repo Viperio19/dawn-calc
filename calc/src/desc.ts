@@ -506,7 +506,9 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
     const effectiveness =
       rockType.effectiveness[defender.types[0]]! *
       (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
-    if (defender.named('Torterra-Crest')) {
+    // Torterra-Crest
+    // Fields - Inverse
+    if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) {
       damage += Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
     } else {
       damage += Math.floor((effectiveness * defender.maxHP()) / 8);
