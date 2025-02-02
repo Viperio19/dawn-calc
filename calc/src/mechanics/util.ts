@@ -159,10 +159,15 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
   return Math.max(0, speed);
 }
 
+const JUNGLE_GRASS_MOVES = [
+  'Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash',
+];
+
 export function getMoveEffectiveness(
   gen: Generation,
   move: Move,
   type: TypeName,
+  field: Field,
   isGhostRevealed?: boolean,
   isGravity?: boolean,
   isRingTarget?: boolean,
@@ -177,6 +182,11 @@ export function getMoveEffectiveness(
     return (
       gen.types.get('fighting' as ID)!.effectiveness[type]! *
       gen.types.get('flying' as ID)!.effectiveness[type]!
+    );
+  } else if (field.chromaticField === 'Jungle' && JUNGLE_GRASS_MOVES.includes(move.name)) {
+    return (
+      gen.types.get(toID(move.type))!.effectiveness[type]! *
+      gen.types.get('grass' as ID)!.effectiveness[type]!
     );
   } else {
     return gen.types.get(toID(move.type))!.effectiveness[type]!;
@@ -287,16 +297,34 @@ export function checkIntrepidSword(source: Pokemon, gen: Generation) {
   if (source.hasAbility('Intrepid Sword') && gen.num > 7) {
     source.boosts.atk = Math.min(6, source.boosts.atk + 1);
   }
+}
 
+export function checkDauntlessShield(source: Pokemon, gen: Generation) {
+  if (source.hasAbility('Dauntless Shield') && gen.num > 7) {
+    source.boosts.def = Math.min(6, source.boosts.def + 1);
+  }
+}
+
+export function checkCrestBoosts(source: Pokemon) {
   if (source.named('Vespiquen-Crest-Offense')) {
     source.boosts.atk = Math.min(6, source.boosts.atk + 1);
     source.boosts.spa = Math.min(6, source.boosts.spa + 1);
   }
 }
 
-export function checkDauntlessShield(source: Pokemon, gen: Generation) {
-  if (source.hasAbility('Dauntless Shield') && gen.num > 7) {
-    source.boosts.def = Math.min(6, source.boosts.def + 1);
+export function checkFieldBoosts(source: Pokemon, field: Field) {
+  if (field.chromaticField === 'Thundering Plateau') {
+    if (source.hasAbility('Motor Drive')) {
+      source.boosts.spe = Math.min(6, source.boosts.spe + 1);
+    } else if (source.hasAbility('Lightning Rod')) {
+      source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+    }
+  } else if (field.chromaticField === 'Starlight Arena') {
+    if (source.hasAbility('Illuminate')) {
+      source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+    } else if (source.hasAbility('Aroma Veil', 'Pastel Veil', 'Sweet Veil')) {
+      source.boosts.spd = Math.min(6, source.boosts.spd + 1);
+    }
   }
 }
 
@@ -405,18 +433,19 @@ export function checkMultihitBoost(
     } else {
       // No move with dropsStats has fancy logic regarding category here
       const stat = move.category === 'Special' ? 'spa' : 'atk';
+      let dropsStats = field.chromaticField === "Dragon's Den" && move.named("Draco Meteor") ? 1 : move.dropsStats;
 
       let boosts = attacker.boosts[stat];
       if (attacker.hasAbility('Contrary')) {
-        boosts = Math.min(6, boosts + move.dropsStats);
+        boosts = Math.min(6, boosts + dropsStats);
         desc.attackerAbility = attacker.ability;
       } else {
-        boosts = Math.max(-6, boosts - move.dropsStats * simple);
+        boosts = Math.max(-6, boosts - dropsStats * simple);
         if (simple > 1) desc.attackerAbility = attacker.ability;
       }
 
       if (attacker.hasItem('White Herb') && attacker.boosts[stat] < 0 && !usedWhiteHerb) {
-        boosts += move.dropsStats * simple;
+        boosts += dropsStats * simple;
         desc.attackerItem = attacker.item;
         usedWhiteHerb = true;
       }
@@ -610,6 +639,17 @@ export function getMimicryType(field: Field) {
     return "Fairy" as TypeName;
   } else if (field.hasTerrain('Psychic')) {
     return "Psychic" as TypeName;
+  // Fields - Mimicry
+  } else if (field.chromaticField === 'Jungle') {
+    return "Bug" as TypeName;
+  } else if (field.chromaticField === 'Eclipse') {
+    return "Dark" as TypeName;
+  } else if (field.chromaticField === "Dragon's Den") {
+    return "Dragon" as TypeName;
+  } else if (field.chromaticField === 'Thundering Plateau') {
+    return "Electric" as TypeName;
+  } else if (field.chromaticField === 'Starlight Arena') {
+    return "Fairy" as TypeName;
   } else {
     return "???" as TypeName;
   }

@@ -276,6 +276,13 @@ $(".ability").bind("keyup change", function () {
 	var pokeObj = $(this).closest(".poke-info");
 	var pokemon = createPokemon(pokeObj);
 
+	var checked = pokeObj.find(".teraToggle").prop("checked");
+	var ability = pokeObj.find(".ability").val();
+	var chromaticField = $("#chromatic-field").val();
+	var teraType = pokeObj.find(".teraType").val();
+	
+	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || (teraType === "Stellar" && checked));
+
 	if (pokemon.name === "Spiritomb-Crest") {
 		$(this).closest(".poke-info").find(".alliesFainted").show();
 		$(this).closest(".poke-info").find(".foesFainted").show();
@@ -391,6 +398,20 @@ $("input[name='terrain']").change(function () {
 	});
 });
 
+$("#chromatic-field").change(function () {
+	var allPokemon = $('.poke-info');
+	allPokemon.each(function () {
+		var pokeObj = $(this);
+	
+		var checked = pokeObj.find(".teraToggle").prop("checked");
+		var ability = pokeObj.find(".ability").val();
+		var chromaticField = $("#chromatic-field").val();
+		var teraType = pokeObj.find(".teraType").val();
+		
+		stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || (teraType === "Stellar" && checked));		
+	});
+});
+
 var lastManualTerrain = "";
 var lastAutoTerrain = ["", ""];
 function autosetTerrain(ability, i) {
@@ -469,7 +490,9 @@ $(".status").bind("keyup change", function () {
 $(".teraType").change(function () {
 	var pokeObj = $(this).closest(".poke-info");
 	var checked = pokeObj.find(".teraToggle").prop("checked");
-	stellarButtonsVisibility(pokeObj, $(this).val() === "Stellar" && checked);
+	var ability = pokeObj.find(".ability").val();
+	var chromaticField = $("#chromatic-field").val();
+	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || ($(this).val() === "Stellar" && checked));
 });
 
 var lockerMove = "";
@@ -838,7 +861,9 @@ function setSelectValueIfValid(select, value, fallback) {
 
 $(".teraToggle").change(function () {
 	var pokeObj = $(this).closest(".poke-info");
-	stellarButtonsVisibility(pokeObj, pokeObj.find(".teraType").val() === "Stellar" && this.checked);
+	var ability = pokeObj.find(".ability").val();
+	var chromaticField = $("#chromatic-field").val();
+	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || (pokeObj.find(".teraType").val() === "Stellar" && this.checked));
 	var forme = $(this).parent().siblings().find(".forme");
 	var curForme = forme.val();
 	if (forme.is(":hidden")) return;
@@ -1125,6 +1150,7 @@ function createField() {
 	var cannonade = [$("#cannonadeL").prop("checked"), $("#cannonadeR").prop("checked")];
 	var volcalith = [$("#volcalithL").prop("checked"), $("#volcalithR").prop("checked")];
 	var terrain = ($("input:checkbox[name='terrain']:checked").val()) ? $("input:checkbox[name='terrain']:checked").val() : "";
+	var chromaticField = $("#chromatic-field").val();
 	var isReflect = [$("#reflectL").prop("checked"), $("#reflectR").prop("checked")];
 	var isLightScreen = [$("#lightScreenL").prop("checked"), $("#lightScreenR").prop("checked")];
 	var isProtected = [$("#protectL").prop("checked"), $("#protectR").prop("checked")];
@@ -1152,7 +1178,7 @@ function createField() {
 		});
 	};
 	return new calc.Field({
-		gameType: gameType, weather: weather, terrain: terrain,
+		gameType: gameType, weather: weather, terrain: terrain, chromaticField: chromaticField,
 		isMagicRoom: isMagicRoom, isWonderRoom: isWonderRoom, isGravity: isGravity,
 		isBeadsOfRuin: isBeadsOfRuin, isTabletsOfRuin: isTabletsOfRuin,
 		isSwordOfRuin: isSwordOfRuin, isVesselOfRuin: isVesselOfRuin,

@@ -218,9 +218,10 @@ function getKOChance(gen, attacker, defender, move, field, damage, err) {
     if (damage[0] >= defender.maxHP() && move.timesUsed === 1 && move.timesUsedWithMetronome === 1) {
         return { chance: 1, n: 1, text: 'guaranteed OHKO' };
     }
-    var hazards = getHazards(gen, defender, field.defenderSide);
+    var hazards = getHazards(gen, defender, field.defenderSide, field);
     var eot = getEndOfTurn(gen, attacker, defender, move, field);
-    var toxicCounter = defender.hasStatus('tox') && !defender.hasAbility('Magic Guard') ? defender.toxicCounter : 0;
+    var toxicCounter = defender.hasStatus('tox') && !(defender.hasAbility('Magic Guard') ||
+        (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) ? defender.toxicCounter : 0;
     var qualifier = move.hits > 1 ? 'approx. ' : '';
     var hazardsText = hazards.texts.length > 0
         ? ' after ' + serializeText(hazards.texts)
@@ -329,13 +330,17 @@ var TRAPPING = [
     'Bind', 'Clamp', 'Fire Spin', 'Infestation', 'Magma Storm', 'Sand Tomb',
     'Thunder Cage', 'Whirlpool', 'Wrap', 'G-Max Sandblast', 'G-Max Centiferno',
 ];
-function getHazards(gen, defender, defenderSide) {
+var TRAPPING_JUNGLE = [
+    'Fell Stinger', 'Silver Wind', 'Steamroller',
+];
+function getHazards(gen, defender, defenderSide, field) {
     var damage = 0;
     var texts = [];
     if (defender.hasItem('Heavy-Duty Boots')) {
         return { damage: damage, texts: texts };
     }
-    if (defenderSide.isSR && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
+    if (defenderSide.isSR && !defender.hasAbility('Magic Guard', 'Mountaineer') &&
+        !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
         var rockType = gen.types.get('rock');
         var effectiveness = rockType.effectiveness[defender.types[0]] *
             (defender.types[1] ? rockType.effectiveness[defender.types[1]] : 1);
@@ -347,7 +352,8 @@ function getHazards(gen, defender, defenderSide) {
         }
         texts.push('Stealth Rock');
     }
-    if (defenderSide.steelsurge && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
+    if (defenderSide.steelsurge && !defender.hasAbility('Magic Guard', 'Mountaineer') &&
+        !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
         var steelType = gen.types.get('steel');
         var effectiveness = steelType.effectiveness[defender.types[0]] *
             (defender.types[1] ? steelType.effectiveness[defender.types[1]] : 1);
@@ -356,6 +362,7 @@ function getHazards(gen, defender, defenderSide) {
     }
     if (!defender.hasType('Flying') &&
         !defender.hasAbility('Magic Guard', 'Levitate') &&
+        !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') &&
         !defender.hasItem('Air Balloon') &&
         !defender.named('Probopass-Crest')) {
         if (defenderSide.spikes === 1) {
@@ -407,7 +414,8 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
     else if (field.hasWeather('Sand')) {
         if (!defender.hasType('Rock', 'Ground', 'Steel') &&
             !defender.hasAbility('Magic Guard', 'Overcoat', 'Sand Force', 'Sand Rush', 'Sand Veil') &&
-            !defender.hasItem('Safety Goggles')) {
+            !defender.hasItem('Safety Goggles') &&
+            !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
             damage -= Math.floor(defender.maxHP() / (gen.num === 2 ? 8 : 16));
             texts.push('sandstorm damage');
         }
@@ -419,6 +427,7 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
         }
         else if (!defender.hasType('Ice') &&
             !defender.hasAbility('Magic Guard', 'Overcoat', 'Snow Cloak') &&
+            !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') &&
             !defender.hasItem('Safety Goggles') &&
             !defender.named('Empoleon-Crest') &&
             field.hasWeather('Hail')) {
@@ -436,7 +445,8 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
             damage += Math.floor(defender.maxHP() / 16);
             texts.push('Black Sludge recovery');
         }
-        else if (!defender.hasAbility('Magic Guard', 'Klutz')) {
+        else if (!defender.hasAbility('Magic Guard', 'Klutz') &&
+            !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
             damage -= Math.floor(defender.maxHP() / 8);
             texts.push('Black Sludge damage');
         }
@@ -446,12 +456,14 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
         texts.push('Sticky Barb damage');
     }
     if (field.defenderSide.isSeeded) {
-        if (!defender.hasAbility('Magic Guard')) {
+        if (!defender.hasAbility('Magic Guard') &&
+            !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
             damage -= Math.floor(defender.maxHP() / (gen.num >= 2 ? 8 : 16));
             texts.push('Leech Seed damage');
         }
     }
-    if (field.attackerSide.isSeeded && !attacker.hasAbility('Magic Guard')) {
+    if (field.attackerSide.isSeeded && !attacker.hasAbility('Magic Guard') &&
+        !(attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
         var recovery = Math.floor(attacker.maxHP() / (gen.num >= 2 ? 8 : 16));
         if (defender.hasItem('Big Root'))
             recovery = Math.trunc(recovery * 5324 / 4096);
@@ -475,7 +487,8 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
             damage += Math.floor(defender.maxHP() / 8);
             texts.push('Poison Heal');
         }
-        else if (!defender.hasAbility('Magic Guard')) {
+        else if (!defender.hasAbility('Magic Guard') &&
+            !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
             damage -= Math.floor(defender.maxHP() / (gen.num === 1 ? 16 : 8));
             texts.push('poison damage');
         }
@@ -485,7 +498,8 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
             damage += Math.floor(defender.maxHP() / 8);
             texts.push('Poison Heal');
         }
-        else if (!defender.hasAbility('Magic Guard')) {
+        else if (!defender.hasAbility('Magic Guard') &&
+            !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
             texts.push('toxic damage');
         }
     }
@@ -494,18 +508,21 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
             damage -= Math.floor(defender.maxHP() / (gen.num > 6 ? 32 : 16));
             texts.push('reduced burn damage');
         }
-        else if (!defender.hasAbility('Magic Guard')) {
+        else if (!defender.hasAbility('Magic Guard') &&
+            !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
             damage -= Math.floor(defender.maxHP() / (gen.num === 1 || gen.num > 6 ? 16 : 8));
             texts.push('burn damage');
         }
     }
     else if ((defender.hasStatus('slp') || defender.hasAbility('Comatose')) &&
         attacker.hasAbility('isBadDreams') &&
-        !defender.hasAbility('Magic Guard')) {
+        !defender.hasAbility('Magic Guard') &&
+        !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
         damage -= Math.floor(defender.maxHP() / 8);
         texts.push('Bad Dreams');
     }
-    if (!defender.hasAbility('Magic Guard') && TRAPPING.includes(move.name)) {
+    if (!defender.hasAbility('Magic Guard') && !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') &&
+        (TRAPPING.includes(move.name) || (TRAPPING_JUNGLE.includes(move.name) && field.chromaticField === 'Jungle'))) {
         if (attacker.hasItem('Binding Band')) {
             damage -= gen.num > 5 ? Math.floor(defender.maxHP() / 6) : Math.floor(defender.maxHP() / 8);
             texts.push('trapping damage');
@@ -515,33 +532,39 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
             texts.push('trapping damage');
         }
     }
-    if (defender.isSaltCure && !defender.hasAbility('Magic Guard')) {
+    if (defender.isSaltCure && !defender.hasAbility('Magic Guard') &&
+        !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
         var isWaterOrSteel = defender.hasType('Water', 'Steel') ||
             (defender.teraType && ['Water', 'Steel'].includes(defender.teraType));
         damage -= Math.floor(defender.maxHP() / (isWaterOrSteel ? 4 : 8));
         texts.push('Salt Cure');
     }
     if (!defender.hasType('Fire') && !defender.hasAbility('Magic Guard') &&
+        !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') &&
         (move.named('Fire Pledge (Grass Pledge Boosted)', 'Grass Pledge (Fire Pledge Boosted)'))) {
         damage -= Math.floor(defender.maxHP() / 8);
         texts.push('Sea of Fire damage');
     }
     if (!defender.hasAbility('Magic Guard') && !defender.hasType('Grass') &&
+        !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') &&
         (field.defenderSide.vinelash || move.named('G-Max Vine Lash'))) {
         damage -= Math.floor(defender.maxHP() / 6);
         texts.push('Vine Lash damage');
     }
     if (!defender.hasAbility('Magic Guard') && !defender.hasType('Fire') &&
+        !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') &&
         (field.defenderSide.wildfire || move.named('G-Max Wildfire'))) {
         damage -= Math.floor(defender.maxHP() / 6);
         texts.push('Wildfire damage');
     }
     if (!defender.hasAbility('Magic Guard') && !defender.hasType('Water') &&
+        !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') &&
         (field.defenderSide.cannonade || move.named('G-Max Cannonade'))) {
         damage -= Math.floor(defender.maxHP() / 6);
         texts.push('Cannonade damage');
     }
     if (!defender.hasAbility('Magic Guard') && !defender.hasType('Rock') &&
+        !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') &&
         (field.defenderSide.volcalith || move.named('G-Max Volcalith'))) {
         damage -= Math.floor(defender.maxHP() / 6);
         texts.push('Volcalith damage');
@@ -573,6 +596,10 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
     if (defender.named('Vespiquen-Crest-Defense')) {
         damage += Math.floor(defender.maxHP() / 16);
         texts.push('Crest recovery');
+    }
+    if (field.chromaticField === 'Thundering Plateau' && defender.hasAbility('Volt Absorb')) {
+        damage += Math.floor(defender.maxHP() / 16);
+        texts.push('Volt Absorb recovery on Thundering Plateau');
     }
     return { damage: damage, texts: texts };
 }
@@ -859,6 +886,9 @@ function buildDescription(description, attacker, defender) {
     }
     else if (description.terrain) {
         output += ' in ' + description.terrain + ' Terrain';
+    }
+    if (description.chromaticField) {
+        output += ' on ' + description.chromaticField + ' (Field)';
     }
     if (description.isReflect) {
         output += ' through Reflect';
