@@ -102,6 +102,7 @@ var Side = (function () {
         this.isAreniteWall = !!side.isAreniteWall;
         this.isBattery = !!side.isBattery;
         this.isPowerSpot = !!side.isPowerSpot;
+        this.isSteelySpirit = !!side.isSteelySpirit;
         this.isSwitching = side.isSwitching;
     }
     Side.prototype.clone = function () {

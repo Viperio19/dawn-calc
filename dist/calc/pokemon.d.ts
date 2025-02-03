@@ -1,5 +1,5 @@
-import * as I from './data/interface';
-import { State } from './state';
+import type * as I from './data/interface';
+import type { State } from './state';
 import { Field } from './field';
 export declare class Pokemon implements State.Pokemon {
     gen: I.Generation;
@@ -19,6 +19,7 @@ export declare class Pokemon implements State.Pokemon {
     relicanthTurns?: number;
     boostedStat?: I.StatIDExceptHP | 'auto';
     item?: I.ItemName;
+    disabledItem?: I.ItemName;
     teraType?: I.TypeName;
     nature: I.NatureName;
     ivs: I.StatsTable;

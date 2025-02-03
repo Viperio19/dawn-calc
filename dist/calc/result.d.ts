@@ -1,8 +1,8 @@
-import { RawDesc } from './desc';
-import { Generation } from './data/interface';
-import { Field } from './field';
-import { Move } from './move';
-import { Pokemon } from './pokemon';
+import { type RawDesc } from './desc';
+import type { Generation } from './data/interface';
+import type { Field } from './field';
+import type { Move } from './move';
+import type { Pokemon } from './pokemon';
 export type Damage = number | number[] | [number, number] | [number[], number[]];
 export declare class Result {
     gen: Generation;
@@ -26,13 +26,9 @@ export declare class Result {
         text: string;
     };
     kochance(err?: boolean): {
-        chance: number;
+        chance: number | undefined;
         n: number;
         text: string;
-    } | {
-        n: number;
-        text: string;
-        chance?: undefined;
     };
 }
 export declare function damageRange(damage: Damage): [number, number] | [[number, number], [number, number]];
