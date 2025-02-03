@@ -313,6 +313,7 @@ export function checkCrestBoosts(source: Pokemon) {
   }
 }
 
+// Fields - Stat boosts from Prism Scale or abilities
 export function checkFieldBoosts(source: Pokemon, field: Field) {
   if (field.chromaticField === 'Dragons-Den') {
     if (source.hasItem('Prism Scale')) {
@@ -331,6 +332,14 @@ export function checkFieldBoosts(source: Pokemon, field: Field) {
     if (source.hasAbility('Illuminate')) {
       source.boosts.spa = Math.min(6, source.boosts.spa + 1);
     } else if (source.hasAbility('Aroma Veil', 'Pastel Veil', 'Sweet Veil')) {
+      source.boosts.spd = Math.min(6, source.boosts.spd + 1);
+    }
+  } else if (field.chromaticField === 'Volcanic-Top') {
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+    }
+    if (source.hasAbility('Magma Armor')) {
+      source.boosts.def = Math.min(6, source.boosts.def + 1);
       source.boosts.spd = Math.min(6, source.boosts.spd + 1);
     }
   }
@@ -647,7 +656,7 @@ export function getMimicryType(field: Field) {
     return "Fairy" as TypeName;
   } else if (field.hasTerrain('Psychic')) {
     return "Psychic" as TypeName;
-  // Fields - Mimicry
+  // Fields - Mimicry types
   } else if (field.chromaticField === 'Jungle') {
     return "Bug" as TypeName;
   } else if (field.chromaticField === 'Eclipse') {
@@ -660,6 +669,8 @@ export function getMimicryType(field: Field) {
     return "Fairy" as TypeName;
   } else if (field.chromaticField === 'Ring-Arena') {
     return "Fighting" as TypeName;
+  } else if (field.chromaticField === 'Volcanic-Top') {
+    return "Fire" as TypeName;
   } else {
     return "???" as TypeName;
   }

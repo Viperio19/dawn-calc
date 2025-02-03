@@ -451,6 +451,10 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
             texts.push('hail damage');
         }
     }
+    if (!(field.hasWeather('Sun', 'Harsh Sunshine')) && field.chromaticField === 'Volcanic-Top' && defender.hasAbility('Solar Power')) {
+        damage -= Math.floor(defender.maxHP() / 8);
+        texts.push('Solar Power damage on Volcanic Top');
+    }
     var loseItem = move.named('Knock Off') && !defender.hasAbility('Sticky Hold');
     if (defender.hasItem('Leftovers') && !loseItem) {
         damage += Math.floor(defender.maxHP() / 16);
@@ -616,6 +620,21 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
     if (field.chromaticField === 'Thundering-Plateau' && defender.hasAbility('Volt Absorb')) {
         damage += Math.floor(defender.maxHP() / 16);
         texts.push('Volt Absorb recovery on Thundering-Plateau');
+    }
+    var VOLCANIC_ERUPTION = [
+        'Bulldoze', 'Earthquake', 'Eruption', 'Lava Plume', 'Magma Storm', 'Magnitude', 'Stomping Tantrum',
+    ];
+    if (field.chromaticField === 'Volcanic-Top' && (VOLCANIC_ERUPTION.includes(move.name) || (move.named('Nature Power') && !field.terrain))) {
+        var fireType = gen.types.get('fire');
+        var effectiveness = fireType.effectiveness[defender.types[0]] *
+            (defender.types[1] ? fireType.effectiveness[defender.types[1]] : 1);
+        if (defender.named('Torterra-Crest')) {
+            damage -= Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
+        }
+        else {
+            damage -= Math.floor((effectiveness * defender.maxHP()) / 8);
+        }
+        texts.push('Volcanic Eruption damage on Volcanic Top');
     }
     return { damage: damage, texts: texts };
 }
@@ -909,7 +928,7 @@ function buildDescription(description, attacker, defender) {
     else if (description.terrain) {
         output += ' in ' + description.terrain + ' Terrain';
     }
-    if (description.chromaticField !== "None") {
+    if (description.chromaticField) {
         switch (description.chromaticField) {
             case "Jungle":
             case "Eclipse":
@@ -927,6 +946,12 @@ function buildDescription(description, attacker, defender) {
                 break;
             case "Ring-Arena":
                 output += ' on Ring Arena';
+                break;
+            case "Volcanic-Top":
+                output += ' on Volcanic Top';
+                break;
+            default:
+                output += 'on ' + description.chromaticField;
                 break;
         }
     }

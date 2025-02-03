@@ -615,6 +615,12 @@ function getEndOfTurn(
       texts.push('hail damage');
     }
   }
+  
+  // Volcanic Top - Activates Solar Power
+  if (!(field.hasWeather('Sun', 'Harsh Sunshine')) && field.chromaticField === 'Volcanic-Top' && defender.hasAbility('Solar Power')) {
+    damage -= Math.floor(defender.maxHP() / 8);
+    texts.push('Solar Power damage on Volcanic Top');
+  }
 
   const loseItem = move.named('Knock Off') && !defender.hasAbility('Sticky Hold');
   if (defender.hasItem('Leftovers') && !loseItem) {
@@ -790,9 +796,28 @@ function getEndOfTurn(
 
   // Fields - End of turn text
 
+  // Thundering Plateau - Volt Absorb restores 1/16 of the user's Max HP per turn
   if (field.chromaticField === 'Thundering-Plateau' && defender.hasAbility('Volt Absorb')) {
     damage += Math.floor(defender.maxHP() / 16);
     texts.push('Volt Absorb recovery on Thundering-Plateau');
+  }
+
+  const VOLCANIC_ERUPTION = [
+    'Bulldoze', 'Earthquake', 'Eruption', 'Lava Plume', 'Magma Storm', 'Magnitude', 'Stomping Tantrum',
+  ];  
+
+  // Volcanic Top - Volcanic Eruption deals 1/8th of all Pokemon's max health determined by the effectiveness of Fire against the target
+  if (field.chromaticField === 'Volcanic-Top' && (VOLCANIC_ERUPTION.includes(move.name) || (move.named('Nature Power') && !field.terrain))) {
+    const fireType = gen.types.get('fire' as ID)!;
+    const effectiveness =
+    fireType.effectiveness[defender.types[0]]! *
+      (defender.types[1] ? fireType.effectiveness[defender.types[1]]! : 1);
+    if (defender.named('Torterra-Crest')) {
+      damage -= Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
+    } else {
+      damage -= Math.floor((effectiveness * defender.maxHP()) / 8);
+    }
+    texts.push('Volcanic Eruption damage on Volcanic Top');
   }
 
   return {damage, texts};
@@ -1110,7 +1135,8 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   } else if (description.terrain) {
     output += ' in ' + description.terrain + ' Terrain';
   }
-  if (description.chromaticField !== "None") {
+  // Fields - Put field names at the end of damage calc text
+  if (description.chromaticField) {
     switch (description.chromaticField) {
     case "Jungle":
     case "Eclipse":
@@ -1128,6 +1154,12 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
       break;
     case "Ring-Arena":
       output += ' on Ring Arena';
+      break;
+    case "Volcanic-Top":
+      output += ' on Volcanic Top';
+      break;
+    default:
+      output += 'on ' + description.chromaticField;
       break;
     }
   }

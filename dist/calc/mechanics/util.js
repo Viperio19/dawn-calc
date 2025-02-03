@@ -359,6 +359,15 @@ function checkFieldBoosts(source, field) {
             source.boosts.spd = Math.min(6, source.boosts.spd + 1);
         }
     }
+    else if (field.chromaticField === 'Volcanic-Top') {
+        if (source.hasItem('Prism Scale')) {
+            source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+        }
+        if (source.hasAbility('Magma Armor')) {
+            source.boosts.def = Math.min(6, source.boosts.def + 1);
+            source.boosts.spd = Math.min(6, source.boosts.spd + 1);
+        }
+    }
 }
 exports.checkFieldBoosts = checkFieldBoosts;
 function checkEmbody(source, gen) {
@@ -658,6 +667,9 @@ function getMimicryType(field) {
     }
     else if (field.chromaticField === 'Ring-Arena') {
         return "Fighting";
+    }
+    else if (field.chromaticField === 'Volcanic-Top') {
+        return "Fire";
     }
     else {
         return "???";

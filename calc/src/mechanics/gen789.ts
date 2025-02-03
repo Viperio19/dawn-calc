@@ -199,6 +199,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Thundering-Plateau' ? 'Electric'
         : field.chromaticField === 'Starlight-Arena' ? 'Fairy'
         : field.chromaticField === 'Ring-Arena' ? 'Fighting'
+        : field.chromaticField === 'Volcanic-Top' ? 'Fire'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
       if (!(type === 'Normal')) {
@@ -534,10 +535,18 @@ export function calculateSMSSSV(
   // Inverse
   if (field.chromaticField === 'Inverse') {
     desc.chromaticField = field.chromaticField;
+  }
 
-    if (attacker.hasItem('Prism Scale') && move.hasType('???')) {
-      desc.attackerItem = attacker.item;
-    }
+  // Thundering Plateau
+  if (field.chromaticField === 'Thundering-Plateau' && defender.item === 'Prism Scale' && move.category === 'Special') {
+    desc.defenderItem = defender.item;
+    desc.chromaticField = field.chromaticField;
+  }
+
+  // Volcanic Top
+  if (field.chromaticField === 'Volcanic-Top' && attacker.item === 'Prism Scale' && move.category === 'Special') {
+    desc.attackerItem = attacker.item;
+    desc.chromaticField = field.chromaticField;
   }
 
   if (move.type === 'Stellar') {
@@ -1223,6 +1232,10 @@ export function calculateBasePowerSMSSSV(
         basePower = 120;
         desc.moveName = 'Close Combat';
         break;
+      case 'Volcanic-Top':
+        basePower = Math.max(1, Math.floor((150 * attacker.curHP()) / attacker.maxHP()));;
+        desc.moveName = 'Eruption';
+        break;
       case 'Inverse':
         basePower = 0;
         desc.moveName = 'Trick Room';
@@ -1230,6 +1243,7 @@ export function calculateBasePowerSMSSSV(
       default:
         basePower = 80;
         desc.moveName = 'Tri Attack';
+        break;
       }
     break;
   case 'Water Shuriken':
@@ -1855,7 +1869,8 @@ export function calculateAtModsSMSSSV(
     atMods.push(6144);
     desc.attackerAbility = attacker.ability;
   } else if ((field.chromaticField === 'Jungle' && attacker.hasAbility('Swarm') && move.hasType('Bug')) ||
-             (field.chromaticField === 'Thundering-Plateau' && attacker.hasAbility('Plus', 'Minus') && move.category === 'Special')) {
+             (field.chromaticField === 'Thundering-Plateau' && attacker.hasAbility('Plus', 'Minus') && move.category === 'Special') ||
+             (field.chromaticField === 'Volcanic-Top' && (attacker.hasAbility('Solar Power') || (attacker.hasAbility('Blaze') && move.hasType('Fire'))))) {
     atMods.push(6144);
     desc.attackerAbility = attacker.ability;
     desc.chromaticField = field.chromaticField;
@@ -1961,6 +1976,7 @@ export function calculateAtModsSMSSSV(
     // Inverse
     if ((field.chromaticField === 'Inverse') && (move.hasType('???'))) {
       atMods.push(6144);
+      desc.attackerItem = attacker.item;
     }
   }
 
