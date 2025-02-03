@@ -1,4 +1,4 @@
-import * as I from './data/interface';
+import type * as I from './data/interface';
 
 export namespace State {
   export interface Pokemon {
@@ -81,6 +81,7 @@ export namespace State {
     isAreniteWall?: boolean;
     isBattery?: boolean;
     isPowerSpot?: boolean;
+    isSteelySpirit?: boolean;
     isSwitching?: 'out' | 'in';
   }
 }

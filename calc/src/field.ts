@@ -1,5 +1,5 @@
-import {State} from './state';
-import {GameType, Weather, Terrain} from './data/interface';
+import type {State} from './state';
+import type {GameType, Weather, Terrain} from './data/interface';
 
 export class Field implements State.Field {
   gameType: GameType;
@@ -95,6 +95,7 @@ export class Side implements State.Side {
   isAreniteWall: boolean;
   isBattery: boolean;
   isPowerSpot: boolean;
+  isSteelySpirit: boolean;
   isSwitching?: 'out' | 'in';
 
   constructor(side: State.Side = {}) {
@@ -118,6 +119,7 @@ export class Side implements State.Side {
     this.isAreniteWall = !!side.isAreniteWall;
     this.isBattery = !!side.isBattery;
     this.isPowerSpot = !!side.isPowerSpot;
+    this.isSteelySpirit = !!side.isSteelySpirit;
     this.isSwitching = side.isSwitching;
   }
 

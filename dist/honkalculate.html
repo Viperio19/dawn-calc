@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8" />
     <title>Pok&eacute;mon Damage Calculator</title>
+	 <link rel="icon" type="image/x-icon" href="./img/favicon.png">
     <link type="text/css" rel="stylesheet" href="./css/vendor/bootstrap.css" />
     <link type="text/css" rel="stylesheet" href="https://cdn.datatables.net/1.10.4/css/jquery.dataTables.min.css" />
     <link type="text/css" rel="stylesheet" href="https://cdn.datatables.net/colvis/1.1.1/css/dataTables.colVis.css" />
     <link type="text/css" rel="stylesheet" href="./js/vendor/select2/select2.css" />
-    <link type="text/css" rel="stylesheet" href="./css/main.css?0636e521" />
+    <link type="text/css" rel="stylesheet" href="./css/main.css?a303fc8c" />
     <link type="text/css" rel="stylesheet" href="./css/dark-theme.css" id="dark-theme-styles">
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26211653-3"></script>
@@ -74,7 +75,8 @@
             <input class="mode visually-hidden" type="radio" name="mode" id="one-vs-one" checked="checked" /><label class="btn btn-left btn-wide" for="one-vs-one">One vs One</label>
             <input class="mode visually-hidden" type="radio" name="mode" id="one-vs-all" /><label class="btn btn-mid btn-wide gen-specific g3 g4 g5 g6 g7 g8 g9" for="one-vs-all">One vs All</label>
             <input class="mode visually-hidden" type="radio" name="mode" id="all-vs-one" /><label class="btn btn-mid btn-wide gen-specific g3 g4 g5 g6 g7 g8 g9" for="all-vs-one">All vs One</label>
-            <input class="mode visually-hidden" type="radio" name="mode" id="randoms" /><label class="btn btn-right btn-xwide" for="randoms">Random Battles</label>
+            <input class="mode visually-hidden" type="radio" name="mode" id="randoms" /><label class="btn btn-mid btn-xwide" for="randoms">Random Battles</label>
+            <input class="mode visually-hidden" type="radio" name="mode" id="oms" checked="checked" /><label class="btn btn-right btn-xwide" for="oms">Other Metagames</label>
         </span>
     </div>
     <hr />
@@ -89,13 +91,14 @@
             <input class="visually-hidden" type="checkbox" name="tier" id="RU" /><label class="btn btn-mid gen-specific g5 g6 g7 g8 g9" for="RU">RU</label>
             <input class="visually-hidden" type="checkbox" name="tier" id="UU" /><label class="btn btn-mid" for="UU">UU</label>
             <input class="visually-hidden" type="checkbox" name="tier" id="OU" /><label class="btn btn-mid" for="OU">OU</label>
-            <input class="visually-hidden" type="checkbox" name="tier" id="Uber" /><label class="btn btn-right" for="Uber">Uber</label>
+            <input class="visually-hidden" type="checkbox" name="tier" id="Ubers" /><label class="btn btn-right" for="Ubers">Ubers</label>
     </span>
     </div>
 
 </div>
 
-    <div class="panel-group" id="accordion">
+	<div class="flex-parent">
+		<div class="panel-group" id="accordion">
         <fieldset class="panel panel-default poke-info" id="p1">
             <legend class="panel-heading panel-title">
                 <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" class="collapsible-link">>  Pokemon</a>
@@ -124,7 +127,11 @@
                         </div>
                         <div>
                             <label>Level</label>
-                            <input class="level" value="100" />
+                            <!--
+                            We use inputmode="decimal" so that mobile devices will have a numpad appear when inputting values.
+                            https://css-tricks.com/everything-you-ever-wanted-to-know-about-inputmode/#aa-decimal
+                            -->
+                            <input class="level" value="100" inputmode="decimal" />
                         </div>
                         <div class="hide">
                             <label>Weight (kg)</label>
@@ -147,16 +154,16 @@
                                     <label>HP</label>
                                 </td>
                                 <td>
-                                    <input class="base" value="100" />
+                                    <input class="base" value="100" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
-                                    <input class="ivs" value="31" />
+                                    <input class="ivs" value="31" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
-                                    <input class="evs" type="number" min="0" max="252" step="4" value="0" />
+                                    <input class="evs" type="number" min="0" max="252" step="4" value="0" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g1 g2 hide">
-                                    <input class="dvs" value="15" disabled="disabled" />
+                                    <input class="dvs" value="15" disabled="disabled" inputmode="decimal" />
                                 </td>
                                 <td><span class="total">341</span>
                                 </td>
@@ -167,16 +174,16 @@
                                     <label>Attack</label>
                                 </td>
                                 <td>
-                                    <input class="base" value="100" />
+                                    <input class="base" value="100" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
-                                    <input class="ivs" value="31" />
+                                    <input class="ivs" value="31" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
-                                    <input class="evs" type="number" min="0" max="252" step="4" value="0" />
+                                    <input class="evs" type="number" min="0" max="252" step="4" value="0" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g1 g2 hide">
-                                    <input class="dvs" value="15" />
+                                    <input class="dvs" value="15" inputmode="decimal" />
                                 </td>
                                 <td><span class="total">236</span>
                                 </td>
@@ -203,16 +210,16 @@
                                     <label>Defense</label>
                                 </td>
                                 <td>
-                                    <input class="base" value="100" />
+                                    <input class="base" value="100" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
-                                    <input class="ivs" value="31" />
+                                    <input class="ivs" value="31" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
-                                    <input class="evs" type="number" min="0" max="252" step="4" value="0" />
+                                    <input class="evs" type="number" min="0" max="252" step="4" value="0" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g1 g2 hide">
-                                    <input class="dvs" value="15" />
+                                    <input class="dvs" value="15" inputmode="decimal" />
                                 </td>
                                 <td><span class="total">236</span>
                                 </td>
@@ -239,16 +246,16 @@
                                     <label>Sp. Atk</label>
                                 </td>
                                 <td>
-                                    <input class="base" value="100" />
+                                    <input class="base" value="100" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
-                                    <input class="ivs" value="31" />
+                                    <input class="ivs" value="31" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
-                                    <input class="evs" type="number" min="0" max="252" step="4" value="0" />
+                                    <input class="evs" type="number" min="0" max="252" step="4" value="0" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g1 g2 hide">
-                                    <input class="dvs" value="15" />
+                                    <input class="dvs" value="15" inputmode="decimal" />
                                 </td>
                                 <td><span class="total">236</span>
                                 </td>
@@ -275,16 +282,16 @@
                                     <label>Sp. Def</label>
                                 </td>
                                 <td>
-                                    <input class="base" value="100" />
+                                    <input class="base" value="100" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
-                                    <input class="ivs" value="31" />
+                                    <input class="ivs" value="31" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
-                                    <input class="evs" type="number" min="0" max="252" step="4" value="0" />
+                                    <input class="evs" type="number" min="0" max="252" step="4" value="0" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g1 g2 hide">
-                                    <input class="dvs" value="15" disabled="disabled" />
+                                    <input class="dvs" value="15" disabled="disabled" inputmode="decimal" />
                                 </td>
                                 <td><span class="total">236</span>
                                 </td>
@@ -311,10 +318,10 @@
                                     <label>Special</label>
                                 </td>
                                 <td>
-                                    <input class="base" value="100" />
+                                    <input class="base" value="100" inputmode="decimal" />
                                 </td>
                                 <td>
-                                    <input class="dvs" value="15" />
+                                    <input class="dvs" value="15" inputmode="decimal" />
                                 </td>
                                 <td><span class="total">236</span>
                                 </td>
@@ -341,16 +348,16 @@
                                     <label>Speed</label>
                                 </td>
                                 <td>
-                                    <input class="base" value="100" />
+                                    <input class="base" value="100" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
-                                    <input class="ivs" value="31" />
+                                    <input class="ivs" value="31" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
-                                    <input class="evs" type="number" min="0" max="252" step="4" value="0" />
+                                    <input class="evs" type="number" min="0" max="252" step="4" value="0" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g1 g2 hide">
-                                    <input class="dvs" value="15" />
+                                    <input class="dvs" value="15" inputmode="decimal" />
                                 </td>
                                 <td><span class="total">236</span>
                                 </td>
@@ -372,6 +379,16 @@
                                     </select>
                                 </td>
                                 <td><span class="totalMod">---</span>
+                                </td>
+                            </tr>
+                            <tr class="totalevs">
+                                <th scope="row">
+                                    <label>Total</label>
+                                </th>
+                                <td></td>
+                                <td></td>
+                                <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
+                                    <span class="evs calc-trigger">0</span>
                                 </td>
                             </tr>
                         </table>
@@ -474,7 +491,7 @@
                     </div>
                     <div class="move1">
                         <select class="move-selector small-select"></select>
-                        <input class="move-bp" value="50" />
+                        <input class="move-bp" value="50" inputmode="decimal" />
                         <select class="move-type"></select>
                         <select class="move-cat gen-specific g4 g5 g6 g7 g8 g9">
                             <option value="Physical">Physical</option>
@@ -492,7 +509,7 @@
                             <option value="4">4 hits</option>
                             <option value="5">5 hits</option>
                         </select>
-                        <select class="stat-drops calc-trigger hide" title="How many times was this move used in a row?">>
+                        <select class="move-times calc-trigger hide" title="How many times was this move used in a row?">>
                             <option value="1">Once</option>
                             <option value="2">Twice</option>
                             <option value="3">3 times</option>
@@ -510,7 +527,7 @@
                     </div>
                     <div class="move2">
                         <select class="move-selector small-select"></select>
-                        <input class="move-bp" value="0" />
+                        <input class="move-bp" value="0" inputmode="decimal" />
                         <select class="move-type"></select>
                         <select class="move-cat gen-specific g4 g5 g6 g7 g8 g9">
                             <option value="Physical">Physical</option>
@@ -528,7 +545,7 @@
                             <option value="4">4 hits</option>
                             <option value="5">5 hits</option>
                         </select>
-                        <select class="stat-drops calc-trigger hide" title="How many times was this move used in a row?">>
+                        <select class="move-times calc-trigger hide" title="How many times was this move used in a row?">>
                             <option value="1">Once</option>
                             <option value="2">Twice</option>
                             <option value="3">3 times</option>
@@ -546,7 +563,7 @@
                     </div>
                     <div class="move3">
                         <select class="move-selector small-select"></select>
-                        <input class="move-bp" value="0" />
+                        <input class="move-bp" value="0" inputmode="decimal" />
                         <select class="move-type"></select>
                         <select class="move-cat gen-specific g4 g5 g6 g7 g8 g9">
                             <option value="Physical">Physical</option>
@@ -564,7 +581,7 @@
                             <option value="4">4 hits</option>
                             <option value="5">5 hits</option>
                         </select>
-                        <select class="stat-drops calc-trigger hide" title="How many times was this move used in a row?">>
+                        <select class="move-times calc-trigger hide" title="How many times was this move used in a row?">>
                             <option value="1">Once</option>
                             <option value="2">Twice</option>
                             <option value="3">3 times</option>
@@ -582,7 +599,7 @@
                     </div>
                     <div class="move4">
                         <select class="move-selector small-select"></select>
-                        <input class="move-bp" value="0" />
+                        <input class="move-bp" value="0" inputmode="decimal" />
                         <select class="move-type"></select>
                         <select class="move-cat gen-specific g4 g5 g6 g7 g8 g9">
                             <option value="Physical">Physical</option>
@@ -600,7 +617,7 @@
                             <option value="4">4 hits</option>
                             <option value="5">5 hits</option>
                         </select>
-                        <select class="stat-drops calc-trigger hide" title="How many times was this move used in a row?">>
+                        <select class="move-times calc-trigger hide" title="How many times was this move used in a row?">>
                           <option value="1">Once</option>
                           <option value="2">Twice</option>
                           <option value="3">3 times</option>
@@ -881,7 +898,7 @@
         </fieldset>
     </div>
     <div>
-        <fieldset class="panel holder-0">
+        <fieldset class="panel" id="holder-0">
             <legend class="panel-heading panel-title">Damage Results</legend>
             <table class="hide display" id="holder-2">
                 <thead>
@@ -900,6 +917,9 @@
             </table>
         </fieldset>
     </div>
+	</div>
+
+
     <script type="text/javascript">
         var linkExtension = '.html';
     </script>
@@ -920,46 +940,46 @@
     </script>
     <script type="text/javascript" src="./calc/util.js?8fa0c7ff"></script>
     <script type="text/javascript" src="./calc/stats.js?9220179f"></script>
-    <script type="text/javascript" src="./calc/data/species.js?e3927974"></script>
-    <script type="text/javascript" src="./js/data/sets/gen9.js?141c928d"></script>
-    <script type="text/javascript" src="./js/data/sets/gen8.js?f1fb25d7"></script>
-    <script type="text/javascript" src="./js/data/sets/gen7.js?319db59c"></script>
-    <script type="text/javascript" src="./js/data/sets/gen6.js?df2e6b45"></script>
-    <script type="text/javascript" src="./js/data/sets/gen5.js?86d601d8"></script>
-    <script type="text/javascript" src="./js/data/sets/gen4.js?fc69c65b"></script>
-    <script type="text/javascript" src="./js/data/sets/gen3.js?a4982872"></script>
-    <script type="text/javascript" src="./js/data/sets/gen2.js?5317967b"></script>
-    <script type="text/javascript" src="./js/data/sets/gen1.js?7aed64e9"></script>
+    <script type="text/javascript" src="./calc/data/species.js?2a9e53bd"></script>
+    <script type="text/javascript" src="./js/data/sets/gen9.js?358bc8e1"></script>
+    <script type="text/javascript" src="./js/data/sets/gen8.js?54fc1238"></script>
+    <script type="text/javascript" src="./js/data/sets/gen7.js?860c5970"></script>
+    <script type="text/javascript" src="./js/data/sets/gen6.js?67b703e7"></script>
+    <script type="text/javascript" src="./js/data/sets/gen5.js?d8e6a6f2"></script>
+    <script type="text/javascript" src="./js/data/sets/gen4.js?43b7d068"></script>
+    <script type="text/javascript" src="./js/data/sets/gen3.js?01a50129"></script>
+    <script type="text/javascript" src="./js/data/sets/gen2.js?a8800799"></script>
+    <script type="text/javascript" src="./js/data/sets/gen1.js?eedd80c3"></script>
     <script type="text/javascript" src="./calc/data/types.js?6b065b89"></script>
     <script type="text/javascript" src="./calc/data/natures.js?04f00dc5"></script>
     <script type="text/javascript" src="./calc/data/abilities.js?76325fcc"></script>
-    <script type="text/javascript" src="./calc/data/moves.js?83f720dc"></script>
+    <script type="text/javascript" src="./calc/data/moves.js?0a91c145"></script>
     <script type="text/javascript" src="./calc/data/items.js?81a1fe7e"></script>
     <script type="text/javascript" src="./calc/data/index.js?083d2bc9"></script>
-    <script type="text/javascript" src="./calc/move.js?19a3f3b5"></script>
+    <script type="text/javascript" src="./calc/move.js?c9991749"></script>
     <script type="text/javascript" src="./calc/pokemon.js?1aa7cdbd"></script>
-    <script type="text/javascript" src="./calc/field.js?b19d3652"></script>
+    <script type="text/javascript" src="./calc/field.js?1b7382a1"></script>
     <script type="text/javascript" src="./calc/items.js?3cbea98f"></script>
-    <script type="text/javascript" src="./calc/mechanics/util.js?e4e7a843"></script>
-    <script type="text/javascript" src="./calc/mechanics/gen789.js?0e0c628d"></script>
-    <script type="text/javascript" src="./calc/mechanics/gen56.js?00ff03fb"></script>
-    <script type="text/javascript" src="./calc/mechanics/gen4.js?943eeb23"></script>
-    <script type="text/javascript" src="./calc/mechanics/gen3.js?27b84ed5"></script>
-    <script type="text/javascript" src="./calc/mechanics/gen12.js?84d9438f"></script>
+    <script type="text/javascript" src="./calc/mechanics/util.js?3d045720"></script>
+    <script type="text/javascript" src="./calc/mechanics/gen789.js?39a7624e"></script>
+    <script type="text/javascript" src="./calc/mechanics/gen56.js?e5630232"></script>
+    <script type="text/javascript" src="./calc/mechanics/gen4.js?26a6f39a"></script>
+    <script type="text/javascript" src="./calc/mechanics/gen3.js?9b31407d"></script>
+    <script type="text/javascript" src="./calc/mechanics/gen12.js?a1a569dd"></script>
     <script type="text/javascript" src="./calc/calc.js?cd072314"></script>
-    <script type="text/javascript" src="./calc/desc.js?d41c116a"></script>
+    <script type="text/javascript" src="./calc/desc.js?a04dd772"></script>
     <script type="text/javascript" src="./calc/result.js?d5c7552b"></script>
     <script type="text/javascript" src="./calc/adaptable.js?afeb3759"></script>
     <script type="text/javascript" src="./calc/index.js?2377cbc8"></script>
-    <script type="text/javascript" src="./js/shared_controls.js?0868e288"></script>
-    <script type="text/javascript" src="./js/honkalculate_controls.js?dc815947"></script>
+    <script type="text/javascript" src="./js/shared_controls.js?792aed03"></script>
+    <script type="text/javascript" src="./js/honkalculate_controls.js?f37dceaa"></script>
 
     <div style="clear:both;padding:20px;text-align:left">Created by Honko, maintained by Austin and Kris
         <ul><li><a href="https://github.com/smogon/damage-calc/contributors" class="links-lighten" target="_blank">Contributors</a></li>
         <li><a href="https://www.smogon.com/forums/threads/pok%C3%A9mon-showdown-damage-calculator.3593546/" class="links-lighten" target="_blank">Bug Reports</a></li>
         <li><a href="https://github.com/smogon/damage-calc" class="links-lighten" target="_blank">GitHub repository</a></li></ul>
         <button type="button" id="dark-theme-toggle"></button>
-        <script type="text/javascript" src="./js/dark-theme-toggle.js?4adfa54a"></script>
+        <script type="text/javascript" src="./js/dark-theme-toggle.js?587424fc"></script>
     </div>
 
 </body>

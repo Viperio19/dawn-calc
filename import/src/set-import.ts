@@ -4,13 +4,12 @@
 
 import * as fs from 'fs';
 
-import {Dex as ModdedDex, Species as PSSpecie, Item as PSItem} from '@pkmn/dex';
 import {
-  AbilityName, Generation, Generations, GenerationNum, ID, Item, ItemName, MoveName,
+  AbilityName, Generation, GenerationNum, Generations, ID, Item, ItemName, MoveName,
   NatureName, PokemonSet, Specie, SpeciesName, StatID, StatsTable, TypeName,
 } from '@pkmn/data';
+import {Dex as ModdedDex, Item as PSItem, Species as PSSpecie} from '@pkmn/dex';
 import {Dex, Format, TeamValidator} from '@pkmn/sim';
-
 import type {DisplayStatistics, LegacyDisplayUsageStatistics} from '@pkmn/smogon';
 
 interface DexSet {
@@ -57,9 +56,6 @@ const VALIDATORS: {[format: string]: TeamValidator} = {};
 // the validator which is the only area that needs the Format object
 const UNSUPPORTED: {[format: string]: string} = {
   'gen9almostanyability': '[Gen 9] Almost Any Ability',
-  // NOTE: This should be working but https://github.com/pkmn/ps/issues/25
-  'gen9lc': '[Gen 9] LC',
-  'gen9vgc2023regulatione': '[Gen 9] VGC 2023 Regulation E',
 };
 const SHORT_STAT_FORM: {[stat: string]: keyof CalcStatsTable} =
 {'hp': 'hp', 'atk': 'at', 'def': 'df', 'spa': 'sa', 'spd': 'sd', 'spe': 'sp'};
@@ -75,22 +71,22 @@ const TIER_RANKINGS: {[tier: string]: number} = {
   pu: 5,
   lc: 6,
   doublesou: 7,
-  // VGC/BSS
-  nintendo: 8,
-  monotype: 9,
-  nationaldex: 10,
-  nationaldexubers: 11,
-  nationaldexuu: 12,
-  nationaldexru: 13,
-  nationaldexmonotype: 14,
-  anythinggoes: 15,
-  '1v1': 16,
-  balancedhackmons: 17,
-  purehackmons: 18,
-  almostanyability: 19,
-  zu: 20,
-  cap: 21,
-  tradebacksou: 22,
+  vgc: 8,
+  bss: 9,
+  monotype: 10,
+  nationaldex: 11,
+  nationaldexubers: 12,
+  nationaldexuu: 13,
+  nationaldexru: 14,
+  nationaldexmonotype: 15,
+  anythinggoes: 16,
+  '1v1': 17,
+  balancedhackmons: 18,
+  purehackmons: 19,
+  almostanyability: 20,
+  zu: 21,
+  cap: 22,
+  tradebacksou: 23,
 };
 
 function first<T>(v: T[] | T): T {
@@ -117,9 +113,9 @@ function top(weighted: {[key: string]: number}, n = 1): string | string[] | unde
 }
 
 function getTierRanking(tier: string): number {
-  const isNintendo =
-    tier.startsWith('vgc') || tier.startsWith('battlestadium') || tier.startsWith('battlespot');
-  return TIER_RANKINGS[isNintendo ? 'nintendo' : tier] ?? 100;
+  const isVGC = tier.startsWith('vgc');
+  const isBSS = tier.startsWith('battlestadium') || tier.startsWith('battlespot');
+  return TIER_RANKINGS[isVGC ? 'vgc' : isBSS ? 'bss' : tier] ?? 100;
 }
 
 function toCalcStatsTable(
@@ -143,7 +139,7 @@ function getUsageThreshold(formatID: ID, count: number): number {
   if (count < 100) return Infinity;
   if (count < 400) return 0.05;
   // These formats are deemed to have playerbases of lower quality than normal
-  return /uber|anythinggoes|doublesou/.test(formatID) ? 0.03 : 0.01;
+  return /uber|anythinggoes|doublesou|gen1nu|gen1pu/.test(formatID) ? 0.03 : 0.01;
 }
 
 function fromSpread(spread: string): {nature: string; evs: Partial<StatsTable>} {
@@ -181,8 +177,11 @@ function getSpecie(gen: Generation, specieName: SpeciesName): Specie | PSSpecie 
 }
 
 function toPSFormat(formatID: ID): ID {
-  if (formatID === 'gen9vgc2023' || formatID === 'gen9battlestadiumsingles') {
-    return `${formatID}regulatione` as ID;
+  if (formatID === 'gen9vgc2024') {
+    return `gen9vgc2025regg` as ID;
+  }
+  if (formatID === 'gen9battlestadiumsingles') {
+    return 'gen9bssregg' as ID;
   }
   return formatID;
 }
@@ -232,6 +231,7 @@ function usageToPset(
   const {nature, evs} = fromSpread(top(uset.spreads));
   const item = top(uset.items);
   const ability = top(uset.abilities);
+  const teraType = top(uset.teraTypes);
   const pset: PokemonSet = {
     name: '',
     species: specieName,
@@ -239,6 +239,7 @@ function usageToPset(
     ability: !ability || ability === 'No Ability' ? '' : ability,
     moves: top(uset.moves, 4).filter(m => m !== 'Nothing'),
     nature,
+    teraType: !teraType || teraType === 'Nothing' ? '' : teraType,
     gender: '',
     evs: TeamValidator.fillStats(evs ?? null, gen.num < 3 ? 252 : 0),
     ivs: TeamValidator.fillStats(null, gen.num === 2 ? 30 : 31),
@@ -400,26 +401,27 @@ function similarFormes(
     return similar;
   }
   switch (specie.name) {
-  case 'Aegislash':
-    similar.formes = ['Aegislash-Blade', 'Aegislash-Shield', 'Aegislash-Both'] as SpeciesName[];
-    break;
-  case 'Keldeo':
-    similar.formes = ['Keldeo-Resolute'] as SpeciesName[];
-    break;
-  case 'Minior':
-    similar.formes = ['Minior-Meteor'] as SpeciesName[];
-    break;
-  case 'Palafin':
-    similar.formes = ['Palafin-Hero'] as SpeciesName[];
-    break;
-  case 'Terapagos':
-    similar.formes = ['Terapagos-Stellar', 'Terapagos-Terastal'] as SpeciesName[];
-    break;
-  case 'Sirfetch\'d':
-    similar.formes = ['Sirfetch’d'] as SpeciesName[];
-    break;
-  case 'Wishiwashi':
-    similar.formes = ['Wishiwashi-School'] as SpeciesName[];
+    case 'Aegislash':
+      similar.formes = ['Aegislash-Blade', 'Aegislash-Shield', 'Aegislash-Both'] as SpeciesName[];
+      break;
+    case 'Keldeo':
+      similar.formes = ['Keldeo-Resolute'] as SpeciesName[];
+      break;
+    case 'Minior':
+      similar.formes = ['Minior-Meteor'] as SpeciesName[];
+      break;
+    case 'Palafin':
+      similar.formes = ['Palafin-Hero'] as SpeciesName[];
+      break;
+    case 'Terapagos':
+      similar.formes = ['Terapagos-Stellar', 'Terapagos-Terastal'] as SpeciesName[];
+      similar.abilityChange = true;
+      break;
+    case 'Sirfetch\'d':
+      similar.formes = ['Sirfetch’d'] as SpeciesName[];
+      break;
+    case 'Wishiwashi':
+      similar.formes = ['Wishiwashi-School'] as SpeciesName[];
   }
   return similar;
 }
@@ -441,8 +443,8 @@ async function fetchStats(formatID: ID): Promise<DisplayStatistics | false> {
 }
 async function importGen(
   gen: Generation
-): Promise<{ [specie: string]: { [name: string]: CalcSet } }> {
-  const calcSets: { [specie: string]: { [name: string]: CalcSet } } = {};
+): Promise<{[specie: string]: {[name: string]: CalcSet}}> {
+  const calcSets: {[specie: string]: {[name: string]: CalcSet}} = {};
   const dexSets = await fetchDexSets(gen.num);
   const formatIDs = new Set<ID>();
   const statsIgnore: {[specie: string]: Set<ID>} = {};
@@ -538,7 +540,7 @@ async function importGen(
 // a separate newline so we write our custom stringify which makes it pretty but still
 // take a reasonable amount of space. The build script minfies it so this has no effect
 // on the bundle size
-function stringifyCalcSets(calcSets: {[specie: string]: {[name: string]: CalcSet }}) {
+function stringifyCalcSets(calcSets: {[specie: string]: {[name: string]: CalcSet}}) {
   const buf = [];
   const space = (n = 2) => ' '.repeat(n);
   for (const [specie, sets] of Object.entries(calcSets)) {

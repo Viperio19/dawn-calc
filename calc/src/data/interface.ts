@@ -136,6 +136,7 @@ export interface Move extends Data<MoveName> {
   readonly multihit?: number | number[];
   readonly beam?: boolean;
   readonly stabbing?: boolean;
+  readonly multiaccuracy?: boolean;
 }
 
 export interface Species {
