@@ -358,7 +358,7 @@ $("input[name='weather']").change(function () {
 var lastManualWeather = "";
 var lastAutoWeather = ["", ""];
 function autosetWeather(ability, i) {
-
+	
 	if ($('.locked-weather').length) {
 		return;
 	}
@@ -571,7 +571,7 @@ $(".move-selector").change(function () {
 	var fullSetName = pokeObj.find("input.set-selector").val();
 	var pokemonName = fullSetName.substring(0, fullSetName.indexOf(" ("));
 	var stockpile = moveName === 'Spit Up' || (moveName === 'Belch' && startsWith(pokemonName, "Swalot")); 
-	var moveSlot = startsWith(pokemonName, "Ampharos-Aevian");
+	var moveSlot = startsWith(pokemonName, "Ampharos-Aevian"); 
 	if (Array.isArray(move.multihit) || (!isNaN(move.multihit) && move.multiaccuracy)) {
 		moveGroupObj.children(".move-times").hide();
 		moveGroupObj.children(".move-hits").empty();
@@ -587,7 +587,7 @@ $(".move-selector").change(function () {
 		moveGroupObj.children(".move-hits").show();
 		moveGroupObj.children(".stockpile").hide();
 		var pokemon = $(this).closest(".poke-info");
-
+		
 		var moveHits = 3;
 		if (move.multiaccuracy) {
 			moveHits = move.multihit;
@@ -595,15 +595,15 @@ $(".move-selector").change(function () {
 			moveHits = 5;
 		} else if (pokemon.find(".item").val() === 'Loaded Dice') {
 			moveHits = 4;
-		}
+		}		
 
 		moveGroupObj.children(".move-hits").val(moveHits);
-	} else if (dropsStats) {
+	} else if (stockpile) {
 		moveGroupObj.children(".move-hits").hide();
-		moveGroupObj.children(".stat-drops").show();
+		moveGroupObj.children(".stockpile").show();
 	} else {
 		moveGroupObj.children(".move-hits").hide();
-		moveGroupObj.children(".stat-drops").hide();
+		moveGroupObj.children(".stockpile").hide();
 	}
 	moveGroupObj.children(".move-z").prop("checked", false);
 	if (moveSlot) {
@@ -1219,7 +1219,7 @@ function getMoveDetails(moveInfo, opts) {
 	return new calc.Move(gen, moveName, {
 		ability: opts.ability, item: opts.item, useZ: isZMove, species: opts.species, isCrit: isCrit, hits: hits,
 		isStellarFirstUse: isStellarFirstUse, timesUsed: timesUsed, timesUsedWithMetronome: timesUsedWithMetronome,
-		overrides: overrides, useMax: useMax
+		stockpiles: stockpiles, moveSlot: moveSlot, overrides: overrides, useMax: opts.isDynamaxed
 	});
 }
 
@@ -1273,11 +1273,11 @@ function createField() {
 			isReflect: isReflect[i], isLightScreen: isLightScreen[i],
 			isProtected: isProtected[i], isSeeded: isSeeded[i], isForesight: isForesight[i],
 			isTailwind: isTailwind[i], isHelpingHand: isHelpingHand[i], isFlowerGift: isFlowerGift[i], isFriendGuard: isFriendGuard[i],
-			isAuroraVeil: isAuroraVeil[i], isBattery: isBattery[i], isPowerSpot: isPowerSpot[i], isSwitching: isSwitchingOut[i] ? 'out' : undefined
+			isAuroraVeil: isAuroraVeil[i], isAreniteWall: isAreniteWall[i], isBattery: isBattery[i], isPowerSpot: isPowerSpot[i], isSwitching: isSwitchingOut[i] ? 'out' : undefined
 		});
 	};
 	return new calc.Field({
-		gameType: gameType, weather: weather, terrain: terrain,
+		gameType: gameType, weather: weather, terrain: terrain, chromaticField: chromaticField,
 		isMagicRoom: isMagicRoom, isWonderRoom: isWonderRoom, isGravity: isGravity,
 		isBeadsOfRuin: isBeadsOfRuin, isTabletsOfRuin: isTabletsOfRuin,
 		isSwordOfRuin: isSwordOfRuin, isVesselOfRuin: isVesselOfRuin,
