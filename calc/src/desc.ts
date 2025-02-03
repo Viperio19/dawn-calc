@@ -503,24 +503,32 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
   if (defenderSide.isSR && !defender.hasAbility('Magic Guard', 'Mountaineer') &&
       !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
     const rockType = gen.types.get('rock' as ID)!;
-    const effectiveness =
+    let effectiveness =
       rockType.effectiveness[defender.types[0]]! *
       (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
-    // Torterra-Crest
-    // Fields - Inverse
-    if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) {
-      damage += Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
-    } else {
-      damage += Math.floor((effectiveness * defender.maxHP()) / 8);
+
+    // XOR between Torterra-Crest and Inverse Field so they cancel each other out
+    if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Crests - Torterra: Inverse type effectiveness
+        (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Fields - Inverse: Inverse type effectiveness
+      effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to rock
     }
+  
+    damage += Math.floor((effectiveness * defender.maxHP()) / 8);
     texts.push('Stealth Rock');
   }
   if (defenderSide.steelsurge && !defender.hasAbility('Magic Guard', 'Mountaineer') &&
       !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
     const steelType = gen.types.get('steel' as ID)!;
-    const effectiveness =
+    let effectiveness =
       steelType.effectiveness[defender.types[0]]! *
       (defender.types[1] ? steelType.effectiveness[defender.types[1]]! : 1);
+
+    // XOR between Torterra-Crest and Inverse Field so they cancel each other out
+    if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Crests - Torterra: Inverse type effectiveness
+        (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Fields - Inverse: Inverse type effectiveness
+      effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to steel
+    }
+    
     damage += Math.floor((effectiveness * defender.maxHP()) / 8);
     texts.push('Steelsurge');
   }
@@ -1106,6 +1114,7 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     switch (description.chromaticField) {
     case "Jungle":
     case "Eclipse":
+    case "Inverse":
       output += ' on ' + description.chromaticField + ' Field';
       break;
     case "Dragons-Den":

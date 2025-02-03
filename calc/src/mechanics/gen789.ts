@@ -190,7 +190,7 @@ export function calculateSMSSSV(
       : field.hasTerrain('Misty') ? 'Fairy'
       : field.hasTerrain('Psychic') ? 'Psychic'
       : 'Normal';
-    // Fields - Nature Power
+    // Fields - Nature Power types
     if (move.named('Nature Power') && type === 'Normal') {
       type =
         field.chromaticField === 'Jungle' ? 'Bug'
@@ -374,7 +374,9 @@ export function calculateSMSSSV(
     )
     : 1;
 
-  if (defender.named('Torterra-Crest')) {
+  // XOR between Torterra-Crest and Inverse Field so they cancel each other out
+  if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Crests - Torterra: Inverse type effectiveness
+      (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Fields - Inverse: Inverse type effectiveness
     if (type1Effectiveness == 0)
       type1Effectiveness = 2;
     else
@@ -386,12 +388,11 @@ export function calculateSMSSSV(
       type2Effectiveness = 1 / type2Effectiveness;
   }
 
-  let typeEffectiveness = type1Effectiveness * type2Effectiveness;
-  
-  // Fields - Inverse
-  if (field.chromaticField === 'Inverse') {
-    if (move.hasType('Normal')) // Normal is always neutral
-      typeEffectiveness = 1;
+  let typeEffectiveness = 1;
+
+  // Fields - Inverse: Normal type moves always hit for neutral damage
+  if (!(field.chromaticField === 'Inverse' && move.hasType('Normal'))) {
+    typeEffectiveness = type1Effectiveness * type2Effectiveness;
   }
 
   // Crests - Resistances and Immunities
@@ -512,20 +513,31 @@ export function calculateSMSSSV(
     desc.weather = field.weather;
   }
 
-  // Fields - Text Stuff
+  // Fields - Text for description
 
+  // Eclipse
   if (field.chromaticField === 'Eclipse' && move.named('Solar Beam', 'Solar Blade')) {
     desc.chromaticField = field.chromaticField;
-    return result;
+    return result; // Results in no damage
   }
 
-  if (field.chromaticField === 'Jungle' && move.named('Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash')) {
-    desc.moveType = '+ Grass' as TypeName;
-    desc.chromaticField = field.chromaticField;
+  // Jungle
+  if (field.chromaticField === 'Jungle') {
+    if (move.named('Fell Stinger', 'Silver Wind', 'Steamroller')) {
+      desc.chromaticField = field.chromaticField;
+    } else if (move.named('Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash')) {
+      desc.moveType = '+ Grass' as TypeName;
+      desc.chromaticField = field.chromaticField;      
+    }
   }
 
-  if (field.chromaticField === 'Jungle' && move.named('Fell Stinger', 'Silver Wind', 'Steamroller')) {
+  // Inverse
+  if (field.chromaticField === 'Inverse') {
     desc.chromaticField = field.chromaticField;
+
+    if (attacker.hasItem('Prism Scale') && move.hasType('???')) {
+      desc.attackerItem = attacker.item;
+    }
   }
 
   if (move.type === 'Stellar') {
@@ -1184,7 +1196,7 @@ export function calculateBasePowerSMSSSV(
       basePower = 80;
       desc.moveName = 'Tri Attack';
     }
-    // Fields - Nature Power
+    // Fields - Nature Power base power and move names
     if (desc.moveName === 'Tri Attack')
       switch (field.chromaticField) {
       case 'Jungle':
@@ -1944,13 +1956,10 @@ export function calculateAtModsSMSSSV(
     desc.attackerItem = attacker.item;
   }
 
-// Fields - Prism Scale Effects
-  if ((attacker.hasItem('Prism Scale') &&
-       !(field.chromaticField === 'None')))
-   {
-    //Inverse
-    if ((field.chromaticField === 'Inverse') && (move.hasType('???')))
-    {
+  // Fields - Prism Scale Effects
+  if ((attacker.hasItem('Prism Scale') && !(field.chromaticField === 'None'))) {
+    // Inverse
+    if ((field.chromaticField === 'Inverse') && (move.hasType('???'))) {
       atMods.push(6144);
     }
   }

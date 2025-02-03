@@ -357,12 +357,11 @@ function getHazards(gen, defender, defenderSide, field) {
         var rockType = gen.types.get('rock');
         var effectiveness = rockType.effectiveness[defender.types[0]] *
             (defender.types[1] ? rockType.effectiveness[defender.types[1]] : 1);
-        if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) {
-            damage += Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
+        if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) ||
+            (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) {
+            effectiveness = 1 / effectiveness;
         }
-        else {
-            damage += Math.floor((effectiveness * defender.maxHP()) / 8);
-        }
+        damage += Math.floor((effectiveness * defender.maxHP()) / 8);
         texts.push('Stealth Rock');
     }
     if (defenderSide.steelsurge && !defender.hasAbility('Magic Guard', 'Mountaineer') &&
@@ -370,6 +369,10 @@ function getHazards(gen, defender, defenderSide, field) {
         var steelType = gen.types.get('steel');
         var effectiveness = steelType.effectiveness[defender.types[0]] *
             (defender.types[1] ? steelType.effectiveness[defender.types[1]] : 1);
+        if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) ||
+            (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) {
+            effectiveness = 1 / effectiveness;
+        }
         damage += Math.floor((effectiveness * defender.maxHP()) / 8);
         texts.push('Steelsurge');
     }
@@ -910,6 +913,7 @@ function buildDescription(description, attacker, defender) {
         switch (description.chromaticField) {
             case "Jungle":
             case "Eclipse":
+            case "Inverse":
                 output += ' on ' + description.chromaticField + ' Field';
                 break;
             case "Dragons-Den":

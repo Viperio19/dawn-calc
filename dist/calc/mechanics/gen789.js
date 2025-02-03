@@ -281,7 +281,8 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     var type2Effectiveness = type2
         ? (0, util_2.getMoveEffectiveness)(gen, move, type2, field, isGhostRevealed, field.isGravity, isRingTarget)
         : 1;
-    if (defender.named('Torterra-Crest')) {
+    if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) ||
+        (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) {
         if (type1Effectiveness == 0)
             type1Effectiveness = 2;
         else
@@ -291,10 +292,9 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         else
             type2Effectiveness = 1 / type2Effectiveness;
     }
-    var typeEffectiveness = type1Effectiveness * type2Effectiveness;
-    if (field.chromaticField === 'Inverse') {
-        if (move.hasType('Normal'))
-            typeEffectiveness = 1;
+    var typeEffectiveness = 1;
+    if (!(field.chromaticField === 'Inverse' && move.hasType('Normal'))) {
+        typeEffectiveness = type1Effectiveness * type2Effectiveness;
     }
     if (defender.named('Druddigon-Crest')) {
         if (move.hasType('Fire'))
@@ -377,12 +377,20 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         desc.chromaticField = field.chromaticField;
         return result;
     }
-    if (field.chromaticField === 'Jungle' && move.named('Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash')) {
-        desc.moveType = '+ Grass';
-        desc.chromaticField = field.chromaticField;
+    if (field.chromaticField === 'Jungle') {
+        if (move.named('Fell Stinger', 'Silver Wind', 'Steamroller')) {
+            desc.chromaticField = field.chromaticField;
+        }
+        else if (move.named('Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash')) {
+            desc.moveType = '+ Grass';
+            desc.chromaticField = field.chromaticField;
+        }
     }
-    if (field.chromaticField === 'Jungle' && move.named('Fell Stinger', 'Silver Wind', 'Steamroller')) {
+    if (field.chromaticField === 'Inverse') {
         desc.chromaticField = field.chromaticField;
+        if (attacker.hasItem('Prism Scale') && move.hasType('???')) {
+            desc.attackerItem = attacker.item;
+        }
     }
     if (move.type === 'Stellar') {
         typeEffectiveness = !defender.teraType ? 1 : 2;
@@ -1505,8 +1513,7 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
         atMods.push(6144);
         desc.attackerItem = attacker.item;
     }
-    if ((attacker.hasItem('Prism Scale') &&
-        !(field.chromaticField === 'None'))) {
+    if ((attacker.hasItem('Prism Scale') && !(field.chromaticField === 'None'))) {
         if ((field.chromaticField === 'Inverse') && (move.hasType('???'))) {
             atMods.push(6144);
         }
