@@ -282,8 +282,9 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     var type2Effectiveness = type2
         ? (0, util_2.getMoveEffectiveness)(gen, move, type2, field, isGhostRevealed, field.isGravity, isRingTarget)
         : 1;
-    if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) ||
-        (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) {
+    var inverse = (defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) ||
+        (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'));
+    if (inverse) {
         if (type1Effectiveness == 0)
             type1Effectiveness = 2;
         else
@@ -293,9 +294,18 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         else
             type2Effectiveness = 1 / type2Effectiveness;
     }
-    var typeEffectiveness = 1;
-    if (!(field.chromaticField === 'Inverse' && move.hasType('Normal'))) {
-        typeEffectiveness = type1Effectiveness * type2Effectiveness;
+    var typeEffectiveness = type1Effectiveness * type2Effectiveness;
+    if (defender.teraType && defender.teraType !== 'Stellar') {
+        typeEffectiveness = (0, util_2.getMoveEffectiveness)(gen, move, defender.teraType, field, isGhostRevealed, field.isGravity, isRingTarget);
+        if (inverse) {
+            if (typeEffectiveness == 0)
+                typeEffectiveness = 2;
+            else
+                typeEffectiveness = 1 / typeEffectiveness;
+        }
+    }
+    if (field.chromaticField === 'Inverse' && move.hasType('Normal')) {
+        typeEffectiveness = 1;
     }
     if (defender.named('Druddigon-Crest')) {
         if (move.hasType('Fire'))
@@ -336,9 +346,6 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     if (defender.named('Whiscash-Crest')) {
         if (move.hasType('Grass'))
             typeEffectiveness = 0;
-    }
-    if (defender.teraType && defender.teraType !== 'Stellar') {
-        typeEffectiveness = (0, util_2.getMoveEffectiveness)(gen, move, defender.teraType, field, isGhostRevealed, field.isGravity, isRingTarget);
     }
     if (typeEffectiveness === 0 && move.hasType('Ground') &&
         defender.hasItem('Iron Ball') && !defender.hasAbility('Klutz')) {
@@ -686,7 +693,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         var simpleMultiplier = attacker.hasAbility('Simple') ? 2 : 1;
         var dropsStats = move.dropsStats;
         if (field.chromaticField === 'Dragons-Den' && move.named("Draco Meteor")) {
-            move.dropsStats = 1;
+            dropsStats = 1;
             desc.chromaticField = field.chromaticField;
         }
         desc.moveTurns = "over ".concat(move.timesUsed, " turns");
@@ -1491,7 +1498,7 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
         }
         atMods.push(3072);
     }
-    if (defender.hasAbility('Guts') && defender.status && move.category === 'Special') {
+    if (defender.hasAbility('Guts') && defender.status && move.category === 'Special' && field.chromaticField === 'Ring-Arena') {
         atMods.push(2867);
         desc.defenderAbility = defender.ability;
         desc.chromaticField = field.chromaticField;
@@ -1685,7 +1692,7 @@ function calculateDfModsSMSSSV(gen, attacker, defender, move, field, desc, isCri
         dfMods.push(8192);
         desc.defenderItem = defender.item;
     }
-    else if (defender.hasItem('Protective Pads') && field.chromaticField === 'Ring Arena' && !hitsPhysical) {
+    if (defender.hasItem('Protective Pads') && field.chromaticField === 'Ring-Arena' && !hitsPhysical) {
         dfMods.push(5324);
         desc.defenderItem = defender.item;
         desc.chromaticField = field.chromaticField;
@@ -1797,11 +1804,9 @@ function calculateFinalModsSMSSSV(gen, attacker, defender, move, field, desc, is
                     var effectiveness = rockType.effectiveness[defender.types[0]] *
                         (defender.types[1] ? rockType.effectiveness[defender.types[1]] : 1);
                     if (defender.named('Torterra-Crest')) {
-                        curHP -= Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
+                        effectiveness = 1 / effectiveness;
                     }
-                    else {
-                        curHP -= Math.floor((effectiveness * defender.maxHP()) / 8);
-                    }
+                    curHP -= Math.floor((effectiveness * defender.maxHP()) / 8);
                 }
             }
             if (curHP >= (0, util_2.pokeRound)(defender.maxHP() * 3 / 4)) {

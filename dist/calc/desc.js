@@ -87,8 +87,6 @@ function getRecovery(gen, attacker, defender, move, damage, notation) {
             var range = [minD[i], maxD[i]];
             for (var j in recovery) {
                 var drained = Math.round(range[j] * percentHealed);
-                if (attacker.hasItem('Big Root') || attacker.named('Shiinotic-Crest'))
-                    drained = Math.trunc(drained * 5324 / 4096);
                 recovery[j] += Math.min(drained * move.hits, max);
             }
         }
@@ -624,16 +622,15 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
     var VOLCANIC_ERUPTION = [
         'Bulldoze', 'Earthquake', 'Eruption', 'Lava Plume', 'Magma Storm', 'Magnitude', 'Stomping Tantrum',
     ];
-    if (field.chromaticField === 'Volcanic-Top' && (VOLCANIC_ERUPTION.includes(move.name) || (move.named('Nature Power') && !field.terrain))) {
+    if (field.chromaticField === 'Volcanic-Top' && (VOLCANIC_ERUPTION.includes(move.name) || (move.named('Nature Power') && !field.terrain)) &&
+        !defender.hasAbility('Flash Fire', 'Well-Baked Body')) {
         var fireType = gen.types.get('fire');
         var effectiveness = fireType.effectiveness[defender.types[0]] *
             (defender.types[1] ? fireType.effectiveness[defender.types[1]] : 1);
         if (defender.named('Torterra-Crest')) {
-            damage -= Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
+            effectiveness = 1 / effectiveness;
         }
-        else {
-            damage -= Math.floor((effectiveness * defender.maxHP()) / 8);
-        }
+        damage -= Math.floor((effectiveness * defender.maxHP()) / 8);
         texts.push('Volcanic Eruption damage on Volcanic Top');
     }
     return { damage: damage, texts: texts };

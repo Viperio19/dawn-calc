@@ -416,10 +416,13 @@ function updateGritStages(pokeObj) {
 	? parseInt(pokeObj.find("input:radio[name='gritL']:checked").val())
 	: parseInt(pokeObj.find("input:radio[name='gritR']:checked").val());
 
+	// Ring Arena - Prism Scale: Applies Focus Energy
+	// All effects that permanently increase Critical Hit Ratio increase Grit instead by the same number of stages
 	if (item === 'Prism Scale') {
 		gritNew += 2;
 	}
 
+	// Ring Arena - Pokemon with the abilities Guts, Huge Power, Iron Fist, Limber, Pure Power, Sheer Force, and Super Luck enter the battlefield with 1 stage of Grit
 	if (ability === 'Guts' || ability === 'Huge Power' || ability === 'Iron Fist' ||
 		ability === 'Limber' || ability === 'Pure Power' || ability === 'Sheer Force' ||
 		ability === 'Super Luck') {
@@ -450,6 +453,7 @@ function updateGritStages(pokeObj) {
 		}
 	}
 
+	// Ring Arena - Grit Stage Effects: 3 - 100% Crit chance
 	for (i = 0; i < 4; i++) {
 		var moveObj = pokeObj.find(".move" + (i + 1) + " select.move-selector");
 		var moveGroupObj = moveObj.parent();

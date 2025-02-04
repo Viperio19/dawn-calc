@@ -149,7 +149,7 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
     speed = Math.floor(OF32(speed * (gen.num < 7 ? 25 : 50)) / 100);
   }
 
-  // Cryogonal Crest: Buffs speed by 10% of its special defense (which is buffed by 20%)
+  // Cryogonal Crest - Buffs speed by 10% of its special defense (which is buffed by 20%)
   if (pokemon.named('Cryogonal-Crest')) {
     speed += Math.floor((Math.floor(pokemon.stats['spd'] * 6 / 5) / 10));
   }
@@ -183,6 +183,7 @@ export function getMoveEffectiveness(
       gen.types.get('fighting' as ID)!.effectiveness[type]! *
       gen.types.get('flying' as ID)!.effectiveness[type]!
     );
+  // Jungle - Certain moves have an additional Grass Type
   } else if (field.chromaticField === 'Jungle' && JUNGLE_GRASS_MOVES.includes(move.name)) {
     return (
       gen.types.get(toID(move.type))!.effectiveness[type]! *
@@ -252,7 +253,7 @@ export function checkIntimidate(gen: Generation, source: Pokemon, target: Pokemo
     target.hasItem('Clear Amulet');
   if (source.hasAbility('Intimidate') && source.abilityOn && !blocked) {
     if (target.hasAbility('Contrary', 'Defiant', 'Guard Dog') ||
-        (target.hasAbility('Steadfast') && field.chromaticField === 'Ring-Arena')) {
+        (target.hasAbility('Steadfast') && field.chromaticField === 'Ring-Arena')) { // Ring Arena - Steadfast grants Defiant
       target.boosts.atk = Math.min(6, target.boosts.atk + 1);
     } else if (target.hasAbility('Simple')) {
       target.boosts.atk = Math.max(-6, target.boosts.atk - 2);
@@ -272,7 +273,7 @@ export function checkIntimidate(gen: Generation, source: Pokemon, target: Pokemo
     } else {
       target.boosts.spa = Math.max(-6, target.boosts.spa - 1);
     }
-    if (target.hasAbility('Defiant') || (target.hasAbility('Steadfast') && field.chromaticField === 'Ring-Arena')) {
+    if (target.hasAbility('Defiant') || (target.hasAbility('Steadfast') && field.chromaticField === 'Ring-Arena')) { // Ring Arena - Steadfast grants Defiant
       target.boosts.atk = Math.min(6, target.boosts.atk + 2);
     }
 
@@ -316,28 +317,36 @@ export function checkCrestBoosts(source: Pokemon) {
 // Fields - Stat boosts from Prism Scale or abilities
 export function checkFieldBoosts(source: Pokemon, field: Field) {
   if (field.chromaticField === 'Dragons-Den') {
+    // Dragon's Den - Prism Scale: Boosts Speed +1 
     if (source.hasItem('Prism Scale')) {
       source.boosts.spe = Math.min(6, source.boosts.spe + 1);
     }
   } else if (field.chromaticField === 'Thundering-Plateau') {
+    // Thundering Plateau - Prism Scale: Applies Charge
     if (source.hasItem('Prism Scale')) {
       source.boosts.spd = Math.min(6, source.boosts.spd + 1);
     }
+    // Thundering Plateau - Motor Drive grants +1 Speed on entry
     if (source.hasAbility('Motor Drive')) {
       source.boosts.spe = Math.min(6, source.boosts.spe + 1);
+    // Thundering Plateau - Lightning rod grants +1 Spatk on entry
     } else if (source.hasAbility('Lightning Rod')) {
       source.boosts.spa = Math.min(6, source.boosts.spa + 1);
     }
   } else if (field.chromaticField === 'Starlight-Arena') {
+    // Starlight Arena - Illuminate grants +1 Special Attack on entry
     if (source.hasAbility('Illuminate')) {
       source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+    // Starlight Arena - Aroma Veil, Pastel Veil, and Sweet Veil grant +1 Special Defense on entry
     } else if (source.hasAbility('Aroma Veil', 'Pastel Veil', 'Sweet Veil')) {
       source.boosts.spd = Math.min(6, source.boosts.spd + 1);
     }
   } else if (field.chromaticField === 'Volcanic-Top') {
+    // Volcanic Top - Prism Scale: Boosts Special Attack +1 
     if (source.hasItem('Prism Scale')) {
       source.boosts.spa = Math.min(6, source.boosts.spa + 1);
     }
+    // Volcanic Top - Magma Armor grants +1 Defense and +1 Special Defense on entry
     if (source.hasAbility('Magma Armor')) {
       source.boosts.def = Math.min(6, source.boosts.def + 1);
       source.boosts.spd = Math.min(6, source.boosts.spd + 1);
@@ -450,7 +459,13 @@ export function checkMultihitBoost(
     } else {
       // No move with dropsStats has fancy logic regarding category here
       const stat = move.category === 'Special' ? 'spa' : 'atk';
-      let dropsStats = field.chromaticField === 'Dragons-Den' && move.named("Draco Meteor") ? 1 : move.dropsStats;
+      let dropsStats = move.dropsStats;
+
+      // Dragon's Den - Draco Meteor only drops 1 stage of Special Attack
+      if (field.chromaticField === 'Dragons-Den' && move.named("Draco Meteor")) {
+        dropsStats = 1;
+        desc.chromaticField = field.chromaticField;
+      }
 
       let boosts = attacker.boosts[stat];
       if (attacker.hasAbility('Contrary')) {

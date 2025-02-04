@@ -469,7 +469,11 @@ function checkMultihitBoost(gen, attacker, defender, move, field, desc, usedWhit
         }
         else {
             var stat = move.category === 'Special' ? 'spa' : 'atk';
-            var dropsStats = field.chromaticField === 'Dragons-Den' && move.named("Draco Meteor") ? 1 : move.dropsStats;
+            var dropsStats = move.dropsStats;
+            if (field.chromaticField === 'Dragons-Den' && move.named("Draco Meteor")) {
+                dropsStats = 1;
+                desc.chromaticField = field.chromaticField;
+            }
             var boosts = attacker.boosts[stat];
             if (attacker.hasAbility('Contrary')) {
                 boosts = Math.min(6, boosts + dropsStats);
