@@ -45,6 +45,12 @@ function calculateRBYGSC(gen, attacker, defender, move, field) {
         desc.isProtected = true;
         return result;
     }
+    if (move.name === 'Pain Split') {
+        var average = Math.floor((attacker.curHP() + defender.curHP()) / 2);
+        var damage = Math.max(0, defender.curHP() - average);
+        result.damage = damage;
+        return result;
+    }
     if (gen.num === 1) {
         var fixedDamage = (0, util_1.handleFixedDamageMoves)(attacker, move);
         if (fixedDamage) {
@@ -97,6 +103,10 @@ function calculateRBYGSC(gen, attacker, defender, move, field) {
     }
     if (move.hits > 1) {
         desc.hits = move.hits;
+    }
+    if (move.name === 'Triple Kick') {
+        move.bp = move.hits === 2 ? 15 : move.hits === 3 ? 20 : 10;
+        desc.moveBP = move.bp;
     }
     if (move.named('Flail', 'Reversal')) {
         move.isCrit = false;

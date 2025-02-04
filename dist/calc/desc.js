@@ -67,6 +67,10 @@ function getRecovery(gen, attacker, defender, move, damage, notation) {
     if (move.named('G-Max Finale')) {
         recovery[0] = recovery[1] = Math.round(attacker.maxHP() / 6);
     }
+    if (move.named('Pain Split')) {
+        var average = Math.floor((attacker.curHP() + defender.curHP()) / 2);
+        recovery[0] = recovery[1] = average - attacker.curHP();
+    }
     if (move.drain) {
         var percentHealed = move.drain[0] / move.drain[1];
         var max = Math.round(defender.maxHP() * percentHealed);
@@ -115,7 +119,8 @@ function getRecovery(gen, attacker, defender, move, damage, notation) {
         return { recovery: recovery, text: text };
     var minHealthRecovered = toDisplay(notation, recovery[0], attacker.maxHP());
     var maxHealthRecovered = toDisplay(notation, recovery[1], attacker.maxHP());
-    text = "".concat(minHealthRecovered, " - ").concat(maxHealthRecovered).concat(notation, " recovered");
+    var change = recovery[0] > 0 ? 'recovered' : 'lost';
+    text = "".concat(minHealthRecovered, " - ").concat(maxHealthRecovered).concat(notation, " ").concat(change);
     return { recovery: recovery, text: text };
 }
 exports.getRecovery = getRecovery;
@@ -231,7 +236,7 @@ function getKOChance(gen, attacker, defender, move, field, damage, err) {
     }
     var hazards = getHazards(gen, defender, field.defenderSide, field);
     var eot = getEndOfTurn(gen, attacker, defender, move, field);
-    var toxicCounter = defender.hasStatus('tox') && !(defender.hasAbility('Magic Guard') ||
+    var toxicCounter = defender.hasStatus('tox') && !(defender.hasAbility('Magic Guard', 'Poison Heal') ||
         (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) ? defender.toxicCounter : 0;
     var qualifier = move.hits > 1 ? 'approx. ' : '';
     var hazardsText = hazards.texts.length > 0
@@ -240,79 +245,94 @@ function getKOChance(gen, attacker, defender, move, field, damage, err) {
     var afterText = hazards.texts.length > 0 || eot.texts.length > 0
         ? ' after ' + serializeText(hazards.texts.concat(eot.texts))
         : '';
+    var afterTextNoHazards = eot.texts.length > 0 ? ' after ' + serializeText(eot.texts) : '';
+    function roundChance(chance) {
+        return Math.max(Math.min(Math.round(chance * 1000), 999), 1) / 10;
+    }
+    function KOChance(chanceWithoutEot, chanceWithEot, n, multipleTurns) {
+        if (multipleTurns === void 0) { multipleTurns = false; }
+        var KOTurnText = n === 1 ? 'OHKO'
+            : (multipleTurns ? "KO in ".concat(n, " turns") : "".concat(n, "HKO"));
+        var text = qualifier;
+        var chance = undefined;
+        if (chanceWithoutEot === undefined || chanceWithEot === undefined) {
+            text += "possible ".concat(KOTurnText);
+        }
+        else if (chanceWithoutEot + chanceWithEot === 0) {
+            chance = 0;
+            text += 'not a KO';
+        }
+        else if (chanceWithoutEot === 1) {
+            chance = chanceWithoutEot;
+            if (qualifier === '')
+                text += 'guaranteed ';
+            text += "OHKO".concat(hazardsText);
+        }
+        else if (chanceWithoutEot > 0) {
+            chance = chanceWithEot;
+            if (chanceWithEot === 1) {
+                text += "".concat(roundChance(chanceWithoutEot), "% chance to ").concat(KOTurnText).concat(hazardsText, " ") +
+                    "(guaranteed ".concat(KOTurnText).concat(afterTextNoHazards, ")");
+            }
+            else if (chanceWithEot > chanceWithoutEot) {
+                text += "".concat(roundChance(chanceWithoutEot), "% chance to ").concat(KOTurnText).concat(hazardsText, " ") +
+                    "(".concat(qualifier).concat(roundChance(chanceWithEot), "% chance to ") +
+                    "".concat(KOTurnText).concat(afterTextNoHazards, ")");
+            }
+            else if (chanceWithoutEot > 0) {
+                text += "".concat(roundChance(chanceWithoutEot), "% chance to ").concat(KOTurnText).concat(hazardsText);
+            }
+        }
+        else if (chanceWithoutEot === 0) {
+            chance = chanceWithEot;
+            if (chanceWithEot === 1) {
+                if (qualifier === '')
+                    text += 'guaranteed ';
+                text += "".concat(KOTurnText).concat(afterText);
+            }
+            else if (chanceWithEot > 0) {
+                text += "".concat(roundChance(chanceWithEot), "% chance to ").concat(KOTurnText).concat(afterText);
+            }
+        }
+        return { chance: chance, n: n, text: text };
+    }
     if ((move.timesUsed === 1 && move.timesUsedWithMetronome === 1) || move.isZ) {
-        var chance = computeKOChance(damage, defender.curHP() - hazards.damage, 0, 1, 1, defender.maxHP(), toxicCounter);
-        if (chance === 1) {
-            return { chance: chance, n: 1, text: "guaranteed OHKO".concat(hazardsText) };
-        }
-        else if (chance > 0) {
-            return {
-                chance: chance,
-                n: 1,
-                text: qualifier + Math.round(chance * 1000) / 10 + "% chance to OHKO".concat(hazardsText)
-            };
-        }
+        var chance = computeKOChance(damage, defender.curHP() - hazards.damage, 0, 1, 1, defender.maxHP(), 0);
+        var chanceWithEot = computeKOChance(damage, defender.curHP() - hazards.damage, eot.damage, 1, 1, defender.maxHP(), toxicCounter);
+        if (chance + chanceWithEot > 0)
+            return KOChance(chance, chanceWithEot, 1);
         if (damage.length === 256) {
             qualifier = 'approx. ';
         }
         for (var i = 2; i <= 4; i++) {
             var chance_1 = computeKOChance(damage, defender.curHP() - hazards.damage, eot.damage, i, 1, defender.maxHP(), toxicCounter);
-            if (chance_1 === 1) {
-                return { chance: chance_1, n: i, text: "".concat(qualifier || 'guaranteed ').concat(i, "HKO").concat(afterText) };
-            }
-            else if (chance_1 > 0) {
-                return {
-                    chance: chance_1,
-                    n: i,
-                    text: qualifier + Math.round(chance_1 * 1000) / 10 + "% chance to ".concat(i, "HKO").concat(afterText)
-                };
-            }
+            if (chance_1 > 0)
+                return KOChance(0, chance_1, i);
         }
         for (var i = 5; i <= 9; i++) {
             if (predictTotal(damage[0], eot.damage, i, 1, toxicCounter, defender.maxHP()) >=
                 defender.curHP() - hazards.damage) {
-                return { chance: 1, n: i, text: "".concat(qualifier || 'guaranteed ').concat(i, "HKO").concat(afterText) };
+                return KOChance(0, 1, i);
             }
             else if (predictTotal(damage[damage.length - 1], eot.damage, i, 1, toxicCounter, defender.maxHP()) >=
                 defender.curHP() - hazards.damage) {
-                return { n: i, text: qualifier + "possible ".concat(i, "HKO").concat(afterText) };
+                return KOChance(undefined, undefined, i);
             }
         }
     }
     else {
         var chance = computeKOChance(damage, defender.maxHP() - hazards.damage, eot.damage, move.hits || 1, move.timesUsed || 1, defender.maxHP(), toxicCounter);
-        if (chance === 1) {
-            return {
-                chance: chance,
-                n: move.timesUsed,
-                text: "".concat(qualifier || 'guaranteed ', "KO in ").concat(move.timesUsed, " turns").concat(afterText)
-            };
-        }
-        else if (chance > 0) {
-            return {
-                chance: chance,
-                n: move.timesUsed,
-                text: qualifier +
-                    Math.round(chance * 1000) / 10 +
-                    "% chance to ".concat(move.timesUsed, "HKO").concat(afterText)
-            };
-        }
+        if (chance > 0)
+            return KOChance(0, chance, move.timesUsed, chance === 1);
         if (predictTotal(damage[0], eot.damage, 1, move.timesUsed, toxicCounter, defender.maxHP()) >=
             defender.curHP() - hazards.damage) {
-            return {
-                chance: 1,
-                n: move.timesUsed,
-                text: "".concat(qualifier || 'guaranteed ', "KO in ").concat(move.timesUsed, " turns").concat(afterText)
-            };
+            return KOChance(0, 1, move.timesUsed, true);
         }
         else if (predictTotal(damage[damage.length - 1], eot.damage, 1, move.timesUsed, toxicCounter, defender.maxHP()) >=
             defender.curHP() - hazards.damage) {
-            return {
-                n: move.timesUsed,
-                text: qualifier + "possible KO in ".concat(move.timesUsed, " turns").concat(afterText)
-            };
+            return KOChance(undefined, undefined, move.timesUsed, true);
         }
-        return { n: move.timesUsed, text: qualifier + 'not a KO' };
+        return KOChance(0, 0, move.timesUsed);
     }
     return { chance: 0, n: 0, text: '' };
 }
@@ -454,14 +474,20 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
         texts.push('Solar Power damage on Volcanic Top');
     }
     var loseItem = move.named('Knock Off') && !defender.hasAbility('Sticky Hold');
-    if (defender.hasItem('Leftovers') && !loseItem) {
+    var healBlock = move.named('Psychic Noise') &&
+        !(attacker.hasAbility('Sheer Force') ||
+            defender.hasItem('Covert Cloak') ||
+            defender.hasAbility('Shield Dust', 'Aroma Veil'));
+    if (defender.hasItem('Leftovers') && !loseItem && !healBlock) {
         damage += Math.floor(defender.maxHP() / 16);
         texts.push('Leftovers recovery');
     }
     else if (defender.hasItem('Black Sludge') && !loseItem) {
         if (defender.hasType('Poison')) {
-            damage += Math.floor(defender.maxHP() / 16);
-            texts.push('Black Sludge recovery');
+            if (!healBlock) {
+                damage += Math.floor(defender.maxHP() / 16);
+                texts.push('Black Sludge recovery');
+            }
         }
         else if (!defender.hasAbility('Magic Guard', 'Klutz') &&
             !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
@@ -489,21 +515,23 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
             damage -= recovery;
             texts.push('Liquid Ooze damage');
         }
-        else {
+        else if (!healBlock) {
             damage += recovery;
             texts.push('Leech Seed recovery');
         }
     }
     if (field.hasTerrain('Grassy')) {
-        if ((0, util_2.isGrounded)(defender, field)) {
+        if ((0, util_2.isGrounded)(defender, field) && !healBlock) {
             damage += Math.floor(defender.maxHP() / 16);
             texts.push('Grassy Terrain recovery');
         }
     }
     if (defender.hasStatus('psn')) {
         if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) {
-            damage += Math.floor(defender.maxHP() / 8);
-            texts.push('Poison Heal');
+            if (!healBlock) {
+                damage += Math.floor(defender.maxHP() / 8);
+                texts.push('Poison Heal');
+            }
         }
         else if (!defender.hasAbility('Magic Guard') &&
             !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
@@ -513,8 +541,10 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
     }
     else if (defender.hasStatus('tox')) {
         if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) {
-            damage += Math.floor(defender.maxHP() / 8);
-            texts.push('Poison Heal');
+            if (!healBlock) {
+                damage += Math.floor(defender.maxHP() / 8);
+                texts.push('Poison Heal');
+            }
         }
         else if (!defender.hasAbility('Magic Guard') &&
             !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
@@ -636,20 +666,24 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
     return { damage: damage, texts: texts };
 }
 function computeKOChance(damage, hp, eot, hits, timesUsed, maxHP, toxicCounter) {
-    var n = damage.length;
-    if (hits === 1) {
-        for (var i = 0; i < n; i++) {
-            if (damage[n - 1] < hp)
-                return 0;
-            if (damage[i] >= hp) {
-                return (n - i) / n;
-            }
-        }
-    }
     var toxicDamage = 0;
     if (toxicCounter > 0) {
         toxicDamage = Math.floor((toxicCounter * maxHP) / 16);
         toxicCounter++;
+    }
+    var n = damage.length;
+    if (hits === 1) {
+        if (eot - toxicDamage > 0) {
+            eot = 0;
+            toxicDamage = 0;
+        }
+        for (var i = 0; i < n; i++) {
+            if (damage[n - 1] - eot + toxicDamage < hp)
+                return 0;
+            if (damage[i] - eot + toxicDamage >= hp) {
+                return (n - i) / n;
+            }
+        }
     }
     var sum = 0;
     var lastc = 0;
@@ -674,10 +708,12 @@ function computeKOChance(damage, hp, eot, hits, timesUsed, maxHP, toxicCounter) 
 }
 function predictTotal(damage, eot, hits, timesUsed, toxicCounter, maxHP) {
     var toxicDamage = 0;
+    var lastTurnEot = eot;
     if (toxicCounter > 0) {
         for (var i = 0; i < hits - 1; i++) {
             toxicDamage += Math.floor(((toxicCounter + i) * maxHP) / 16);
         }
+        lastTurnEot -= Math.floor(((toxicCounter + (hits - 1)) * maxHP) / 16);
     }
     var total = 0;
     if (hits > 1 && timesUsed === 1) {
@@ -686,6 +722,8 @@ function predictTotal(damage, eot, hits, timesUsed, toxicCounter, maxHP) {
     else {
         total = damage - eot * (hits - 1) + toxicDamage;
     }
+    if (lastTurnEot < 0)
+        total -= lastTurnEot;
     return total;
 }
 function squashMultihit(gen, d, hits, err) {
@@ -838,6 +876,9 @@ function buildDescription(description, attacker, defender) {
     if (description.attackerTera) {
         output += "Tera ".concat(description.attackerTera, " ");
     }
+    if (description.isStellarFirstUse) {
+        output += '(First Use) ';
+    }
     if (description.isBeadsOfRuin) {
         output += 'Beads of Ruin ';
     }
@@ -853,6 +894,9 @@ function buildDescription(description, attacker, defender) {
     }
     if (description.isFlowerGiftAttacker) {
         output += 'with an ally\'s Flower Gift ';
+    }
+    if (description.isSteelySpiritAttacker) {
+        output += 'with an ally\'s Steely Spirit ';
     }
     if (description.isBattery) {
         output += 'Battery boosted ';

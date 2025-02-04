@@ -1,7 +1,7 @@
-import * as I from './data/interface';
+import type * as I from './data/interface';
 import {Stats} from './stats';
 import {toID, extend, assignWithout} from './util';
-import {State} from './state';
+import type {State} from './state';
 import {Field, Side} from './field';
 import { getMimicryType } from './mechanics/util';
 
@@ -31,6 +31,7 @@ export class Pokemon implements State.Pokemon {
   relicanthTurns?: number;
   boostedStat?: I.StatIDExceptHP | 'auto';
   item?: I.ItemName;
+  disabledItem?: I.ItemName;
   teraType?: I.TypeName;
 
   nature: I.NatureName;

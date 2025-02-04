@@ -30,7 +30,7 @@ a img {
     padding: 15px 6px 15px 6px;
 }
 .header .nav {
-    padding: 15px 0 15px 155px;
+    padding: 15px 0 15px 80px;
 }
 .header .nav-play {
     padding: 15px 0 15px 10px;
@@ -221,10 +221,7 @@ th {
     text-align: center;
     width: 27.5em;
 }
-.holder-0 {
-    position: absolute;
-    top: 151px;
-}
+
 #holder-2 tr {
     white-space: nowrap;
 }
@@ -319,6 +316,10 @@ th {
     float: right;
 }
 .locked-move:checked + .btn {
+    background: #ffff99;
+}
+
+.locked-weather:checked + .btn {
     background: #ffff99;
 }
 
@@ -529,4 +530,8 @@ table.field {
 .extraSetItems,
 .extraSetMoves {
     width: 100%;
+}
+
+.flex-parent {
+	display: flex;
 }
