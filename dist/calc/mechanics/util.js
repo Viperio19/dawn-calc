@@ -267,12 +267,13 @@ function checkWonderRoom(pokemon, wonderRoomActive) {
     }
 }
 exports.checkWonderRoom = checkWonderRoom;
-function checkIntimidate(gen, source, target) {
+function checkIntimidate(gen, source, target, field) {
     var blocked = target.hasAbility('Clear Body', 'White Smoke', 'Hyper Cutter', 'Full Metal Body') ||
         (gen.num >= 8 && target.hasAbility('Inner Focus', 'Own Tempo', 'Oblivious', 'Scrappy')) ||
         target.hasItem('Clear Amulet');
     if (source.hasAbility('Intimidate') && source.abilityOn && !blocked) {
-        if (target.hasAbility('Contrary', 'Defiant', 'Guard Dog')) {
+        if (target.hasAbility('Contrary', 'Defiant', 'Guard Dog') ||
+            (target.hasAbility('Steadfast') && field.chromaticField === 'Ring-Arena')) {
             target.boosts.atk = Math.min(6, target.boosts.atk + 1);
         }
         else if (target.hasAbility('Simple')) {
@@ -295,7 +296,7 @@ function checkIntimidate(gen, source, target) {
         else {
             target.boosts.spa = Math.max(-6, target.boosts.spa - 1);
         }
-        if (target.hasAbility('Defiant')) {
+        if (target.hasAbility('Defiant') || (target.hasAbility('Steadfast') && field.chromaticField === 'Ring-Arena')) {
             target.boosts.atk = Math.min(6, target.boosts.atk + 2);
         }
         source.boosts.spa = Math.min(6, source.boosts.atk + 1);
@@ -338,7 +339,15 @@ function checkCrestBoosts(source) {
 }
 exports.checkCrestBoosts = checkCrestBoosts;
 function checkFieldBoosts(source, field) {
-    if (field.chromaticField === 'Thundering Plateau') {
+    if (field.chromaticField === 'Dragons-Den') {
+        if (source.hasItem('Prism Scale')) {
+            source.boosts.spe = Math.min(6, source.boosts.spe + 1);
+        }
+    }
+    else if (field.chromaticField === 'Thundering-Plateau') {
+        if (source.hasItem('Prism Scale')) {
+            source.boosts.spd = Math.min(6, source.boosts.spd + 1);
+        }
         if (source.hasAbility('Motor Drive')) {
             source.boosts.spe = Math.min(6, source.boosts.spe + 1);
         }
@@ -346,11 +355,20 @@ function checkFieldBoosts(source, field) {
             source.boosts.spa = Math.min(6, source.boosts.spa + 1);
         }
     }
-    else if (field.chromaticField === 'Starlight Arena') {
+    else if (field.chromaticField === 'Starlight-Arena') {
         if (source.hasAbility('Illuminate')) {
             source.boosts.spa = Math.min(6, source.boosts.spa + 1);
         }
         else if (source.hasAbility('Aroma Veil', 'Pastel Veil', 'Sweet Veil')) {
+            source.boosts.spd = Math.min(6, source.boosts.spd + 1);
+        }
+    }
+    else if (field.chromaticField === 'Volcanic-Top') {
+        if (source.hasItem('Prism Scale')) {
+            source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+        }
+        if (source.hasAbility('Magma Armor')) {
+            source.boosts.def = Math.min(6, source.boosts.def + 1);
             source.boosts.spd = Math.min(6, source.boosts.spd + 1);
         }
     }
@@ -509,19 +527,23 @@ function checkMultihitBoost(gen, attacker, defender, move, field, desc, attacker
         }
         else {
             var stat = move.category === 'Special' ? 'spa' : 'atk';
-            var dropsStats = field.chromaticField === "Dragon's Den" && move.named("Draco Meteor") ? 1 : move.dropsStats;
+            var dropsStats = move.dropsStats;
+            if (field.chromaticField === 'Dragons-Den' && move.named("Draco Meteor")) {
+                dropsStats = 1;
+                desc.chromaticField = field.chromaticField;
+            }
             var boosts = attacker.boosts[stat];
             if (attacker.hasAbility('Contrary')) {
                 boosts = Math.min(6, boosts + dropsStats);
                 desc.attackerAbility = attacker.ability;
             }
             else {
-                boosts = Math.max(-6, boosts - move.dropsStats * atkSimple);
+                boosts = Math.max(-6, boosts - dropsStats * atkSimple);
             }
             if (atkSimple === 2)
                 desc.attackerAbility = attacker.ability;
             if (attacker.hasItem('White Herb') && attacker.boosts[stat] < 0 && !attackerUsedItem) {
-                boosts += move.dropsStats * atkSimple;
+                boosts += dropsStats * atkSimple;
                 desc.attackerItem = attacker.item;
                 attackerUsedItem = true;
             }
@@ -758,14 +780,20 @@ function getMimicryType(field) {
     else if (field.chromaticField === 'Eclipse') {
         return "Dark";
     }
-    else if (field.chromaticField === "Dragon's Den") {
+    else if (field.chromaticField === 'Dragons-Den') {
         return "Dragon";
     }
-    else if (field.chromaticField === 'Thundering Plateau') {
+    else if (field.chromaticField === 'Thundering-Plateau') {
         return "Electric";
     }
-    else if (field.chromaticField === 'Starlight Arena') {
+    else if (field.chromaticField === 'Starlight-Arena') {
         return "Fairy";
+    }
+    else if (field.chromaticField === 'Ring-Arena') {
+        return "Fighting";
+    }
+    else if (field.chromaticField === 'Volcanic-Top') {
+        return "Fire";
     }
     else {
         return "???";

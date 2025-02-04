@@ -23,8 +23,8 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     (0, util_2.checkDauntlessShield)(defender, gen);
     (0, util_2.checkEmbody)(attacker, gen);
     (0, util_2.checkEmbody)(defender, gen);
-    (0, util_2.checkIntimidate)(gen, attacker, defender);
-    (0, util_2.checkIntimidate)(gen, defender, attacker);
+    (0, util_2.checkIntimidate)(gen, attacker, defender, field);
+    (0, util_2.checkIntimidate)(gen, defender, attacker, field);
     (0, util_2.checkDownload)(attacker, defender, field.isWonderRoom);
     (0, util_2.checkDownload)(defender, attacker, field.isWonderRoom);
     (0, util_2.checkIntrepidSword)(attacker, gen);
@@ -177,10 +177,13 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
             type =
                 field.chromaticField === 'Jungle' ? 'Bug'
                     : field.chromaticField === 'Eclipse' ? 'Dark'
-                        : field.chromaticField === "Dragon's Den" ? 'Steel'
-                            : field.chromaticField === 'Thundering Plateau' ? 'Electric'
-                                : field.chromaticField === 'Starlight Arena' ? 'Fairy'
-                                    : 'Normal';
+                        : field.chromaticField === 'Dragons-Den' ? 'Steel'
+                            : field.chromaticField === 'Thundering-Plateau' ? 'Electric'
+                                : field.chromaticField === 'Starlight-Arena' ? 'Fairy'
+                                    : field.chromaticField === 'Ring-Arena' ? 'Fighting'
+                                        : field.chromaticField === 'Volcanic-Top' ? 'Fire'
+                                            : field.chromaticField === 'Inverse' ? 'Psychic'
+                                                : 'Normal';
             if (!(type === 'Normal')) {
                 desc.chromaticField = field.chromaticField;
             }
@@ -298,10 +301,10 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         else if ((isSimisearCrest = attacker.named('Simisear-Crest') && normal)) {
             type = 'Water';
         }
-        else if ((isDDenIntimidate = attacker.hasAbility('Intimidate') && normal && field.chromaticField === "Dragon's Den")) {
+        else if ((isDDenIntimidate = attacker.hasAbility('Intimidate') && normal && field.chromaticField === 'Dragons-Den')) {
             type = 'Dragon';
         }
-        else if ((isStarlightFairy = normal && field.chromaticField === 'Starlight Arena')) {
+        else if ((isStarlightFairy = normal && field.chromaticField === 'Starlight-Arena')) {
             type = 'Fairy';
         }
         else if (move.named('Mirror Beam')) {
@@ -352,7 +355,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         type2 = "???";
         desc.mimicryDefenseType = type1;
     }
-    if (defender.hasAbility('Victory Star') && field.chromaticField === 'Starlight Arena') {
+    if (defender.hasAbility('Victory Star') && field.chromaticField === 'Starlight-Arena') {
         type1 = 'Fairy';
         desc.mimicryDefenseType = type1;
     }
@@ -360,7 +363,9 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     var type2Effectiveness = type2
         ? (0, util_2.getMoveEffectiveness)(gen, move, type2, field, isGhostRevealed, field.isGravity, isRingTarget)
         : 1;
-    if (defender.named('Torterra-Crest')) {
+    var inverse = (defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) ||
+        (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'));
+    if (inverse) {
         if (type1Effectiveness == 0)
             type1Effectiveness = 2;
         else
@@ -371,6 +376,18 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
             type2Effectiveness = 1 / type2Effectiveness;
     }
     var typeEffectiveness = type1Effectiveness * type2Effectiveness;
+    if (defender.teraType && defender.teraType !== 'Stellar') {
+        typeEffectiveness = (0, util_2.getMoveEffectiveness)(gen, move, defender.teraType, field, isGhostRevealed, field.isGravity, isRingTarget);
+        if (inverse) {
+            if (typeEffectiveness == 0)
+                typeEffectiveness = 2;
+            else
+                typeEffectiveness = 1 / typeEffectiveness;
+        }
+    }
+    if (field.chromaticField === 'Inverse' && move.hasType('Normal')) {
+        typeEffectiveness = 1;
+    }
     if (defender.named('Druddigon-Crest')) {
         if (move.hasType('Fire'))
             typeEffectiveness = 0;
@@ -411,9 +428,6 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         if (move.hasType('Grass'))
             typeEffectiveness = 0;
     }
-    if (defender.teraType && defender.teraType !== 'Stellar') {
-        typeEffectiveness = (0, util_2.getMoveEffectiveness)(gen, move, defender.teraType, field, isGhostRevealed, field.isGravity, isRingTarget);
-    }
     if (typeEffectiveness === 0 && move.hasType('Ground') &&
         defender.hasItem('Iron Ball') && !defender.hasAbility('Klutz')) {
         typeEffectiveness = 1;
@@ -421,7 +435,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
     if (typeEffectiveness === 0 && move.named('Thousand Arrows')) {
         typeEffectiveness = 1;
     }
-    if (typeEffectiveness === 0 && field.chromaticField === "Dragon's Den" && move.named('Dragon Pulse')) {
+    if (typeEffectiveness === 0 && field.chromaticField === 'Dragons-Den' && move.named('Dragon Pulse')) {
         typeEffectiveness = 0.5;
         desc.chromaticField = field.chromaticField;
     }
@@ -452,14 +466,24 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         desc.chromaticField = field.chromaticField;
         return result;
     }
-    if (field.chromaticField === 'Jungle' && move.named('Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash')) {
-        desc.moveType = '+ Grass';
+    if (field.chromaticField === 'Jungle') {
+        if (move.named('Fell Stinger', 'Silver Wind', 'Steamroller')) {
+            desc.chromaticField = field.chromaticField;
+        }
+        else if (move.named('Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash')) {
+            desc.moveType = '+ Grass';
+            desc.chromaticField = field.chromaticField;
+        }
+    }
+    if (field.chromaticField === 'Inverse') {
         desc.chromaticField = field.chromaticField;
     }
-    if (field.chromaticField === 'Jungle' && move.named('Fell Stinger', 'Silver Wind', 'Steamroller')) {
+    if (field.chromaticField === 'Thundering-Plateau' && defender.item === 'Prism Scale' && move.category === 'Special') {
+        desc.defenderItem = defender.item;
         desc.chromaticField = field.chromaticField;
     }
-    if (field.chromaticField === 'Starlight Arena' && attacker.hasAbility("Illuminate") && move.category === 'Special') {
+    if (field.chromaticField === 'Volcanic-Top' && attacker.item === 'Prism Scale' && move.category === 'Special') {
+        desc.attackerItem = attacker.item;
         desc.chromaticField = field.chromaticField;
     }
     if (move.type === 'Stellar') {
@@ -602,7 +626,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
         stabMod += 2048;
         desc.mimicryOffenseType = (0, util_2.getMimicryType)(field);
     }
-    else if (attacker.hasAbility('Victory Star') && field.chromaticField === 'Starlight Arena' && move.hasType('Fairy')) {
+    else if (attacker.hasAbility('Victory Star') && field.chromaticField === 'Starlight-Arena' && move.hasType('Fairy')) {
         stabMod += 2048;
         desc.chromaticField = field.chromaticField;
     }
@@ -648,7 +672,7 @@ function calculateSMSSSV(gen, attacker, defender, move, field) {
             stabMod = 4915;
         }
     }
-    else if (attacker.hasAbility('Pixilate') && field.chromaticField === 'Starlight Arena') {
+    else if (attacker.hasAbility('Pixilate') && field.chromaticField === 'Starlight-Arena') {
         if (attacker.hasOriginalType(move.type)) {
             stabMod += 2048;
         }
@@ -870,6 +894,10 @@ function calculateBasePowerSMSSSV(gen, attacker, defender, move, field, hasAteAb
         case 'Acrobatics':
             basePower = move.bp * (attacker.hasItem('Flying Gem') ||
                 (!attacker.item || (0, util_2.isQPActive)(attacker, field)) ? 2 : 1);
+            if (field.chromaticField === 'Ring-Arena' && basePower == move.bp) {
+                basePower *= 2;
+                desc.chromaticField = field.chromaticField;
+            }
             desc.moveBP = basePower;
             break;
         case 'Assurance':
@@ -980,21 +1008,35 @@ function calculateBasePowerSMSSSV(gen, attacker, defender, move, field, hasAteAb
                         basePower = 80;
                         desc.moveName = 'Dark Pulse';
                         break;
-                    case "Dragon's Den":
+                    case 'Dragons-Den':
                         basePower = 120;
                         desc.moveName = 'Make It Rain';
                         break;
-                    case 'Thundering Plateau':
+                    case 'Thundering-Plateau':
                         basePower = 60;
                         desc.moveName = 'Shock Wave';
                         break;
-                    case 'Starlight Arena':
+                    case 'Starlight-Arena':
                         basePower = 0;
                         desc.moveName = 'Lunar Dance';
+                        break;
+                    case 'Ring-Arena':
+                        basePower = 120;
+                        desc.moveName = 'Close Combat';
+                        break;
+                    case 'Volcanic-Top':
+                        basePower = Math.max(1, Math.floor((150 * attacker.curHP()) / attacker.maxHP()));
+                        ;
+                        desc.moveName = 'Eruption';
+                        break;
+                    case 'Inverse':
+                        basePower = 0;
+                        desc.moveName = 'Trick Room';
                         break;
                     default:
                         basePower = 80;
                         desc.moveName = 'Tri Attack';
+                        break;
                 }
             break;
         case 'Water Shuriken':
@@ -1152,6 +1194,11 @@ function calculateBPModsSMSSSV(gen, attacker, defender, move, field, desc, baseP
             bpMods.push(5324);
             desc.chromaticField = field.chromaticField;
         }
+    }
+    if (attacker.gritStages == 5) {
+        bpMods.push(6144);
+        desc.gritStages = attacker.gritStages;
+        desc.chromaticField = field.chromaticField;
     }
     if (((attacker.hasAbility('Technician') || attacker.named('Dusknoir-Crest')) && basePower <= 60) ||
         (attacker.hasAbility('Flare Boost') &&
@@ -1453,7 +1500,8 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
         desc.attackerAbility = attacker.ability;
     }
     else if ((field.chromaticField === 'Jungle' && attacker.hasAbility('Swarm') && move.hasType('Bug')) ||
-        (field.chromaticField === 'Thundering Plateau' && attacker.hasAbility('Plus', 'Minus') && move.category === 'Special')) {
+        (field.chromaticField === 'Thundering-Plateau' && attacker.hasAbility('Plus', 'Minus') && move.category === 'Special') ||
+        (field.chromaticField === 'Volcanic-Top' && (attacker.hasAbility('Solar Power') || (attacker.hasAbility('Blaze') && move.hasType('Fire'))))) {
         atMods.push(6144);
         desc.attackerAbility = attacker.ability;
         desc.chromaticField = field.chromaticField;
@@ -1518,6 +1566,11 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
         }
         atMods.push(3072);
     }
+    if (defender.hasAbility('Guts') && defender.status && move.category === 'Special' && field.chromaticField === 'Ring-Arena') {
+        atMods.push(2867);
+        desc.defenderAbility = defender.ability;
+        desc.chromaticField = field.chromaticField;
+    }
     if ((0, util_2.isQPActive)(attacker, field)) {
         if ((move.category === 'Physical' && (0, util_2.getQPBoostedStat)(attacker) === 'atk') ||
             (move.category === 'Special' && (0, util_2.getQPBoostedStat)(attacker) === 'spa')) {
@@ -1548,6 +1601,12 @@ function calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc) {
         atMods.push(6144);
         desc.attackerItem = attacker.item;
     }
+    if ((attacker.hasItem('Prism Scale') && !(field.chromaticField === 'None'))) {
+        if ((field.chromaticField === 'Inverse') && (move.hasType('???'))) {
+            atMods.push(6144);
+            desc.attackerItem = attacker.item;
+        }
+    }
     if (attacker.named('Seviper-Crest')) {
         atMods.push(4096 + (0, util_2.pokeRound)(Math.floor((defender.curHP() * 4096) / defender.maxHP()) / 2));
     }
@@ -1575,6 +1634,11 @@ function calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCr
     else if (attacker.hasAbility('Unaware')) {
         defense = defender.rawStats[defenseStat];
         desc.attackerAbility = attacker.ability;
+    }
+    else if (attacker.gritStages && attacker.gritStages >= 1) {
+        defense = defender.rawStats[defenseStat];
+        desc.gritStages = attacker.gritStages;
+        desc.chromaticField = field.chromaticField;
     }
     else {
         defense = (0, util_2.getModifiedStat)(defender.rawStats[defenseStat], defender.boosts[defenseStat]);
@@ -1633,7 +1697,7 @@ function calculateDfModsSMSSSV(gen, attacker, defender, move, field, desc, isCri
             dfMods.push(6144);
             desc.defenderAbility = defender.ability;
         }
-        else if (field.chromaticField === "Dragon's Den") {
+        else if (field.chromaticField === 'Dragons-Den') {
             dfMods.push(6144);
             desc.defenderAbility = defender.ability;
             desc.chromaticField = field.chromaticField;
@@ -1695,6 +1759,11 @@ function calculateDfModsSMSSSV(gen, attacker, defender, move, field, desc, isCri
         (defender.hasItem('Deep Sea Scale') && defender.named('Clamperl') && !hitsPhysical)) {
         dfMods.push(8192);
         desc.defenderItem = defender.item;
+    }
+    if (defender.hasItem('Protective Pads') && field.chromaticField === 'Ring-Arena' && !hitsPhysical) {
+        dfMods.push(5324);
+        desc.defenderItem = defender.item;
+        desc.chromaticField = field.chromaticField;
     }
     if (attacker.named('Electrode-Crest') && hitsPhysical) {
         dfMods.push(2048);
@@ -1776,6 +1845,11 @@ function calculateFinalModsSMSSSV(gen, attacker, defender, move, field, desc, is
         finalMods.push(8192);
         desc.attackerAbility = attacker.ability;
     }
+    else if (attacker.isStarstruck && typeEffectiveness < 1) {
+        finalMods.push(8192);
+        desc.starstruck = true;
+        desc.chromaticField = field.chromaticField;
+    }
     if (defender.isDynamaxed && move.named('Dynamax Cannon', 'Behemoth Blade', 'Behemoth Bash')) {
         finalMods.push(8192);
     }
@@ -1787,7 +1861,7 @@ function calculateFinalModsSMSSSV(gen, attacker, defender, move, field, desc, is
             finalMods.push(2048);
             desc.defenderAbility = defender.ability;
         }
-        else if (defender.hasAbility('Multiscale') && field.chromaticField === "Dragon's Den") {
+        else if (defender.hasAbility('Multiscale') && field.chromaticField === 'Dragons-Den') {
             var curHP = defender.curHP();
             if (!defender.hasItem('Heavy-Duty Boots')) {
                 if (field.defenderSide.spikes && !defender.hasType('Flying')) {
@@ -1798,11 +1872,9 @@ function calculateFinalModsSMSSSV(gen, attacker, defender, move, field, desc, is
                     var effectiveness = rockType.effectiveness[defender.types[0]] *
                         (defender.types[1] ? rockType.effectiveness[defender.types[1]] : 1);
                     if (defender.named('Torterra-Crest')) {
-                        curHP -= Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
+                        effectiveness = 1 / effectiveness;
                     }
-                    else {
-                        curHP -= Math.floor((effectiveness * defender.maxHP()) / 8);
-                    }
+                    curHP -= Math.floor((effectiveness * defender.maxHP()) / 8);
                 }
             }
             if (curHP >= (0, util_2.pokeRound)(defender.maxHP() * 3 / 4)) {

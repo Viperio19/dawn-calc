@@ -555,6 +555,32 @@
                 </div>
                 <br />
             </div>
+            <div class="info-group gen-specific g9 field-specific Starlight-Arena">
+                <div class="left" title="Is this Pok&eacute;mon Starstruck?">
+                    <div hidden id="selectRevealInstruction">Is this Pok&eacute;mon Starstruck?</div>
+                    <input aria-describedby="selectRevealInstruction" class="visually-hidden starstruck calc-trigger" type="checkbox" id="starstruckL" />
+                    <label class="btn btn-xxwide" for="starstruckL">Starstruck</label>
+                </div>
+                <br />
+            </div>
+            <div class="info-group gen-specific g9 field-specific Ring-Arena">
+                <div hidden id="selectGritInstruction">How many Grit stages does this Pokémon have?</div>
+                <div aria-labelledby="selectGritInstruction" class="grit" role="radiogroup" title="How many Grit stages does this Pokémon have?">
+                    <input class="visually-hidden calc-trigger" type="radio" name="gritL" value="0" id="gritL0" checked="checked" />
+                    <label class="btn grit-btn btn-left" for="gritL0">0</label>
+                    <input class="visually-hidden calc-trigger" type="radio" name="gritL" value="1" id="gritL1" />
+                    <label class="btn grit-btn btn-mid" for="gritL1">1</label>
+                    <input class="visually-hidden calc-trigger" type="radio" name="gritL" value="2" id="gritL2" />
+                    <label class="btn grit-btn btn-mid" for="gritL2">2</label>
+                    <input class="visually-hidden calc-trigger" type="radio" name="gritL" value="3" id="gritL3" />
+                    <label class="btn grit-btn btn-mid" for="gritL3">3</label>
+                    <input class="visually-hidden calc-trigger" type="radio" name="gritL" value="4" id="gritL4" />
+                    <label class="btn grit-btn btn-mid" for="gritL4">4</label>
+                    <input class="visually-hidden calc-trigger" type="radio" name="gritL" value="5" id="gritL5" />
+                    <label class="btn grit-5-btn btn-right" for="gritL5">5 Grit Stages</label>
+                </div>
+                <br />
+            </div>
             <div class="info-group">
                 <label for="currentHpL1">Current HP</label>
                 <input class="current-hp calc-trigger" id="currentHpL1" value="341" inputmode="decimal" />/<span class="max-hp">341</span> (
@@ -796,9 +822,12 @@
                         <option value="None">None</option>
                         <option value="Jungle">Jungle (Bug)</option>
                         <option value="Eclipse">Eclipse (Dark)</option>
-                        <option value="Dragon's Den">Dragon's Den (Dragon)</option>
-                        <option value="Thundering Plateau">Thundering Plateau (Electric)</option>
-                        <option value="Starlight Arena">Starlight Arena (Fairy)</option>
+                        <option value="Dragons-Den">Dragon's Den (Dragon)</option>
+                        <option value="Thundering-Plateau">Thundering Plateau (Electric)</option>
+                        <option value="Starlight-Arena">Starlight Arena (Fairy)</option>
+                        <option value="Ring-Arena">Ring Arena (Fighting)</option>
+                        <option value="Volcanic-Top">Volcanic Top (Fire)</option>
+                        <option value="Inverse">Inverse (All)</option>
                     </select>
                 </div>
                 <div aria-labelledby="selectRuinInstruction" class="gen-specific g9 format-specific doubles" role="group" style="margin: 10px auto auto;" title="Select the ruin abilities from other Pok&eacute;mon on the field.">
@@ -1564,6 +1593,32 @@
                     <div hidden id="selectRevealInstruction">Has this Pok&eacute;mon been cured with Salt Cure?</div>
                     <input aria-describedby="selectRevealInstruction" class="visually-hidden saltcure calc-trigger" type="checkbox" id="cureR" />
                     <label class="btn btn-xxwide" for="cureR">Salt Cure</label>
+                </div>
+                <br />
+            </div>
+            <div class="info-group gen-specific g9 field-specific Starlight-Arena">
+                <div class="left" title="Is this Pok&eacute;mon Starstruck?">
+                    <div hidden id="selectRevealInstruction">Is this Pok&eacute;mon Starstruck?</div>
+                    <input aria-describedby="selectRevealInstruction" class="visually-hidden starstruck calc-trigger" type="checkbox" id="starstruckR" />
+                    <label class="btn btn-xxwide" for="starstruckR">Starstruck</label>
+                </div>
+                <br />
+            </div>
+            <div class="info-group gen-specific g9 field-specific Ring-Arena">
+                <div hidden id="selectGritInstruction">How many Grit stages does this Pokémon have?</div>
+                <div aria-labelledby="selectGritInstruction" class="grit" role="radiogroup" title="How many Grit stages does this Pokémon have?">
+                    <input class="visually-hidden calc-trigger" type="radio" name="gritR" value="0" id="gritR0" checked="checked" />
+                    <label class="btn grit-btn btn-left" for="gritR0">0</label>
+                    <input class="visually-hidden calc-trigger" type="radio" name="gritR" value="1" id="gritR1" />
+                    <label class="btn grit-btn btn-mid" for="gritR1">1</label>
+                    <input class="visually-hidden calc-trigger" type="radio" name="gritR" value="2" id="gritR2" />
+                    <label class="btn grit-btn btn-mid" for="gritR2">2</label>
+                    <input class="visually-hidden calc-trigger" type="radio" name="gritR" value="3" id="gritR3" />
+                    <label class="btn grit-btn btn-mid" for="gritR3">3</label>
+                    <input class="visually-hidden calc-trigger" type="radio" name="gritR" value="4" id="gritR4" />
+                    <label class="btn grit-btn btn-mid" for="gritR4">4</label>
+                    <input class="visually-hidden calc-trigger" type="radio" name="gritR" value="5" id="gritR5" />
+                    <label class="btn grit-5-btn btn-right" for="gritR5">5 Grit Stages</label>
                 </div>
                 <br />
             </div>

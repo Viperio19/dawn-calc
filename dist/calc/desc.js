@@ -84,6 +84,17 @@ function getRecovery(gen, attacker, defender, move, damage, notation) {
             }
         }
     }
+    if (attacker.gritStages && attacker.gritStages >= 2) {
+        var percentHealed = 1 / 6;
+        var max = Math.round(defender.maxHP() * percentHealed);
+        for (var i = 0; i < minD.length; i++) {
+            var range = [minD[i], maxD[i]];
+            for (var j in recovery) {
+                var drained = Math.round(range[j] * percentHealed);
+                recovery[j] += Math.min(drained * move.hits, max);
+            }
+        }
+    }
     if ((attacker.named('Dusknoir-Crest') && move.named('Shadow Punch')) || attacker.named('Gothitelle-Crest-Dark')) {
         var tempPercentHealed = 0;
         if (attacker.named('Dusknoir-Crest')) {
@@ -225,9 +236,8 @@ function getKOChance(gen, attacker, defender, move, field, damage, err) {
     }
     var hazards = getHazards(gen, defender, field.defenderSide, field);
     var eot = getEndOfTurn(gen, attacker, defender, move, field);
-    var toxicCounter = defender.hasStatus('tox') && !(defender.hasAbility('Magic Guard', 'Poison Heal')
-        ||
-            (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) ? defender.toxicCounter : 0;
+    var toxicCounter = defender.hasStatus('tox') && !(defender.hasAbility('Magic Guard', 'Poison Heal') ||
+        (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) ? defender.toxicCounter : 0;
     var qualifier = move.hits > 1 ? 'approx. ' : '';
     var hazardsText = hazards.texts.length > 0
         ? ' after ' + serializeText(hazards.texts)
@@ -365,12 +375,11 @@ function getHazards(gen, defender, defenderSide, field) {
         var rockType = gen.types.get('rock');
         var effectiveness = rockType.effectiveness[defender.types[0]] *
             (defender.types[1] ? rockType.effectiveness[defender.types[1]] : 1);
-        if (defender.named('Torterra-Crest')) {
-            damage += Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
+        if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) ||
+            (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) {
+            effectiveness = 1 / effectiveness;
         }
-        else {
-            damage += Math.floor((effectiveness * defender.maxHP()) / 8);
-        }
+        damage += Math.floor((effectiveness * defender.maxHP()) / 8);
         texts.push('Stealth Rock');
     }
     if (defenderSide.steelsurge && !defender.hasAbility('Magic Guard', 'Mountaineer') &&
@@ -378,6 +387,10 @@ function getHazards(gen, defender, defenderSide, field) {
         var steelType = gen.types.get('steel');
         var effectiveness = steelType.effectiveness[defender.types[0]] *
             (defender.types[1] ? steelType.effectiveness[defender.types[1]] : 1);
+        if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) ||
+            (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) {
+            effectiveness = 1 / effectiveness;
+        }
         damage += Math.floor((effectiveness * defender.maxHP()) / 8);
         texts.push('Steelsurge');
     }
@@ -455,6 +468,10 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
             damage -= Math.floor(defender.maxHP() / 16);
             texts.push('hail damage');
         }
+    }
+    if (!(field.hasWeather('Sun', 'Harsh Sunshine')) && field.chromaticField === 'Volcanic-Top' && defender.hasAbility('Solar Power')) {
+        damage -= Math.floor(defender.maxHP() / 8);
+        texts.push('Solar Power damage on Volcanic Top');
     }
     var loseItem = move.named('Knock Off') && !defender.hasAbility('Sticky Hold');
     var healBlock = move.named('Psychic Noise') &&
@@ -628,9 +645,23 @@ function getEndOfTurn(gen, attacker, defender, move, field) {
         damage += Math.floor(defender.maxHP() / 16);
         texts.push('Crest recovery');
     }
-    if (field.chromaticField === 'Thundering Plateau' && defender.hasAbility('Volt Absorb')) {
+    if (field.chromaticField === 'Thundering-Plateau' && defender.hasAbility('Volt Absorb')) {
         damage += Math.floor(defender.maxHP() / 16);
-        texts.push('Volt Absorb recovery on Thundering Plateau');
+        texts.push('Volt Absorb recovery on Thundering-Plateau');
+    }
+    var VOLCANIC_ERUPTION = [
+        'Bulldoze', 'Earthquake', 'Eruption', 'Lava Plume', 'Magma Storm', 'Magnitude', 'Stomping Tantrum',
+    ];
+    if (field.chromaticField === 'Volcanic-Top' && (VOLCANIC_ERUPTION.includes(move.name) || (move.named('Nature Power') && !field.terrain)) &&
+        !defender.hasAbility('Flash Fire', 'Well-Baked Body')) {
+        var fireType = gen.types.get('fire');
+        var effectiveness = fireType.effectiveness[defender.types[0]] *
+            (defender.types[1] ? fireType.effectiveness[defender.types[1]] : 1);
+        if (defender.named('Torterra-Crest')) {
+            effectiveness = 1 / effectiveness;
+        }
+        damage -= Math.floor((effectiveness * defender.maxHP()) / 8);
+        texts.push('Volcanic Eruption damage on Volcanic Top');
     }
     return { damage: damage, texts: texts };
 }
@@ -821,8 +852,14 @@ function buildDescription(description, attacker, defender) {
     output = appendIfSet(output, description.attackerItem);
     output = appendIfSet(output, description.attackerAbility);
     output = appendIfSet(output, description.rivalry);
+    if (description.starstruck) {
+        output += 'Starstruck ';
+    }
     if (description.isBurned) {
         output += 'burned ';
+    }
+    if (description.gritStages) {
+        output += Math.min(5, description.gritStages) + ' Grit Stages ';
     }
     if (description.alliesFainted) {
         output += Math.min(5, description.alliesFainted) +
@@ -933,7 +970,31 @@ function buildDescription(description, attacker, defender) {
         output += ' in ' + description.terrain + ' Terrain';
     }
     if (description.chromaticField) {
-        output += ' on ' + description.chromaticField + ' (Field)';
+        switch (description.chromaticField) {
+            case "Jungle":
+            case "Eclipse":
+            case "Inverse":
+                output += ' on ' + description.chromaticField + ' Field';
+                break;
+            case "Dragons-Den":
+                output += " on Dragon's Den";
+                break;
+            case "Thundering-Plateau":
+                output += ' on Thundering Plateau';
+                break;
+            case "Starlight-Arena":
+                output += ' on Starlight Arena';
+                break;
+            case "Ring-Arena":
+                output += ' on Ring Arena';
+                break;
+            case "Volcanic-Top":
+                output += ' on Volcanic Top';
+                break;
+            default:
+                output += 'on ' + description.chromaticField;
+                break;
+        }
     }
     if (description.isReflect) {
         output += ' through Reflect';

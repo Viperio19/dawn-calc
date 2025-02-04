@@ -50,6 +50,8 @@ export interface RawDesc {
     rivalry?: 'buffed' | 'nerfed';
     terrain?: Terrain;
     chromaticField?: string;
+    starstruck?: boolean;
+    gritStages?: number;
     weather?: Weather;
     isDefenderDynamaxed?: boolean;
     reflectorOffenseTypes?: string;
