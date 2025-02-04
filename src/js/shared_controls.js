@@ -665,6 +665,7 @@ $(".move-selector").change(function () {
 	var moveSlot = startsWith(pokemonName, "Ampharos-Aevian"); 
 	if (Array.isArray(move.multihit) || (!isNaN(move.multihit) && move.multiaccuracy)) {
 		moveGroupObj.children(".move-times").hide();
+		moveGroupObj.children(".stockpile").hide();
 		moveGroupObj.children(".move-hits").empty();
 		if (!isNaN(move.multihit)) {
 			for (var i = 1; i <= move.multihit; i++) {
@@ -692,9 +693,11 @@ $(".move-selector").change(function () {
 	} else if (stockpile) {
 		moveGroupObj.children(".move-hits").hide();
 		moveGroupObj.children(".stockpile").show();
+		moveGroupObj.children(".move-times").hide();
 	} else {
 		moveGroupObj.children(".move-hits").hide();
 		moveGroupObj.children(".stockpile").hide();
+		moveGroupObj.children(".move-times").show();
 	}
 	moveGroupObj.children(".move-z").prop("checked", false);
 	if (moveSlot) {

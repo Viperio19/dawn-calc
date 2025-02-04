@@ -538,12 +538,12 @@ function checkMultihitBoost(gen, attacker, defender, move, field, desc, attacker
                 desc.attackerAbility = attacker.ability;
             }
             else {
-                boosts = Math.max(-6, boosts - move.dropsStats * atkSimple);
+                boosts = Math.max(-6, boosts - dropsStats * atkSimple);
             }
             if (atkSimple === 2)
                 desc.attackerAbility = attacker.ability;
             if (attacker.hasItem('White Herb') && attacker.boosts[stat] < 0 && !attackerUsedItem) {
-                boosts += move.dropsStats * atkSimple;
+                boosts += dropsStats * atkSimple;
                 desc.attackerItem = attacker.item;
                 attackerUsedItem = true;
             }
