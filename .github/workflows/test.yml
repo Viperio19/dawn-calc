@@ -50,7 +50,7 @@ jobs:
     - name: Build
       run: node build
     - name: Upload artifact for GitHub Pages
-      uses: actions/upload-pages-artifact@v2
+      uses: actions/upload-pages-artifact@v3
       with: 
         name: github-pages
         # Upload entire repository
@@ -58,4 +58,4 @@ jobs:
     - uses: actions/configure-pages@v1
     - name: Deploy to GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v1
+      uses: actions/deploy-pages@v4
