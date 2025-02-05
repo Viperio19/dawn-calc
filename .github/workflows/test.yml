@@ -33,7 +33,7 @@ jobs:
 #       env:
 #         CI: true
   publish:
-    if: ${{ github.repository == 'smogon/damage-calc' && github.event_name == 'push' }}
+    if: ${{ github.repository == 'Viperio19/dawn-calc' && github.event_name == 'push' }}
     # needs: build
     runs-on: ubuntu-latest
     permissions:
