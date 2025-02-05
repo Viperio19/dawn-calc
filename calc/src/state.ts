@@ -74,6 +74,7 @@ export namespace State {
     isLightScreen?: boolean;
     isProtected?: boolean;
     isSeeded?: boolean;
+    isNightmare?: boolean;
     isForesight?: boolean;
     isTailwind?: boolean;
     isHelpingHand?: boolean;

@@ -365,6 +365,11 @@ export function checkFieldBoosts(source: Pokemon, field: Field) {
     if (source.hasAbility('Early Bird')) {
       source.boosts.spe = Math.min(6, source.boosts.spe + 1);
     }
+  } else if (field.chromaticField === 'Haunted-Graveyard') {
+    // Haunted Graveyard - Prism Scale: Boosts Special Defense +1
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.spd = Math.min(6, source.boosts.spd + 1);
+    }    
   }
 }
 
@@ -819,6 +824,8 @@ export function getMimicryType(field: Field) {
     return "Fire" as TypeName;
   } else if (field.chromaticField === 'Sky') {
     return "Flying" as TypeName;
+  } else if (field.chromaticField === 'Haunted-Graveyard') {
+    return "Ghost" as TypeName;
   } else {
     return "???" as TypeName;
   }

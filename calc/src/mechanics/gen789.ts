@@ -300,6 +300,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Ring-Arena' ? 'Fighting'
         : field.chromaticField === 'Volcanic-Top' ? 'Fire'
         : field.chromaticField === 'Sky' ? 'Flying'
+        : field.chromaticField === 'Haunted-Graveyard' ? 'Ghost'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
       if (!(type === 'Normal')) {
@@ -634,7 +635,7 @@ export function calculateSMSSSV(
       (move.named('Synchronoise') && (!defender.hasType(attacker.types[0]) && !defender.hasInvisisbleType(attacker, field, attacker.types[0])) &&
         (!attacker.types[1] || !defender.hasType(attacker.types[1]))) ||
       (move.named('Dream Eater') &&
-        (!(defender.hasStatus('slp') || defender.hasAbility('Comatose')))) ||
+        (!(defender.hasStatus('slp') || defender.hasAbility('Comatose') || field.chromaticField === 'Haunted-Graveyard'))) || // Haunted Graveyard - Dream Eater never fails
       (move.named('Steel Roller') && !field.terrain) ||
       (move.named('Poltergeist') && (!defender.item || isQPActive(defender, field)))
   ) {
@@ -679,21 +680,55 @@ export function calculateSMSSSV(
   }
 
   // Thundering Plateau
-  if (field.chromaticField === 'Thundering-Plateau' && defender.item === 'Prism Scale' && move.category === 'Special') {
-    desc.defenderItem = defender.item;
-    desc.chromaticField = field.chromaticField;
+  if (field.chromaticField === 'Thundering-Plateau') {
+    if (defender.item === 'Prism Scale' && move.category === 'Special') {
+      desc.defenderItem = defender.item;
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if (defender.hasAbility('Volt Absorb')) {
+      desc.chromaticField = field.chromaticField;
+    }
   }
 
+  const VOLCANIC_ERUPTION = [
+    'Bulldoze', 'Earthquake', 'Eruption', 'Lava Plume', 'Magma Storm', 'Magnitude', 'Stomping Tantrum',
+  ];
+
   // Volcanic Top
-  if (field.chromaticField === 'Volcanic-Top' && attacker.item === 'Prism Scale' && move.category === 'Special') {
-    desc.attackerItem = attacker.item;
-    desc.chromaticField = field.chromaticField;
+  if (field.chromaticField === 'Volcanic-Top') {
+    if (attacker.item === 'Prism Scale' && move.category === 'Special') {
+      desc.attackerItem = attacker.item;
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if (VOLCANIC_ERUPTION.includes(move.name) || (move.named('Nature Power') && !field.terrain) &&
+        !defender.hasAbility('Flash Fire', 'Well-Baked Body')) {
+      desc.chromaticField = field.chromaticField;
+    }
   }
 
   // Sky
-  if (field.chromaticField === 'Sky' && defender.item === 'Prism Scale') {
+  if (field.chromaticField === 'Sky' && defender.item === 'Prism Scale' && move.bp != 0) {
     desc.defenderItem = defender.item;
     desc.chromaticField = field.chromaticField;
+  }
+
+  // Haunted Graveyard
+  if (field.chromaticField === 'Haunted-Graveyard') {
+    if ((defender.hasStatus('slp') || defender.hasAbility('Comatose')) && !defender.hasAbility('Magic Guard')
+    ) {
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if (defender.item === 'Prism Scale' && move.category === 'Special' && !move.named('Nature Power')) {
+      desc.defenderItem = defender.item;
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if (!(defender.hasStatus('slp') || defender.hasAbility('Comatose')) && move.named('Dream Eater')) {
+      desc.chromaticField = field.chromaticField;
+    }
   }
 
   if (move.type === 'Stellar') {
@@ -752,8 +787,14 @@ export function calculateSMSSSV(
 
   desc.HPEVs = getStatDescriptionText(gen, defender, 'hp');
 
-  const fixedDamage = handleFixedDamageMoves(attacker, move);
+  let fixedDamage = handleFixedDamageMoves(attacker, move);
   if (fixedDamage) {
+    // Haunted Graveyard - Night Shade deals 1.5x damage
+    if (field.chromaticField === 'Haunted-Graveyard' && move.named('Night Shade')) {
+      fixedDamage = pokeRound(fixedDamage * 3 / 2);
+      desc.chromaticField = field.chromaticField
+    }
+
     if (attacker.hasAbility('Parental Bond')) {
       result.damage = [fixedDamage, fixedDamage];
       desc.attackerAbility = attacker.ability;
@@ -1179,6 +1220,11 @@ export function calculateBasePowerSMSSSV(
 ) {
   const turnOrder = attacker.stats.spe > defender.stats.spe ? 'first' : 'last';
 
+  // Fields - Nature Power categories
+  const NATURE_POWER_PHYSICAL = [
+    'Ring-Arena', 'Haunted-Graveyard',
+  ];
+
   let basePower: number;
 
   switch (move.name) {
@@ -1319,7 +1365,7 @@ export function calculateBasePowerSMSSSV(
     }
     break;
   case 'Nature Power':
-    move.category = 'Special';
+    move.category = (field.chromaticField && NATURE_POWER_PHYSICAL.includes(field.chromaticField)) ? 'Physical': 'Special';
     move.secondaries = true;
 
     // Nature Power cannot affect Dark-types if it is affected by Prankster
@@ -1391,6 +1437,10 @@ export function calculateBasePowerSMSSSV(
       case 'Sky':
         basePower = 100;
         desc.moveName = 'Bleakwind Storm';
+        break;
+      case 'Haunted-Graveyard':
+        basePower = 90;
+        desc.moveName = 'Phantom Force';
         break;
       case 'Inverse':
         basePower = 0;
@@ -2139,6 +2189,18 @@ export function calculateAtModsSMSSSV(
   ) {
     atMods.push(6144);
     desc.attackerItem = attacker.item;
+  }
+
+  // Fields - Attack Modifiers
+
+  const HAUNTED_GRAVEYARD_BOOSTS = [
+    'Dazzling Gleam', 'Draining Kiss', 'Foul Play', 'Spirit Break'
+  ];
+
+  // Haunted Graveyard - Dazzling Gleam, Draining Kiss, Foul Play, and Spirit Break deal 1.2x damage
+  if (field.chromaticField === 'Haunted-Graveyard' && HAUNTED_GRAVEYARD_BOOSTS.includes(move.name)) {
+    atMods.push(4915);
+    desc.chromaticField = field.chromaticField;
   }
 
   // Fields - Prism Scale Effects
