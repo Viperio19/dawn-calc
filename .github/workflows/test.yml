@@ -34,7 +34,7 @@ jobs:
 #         CI: true
   publish:
     if: ${{ github.repository == 'smogon/damage-calc' && github.event_name == 'push' }}
-    needs: build
+    # needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
