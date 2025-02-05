@@ -51,7 +51,8 @@ jobs:
       run: node build
     - name: Upload artifact for GitHub Pages
       uses: actions/upload-artifact@v4
-      with:
+      with: 
+        name: github-pages
         # Upload entire repository
         path: 'dist'
     - uses: actions/configure-pages@v1
