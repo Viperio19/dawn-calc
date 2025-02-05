@@ -1,6 +1,7 @@
 logs/
 node_modules/
 eslint-cache/
+dist/
 .tsbuildinfo
 .eslintcache
 .DS_Store

@@ -5367,7 +5367,6 @@ var SETDEX_SV = {
   "Glalie": {
     "ZU Showdown Usage": {"ability":"Inner Focus","item":"Focus Sash","nature":"Jolly","teraType":"Ice","evs":{"at":252,"sd":4,"sp":252},"moves":["Spikes","Taunt","Earthquake","Ice Shard"]}
   },
-  // natdex fields MegaG sets beginning
   "Appletun-Mega-Gmax": {
     "National Dex Fields": {"ability":"Thick Fat","item":"Appletunite","nature":"Bold","teraType":"Grass","ivs":{"at":0},"evs":{"hp":232,"df":252,"sd":20,"sp":4},"moves":["Recover","Iron Defense","Body Press","Apple Acid"]}
   },
@@ -5420,8 +5419,6 @@ var SETDEX_SV = {
   "Venusaur-Mega-Gmax": {
     "National Dex Fields": {"ability":"Overgrow","item":"Beast Ball","nature":"Timid","teraType":"Grass","ivs":{"at":0},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Weather Ball","Earth Power","Giga Drain","Growth"]}
   },
-  // natdex fields MegaG sets end
-  // natdex fields Aevian sets start
   "Parasect-Aevian": {
     "National Dex Fields": {"ability":"Resuscitation","item":"Choice Band","nature":"Jolly","teraType":"Bug","evs":{"hp":4,"at":252,"sp":252},"moves":["Shadow Sneak","Gunk Shot","U-turn","Poltergeist"]},
     "NatDex Fields Liechi": {"ability":"Resuscitation","item":"Liechi Berry","nature":"Adamant","teraType":"Bug","evs":{"hp":4,"at":252,"sp":252},"moves":["Poltergeist","Stomping Tantrum","Gunk Shot","Agility"]},
@@ -5515,8 +5512,6 @@ var SETDEX_SV = {
   "Toxtricity-Aevian": {
     "National Dex Fields": {"ability":"Galvanize","item":"Choice Specs","nature":"Modest","teraType":"Poison","ivs":{"at":0},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Scorching Sands","Flamethrower","Overheat","Boomburst"]}
   },
-  // natdex fields Aevian sets end
-  // natdex fields Crests sets start
   "Ariados-Crest": {
     "National Dex Fields": {"ability":"Sniper","item":"Up-Grade","nature":"Jolly","teraType":"Bug","evs":{"at":252,"sd":4,"sp":252},"moves":["Shadow Sneak","Toxic Spikes","Megahorn","Poison Jab"]},
     "NatDex Fields Sneak": {"ability":"Sniper","item":"Up-Grade","nature":"Jolly","teraType":"Bug","evs":{"at":252,"sd":4,"sp":252},"moves":["Shadow Sneak","Toxic Thread","Megahorn","Poison Jab"]}
@@ -5715,5 +5710,4 @@ var SETDEX_SV = {
     "National Dex Fields": {"ability":"Toxic Boost","item":"Up-Grade","nature":"Adamant","teraType":"Normal","evs":{"at":252,"sd":4,"sp":252},"moves":["Swords Dance","Close Combat","Knock Off","Facade"]},
     "NatDex Fields Offense": {"ability":"Toxic Boost","item":"Up-Grade","nature":"Adamant","teraType":"Normal","evs":{"at":252,"sd":4,"sp":252},"moves":["Taunt","Fire Punch","Quick Attack","Facade"]}
   }
-  // natdex fields Crests sets end
 };
