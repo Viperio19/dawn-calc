@@ -255,7 +255,14 @@ export function calculateSMSSSV(
       : field.hasWeather('Sand') ? 'Rock'
       : field.hasWeather('Hail', 'Snow') ? 'Ice'
       : 'Normal';
-    desc.weather = field.weather;
+    // Sky - Weather Ball becomes Flying-type during tailwind if no other weathers are active
+    if (type === 'Normal' && field.attackerSide.isTailwind && field.chromaticField === 'Sky') {
+      type = 'Flying';
+      desc.isTailwind = true;
+      desc.chromaticField = field.chromaticField;
+    } else {
+      desc.weather = field.weather;
+    }
     desc.moveType = type;
   } else if (move.named('Judgment') && attacker.item && attacker.item.includes('Plate')) {
     type = getItemBoostType(attacker.item)!;
@@ -292,6 +299,8 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Starlight-Arena' ? 'Fairy'
         : field.chromaticField === 'Ring-Arena' ? 'Fighting'
         : field.chromaticField === 'Volcanic-Top' ? 'Fire'
+        : field.chromaticField === 'Sky' ? 'Flying'
+        : field.chromaticField === 'Haunted-Graveyard' ? 'Ghost'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
       if (!(type === 'Normal')) {
@@ -349,7 +358,8 @@ export function calculateSMSSSV(
   ) {
     move.target = 'allAdjacentFoes';
     type = 'Stellar';
-  } else if (move.named('Brick Break', 'Psychic Fangs')) {
+  // Jungle - X-Scissor removes Light Screen, Reflect, and Aurora Veil from the target's side
+  } else if (move.named('Brick Break', 'Psychic Fangs') || (move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
     field.defenderSide.isReflect = false;
     field.defenderSide.isLightScreen = false;
     field.defenderSide.isAuroraVeil = false;
@@ -446,7 +456,7 @@ export function calculateSMSSSV(
   if ((attacker.hasAbility('Triage') && move.drain) ||
       (attacker.hasAbility('Gale Wings') &&
        move.hasType('Flying') &&
-       attacker.curHP() === attacker.maxHP())) {
+       (attacker.curHP() === attacker.maxHP() || field.chromaticField === 'Sky'))) { // Sky - Activates Gale Wings regardless of HP
     move.priority = 1;
     desc.attackerAbility = attacker.ability;
   }
@@ -625,7 +635,7 @@ export function calculateSMSSSV(
       (move.named('Synchronoise') && (!defender.hasType(attacker.types[0]) && !defender.hasInvisisbleType(attacker, field, attacker.types[0])) &&
         (!attacker.types[1] || !defender.hasType(attacker.types[1]))) ||
       (move.named('Dream Eater') &&
-        (!(defender.hasStatus('slp') || defender.hasAbility('Comatose')))) ||
+        (!(defender.hasStatus('slp') || defender.hasAbility('Comatose') || field.chromaticField === 'Haunted-Graveyard'))) || // Haunted Graveyard - Dream Eater never fails
       (move.named('Steel Roller') && !field.terrain) ||
       (move.named('Poltergeist') && (!defender.item || isQPActive(defender, field)))
   ) {
@@ -670,15 +680,55 @@ export function calculateSMSSSV(
   }
 
   // Thundering Plateau
-  if (field.chromaticField === 'Thundering-Plateau' && defender.item === 'Prism Scale' && move.category === 'Special') {
+  if (field.chromaticField === 'Thundering-Plateau') {
+    if (defender.item === 'Prism Scale' && move.category === 'Special') {
+      desc.defenderItem = defender.item;
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if (defender.hasAbility('Volt Absorb')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  const VOLCANIC_ERUPTION = [
+    'Bulldoze', 'Earthquake', 'Eruption', 'Lava Plume', 'Magma Storm', 'Magnitude', 'Stomping Tantrum',
+  ];
+
+  // Volcanic Top
+  if (field.chromaticField === 'Volcanic-Top') {
+    if (attacker.item === 'Prism Scale' && move.category === 'Special') {
+      desc.attackerItem = attacker.item;
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if (VOLCANIC_ERUPTION.includes(move.name) || (move.named('Nature Power') && !field.terrain) &&
+        !defender.hasAbility('Flash Fire', 'Well-Baked Body')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Sky
+  if (field.chromaticField === 'Sky' && defender.item === 'Prism Scale' && move.bp != 0) {
     desc.defenderItem = defender.item;
     desc.chromaticField = field.chromaticField;
   }
 
-  // Volcanic Top
-  if (field.chromaticField === 'Volcanic-Top' && attacker.item === 'Prism Scale' && move.category === 'Special') {
-    desc.attackerItem = attacker.item;
-    desc.chromaticField = field.chromaticField;
+  // Haunted Graveyard
+  if (field.chromaticField === 'Haunted-Graveyard') {
+    if ((defender.hasStatus('slp') || defender.hasAbility('Comatose')) && !defender.hasAbility('Magic Guard')
+    ) {
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if (defender.item === 'Prism Scale' && move.category === 'Special' && !move.named('Nature Power')) {
+      desc.defenderItem = defender.item;
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if (!(defender.hasStatus('slp') || defender.hasAbility('Comatose')) && move.named('Dream Eater')) {
+      desc.chromaticField = field.chromaticField;
+    }
   }
 
   if (move.type === 'Stellar') {
@@ -737,8 +787,14 @@ export function calculateSMSSSV(
 
   desc.HPEVs = getStatDescriptionText(gen, defender, 'hp');
 
-  const fixedDamage = handleFixedDamageMoves(attacker, move);
+  let fixedDamage = handleFixedDamageMoves(attacker, move);
   if (fixedDamage) {
+    // Haunted Graveyard - Night Shade deals 1.5x damage
+    if (field.chromaticField === 'Haunted-Graveyard' && move.named('Night Shade')) {
+      fixedDamage = pokeRound(fixedDamage * 3 / 2);
+      desc.chromaticField = field.chromaticField
+    }
+
     if (attacker.hasAbility('Parental Bond')) {
       result.damage = [fixedDamage, fixedDamage];
       desc.attackerAbility = attacker.ability;
@@ -1164,6 +1220,11 @@ export function calculateBasePowerSMSSSV(
 ) {
   const turnOrder = attacker.stats.spe > defender.stats.spe ? 'first' : 'last';
 
+  // Fields - Nature Power categories
+  const NATURE_POWER_PHYSICAL = [
+    'Ring-Arena', 'Haunted-Graveyard',
+  ];
+
   let basePower: number;
 
   switch (move.name) {
@@ -1252,9 +1313,13 @@ export function calculateBasePowerSMSSSV(
     desc.moveBP = basePower;
     break;
   case 'Weather Ball':
-    basePower = move.bp * (field.weather && !field.hasWeather('Strong Winds') ? 2 : 1);
+    // Sky - Weather Ball becomes Flying-type during tailwind if no other weathers are active
+    basePower = move.bp * ((field.weather && !field.hasWeather('Strong Winds')) ||
+                           (field.attackerSide.isTailwind && field.chromaticField === 'Sky') ? 2 : 1);
     if (field.hasWeather('Sun', 'Harsh Sunshine', 'Rain', 'Heavy Rain') &&
-      attacker.hasItem('Utility Umbrella')) basePower = move.bp;
+        attacker.hasItem('Utility Umbrella') && !field.attackerSide.isTailwind) {
+      basePower = move.bp;
+    }
     desc.moveBP = basePower;
     break;
   case 'Terrain Pulse':
@@ -1300,7 +1365,7 @@ export function calculateBasePowerSMSSSV(
     }
     break;
   case 'Nature Power':
-    move.category = 'Special';
+    move.category = (field.chromaticField && NATURE_POWER_PHYSICAL.includes(field.chromaticField)) ? 'Physical': 'Special';
     move.secondaries = true;
 
     // Nature Power cannot affect Dark-types if it is affected by Prankster
@@ -1368,6 +1433,14 @@ export function calculateBasePowerSMSSSV(
       case 'Volcanic-Top':
         basePower = Math.max(1, Math.floor((150 * attacker.curHP()) / attacker.maxHP()));;
         desc.moveName = 'Eruption';
+        break;
+      case 'Sky':
+        basePower = 100;
+        desc.moveName = 'Bleakwind Storm';
+        break;
+      case 'Haunted-Graveyard':
+        basePower = 90;
+        desc.moveName = 'Phantom Force';
         break;
       case 'Inverse':
         basePower = 0;
@@ -2118,6 +2191,18 @@ export function calculateAtModsSMSSSV(
     desc.attackerItem = attacker.item;
   }
 
+  // Fields - Attack Modifiers
+
+  const HAUNTED_GRAVEYARD_BOOSTS = [
+    'Dazzling Gleam', 'Draining Kiss', 'Foul Play', 'Spirit Break'
+  ];
+
+  // Haunted Graveyard - Dazzling Gleam, Draining Kiss, Foul Play, and Spirit Break deal 1.2x damage
+  if (field.chromaticField === 'Haunted-Graveyard' && HAUNTED_GRAVEYARD_BOOSTS.includes(move.name)) {
+    atMods.push(4915);
+    desc.chromaticField = field.chromaticField;
+  }
+
   // Fields - Prism Scale Effects
   if ((attacker.hasItem('Prism Scale') && !(field.chromaticField === 'None'))) {
     // Inverse - The user's next move becomes typeless and deals 1.5x damage until it's switched out
@@ -2424,29 +2509,24 @@ export function calculateFinalModsSMSSSV(
 ) {
   const finalMods = [];
 
-  // Jungle - TODO: Update X-Scissor code after merging with master (Brick Break got added there as well)
   if (field.defenderSide.isReflect && move.category === 'Physical' &&
-      !isCritical && !field.defenderSide.isAuroraVeil &&
-      !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
+      !isCritical && !field.defenderSide.isAuroraVeil) {
     // doesn't stack with Aurora Veil
     finalMods.push(field.gameType !== 'Singles' ? 2732 : 2048);
     desc.isReflect = true;
   } else if (
     field.defenderSide.isLightScreen && move.category === 'Special' &&
-    !isCritical && !field.defenderSide.isAuroraVeil &&
-    !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')
+    !isCritical && !field.defenderSide.isAuroraVeil
   ) {
     // doesn't stack with Aurora Veil
     finalMods.push(field.gameType !== 'Singles' ? 2732 : 2048);
     desc.isLightScreen = true;
   }
-  if (field.defenderSide.isAuroraVeil && !isCritical &&
-      !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
+  if (field.defenderSide.isAuroraVeil && !isCritical) {
     finalMods.push(field.gameType !== 'Singles' ? 2732 : 2048);
     desc.isAuroraVeil = true;
   }
-  if (field.defenderSide.isAreniteWall && typeEffectiveness > 1 &&
-      !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
+  if (field.defenderSide.isAreniteWall && typeEffectiveness > 1) {
     finalMods.push(2048);
     desc.isAreniteWall = true;
   }

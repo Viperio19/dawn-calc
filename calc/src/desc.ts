@@ -57,6 +57,7 @@ export interface RawDesc {
   starstruck?: boolean;
   gritStages?: number;
   weather?: Weather;
+  isTailwind?: boolean;
   isDefenderDynamaxed?: boolean;
   reflectorOffenseTypes?: string;
   reflectorDefenseTypes?: string;
@@ -756,7 +757,7 @@ function getEndOfTurn(
     }
   } else if (
     (defender.hasStatus('slp') || defender.hasAbility('Comatose')) &&
-    attacker.hasAbility('isBadDreams') &&
+    (attacker.hasAbility('Bad Dreams') || field.chromaticField === 'Haunted-Graveyard') && // Haunted Graveyard - Bad Dreams is always active
     !defender.hasAbility('Magic Guard') && 
     !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') // Jungle - Shield Dust grants Magic Guard
   ) {
@@ -816,6 +817,13 @@ function getEndOfTurn(
     texts.push('Volcalith damage');
   }
 
+  if (field.defenderSide.isNightmare && (defender.hasStatus('slp') || defender.hasAbility('Comatose')) && !defender.hasAbility('Magic Guard') && 
+      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
+    // Haunted Graveyard - Nightmare deals 1/3 of the target’s Max HP (From 1/4th)
+    damage -= field.chromaticField === 'Haunted-Graveyard' ? Math.floor(defender.maxHP() / 3) : Math.floor(defender.maxHP() / 4);
+    texts.push('Nightmare');
+  }
+
   // Crests - End of turn text
 
   if (defender.named('Gothitelle-Crest')) {
@@ -858,12 +866,12 @@ function getEndOfTurn(
   // Thundering Plateau - Volt Absorb restores 1/16 of the user's Max HP per turn
   if (field.chromaticField === 'Thundering-Plateau' && defender.hasAbility('Volt Absorb')) {
     damage += Math.floor(defender.maxHP() / 16);
-    texts.push('Volt Absorb recovery on Thundering-Plateau');
+    texts.push('Volt Absorb recovery');
   }
 
   const VOLCANIC_ERUPTION = [
     'Bulldoze', 'Earthquake', 'Eruption', 'Lava Plume', 'Magma Storm', 'Magnitude', 'Stomping Tantrum',
-  ];  
+  ];
 
   // Volcanic Top - Volcanic Eruption deals 1/8th of all Pokemon's max health determined by the effectiveness of Fire against the target
   if (field.chromaticField === 'Volcanic-Top' && (VOLCANIC_ERUPTION.includes(move.name) || (move.named('Nature Power') && !field.terrain)) &&
@@ -879,7 +887,7 @@ function getEndOfTurn(
     }
   
     damage -= Math.floor((effectiveness * defender.maxHP()) / 8);
-    texts.push('Volcanic Eruption damage on Volcanic Top');
+    texts.push('Volcanic Eruption damage');
   }
 
   return {damage, texts};
@@ -1223,12 +1231,15 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     output += ' in ' + description.weather;
   } else if (description.terrain) {
     output += ' in ' + description.terrain + ' Terrain';
+  } else if (description.isTailwind) {
+    output += ' in Tailwind';
   }
   // Fields - Put field names at the end of damage calc text
   if (description.chromaticField) {
     switch (description.chromaticField) {
     case "Jungle":
     case "Eclipse":
+    case "Sky":
     case "Inverse":
       output += ' on ' + description.chromaticField + ' Field';
       break;
@@ -1246,6 +1257,9 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
       break;
     case "Volcanic-Top":
       output += ' on Volcanic Top';
+      break;
+    case "Haunted-Graveyard":
+      output += ' on Haunted Graveyard';
       break;
     default:
       output += 'on ' + description.chromaticField;

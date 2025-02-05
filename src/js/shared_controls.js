@@ -426,6 +426,7 @@ $("input[name='terrain']").change(function () {
 	});
 });
 
+// Update grit stages based on ability and item
 function updateGritStages(pokeObj) {
 	var ability = pokeObj.find(".ability").val();
 	var item = pokeObj.find(".item").val();
@@ -453,6 +454,7 @@ function updateGritStages(pokeObj) {
 		return;
 	}
 	
+	// Set new grit stages iff it has higher than the current grit stage
 	if (gritNew == 3) {
 		if (id === 'p1') {
 			$("#gritL3").prop("checked", true);
@@ -497,14 +499,25 @@ $("#chromatic-field").change(function () {
 	var allPokemon = $('.poke-info');
 	allPokemon.each(function () {
 		var pokeObj = $(this);
+		var id = pokeObj.prop("id");
 	
 		var ability = pokeObj.find(".ability").val();
+		var item = pokeObj.find(".item").val();
 
 		var teraType = pokeObj.find(".teraType").val();
 		var checked = pokeObj.find(".teraToggle").prop("checked");
 
 		stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (teraType === "Stellar" && checked));
 		
+		// Sky - Prism Scale: Applies Tailwind
+		if (chromaticField === 'Sky' && item === 'Prism Scale') {
+			if (id === 'p1') {
+				$("#tailwindL").prop("checked", true);
+			} else {
+				$("#tailwindR").prop("checked", true);
+			}			
+		}
+
 		if (chromaticField === 'Ring-Arena') {
 			updateGritStages(pokeObj);
 		} else {
@@ -736,6 +749,16 @@ $(".item").change(function () {
 	autosetQP($(this).closest(".poke-info"));
 
 	var chromaticField = $("#chromatic-field").val();
+	var id = pokeObj.prop("id");
+
+	// Sky - Prism Scale: Set Tailwind
+	if (chromaticField === 'Sky' && itemName === 'Prism Scale') {
+		if (id === 'p1') {
+			$("#tailwindL").prop("checked", true);
+		} else {
+			$("#tailwindR").prop("checked", true);
+		}			
+	}
 
 	if (chromaticField === 'Ring-Arena') {
 		updateGritStages(pokeObj);
@@ -1373,6 +1396,7 @@ function createField() {
 	var isLightScreen = [$("#lightScreenL").prop("checked"), $("#lightScreenR").prop("checked")];
 	var isProtected = [$("#protectL").prop("checked"), $("#protectR").prop("checked")];
 	var isSeeded = [$("#leechSeedL").prop("checked"), $("#leechSeedR").prop("checked")];
+	var isNightmare = [$("#nightmareL").prop("checked"), $("#nightmareR").prop("checked")];
 	var isForesight = [$("#foresightL").prop("checked"), $("#foresightR").prop("checked")];
 	var isHelpingHand = [$("#helpingHandL").prop("checked"), $("#helpingHandR").prop("checked")];
 	var isTailwind = [$("#tailwindL").prop("checked"), $("#tailwindR").prop("checked")];
@@ -1391,7 +1415,7 @@ function createField() {
 			spikes: spikes[i], isSR: isSR[i], steelsurge: steelsurge[i],
 			vinelash: vinelash[i], wildfire: wildfire[i], cannonade: cannonade[i], volcalith: volcalith[i],
 			isReflect: isReflect[i], isLightScreen: isLightScreen[i],
-			isProtected: isProtected[i], isSeeded: isSeeded[i], isForesight: isForesight[i],
+			isProtected: isProtected[i], isSeeded: isSeeded[i], isNightmare: isNightmare[i], isForesight: isForesight[i],
 			isTailwind: isTailwind[i], isHelpingHand: isHelpingHand[i], isFlowerGift: isFlowerGift[i], isFriendGuard: isFriendGuard[i],
 			isAuroraVeil: isAuroraVeil[i], isAreniteWall: isAreniteWall[i], isBattery: isBattery[i], isPowerSpot: isPowerSpot[i], isSwitching: isSwitchingOut[i] ? 'out' : undefined
 		});
@@ -1656,6 +1680,8 @@ function clearField() {
 	$("#protectR").prop("checked", false);
 	$("#leechSeedL").prop("checked", false);
 	$("#leechSeedR").prop("checked", false);
+	$("#nightmareL").prop("checked", false);
+	$("#nightmareR").prop("checked", false);
 	$("#foresightL").prop("checked", false);
 	$("#foresightR").prop("checked", false);
 	$("#helpingHandL").prop("checked", false);
