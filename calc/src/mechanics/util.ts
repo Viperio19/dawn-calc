@@ -326,7 +326,7 @@ export function checkFieldBoosts(source: Pokemon, field: Field) {
       source.boosts.spe = Math.min(6, source.boosts.spe + 1);
     }
   } else if (field.chromaticField === 'Thundering-Plateau') {
-    // Thundering Plateau - Prism Scale: Applies Charge
+    // Thundering Plateau - Prism Scale: Applies Charge (Boosts Special Defenese +1)
     if (source.hasItem('Prism Scale')) {
       source.boosts.spd = Math.min(6, source.boosts.spd + 1);
     }
@@ -354,6 +354,16 @@ export function checkFieldBoosts(source: Pokemon, field: Field) {
     if (source.hasAbility('Magma Armor')) {
       source.boosts.def = Math.min(6, source.boosts.def + 1);
       source.boosts.spd = Math.min(6, source.boosts.spd + 1);
+    }
+  } else if (field.chromaticField === 'Sky') {
+    // Sky - Prism Scale: Lowers the user’s Defense and Special Defense by 1
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.def = Math.min(6, source.boosts.def - 1);
+      source.boosts.spd = Math.min(6, source.boosts.spd - 1);
+    }
+    // Sky - Early Bird grants +1 Speed on entry 
+    if (source.hasAbility('Early Bird')) {
+      source.boosts.spe = Math.min(6, source.boosts.spe + 1);
     }
   }
 }
@@ -807,6 +817,8 @@ export function getMimicryType(field: Field) {
     return "Fighting" as TypeName;
   } else if (field.chromaticField === 'Volcanic-Top') {
     return "Fire" as TypeName;
+  } else if (field.chromaticField === 'Sky') {
+    return "Flying" as TypeName;
   } else {
     return "???" as TypeName;
   }

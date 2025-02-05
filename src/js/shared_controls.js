@@ -426,6 +426,7 @@ $("input[name='terrain']").change(function () {
 	});
 });
 
+// Update grit stages based on ability and item
 function updateGritStages(pokeObj) {
 	var ability = pokeObj.find(".ability").val();
 	var item = pokeObj.find(".item").val();
@@ -453,6 +454,7 @@ function updateGritStages(pokeObj) {
 		return;
 	}
 	
+	// Set new grit stages iff it has higher than the current grit stage
 	if (gritNew == 3) {
 		if (id === 'p1') {
 			$("#gritL3").prop("checked", true);
@@ -497,14 +499,25 @@ $("#chromatic-field").change(function () {
 	var allPokemon = $('.poke-info');
 	allPokemon.each(function () {
 		var pokeObj = $(this);
+		var id = pokeObj.prop("id");
 	
 		var ability = pokeObj.find(".ability").val();
+		var item = pokeObj.find(".item").val();
 
 		var teraType = pokeObj.find(".teraType").val();
 		var checked = pokeObj.find(".teraToggle").prop("checked");
 
 		stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (teraType === "Stellar" && checked));
 		
+		// Sky - Prism Scale: Applies Tailwind
+		if (chromaticField === 'Sky' && item === 'Prism Scale') {
+			if (id === 'p1') {
+				$("#tailwindL").prop("checked", true);
+			} else {
+				$("#tailwindR").prop("checked", true);
+			}			
+		}
+
 		if (chromaticField === 'Ring-Arena') {
 			updateGritStages(pokeObj);
 		} else {
@@ -736,6 +749,16 @@ $(".item").change(function () {
 	autosetQP($(this).closest(".poke-info"));
 
 	var chromaticField = $("#chromatic-field").val();
+	var id = pokeObj.prop("id");
+
+	// Sky - Prism Scale: Set Tailwind
+	if (chromaticField === 'Sky' && itemName === 'Prism Scale') {
+		if (id === 'p1') {
+			$("#tailwindL").prop("checked", true);
+		} else {
+			$("#tailwindR").prop("checked", true);
+		}			
+	}
 
 	if (chromaticField === 'Ring-Arena') {
 		updateGritStages(pokeObj);

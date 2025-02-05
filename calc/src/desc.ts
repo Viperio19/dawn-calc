@@ -57,6 +57,7 @@ export interface RawDesc {
   starstruck?: boolean;
   gritStages?: number;
   weather?: Weather;
+  isTailwind?: boolean;
   isDefenderDynamaxed?: boolean;
   reflectorOffenseTypes?: string;
   reflectorDefenseTypes?: string;
@@ -1223,12 +1224,15 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     output += ' in ' + description.weather;
   } else if (description.terrain) {
     output += ' in ' + description.terrain + ' Terrain';
+  } else if (description.isTailwind) {
+    output += ' in Tailwind';
   }
   // Fields - Put field names at the end of damage calc text
   if (description.chromaticField) {
     switch (description.chromaticField) {
     case "Jungle":
     case "Eclipse":
+    case "Sky":
     case "Inverse":
       output += ' on ' + description.chromaticField + ' Field';
       break;

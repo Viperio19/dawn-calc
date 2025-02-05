@@ -255,7 +255,14 @@ export function calculateSMSSSV(
       : field.hasWeather('Sand') ? 'Rock'
       : field.hasWeather('Hail', 'Snow') ? 'Ice'
       : 'Normal';
-    desc.weather = field.weather;
+    // Sky - Weather Ball becomes Flying-type during tailwind if no other weathers are active
+    if (type === 'Normal' && field.attackerSide.isTailwind && field.chromaticField === 'Sky') {
+      type = 'Flying';
+      desc.isTailwind = true;
+      desc.chromaticField = field.chromaticField;
+    } else {
+      desc.weather = field.weather;
+    }
     desc.moveType = type;
   } else if (move.named('Judgment') && attacker.item && attacker.item.includes('Plate')) {
     type = getItemBoostType(attacker.item)!;
@@ -292,6 +299,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Starlight-Arena' ? 'Fairy'
         : field.chromaticField === 'Ring-Arena' ? 'Fighting'
         : field.chromaticField === 'Volcanic-Top' ? 'Fire'
+        : field.chromaticField === 'Sky' ? 'Flying'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
       if (!(type === 'Normal')) {
@@ -349,7 +357,8 @@ export function calculateSMSSSV(
   ) {
     move.target = 'allAdjacentFoes';
     type = 'Stellar';
-  } else if (move.named('Brick Break', 'Psychic Fangs')) {
+  // Jungle - X-Scissor removes Light Screen, Reflect, and Aurora Veil from the target's side
+  } else if (move.named('Brick Break', 'Psychic Fangs') || (move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
     field.defenderSide.isReflect = false;
     field.defenderSide.isLightScreen = false;
     field.defenderSide.isAuroraVeil = false;
@@ -446,7 +455,7 @@ export function calculateSMSSSV(
   if ((attacker.hasAbility('Triage') && move.drain) ||
       (attacker.hasAbility('Gale Wings') &&
        move.hasType('Flying') &&
-       attacker.curHP() === attacker.maxHP())) {
+       (attacker.curHP() === attacker.maxHP() || field.chromaticField === 'Sky'))) { // Sky - Activates Gale Wings regardless of HP
     move.priority = 1;
     desc.attackerAbility = attacker.ability;
   }
@@ -678,6 +687,12 @@ export function calculateSMSSSV(
   // Volcanic Top
   if (field.chromaticField === 'Volcanic-Top' && attacker.item === 'Prism Scale' && move.category === 'Special') {
     desc.attackerItem = attacker.item;
+    desc.chromaticField = field.chromaticField;
+  }
+
+  // Sky
+  if (field.chromaticField === 'Sky' && defender.item === 'Prism Scale') {
+    desc.defenderItem = defender.item;
     desc.chromaticField = field.chromaticField;
   }
 
@@ -1252,9 +1267,13 @@ export function calculateBasePowerSMSSSV(
     desc.moveBP = basePower;
     break;
   case 'Weather Ball':
-    basePower = move.bp * (field.weather && !field.hasWeather('Strong Winds') ? 2 : 1);
+    // Sky - Weather Ball becomes Flying-type during tailwind if no other weathers are active
+    basePower = move.bp * ((field.weather && !field.hasWeather('Strong Winds')) ||
+                           (field.attackerSide.isTailwind && field.chromaticField === 'Sky') ? 2 : 1);
     if (field.hasWeather('Sun', 'Harsh Sunshine', 'Rain', 'Heavy Rain') &&
-      attacker.hasItem('Utility Umbrella')) basePower = move.bp;
+        attacker.hasItem('Utility Umbrella') && !field.attackerSide.isTailwind) {
+      basePower = move.bp;
+    }
     desc.moveBP = basePower;
     break;
   case 'Terrain Pulse':
@@ -1368,6 +1387,10 @@ export function calculateBasePowerSMSSSV(
       case 'Volcanic-Top':
         basePower = Math.max(1, Math.floor((150 * attacker.curHP()) / attacker.maxHP()));;
         desc.moveName = 'Eruption';
+        break;
+      case 'Sky':
+        basePower = 100;
+        desc.moveName = 'Bleakwind Storm';
         break;
       case 'Inverse':
         basePower = 0;
@@ -2424,29 +2447,24 @@ export function calculateFinalModsSMSSSV(
 ) {
   const finalMods = [];
 
-  // Jungle - TODO: Update X-Scissor code after merging with master (Brick Break got added there as well)
   if (field.defenderSide.isReflect && move.category === 'Physical' &&
-      !isCritical && !field.defenderSide.isAuroraVeil &&
-      !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
+      !isCritical && !field.defenderSide.isAuroraVeil) {
     // doesn't stack with Aurora Veil
     finalMods.push(field.gameType !== 'Singles' ? 2732 : 2048);
     desc.isReflect = true;
   } else if (
     field.defenderSide.isLightScreen && move.category === 'Special' &&
-    !isCritical && !field.defenderSide.isAuroraVeil &&
-    !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')
+    !isCritical && !field.defenderSide.isAuroraVeil
   ) {
     // doesn't stack with Aurora Veil
     finalMods.push(field.gameType !== 'Singles' ? 2732 : 2048);
     desc.isLightScreen = true;
   }
-  if (field.defenderSide.isAuroraVeil && !isCritical &&
-      !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
+  if (field.defenderSide.isAuroraVeil && !isCritical) {
     finalMods.push(field.gameType !== 'Singles' ? 2732 : 2048);
     desc.isAuroraVeil = true;
   }
-  if (field.defenderSide.isAreniteWall && typeEffectiveness > 1 &&
-      !move.named('Brick Break') && !(move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
+  if (field.defenderSide.isAreniteWall && typeEffectiveness > 1) {
     finalMods.push(2048);
     desc.isAreniteWall = true;
   }
