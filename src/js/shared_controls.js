@@ -1395,6 +1395,8 @@ function createField() {
 	var isReflect = [$("#reflectL").prop("checked"), $("#reflectR").prop("checked")];
 	var isLightScreen = [$("#lightScreenL").prop("checked"), $("#lightScreenR").prop("checked")];
 	var isProtected = [$("#protectL").prop("checked"), $("#protectR").prop("checked")];
+	var isIngrain = [$("#ingrainL").prop("checked"), $("#ingrainR").prop("checked")];
+	var isAquaRing = [$("#aquaRingL").prop("checked"), $("#aquaRingR").prop("checked")];
 	var isSeeded = [$("#leechSeedL").prop("checked"), $("#leechSeedR").prop("checked")];
 	var isNightmare = [$("#nightmareL").prop("checked"), $("#nightmareR").prop("checked")];
 	var isForesight = [$("#foresightL").prop("checked"), $("#foresightR").prop("checked")];
@@ -1414,8 +1416,8 @@ function createField() {
 		return new calc.Side({
 			spikes: spikes[i], isSR: isSR[i], steelsurge: steelsurge[i],
 			vinelash: vinelash[i], wildfire: wildfire[i], cannonade: cannonade[i], volcalith: volcalith[i],
-			isReflect: isReflect[i], isLightScreen: isLightScreen[i],
-			isProtected: isProtected[i], isSeeded: isSeeded[i], isNightmare: isNightmare[i], isForesight: isForesight[i],
+			isReflect: isReflect[i], isLightScreen: isLightScreen[i], isProtected: isProtected[i], isIngrain: isIngrain[i],
+			isAquaRing: isAquaRing[i], isSeeded: isSeeded[i], isNightmare: isNightmare[i], isForesight: isForesight[i],
 			isTailwind: isTailwind[i], isHelpingHand: isHelpingHand[i], isFlowerGift: isFlowerGift[i], isFriendGuard: isFriendGuard[i],
 			isAuroraVeil: isAuroraVeil[i], isAreniteWall: isAreniteWall[i], isBattery: isBattery[i], isPowerSpot: isPowerSpot[i], isSwitching: isSwitchingOut[i] ? 'out' : undefined
 		});
