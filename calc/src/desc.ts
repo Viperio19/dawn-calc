@@ -696,6 +696,20 @@ function getEndOfTurn(
     texts.push('Sticky Barb damage');
   }
 
+  if (field.defenderSide.isIngrain && !healBlock) {
+    let recovery = Math.floor(defender.maxHP() / 16);
+    if (defender.hasItem('Big Root')) recovery = Math.trunc(recovery * 5324 / 4096);
+    damage += recovery;
+    texts.push('Ingrain recovery');
+  }
+
+  if ((field.defenderSide.isAquaRing || defender.named('Phione-Crest')) && !healBlock) {
+    let recovery = Math.floor(defender.maxHP() / 16);
+    if (defender.hasItem('Big Root')) recovery = Math.trunc(recovery * 5324 / 4096);
+    damage += recovery;
+    texts.push('Aqua Ring recovery');
+  }
+
   if (field.defenderSide.isSeeded) {
     if (!defender.hasAbility('Magic Guard') && 
         !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
@@ -834,11 +848,6 @@ function getEndOfTurn(
   if (defender.named('Meganium-Crest')) {
     damage += Math.floor(defender.maxHP() / 16);
     texts.push('Crest recovery');
-  }
-
-  if (defender.named('Phione-Crest')) {
-    damage += Math.floor(defender.maxHP() / 16);
-    texts.push('Aqua Ring recovery');
   }
 
   if (attacker.named('Shiinotic-Crest') && defender.status) {
