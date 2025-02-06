@@ -5367,61 +5367,58 @@ var SETDEX_SV = {
   "Glalie": {
     "ZU Showdown Usage": {"ability":"Inner Focus","item":"Focus Sash","nature":"Jolly","teraType":"Ice","evs":{"at":252,"sd":4,"sp":252},"moves":["Spikes","Taunt","Earthquake","Ice Shard"]}
   },
-  // natdex fields MegaG sets beginning
-  "Appletun-Mega-Gmax": {
+  "Appletun-Mega-G": {
     "National Dex Fields": {"ability":"Thick Fat","item":"Appletunite","nature":"Bold","teraType":"Grass","ivs":{"at":0},"evs":{"hp":232,"df":252,"sd":20,"sp":4},"moves":["Recover","Iron Defense","Body Press","Apple Acid"]}
   },
-  "Blastoise-Mega-Gmax": {
+  "Blastoise-Mega-G": {
     "National Dex Fields": {"ability":"Torrent","item":"Blastoiseite G","nature":"Mild","teraType":"Water","evs":{"at":4,"sa":252,"sp":252},"moves":["Ice Beam","Earthquake","Water Spout","Shell Smash"]}
   },
-  "Butterfree-Mega-Gmax": {
+  "Butterfree-Mega-G": {
     "National Dex Fields": {"ability":"Compound Eyes","item":"Butterfreeite","nature":"Modest","teraType":"Bug","ivs":{"at":0},"evs":{"df":4,"sa":252,"sp":252},"moves":["Hurricane","Sleep Powder","Substitute","Quiver Dance"]}
   },
-  "Centiskorch-Mega-Gmax": {
+  "Centiskorch-Mega-G": {
     "National Dex Fields": {"ability":"Flash Fire","item":"Centiskorchite","nature":"Jolly","teraType":"Fire","evs":{"at":252,"sd":4,"sp":252},"moves":["Coil","Knock Off","Fire Lash","Power Whip"]}
   },
-  "Charizard-Mega-Gmax": {
+  "Charizard-Mega-G": {
     "National Dex Fields": {"ability":"Blaze","item":"Charizardite G","nature":"Timid","teraType":"Fire","ivs":{"at":0},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Roost","Fire Blast","Solar Beam","Focus Blast"]}
   },
-  "Duraludon-Mega-Gmax": {
-    "National Dex Fields": {"ability":"Light Metal","item":"Beast Ball by baezel","nature":"Hasty","teraType":"Steel","evs":{"sa":252,"sd":4,"sp":252},"moves":["Flash Cannon","Thunderbolt","Stomping Tantrum","Draco Meteor"]},
-    "NatDex Fields Mixed": {"ability":"Light Metal","item":"Beast Ball","nature":"Naive","teraType":"Steel","evs":{"df":4,"sa":252,"sp":252},"moves":["Flash Cannon","Stomping Tantrum","Draco Meteor","Stealth Rock"]}
+  "Duraludon-Mega-G": {
+    "National Dex Fields": {"ability":"Light Metal","item":"Duraludonite","nature":"Hasty","teraType":"Steel","evs":{"sa":252,"sd":4,"sp":252},"moves":["Flash Cannon","Thunderbolt","Stomping Tantrum","Draco Meteor"]},
+    "NatDex Fields Mixed": {"ability":"Light Metal","item":"Duraludonite","nature":"Naive","teraType":"Steel","evs":{"df":4,"sa":252,"sp":252},"moves":["Flash Cannon","Stomping Tantrum","Draco Meteor","Stealth Rock"]}
   },
-  "Garbodor-Mega-Gmax": {
+  "Garbodor-Mega-G": {
     "National Dex Fields": {"ability":"Weak Armor","item":"Garbodorite","nature":"Impish","teraType":"Poison","evs":{"hp":248,"df":204,"sp":56},"moves":["Pain Split","Spikes","Stomping Tantrum","Gunk Shot"]}
   },
-  "Gengar-Mega-Gmax": {
-    "National Dex Fields": {"ability":"Cursed Body","item":"Beast Ball","nature":"Jolly","teraType":"Ghost","evs":{"at":252,"sd":4,"sp":252},"moves":["Toxic","Drain Punch","Substitute","Poltergeist"]}
+  "Gengar-Mega-G": {
+    "National Dex Fields": {"ability":"Cursed Body","item":"Gengarite G","nature":"Jolly","teraType":"Ghost","evs":{"at":252,"sd":4,"sp":252},"moves":["Toxic","Drain Punch","Substitute","Poltergeist"]}
   },
-  "Grimmsnarl-Mega-Gmax": {
-    "National Dex Fields": {"ability":"Frisk","item":"Beast Ball","nature":"Careful","teraType":"Dark","evs":{"hp":252,"at":4,"sd":252},"moves":["Darkest Lariat","Sleep Talk","Bulk Up","Rest"]}
+  "Grimmsnarl-Mega-G": {
+    "National Dex Fields": {"ability":"Frisk","item":"Grimmsnarlite","nature":"Careful","teraType":"Dark","evs":{"hp":252,"at":4,"sd":252},"moves":["Darkest Lariat","Sleep Talk","Bulk Up","Rest"]}
   },
-  "Hatterene-Mega-Gmax": {
+  "Hatterene-Mega-G": {
     "National Dex Fields": {"ability":"Magic Bounce","item":"Hattereneite","nature":"Quiet","teraType":"Psychic","ivs":{"at":0,"sp":0},"evs":{"hp":252,"sa":252,"sd":4},"moves":["Trick Room","Mystical Fire","Psychic","Misty Explosion"]}
   },
-  "Lapras-Mega-Gmax": {
+  "Lapras-Mega-G": {
     "SnowMiser NatDex Fields": {"ability":"Hydration","item":"Laprasite","nature":"Adamant","teraType":"Water","evs":{"at":252,"sd":4,"sp":252},"moves":["Dragon Dance","Earthquake","Ice Shard","Liquidation"]}
   },
-  "Machamp-Mega-Gmax": {
-    "National Dex Fields": {"ability":"Steadfast","item":"Beast Ball","nature":"Adamant","teraType":"Fighting","evs":{"hp":4,"at":252,"sp":252},"moves":["Knock Off","Stone Edge","Dynamic Punch","Ice Punch"]}
+  "Machamp-Mega-G": {
+    "National Dex Fields": {"ability":"Steadfast","item":"Machampite","nature":"Adamant","teraType":"Fighting","evs":{"hp":4,"at":252,"sp":252},"moves":["Knock Off","Stone Edge","Dynamic Punch","Ice Punch"]}
   },
-  "Rillaboom-Mega-Gmax": {
-    "National Dex Fields": {"ability":"Grassy Surge","item":"Beast Ball","nature":"Adamant","teraType":"Grass","evs":{"hp":248,"at":252,"df":8},"moves":["Drain Punch","Wood Hammer","Grassy Glide","Swords Dance"]}
+  "Rillaboom-Mega-G": {
+    "National Dex Fields": {"ability":"Grassy Surge","item":"Rillaboomite","nature":"Adamant","teraType":"Grass","evs":{"hp":248,"at":252,"df":8},"moves":["Drain Punch","Wood Hammer","Grassy Glide","Swords Dance"]}
   },
-  "Snorlax-Mega-Gmax": {
-    "National Dex Fields": {"ability":"Thick Fat","item":"Beast Ball","nature":"Careful","teraType":"Normal","evs":{"hp":252,"df":144,"sd":112},"moves":["Rest","Curse","Return","Earthquake"]}
+  "Snorlax-Mega-G": {
+    "National Dex Fields": {"ability":"Thick Fat","item":"Snorlaxite","nature":"Careful","teraType":"Normal","evs":{"hp":252,"df":144,"sd":112},"moves":["Rest","Curse","Return","Earthquake"]}
   },
-  "Toxtricity-Mega-Gmax": {
+  "Toxtricity-Mega-G": {
     "National Dex Fields": {"ability":"Punk Rock","item":"Toxtricityite","nature":"Timid","teraType":"Electric","ivs":{"at":0},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Toxic Spikes","Psychic Noise","Boomburst","Charge Beam"]}
   },
-  "Toxtricity-Mega-Gmax": {
+  "Toxtricity-Mega-G": {
     "NatDex Fields Physical": {"ability":"Punk Rock","item":"Toxtricityite","nature":"Adamant","teraType":"Electric","evs":{"hp":4,"at":252,"sp":252},"moves":["Shift Gear","Spark","Drain Punch","Gunk Shot"]}
   },
-  "Venusaur-Mega-Gmax": {
-    "National Dex Fields": {"ability":"Overgrow","item":"Beast Ball","nature":"Timid","teraType":"Grass","ivs":{"at":0},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Weather Ball","Earth Power","Giga Drain","Growth"]}
+  "Venusaur-Mega-G": {
+    "National Dex Fields": {"ability":"Overgrow","item":"Venusaurite G","nature":"Timid","teraType":"Grass","ivs":{"at":0},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Weather Ball","Earth Power","Giga Drain","Growth"]}
   },
-  // natdex fields MegaG sets end
-  // natdex fields Aevian sets start
   "Parasect-Aevian": {
     "National Dex Fields": {"ability":"Resuscitation","item":"Choice Band","nature":"Jolly","teraType":"Bug","evs":{"hp":4,"at":252,"sp":252},"moves":["Shadow Sneak","Gunk Shot","U-turn","Poltergeist"]},
     "NatDex Fields Liechi": {"ability":"Resuscitation","item":"Liechi Berry","nature":"Adamant","teraType":"Bug","evs":{"hp":4,"at":252,"sp":252},"moves":["Poltergeist","Stomping Tantrum","Gunk Shot","Agility"]},
@@ -5515,8 +5512,6 @@ var SETDEX_SV = {
   "Toxtricity-Aevian": {
     "National Dex Fields": {"ability":"Galvanize","item":"Choice Specs","nature":"Modest","teraType":"Poison","ivs":{"at":0},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Scorching Sands","Flamethrower","Overheat","Boomburst"]}
   },
-  // natdex fields Aevian sets end
-  // natdex fields Crests sets start
   "Ariados-Crest": {
     "National Dex Fields": {"ability":"Sniper","item":"Up-Grade","nature":"Jolly","teraType":"Bug","evs":{"at":252,"sd":4,"sp":252},"moves":["Shadow Sneak","Toxic Spikes","Megahorn","Poison Jab"]},
     "NatDex Fields Sneak": {"ability":"Sniper","item":"Up-Grade","nature":"Jolly","teraType":"Bug","evs":{"at":252,"sd":4,"sp":252},"moves":["Shadow Sneak","Toxic Thread","Megahorn","Poison Jab"]}
@@ -5715,5 +5710,4 @@ var SETDEX_SV = {
     "National Dex Fields": {"ability":"Toxic Boost","item":"Up-Grade","nature":"Adamant","teraType":"Normal","evs":{"at":252,"sd":4,"sp":252},"moves":["Swords Dance","Close Combat","Knock Off","Facade"]},
     "NatDex Fields Offense": {"ability":"Toxic Boost","item":"Up-Grade","nature":"Adamant","teraType":"Normal","evs":{"at":252,"sd":4,"sp":252},"moves":["Taunt","Fire Punch","Quick Attack","Facade"]}
   }
-  // natdex fields Crests sets end
 };

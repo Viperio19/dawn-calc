@@ -91,6 +91,11 @@ function validate(obj, min, max) {
 }
 
 $("input:radio[name='format']").change(function () {
+	var chromaticField = $("#chromatic-field").val();
+
+	$(".field-specific." + chromaticField).show();
+	$(".field-specific").not("." + chromaticField).hide();
+
 	var gameType = $("input:radio[name='format']:checked").val();
 	if (gameType === 'Singles') {
 		$("input:checkbox[name='ruin']:checked").prop("checked", false);
@@ -296,7 +301,7 @@ $(".ability").bind("keyup change", function () {
 	var chromaticField = $("#chromatic-field").val();
 	var teraType = pokeObj.find(".teraType").val();
 	
-	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || (teraType === "Stellar" && checked));
+	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (teraType === "Stellar" && checked));
 
 	if (pokemon.name === "Spiritomb-Crest") {
 		$(this).closest(".poke-info").find(".alliesFainted").show();
@@ -319,6 +324,9 @@ $(".ability").bind("keyup change", function () {
 		$(this).closest(".poke-info").find(".relicanthTurns").hide();
 	}
 
+	if (chromaticField === 'Ring-Arena') {
+		updateGritStages(pokeObj);
+	}
 });
 
 function autosetQP(pokemon) {
@@ -418,17 +426,109 @@ $("input[name='terrain']").change(function () {
 	});
 });
 
+// Update grit stages based on ability and item
+function updateGritStages(pokeObj) {
+	var ability = pokeObj.find(".ability").val();
+	var item = pokeObj.find(".item").val();
+	var id = pokeObj.prop("id");
+	var gritNew = 0;
+
+	var gritCurr = pokeObj.prop("id") === 'p1'
+	? parseInt(pokeObj.find("input:radio[name='gritL']:checked").val())
+	: parseInt(pokeObj.find("input:radio[name='gritR']:checked").val());
+
+	// Ring Arena - Prism Scale: Applies Focus Energy
+	// All effects that permanently increase Critical Hit Ratio increase Grit instead by the same number of stages
+	if (item === 'Prism Scale') {
+		gritNew += 2;
+	}
+
+	// Ring Arena - Pokemon with the abilities Guts, Huge Power, Iron Fist, Limber, Pure Power, Sheer Force, and Super Luck enter the battlefield with 1 stage of Grit
+	if (ability === 'Guts' || ability === 'Huge Power' || ability === 'Iron Fist' ||
+		ability === 'Limber' || ability === 'Pure Power' || ability === 'Sheer Force' ||
+		ability === 'Super Luck') {
+		gritNew += 1;
+	}
+
+	if (gritCurr >= gritNew) {
+		return;
+	}
+	
+	// Set new grit stages iff it has higher than the current grit stage
+	if (gritNew == 3) {
+		if (id === 'p1') {
+			$("#gritL3").prop("checked", true);
+		} else {
+			$("#gritR3").prop("checked", true);
+		}
+	} else if (gritNew == 2) {
+		if (id === 'p1') {
+			$("#gritL2").prop("checked", true);
+		} else {
+			$("#gritR2").prop("checked", true);
+		}
+	} else if (gritNew == 1) {
+		if (id === 'p1') {
+			$("#gritL1").prop("checked", true);
+		} else {
+			$("#gritR1").prop("checked", true);
+		}
+	}
+
+	// Ring Arena - Grit Stage Effects: 3 - 100% Crit chance
+	for (i = 0; i < 4; i++) {
+		var moveObj = pokeObj.find(".move" + (i + 1) + " select.move-selector");
+		var moveGroupObj = moveObj.parent();
+		var moveName = moveObj.	val();
+		var move = moves[moveName] || moves['(No Move)'];
+		moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true || gritNew >= 3);
+	}
+}
+
 $("#chromatic-field").change(function () {
+	var chromaticField = $("#chromatic-field").val();
+
+	$(".field-specific." + chromaticField).show();
+	$(".field-specific").not("." + chromaticField).hide();
+
+	$("#starstruckL").prop("checked", false);
+	$("#starstruckR").prop("checked", false);
+	$("#gritL0").prop("checked", true);
+	$("#gritR0").prop("checked", true);
+
 	var allPokemon = $('.poke-info');
 	allPokemon.each(function () {
 		var pokeObj = $(this);
+		var id = pokeObj.prop("id");
 	
-		var checked = pokeObj.find(".teraToggle").prop("checked");
 		var ability = pokeObj.find(".ability").val();
-		var chromaticField = $("#chromatic-field").val();
+		var item = pokeObj.find(".item").val();
+
 		var teraType = pokeObj.find(".teraType").val();
+		var checked = pokeObj.find(".teraToggle").prop("checked");
+
+		stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (teraType === "Stellar" && checked));
 		
-		stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || (teraType === "Stellar" && checked));		
+		// Sky - Prism Scale: Applies Tailwind
+		if (chromaticField === 'Sky' && item === 'Prism Scale') {
+			if (id === 'p1') {
+				$("#tailwindL").prop("checked", true);
+			} else {
+				$("#tailwindR").prop("checked", true);
+			}			
+		}
+
+		if (chromaticField === 'Ring-Arena') {
+			updateGritStages(pokeObj);
+		} else {
+			for (i = 0; i < 4; i++) {
+				var moveObj = pokeObj.find(".move" + (i + 1) + " select.move-selector");
+				var moveGroupObj = moveObj.parent();
+				var moveName = moveObj.	val();
+				var move = moves[moveName] || moves['(No Move)'];
+				moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true);
+			}
+		}
 	});
 });
 
@@ -512,7 +612,7 @@ $(".teraType").change(function () {
 	var checked = pokeObj.find(".teraToggle").prop("checked");
 	var ability = pokeObj.find(".ability").val();
 	var chromaticField = $("#chromatic-field").val();
-	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || ($(this).val() === "Stellar" && checked));
+	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || ($(this).val() === "Stellar" && checked));
 });
 
 var lockerMove = "";
@@ -564,7 +664,11 @@ $(".move-selector").change(function () {
 	$(this).attr('data-prev', moveName);
 	moveGroupObj.children(".move-type").val(move.type);
 	moveGroupObj.children(".move-cat").val(move.category);
-	moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true);
+	var pokeObj = $(this).closest(".poke-info");
+	var gritStages = pokeObj.prop("id") === 'p1'
+				   ? parseInt(pokeObj.find("input:radio[name='gritL']:checked").val())
+				   : parseInt(pokeObj.find("input:radio[name='gritR']:checked").val());
+	moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true || gritStages >= 3);
 
 	var stat = move.category === 'Special' ? 'spa' : 'atk';
 	var pokeObj = $(this).closest(".poke-info");
@@ -574,6 +678,7 @@ $(".move-selector").change(function () {
 	var moveSlot = startsWith(pokemonName, "Ampharos-Aevian"); 
 	if (Array.isArray(move.multihit) || (!isNaN(move.multihit) && move.multiaccuracy)) {
 		moveGroupObj.children(".move-times").hide();
+		moveGroupObj.children(".stockpile").hide();
 		moveGroupObj.children(".move-hits").empty();
 		if (!isNaN(move.multihit)) {
 			for (var i = 1; i <= move.multihit; i++) {
@@ -601,9 +706,11 @@ $(".move-selector").change(function () {
 	} else if (stockpile) {
 		moveGroupObj.children(".move-hits").hide();
 		moveGroupObj.children(".stockpile").show();
+		moveGroupObj.children(".move-times").hide();
 	} else {
 		moveGroupObj.children(".move-hits").hide();
 		moveGroupObj.children(".stockpile").hide();
+		moveGroupObj.children(".move-times").show();
 	}
 	moveGroupObj.children(".move-z").prop("checked", false);
 	if (moveSlot) {
@@ -614,6 +721,7 @@ $(".move-selector").change(function () {
 });
 
 $(".item").change(function () {
+	var pokeObj = $(this).closest(".poke-info");
 	var itemName = $(this).val();
 	var $metronomeControl = $(this).closest('.poke-info').find('.metronome');
 	if (itemName === "Metronome") {
@@ -639,6 +747,37 @@ $(".item").change(function () {
 	}
 
 	autosetQP($(this).closest(".poke-info"));
+
+	var chromaticField = $("#chromatic-field").val();
+	var id = pokeObj.prop("id");
+
+	// Sky - Prism Scale: Set Tailwind
+	if (chromaticField === 'Sky' && itemName === 'Prism Scale') {
+		if (id === 'p1') {
+			$("#tailwindL").prop("checked", true);
+		} else {
+			$("#tailwindR").prop("checked", true);
+		}			
+	}
+
+	if (chromaticField === 'Ring-Arena') {
+		updateGritStages(pokeObj);
+	}
+});
+
+$(".grit").change(function () {
+	var pokeObj = $(this).closest(".poke-info");
+
+	for (i = 0; i < 4; i++) {
+		var moveObj = pokeObj.find(".move" + (i + 1) + " select.move-selector");
+		var moveGroupObj = moveObj.parent();
+		var moveName = moveObj.	val();
+		var move = moves[moveName] || moves['(No Move)'];
+		var gritStages = pokeObj.prop("id") === 'p1'
+						 ? parseInt(pokeObj.find("input:radio[name='gritL']:checked").val())
+						 : parseInt(pokeObj.find("input:radio[name='gritR']:checked").val());
+		moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true || gritStages >= 3);
+	}			
 });
 
 function smogonAnalysis(pokemonName) {
@@ -913,7 +1052,7 @@ $(".teraToggle").change(function () {
 	var pokeObj = $(this).closest(".poke-info");
 	var ability = pokeObj.find(".ability").val();
 	var chromaticField = $("#chromatic-field").val();
-	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight Arena") || (pokeObj.find(".teraType").val() === "Stellar" && this.checked));
+	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (pokeObj.find(".teraType").val() === "Stellar" && this.checked));
 	var forme = $(this).parent().siblings().find(".forme");
 	var curForme = forme.val();
 	if (forme.is(":hidden")) return;
@@ -1161,6 +1300,10 @@ function createPokemon(pokeInfo) {
 			evs: evs,
 			isDynamaxed: isDynamaxed,
 			isSaltCure: pokeInfo.find(".saltcure").is(":checked"),
+			isStarstruck: pokeInfo.find(".starstruck").is(":checked"),
+			gritStages: pokeInfo.prop("id") === 'p1'
+					    ? parseInt(pokeInfo.find("input:radio[name='gritL']:checked").val())
+						: parseInt(pokeInfo.find("input:radio[name='gritR']:checked").val()),
 			alliesFainted: parseInt(pokeInfo.find(".alliesFainted").val()),
 			boostedStat: pokeInfo.find(".boostedStat").val() || undefined,
 			foesFainted: parseInt(pokeInfo.find(".foesFainted").val()),
@@ -1253,6 +1396,7 @@ function createField() {
 	var isLightScreen = [$("#lightScreenL").prop("checked"), $("#lightScreenR").prop("checked")];
 	var isProtected = [$("#protectL").prop("checked"), $("#protectR").prop("checked")];
 	var isSeeded = [$("#leechSeedL").prop("checked"), $("#leechSeedR").prop("checked")];
+	var isNightmare = [$("#nightmareL").prop("checked"), $("#nightmareR").prop("checked")];
 	var isForesight = [$("#foresightL").prop("checked"), $("#foresightR").prop("checked")];
 	var isHelpingHand = [$("#helpingHandL").prop("checked"), $("#helpingHandR").prop("checked")];
 	var isTailwind = [$("#tailwindL").prop("checked"), $("#tailwindR").prop("checked")];
@@ -1271,7 +1415,7 @@ function createField() {
 			spikes: spikes[i], isSR: isSR[i], steelsurge: steelsurge[i],
 			vinelash: vinelash[i], wildfire: wildfire[i], cannonade: cannonade[i], volcalith: volcalith[i],
 			isReflect: isReflect[i], isLightScreen: isLightScreen[i],
-			isProtected: isProtected[i], isSeeded: isSeeded[i], isForesight: isForesight[i],
+			isProtected: isProtected[i], isSeeded: isSeeded[i], isNightmare: isNightmare[i], isForesight: isForesight[i],
 			isTailwind: isTailwind[i], isHelpingHand: isHelpingHand[i], isFlowerGift: isFlowerGift[i], isFriendGuard: isFriendGuard[i],
 			isAuroraVeil: isAuroraVeil[i], isAreniteWall: isAreniteWall[i], isBattery: isBattery[i], isPowerSpot: isPowerSpot[i], isSwitching: isSwitchingOut[i] ? 'out' : undefined
 		});
@@ -1508,6 +1652,10 @@ function clearField() {
 	$("#clear").prop("checked", true);
 	$("#gscClear").prop("checked", true);
 	$("#gravity").prop("checked", false);
+	$("#starstruckL").prop("checked", false);
+	$("#starstruckR").prop("checked", false);
+	$("#gritL0").prop("checked", true);
+	$("#gritR0").prop("checked", true);
 	$("#srL").prop("checked", false);
 	$("#srR").prop("checked", false);
 	$("#spikesL0").prop("checked", true);
@@ -1532,6 +1680,8 @@ function clearField() {
 	$("#protectR").prop("checked", false);
 	$("#leechSeedL").prop("checked", false);
 	$("#leechSeedR").prop("checked", false);
+	$("#nightmareL").prop("checked", false);
+	$("#nightmareR").prop("checked", false);
 	$("#foresightL").prop("checked", false);
 	$("#foresightR").prop("checked", false);
 	$("#helpingHandL").prop("checked", false);

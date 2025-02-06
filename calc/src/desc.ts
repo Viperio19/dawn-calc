@@ -54,7 +54,10 @@ export interface RawDesc {
   rivalry?: 'buffed' | 'nerfed';
   terrain?: Terrain;
   chromaticField?: string;
+  starstruck?: boolean;
+  gritStages?: number;
   weather?: Weather;
+  isTailwind?: boolean;
   isDefenderDynamaxed?: boolean;
   reflectorOffenseTypes?: string;
   reflectorDefenseTypes?: string;
@@ -153,6 +156,19 @@ export function getRecovery(
       for (const j in recovery) {
         let drained = Math.round(range[j] * percentHealed);
         if (attacker.hasItem('Big Root') || attacker.named('Shiinotic-Crest')) drained = Math.trunc(drained * 5324 / 4096);
+        recovery[j] += Math.min(drained * move.hits, max);
+      }
+    }
+  }
+
+  // Ring Arena - Grit Stage Effects: 2 - After an attack, the Pokemon gains 1/6 of the damage in HP dealt to other Pokemon
+  if (attacker.gritStages && attacker.gritStages >= 2) {
+    const percentHealed = 1 / 6;
+    const max = Math.round(defender.maxHP() * percentHealed);
+    for (let i = 0; i < minD.length; i++) {
+      const range = [minD[i], maxD[i]];
+      for (const j in recovery) {
+        let drained = Math.round(range[j] * percentHealed);
         recovery[j] += Math.min(drained * move.hits, max);
       }
     }
@@ -324,8 +340,8 @@ export function getKOChance(
   const hazards = getHazards(gen, defender, field.defenderSide, field);
   const eot = getEndOfTurn(gen, attacker, defender, move, field);
   const toxicCounter =
-    defender.hasStatus('tox') && !(defender.hasAbility('Magic Guard', 'Poison Heal')
-      ||
+  // Jungle - Shield Dust grants Magic Guard
+    defender.hasStatus('tox') && !(defender.hasAbility('Magic Guard', 'Poison Heal') ||
      (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) ? defender.toxicCounter : 0;
 
   // multi-hit moves have too many possibilities for brute-forcing to work, so reduce it
@@ -531,31 +547,41 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
     return {damage, texts};
   }
   if (defenderSide.isSR && !defender.hasAbility('Magic Guard', 'Mountaineer') &&
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
+      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
     const rockType = gen.types.get('rock' as ID)!;
-    const effectiveness =
+    let effectiveness =
       rockType.effectiveness[defender.types[0]]! *
       (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
-    if (defender.named('Torterra-Crest')) {
-      damage += Math.floor(((1 / effectiveness) * defender.maxHP()) / 8);
-    } else {
-      damage += Math.floor((effectiveness * defender.maxHP()) / 8);
+
+    // XOR between Torterra-Crest and Inverse Field so they cancel each other out
+    if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
+        (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Inverse - Inverse type effectiveness
+      effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to rock
     }
+  
+    damage += Math.floor((effectiveness * defender.maxHP()) / 8);
     texts.push('Stealth Rock');
   }
   if (defenderSide.steelsurge && !defender.hasAbility('Magic Guard', 'Mountaineer') &&
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
+      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
     const steelType = gen.types.get('steel' as ID)!;
-    const effectiveness =
+    let effectiveness =
       steelType.effectiveness[defender.types[0]]! *
       (defender.types[1] ? steelType.effectiveness[defender.types[1]]! : 1);
+
+    // XOR between Torterra-Crest and Inverse Field so they cancel each other out
+    if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
+        (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Inverse - Inverse type effectiveness
+      effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to steel
+    }
+    
     damage += Math.floor((effectiveness * defender.maxHP()) / 8);
     texts.push('Steelsurge');
   }
 
   if (!defender.hasType('Flying') &&
       !defender.hasAbility('Magic Guard', 'Levitate') && 
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && 
+      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
       !defender.hasItem('Air Balloon') &&
       !defender.named('Probopass-Crest')
   ) {
@@ -614,7 +640,7 @@ function getEndOfTurn(
       !defender.hasType('Rock', 'Ground', 'Steel') &&
       !defender.hasAbility('Magic Guard', 'Overcoat', 'Sand Force', 'Sand Rush', 'Sand Veil') &&
       !defender.hasItem('Safety Goggles') && 
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
+      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') // Jungle - Shield Dust grants Magic Guard
     ) {
       damage -= Math.floor(defender.maxHP() / (gen.num === 2 ? 8 : 16));
       texts.push('sandstorm damage');
@@ -626,7 +652,7 @@ function getEndOfTurn(
     } else if (
       !defender.hasType('Ice') &&
       !defender.hasAbility('Magic Guard', 'Overcoat', 'Snow Cloak') &&
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && 
+      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
       !defender.hasItem('Safety Goggles') &&
       !defender.named('Empoleon-Crest') && 
       field.hasWeather('Hail')
@@ -634,6 +660,12 @@ function getEndOfTurn(
       damage -= Math.floor(defender.maxHP() / 16);
       texts.push('hail damage');
     }
+  }
+  
+  // Volcanic Top - Activates Solar Power
+  if (!(field.hasWeather('Sun', 'Harsh Sunshine')) && field.chromaticField === 'Volcanic-Top' && defender.hasAbility('Solar Power')) {
+    damage -= Math.floor(defender.maxHP() / 8);
+    texts.push('Solar Power damage on Volcanic Top');
   }
 
   const loseItem = move.named('Knock Off') && !defender.hasAbility('Sticky Hold');
@@ -655,7 +687,7 @@ function getEndOfTurn(
         texts.push('Black Sludge recovery');
       }
     } else if (!defender.hasAbility('Magic Guard', 'Klutz') && 
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
+      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
       damage -= Math.floor(defender.maxHP() / 8);
       texts.push('Black Sludge damage');
     }
@@ -666,7 +698,7 @@ function getEndOfTurn(
 
   if (field.defenderSide.isSeeded) {
     if (!defender.hasAbility('Magic Guard') && 
-        !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
+        !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
       // 1/16 in gen 1, 1/8 in gen 2 onwards
       damage -= Math.floor(defender.maxHP() / (gen.num >= 2 ? 8 : 16));
       texts.push('Leech Seed damage');
@@ -674,7 +706,7 @@ function getEndOfTurn(
   }
 
   if (field.attackerSide.isSeeded && !attacker.hasAbility('Magic Guard') && 
-      !(attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
+      !(attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
     let recovery = Math.floor(attacker.maxHP() / (gen.num >= 2 ? 8 : 16));
     if (defender.hasItem('Big Root')) recovery = Math.trunc(recovery * 5324 / 4096);
     if (attacker.hasAbility('Liquid Ooze')) {
@@ -700,7 +732,7 @@ function getEndOfTurn(
         texts.push('Poison Heal');
       }
     } else if (!defender.hasAbility('Magic Guard') && 
-               !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
+               !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
       damage -= Math.floor(defender.maxHP() / (gen.num === 1 ? 16 : 8));
       texts.push('poison damage');
     }
@@ -711,7 +743,7 @@ function getEndOfTurn(
         texts.push('Poison Heal');
       }
     } else if (!defender.hasAbility('Magic Guard') && 
-               !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
+               !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
       texts.push('toxic damage');
     }
   } else if (defender.hasStatus('brn')) {
@@ -719,22 +751,22 @@ function getEndOfTurn(
       damage -= Math.floor(defender.maxHP() / (gen.num > 6 ? 32 : 16));
       texts.push('reduced burn damage');
     } else if (!defender.hasAbility('Magic Guard') && 
-               !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
+               !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
       damage -= Math.floor(defender.maxHP() / (gen.num === 1 || gen.num > 6 ? 16 : 8));
       texts.push('burn damage');
     }
   } else if (
     (defender.hasStatus('slp') || defender.hasAbility('Comatose')) &&
-    attacker.hasAbility('isBadDreams') &&
+    (attacker.hasAbility('Bad Dreams') || field.chromaticField === 'Haunted-Graveyard') && // Haunted Graveyard - Bad Dreams is always active
     !defender.hasAbility('Magic Guard') && 
-    !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
+    !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') // Jungle - Shield Dust grants Magic Guard
   ) {
     damage -= Math.floor(defender.maxHP() / 8);
     texts.push('Bad Dreams');
   }
 
-  if (!defender.hasAbility('Magic Guard') && !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && 
-      (TRAPPING.includes(move.name) || (TRAPPING_JUNGLE.includes(move.name) && field.chromaticField === 'Jungle'))) {
+  if (!defender.hasAbility('Magic Guard') && !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
+      (TRAPPING.includes(move.name) || (TRAPPING_JUNGLE.includes(move.name) && field.chromaticField === 'Jungle'))) { // Jungle - Certain moves apply Infestation
     if (attacker.hasItem('Binding Band')) {
       damage -= gen.num > 5 ? Math.floor(defender.maxHP() / 6) : Math.floor(defender.maxHP() / 8);
       texts.push('trapping damage');
@@ -744,45 +776,52 @@ function getEndOfTurn(
     }
   }
   if (defender.isSaltCure && !defender.hasAbility('Magic Guard') && 
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) {
+      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
     const isWaterOrSteel = defender.hasType('Water', 'Steel') ||
       (defender.teraType && ['Water', 'Steel'].includes(defender.teraType));
     damage -= Math.floor(defender.maxHP() / (isWaterOrSteel ? 4 : 8));
     texts.push('Salt Cure');
   }
   if (!defender.hasType('Fire') && !defender.hasAbility('Magic Guard') &&
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') &&
+      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
       (move.named('Fire Pledge (Grass Pledge Boosted)', 'Grass Pledge (Fire Pledge Boosted)'))) {
     damage -= Math.floor(defender.maxHP() / 8);
     texts.push('Sea of Fire damage');
   }
 
   if (!defender.hasAbility('Magic Guard') && !defender.hasType('Grass') && 
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') &&
+      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
       (field.defenderSide.vinelash || move.named('G-Max Vine Lash'))) {
     damage -= Math.floor(defender.maxHP() / 6);
     texts.push('Vine Lash damage');
   }
 
   if (!defender.hasAbility('Magic Guard') && !defender.hasType('Fire') &&
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') &&
+      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
       (field.defenderSide.wildfire || move.named('G-Max Wildfire'))) {
     damage -= Math.floor(defender.maxHP() / 6);
     texts.push('Wildfire damage');
   }
 
   if (!defender.hasAbility('Magic Guard') && !defender.hasType('Water') &&
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') &&
+      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
       (field.defenderSide.cannonade || move.named('G-Max Cannonade'))) {
     damage -= Math.floor(defender.maxHP() / 6);
     texts.push('Cannonade damage');
   }
 
   if (!defender.hasAbility('Magic Guard') && !defender.hasType('Rock') &&
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') &&
+      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
       (field.defenderSide.volcalith || move.named('G-Max Volcalith'))) {
     damage -= Math.floor(defender.maxHP() / 6);
     texts.push('Volcalith damage');
+  }
+
+  if (field.defenderSide.isNightmare && (defender.hasStatus('slp') || defender.hasAbility('Comatose')) && !defender.hasAbility('Magic Guard') && 
+      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
+    // Haunted Graveyard - Nightmare deals 1/3 of the target’s Max HP (From 1/4th)
+    damage -= field.chromaticField === 'Haunted-Graveyard' ? Math.floor(defender.maxHP() / 3) : Math.floor(defender.maxHP() / 4);
+    texts.push('Nightmare');
   }
 
   // Crests - End of turn text
@@ -824,9 +863,31 @@ function getEndOfTurn(
 
   // Fields - End of turn text
 
-  if (field.chromaticField === 'Thundering Plateau' && defender.hasAbility('Volt Absorb')) {
+  // Thundering Plateau - Volt Absorb restores 1/16 of the user's Max HP per turn
+  if (field.chromaticField === 'Thundering-Plateau' && defender.hasAbility('Volt Absorb')) {
     damage += Math.floor(defender.maxHP() / 16);
-    texts.push('Volt Absorb recovery on Thundering Plateau');
+    texts.push('Volt Absorb recovery');
+  }
+
+  const VOLCANIC_ERUPTION = [
+    'Bulldoze', 'Earthquake', 'Eruption', 'Lava Plume', 'Magma Storm', 'Magnitude', 'Stomping Tantrum',
+  ];
+
+  // Volcanic Top - Volcanic Eruption deals 1/8th of all Pokemon's max health determined by the effectiveness of Fire against the target
+  if (field.chromaticField === 'Volcanic-Top' && (VOLCANIC_ERUPTION.includes(move.name) || (move.named('Nature Power') && !field.terrain)) &&
+      !defender.hasAbility('Flash Fire', 'Well-Baked Body')) {
+    const fireType = gen.types.get('fire' as ID)!;
+    let effectiveness =
+    fireType.effectiveness[defender.types[0]]! *
+      (defender.types[1] ? fireType.effectiveness[defender.types[1]]! : 1);
+
+    // Torterra Crest - Inverse type effectiveness
+    if (defender.named('Torterra-Crest')) { 
+      effectiveness = 1 / effectiveness;
+    }
+  
+    damage -= Math.floor((effectiveness * defender.maxHP()) / 8);
+    texts.push('Volcanic Eruption damage');
   }
 
   return {damage, texts};
@@ -1047,8 +1108,14 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   output = appendIfSet(output, description.attackerItem);
   output = appendIfSet(output, description.attackerAbility);
   output = appendIfSet(output, description.rivalry);
+  if (description.starstruck) {
+    output += 'Starstruck ';
+  }
   if (description.isBurned) {
     output += 'burned ';
+  }
+  if (description.gritStages) {
+    output += Math.min(5, description.gritStages) + ' Grit Stages ';
   }
   if (description.alliesFainted) {
     output += Math.min(5, description.alliesFainted) +
@@ -1164,9 +1231,40 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     output += ' in ' + description.weather;
   } else if (description.terrain) {
     output += ' in ' + description.terrain + ' Terrain';
+  } else if (description.isTailwind) {
+    output += ' in Tailwind';
   }
+  // Fields - Put field names at the end of damage calc text
   if (description.chromaticField) {
-    output += ' on ' + description.chromaticField + ' (Field)';
+    switch (description.chromaticField) {
+    case "Jungle":
+    case "Eclipse":
+    case "Sky":
+    case "Inverse":
+      output += ' on ' + description.chromaticField + ' Field';
+      break;
+    case "Dragons-Den":
+      output += " on Dragon's Den";
+      break;
+    case "Thundering-Plateau":
+      output += ' on Thundering Plateau';
+      break;
+    case "Starlight-Arena":
+      output += ' on Starlight Arena';
+      break;
+    case "Ring-Arena":
+      output += ' on Ring Arena';
+      break;
+    case "Volcanic-Top":
+      output += ' on Volcanic Top';
+      break;
+    case "Haunted-Graveyard":
+      output += ' on Haunted Graveyard';
+      break;
+    default:
+      output += 'on ' + description.chromaticField;
+      break;
+    }
   }
   if (description.isReflect) {
     output += ' through Reflect';
