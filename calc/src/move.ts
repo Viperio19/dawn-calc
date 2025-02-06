@@ -1,5 +1,5 @@
-import * as I from './data/interface';
-import {State} from './state';
+import type * as I from './data/interface';
+import type {State} from './state';
 import {toID, extend} from './util';
 
 const SPECIAL = ['Fire', 'Water', 'Grass', 'Electric', 'Ice', 'Psychic', 'Dark', 'Dragon'];
@@ -20,6 +20,7 @@ export class Move implements State.Move {
   timesUsed?: number;
   timesUsedWithMetronome?: number;
   stockpiles?: number;
+  moveSlot?: number;
   bp: number;
   type: I.TypeName;
   category: I.MoveCategory;
@@ -43,6 +44,7 @@ export class Move implements State.Move {
   breaksProtect: boolean;
   isZ: boolean;
   isMax: boolean;
+  multiaccuracy: boolean;
 
   constructor(
     gen: I.Generation,
@@ -62,6 +64,7 @@ export class Move implements State.Move {
     if (options.useMax && data.maxMove) {
       const maxMoveName: string = getMaxMoveName(
         data.type,
+        data.name,
         options.species,
         !!(data.category === 'Status'),
         options.ability
@@ -94,14 +97,18 @@ export class Move implements State.Move {
       });
     } else {
       if (data.multihit) {
-        if (typeof data.multihit === 'number') {
-          this.hits = data.multihit;
-        } else if (options.hits) {
-          this.hits = options.hits;
+        if (data.multiaccuracy && typeof data.multihit === 'number') {
+          this.hits = options.hits || data.multihit;
         } else {
-          this.hits = (options.ability === 'Skill Link')
-            ? data.multihit[1]
-            : data.multihit[0] + 1;
+          if (typeof data.multihit === 'number') {
+            this.hits = data.multihit;
+          } else if (options.hits) {
+            this.hits = options.hits;
+          } else {
+            this.hits = (options.ability === 'Skill Link')
+              ? data.multihit[1]
+              : data.multihit[0] + 1;
+          }
         }
       } else if (options.species == 'Cinccino-Crest') {
         this.hits = (options.ability === 'Skill Link')
@@ -112,6 +119,7 @@ export class Move implements State.Move {
       }
       this.timesUsedWithMetronome = options.timesUsedWithMetronome;
       this.stockpiles = options.stockpiles;
+      this.moveSlot = options.moveSlot;
     }
     this.gen = gen;
     this.name = data.name;
@@ -135,7 +143,7 @@ export class Move implements State.Move {
     if (data.self?.boosts && data.self.boosts[stat] && data.self.boosts[stat]! < 0) {
       this.dropsStats = Math.abs(data.self.boosts[stat]!);
     }
-    this.timesUsed = (this.dropsStats && options.timesUsed) || 1;
+    this.timesUsed = options.timesUsed || 1;
     this.secondaries = data.secondaries;
     // For the purposes of the damage formula only 'allAdjacent' and 'allAdjacentFoes' matter, so we
     // simply default to 'any' for the others even though they may not actually be 'any'-target
@@ -161,6 +169,7 @@ export class Move implements State.Move {
     this.breaksProtect = !!data.breaksProtect;
     this.isZ = !!data.isZ;
     this.isMax = !!data.isMax;
+    this.multiaccuracy = !!data.multiaccuracy;
 
     if (!this.bp) {
       // Assume max happiness for these moves because the calc doesn't support happiness
@@ -191,6 +200,7 @@ export class Move implements State.Move {
       timesUsed: this.timesUsed,
       timesUsedWithMetronome: this.timesUsedWithMetronome,
       stockpiles: this.stockpiles,
+      moveSlot: this.moveSlot,
       overrides: this.overrides,
     });
   }
@@ -249,6 +259,7 @@ const ZMOVES_TYPING: {
 
 export function getMaxMoveName(
   moveType: I.TypeName,
+  moveName?: string,
   pokemonSpecies?: string,
   isStatus?: boolean,
   pokemonAbility?: string
@@ -264,10 +275,12 @@ export function getMaxMoveName(
     if (pokemonSpecies === 'Eevee-Gmax') return 'G-Max Cuddle';
     if (pokemonSpecies === 'Meowth-Gmax') return 'G-Max Gold Rush';
     if (pokemonSpecies === 'Snorlax-Gmax') return 'G-Max Replenish';
-    if (pokemonAbility === 'Pixilate') return 'Max Starfall';
-    if (pokemonAbility === 'Aerilate') return 'Max Airstream';
-    if (pokemonAbility === 'Refrigerate') return 'Max Hailstorm';
-    if (pokemonAbility === 'Galvanize') return 'Max Lightning';
+    if (!(moveName === 'Weather Ball' || moveName === 'Terrain Pulse')) {
+      if (pokemonAbility === 'Pixilate') return 'Max Starfall';
+      if (pokemonAbility === 'Aerilate') return 'Max Airstream';
+      if (pokemonAbility === 'Refrigerate') return 'Max Hailstorm';
+      if (pokemonAbility === 'Galvanize') return 'Max Lightning';
+    }
   }
   if (moveType === 'Fairy') {
     if (pokemonSpecies === 'Alcremie-Gmax') return 'G-Max Finale';

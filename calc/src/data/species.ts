@@ -1,5 +1,5 @@
-﻿import * as I from './interface';
-import {toID, extend, DeepPartial, assignWithout} from '../util';
+import type * as I from './interface';
+import {type DeepPartial, toID, extend, assignWithout} from '../util';
 
 export interface SpeciesData {
   readonly types: [I.TypeName] | [I.TypeName, I.TypeName];
@@ -8992,6 +8992,7 @@ const SV_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   Dunsparce: {nfe: true},
   Duraludon: {nfe: true},
   Girafarig: {nfe: true},
+  Kitsunoh: {bs: {at: 117, sp: 128}},
   Primeape: {nfe: true},
   Tauros: {otherFormes: ['Tauros-Paldea-Aqua', 'Tauros-Paldea-Blaze', 'Tauros-Paldea-Combat']},
   Wooper: {otherFormes: ['Wooper-Paldea']},
@@ -9122,6 +9123,12 @@ const SV_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     gender: 'N',
     abilities: {0: 'Sword of Ruin'},
   },
+  Chuggalong: {
+    types: ['Dragon', 'Poison'],
+    bs: {hp: 45, at: 43, df: 117, sa: 120, sd: 110, sp: 108},
+    weightkg: 201.6,
+    abilities: {0: 'Armor Tail'},
+  },
   Clodsire: {
     types: ['Poison', 'Ground'],
     bs: {hp: 130, at: 75, df: 60, sa: 45, sd: 100, sp: 20},
@@ -9130,7 +9137,7 @@ const SV_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   },
   Cresceidon: {
     types: ['Water', 'Fairy'],
-    bs: {hp: 80, at: 32, df: 111, sa: 88, sd: 99, sp: 125},
+    bs: {hp: 80, at: 32, df: 111, sa: 88, sd: 99, sp: 124},
     weightkg: 999.9,
     abilities: {0: 'Multiscale'},
   },
@@ -10019,7 +10026,7 @@ const SV_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
 
 const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   Alcremie: {otherFormes: ['Alcremie-Gmax', 'Alcremie-Mega-Gmax']},
-  Ampharos: {otherFormes: ['Ampharos-Aevian', 'Ampharos-Mega']},
+  Ampharos: {otherFormes: ['Ampharos-Aevian', 'Ampharos-Aevian-Crest', 'Ampharos-Mega']},
   Appletun: {otherFormes: ['Appletun-Gmax', 'Appletun-Mega-Gmax']},
   Ariados: {otherFormes: ['Ariados-Crest']},
   Bastiodon: {otherFormes: ['Bastiodon-Crest']},
@@ -10085,6 +10092,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   Leavanny: {otherFormes: ['Leavanny-Aevian']},
   Ledian: {otherFormes: ['Ledian-Crest']},
   Litwick: {otherFormes: ['Litwick-Aevian']},
+  Lunatone: {otherFormes: ['Lunatone-Fusion']},
   Luvdisc: {otherFormes: ['Luvdisc-Crest']},
   Luxray: {otherFormes: ['Luxray-Crest']},
   Machamp: {otherFormes: ['Machamp-Gmax', 'Machamp-Mega-Gmax']},
@@ -10166,6 +10174,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   Skuntank: {otherFormes: ['Skuntank-Crest']},
   Snorlax: {otherFormes: ['Snorlax-Gmax', 'Snorlax-Mega-Gmax']},
   Snorunt: {otherFormes: ['Snorunt-Aevian']},
+  Solrock: {otherFormes: ['Solrock-Fusion']},
   Spiritomb: {otherFormes: ['Spiritomb-Crest']},
   Stantler: {otherFormes: ['Stantler-Crest']},
   Swadloon: {otherFormes: ['Swadloon-Aevian']},
@@ -10472,6 +10481,13 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     bs: {hp: 65, at: 65, df: 60, sa: 130, sd: 95, sp: 110},
     weightkg: 29,
     abilities: {0: 'Inner Focus'},
+  },
+  'Ampharos-Aevian-Crest': {
+    types: ['Ice', 'Electric'],
+    bs: {hp: 90, at: 75, df: 90, sa: 115, sd: 85, sp: 55},
+    weightkg: 61.5,
+    abilities: {0: 'Filter'},
+    baseSpecies: 'Ampharos',
   },
   'Ariados-Crest': {
     types: ['Bug', 'Poison'],
@@ -11126,14 +11142,14 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     baseSpecies: 'Breloom',
   },
   'Bronzong-Aevian': {
-    types: ['Steel', '???'],
+    types: ['Steel'],
     bs: {hp: 67, at: 79, df: 116, sa: 89, sd: 116, sp: 33},
     weightkg: 187,
     abilities: {0: 'Reflector'},
     baseSpecies: 'Bronzong',
   },
   'Bronzor-Aevian': {
-    types: ['Steel', '???'],
+    types: ['Steel'],
     bs: {hp: 57, at: 24, df: 86, sa: 24, sd: 86, sp: 23},
     weightkg: 57,
     abilities: {0: 'Reflector'},
@@ -11245,7 +11261,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     nfe: true,
   },
   'Lapras-Aevian': {
-    types: ['Poison', 'Ground'],
+    types: ['Rock', 'Psychic'],
     bs: {hp: 135, at: 95, df: 80, sa: 85, sd: 85, sp: 60},
     weightkg: 220,
     abilities: {0: 'Solid Rock'},
@@ -11493,6 +11509,20 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     abilities: {0: 'Wimp Out'},
     baseSpecies: 'Wimpod',
     nfe: true,
+  },
+  'Lunatone-Fusion': {
+    types: ['Rock', 'Psychic'],
+    bs: {hp: 90, at: 44, df: 90, sa: 110, sd: 90, sp: 75},
+    weightkg: 168,
+    abilities: {0: 'Lunar Idol'},
+    baseSpecies: 'Lunatone',
+  },
+  'Solrock-Fusion': {
+    types: ['Rock', 'Psychic'],
+    bs: {hp: 90, at: 110, df: 90, sa: 75, sd: 90, sp: 44},
+    weightkg: 154,
+    abilities: {0: 'Solar Idol'},
+    baseSpecies: 'Solrock',
   },
 };
 

@@ -1,9 +1,11 @@
 logs/
 node_modules/
 eslint-cache/
+dist/
 .tsbuildinfo
 .eslintcache
 .DS_Store
 Thumbs.db
 pnpm-debug.log
 npm-debug.log
+.vs/

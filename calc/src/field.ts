@@ -1,10 +1,11 @@
-import {State} from './state';
-import {GameType, Weather, Terrain} from './data/interface';
+import type {State} from './state';
+import type {GameType, Weather, Terrain} from './data/interface';
 
 export class Field implements State.Field {
   gameType: GameType;
   weather?: Weather;
   terrain?: Terrain;
+  chromaticField?: string;
   isMagicRoom: boolean;
   isWonderRoom: boolean;
   isGravity: boolean;
@@ -21,6 +22,7 @@ export class Field implements State.Field {
   constructor(field: Partial<State.Field> = {}) {
     this.gameType = field.gameType || 'Singles';
     this.terrain = field.terrain;
+    this.chromaticField = field.chromaticField;
     this.weather = field.weather;
     this.isMagicRoom = !!field.isMagicRoom;
     this.isWonderRoom = !!field.isWonderRoom;
@@ -55,6 +57,7 @@ export class Field implements State.Field {
       gameType: this.gameType,
       weather: this.weather,
       terrain: this.terrain,
+      chromaticField: this.chromaticField,
       isMagicRoom: this.isMagicRoom,
       isWonderRoom: this.isWonderRoom,
       isGravity: this.isGravity,
@@ -83,6 +86,7 @@ export class Side implements State.Side {
   isLightScreen: boolean;
   isProtected: boolean;
   isSeeded: boolean;
+  isNightmare: boolean;
   isForesight: boolean;
   isTailwind: boolean;
   isHelpingHand: boolean;
@@ -92,6 +96,7 @@ export class Side implements State.Side {
   isAreniteWall: boolean;
   isBattery: boolean;
   isPowerSpot: boolean;
+  isSteelySpirit: boolean;
   isSwitching?: 'out' | 'in';
 
   constructor(side: State.Side = {}) {
@@ -106,6 +111,7 @@ export class Side implements State.Side {
     this.isLightScreen = !!side.isLightScreen;
     this.isProtected = !!side.isProtected;
     this.isSeeded = !!side.isSeeded;
+    this.isNightmare = !!side.isNightmare;
     this.isForesight = !!side.isForesight;
     this.isTailwind = !!side.isTailwind;
     this.isHelpingHand = !!side.isHelpingHand;
@@ -115,6 +121,7 @@ export class Side implements State.Side {
     this.isAreniteWall = !!side.isAreniteWall;
     this.isBattery = !!side.isBattery;
     this.isPowerSpot = !!side.isPowerSpot;
+    this.isSteelySpirit = !!side.isSteelySpirit;
     this.isSwitching = side.isSwitching;
   }
 

@@ -1,9 +1,9 @@
-import {Generation} from '../data/interface';
+import type {Generation} from '../data/interface';
 import {getItemBoostType} from '../items';
-import {RawDesc} from '../desc';
-import {Field} from '../field';
-import {Move} from '../move';
-import {Pokemon} from '../pokemon';
+import type {RawDesc} from '../desc';
+import type {Field} from '../field';
+import type {Move} from '../move';
+import type {Pokemon} from '../pokemon';
 import {Result} from '../result';
 import {computeFinalStats, getMoveEffectiveness, handleFixedDamageMoves} from './util';
 
@@ -30,6 +30,13 @@ export function calculateRBYGSC(
 
   if (field.defenderSide.isProtected) {
     desc.isProtected = true;
+    return result;
+  }
+
+  if (move.name === 'Pain Split') {
+    const average = Math.floor((attacker.curHP() + defender.curHP()) / 2);
+    const damage = Math.max(0, defender.curHP() - average);
+    result.damage = damage;
     return result;
   }
 
@@ -74,11 +81,10 @@ export function calculateRBYGSC(
     }
   }
 
-
   const type1Effectiveness =
-    getMoveEffectiveness(gen, move, firstDefenderType, field.defenderSide.isForesight);
+    getMoveEffectiveness(gen, move, firstDefenderType, field, field.defenderSide.isForesight);
   const type2Effectiveness = secondDefenderType
-    ? getMoveEffectiveness(gen, move, secondDefenderType, field.defenderSide.isForesight)
+    ? getMoveEffectiveness(gen, move, secondDefenderType, field, field.defenderSide.isForesight)
     : 1;
   const typeEffectiveness = type1Effectiveness * type2Effectiveness;
 
@@ -96,6 +102,11 @@ export function calculateRBYGSC(
 
   if (move.hits > 1) {
     desc.hits = move.hits;
+  }
+  // Triple Kick's damage increases by 10 after each consecutive hit (10, 20, 30), this is a hack
+  if (move.name === 'Triple Kick') {
+    move.bp = move.hits === 2 ? 15 : move.hits === 3 ? 20 : 10;
+    desc.moveBP = move.bp;
   }
 
   // Flail and Reversal are variable BP and never crit
