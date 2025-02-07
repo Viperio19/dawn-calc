@@ -734,7 +734,7 @@ function getEndOfTurn(
 
   if (field.hasTerrain('Grassy')) {
     // Flower Garden - Grassy Terrain only heals Grass Type Pokemon
-    if (isGrounded(defender, field) && !healBlock && !(field.chromaticField === 'Flower-Garden' && !defender.hasType('Grass'))) {
+    if (isGrounded(defender, field, field.defenderSide.isIngrain) && !healBlock && !(field.chromaticField === 'Flower-Garden' && !defender.hasType('Grass'))) {
       damage += Math.floor(defender.maxHP() / 16);
       texts.push('Grassy Terrain recovery');
     }

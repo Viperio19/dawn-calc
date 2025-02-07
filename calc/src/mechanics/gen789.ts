@@ -281,7 +281,7 @@ export function calculateSMSSSV(
     desc.attackerItem = attacker.item;
   } else if (
     move.named('Nature Power') ||
-    (move.originalName === 'Terrain Pulse' && isGrounded(attacker, field))
+    (move.originalName === 'Terrain Pulse' && isGrounded(attacker, field, field.attackerSide.isIngrain))
   ) {
     type =
       field.hasTerrain('Electric') ? 'Electric'
@@ -319,7 +319,7 @@ export function calculateSMSSSV(
     // Dark-types or grounded foes if Psychic Terrain is active
     if (!(move.named('Nature Power') && attacker.hasAbility('Prankster')) &&
       ((defender.types.includes('Dark') ||
-      (field.hasTerrain('Psychic') && isGrounded(defender, field))))) {
+      (field.hasTerrain('Psychic') && isGrounded(defender, field, field.defenderSide.isIngrain))))) {
       desc.moveType = type;
     }
   } else if (move.originalName === 'Revelation Dance') {
@@ -789,7 +789,7 @@ export function calculateSMSSSV(
     return result;
   }
 
-  if (move.priority > 0 && field.hasTerrain('Psychic') && isGrounded(defender, field)) {
+  if (move.priority > 0 && field.hasTerrain('Psychic') && isGrounded(defender, field, field.defenderSide.isIngrain)) {
     desc.terrain = field.terrain;
     return result;
   }
@@ -1337,11 +1337,11 @@ export function calculateBasePowerSMSSSV(
     desc.moveBP = basePower;
     break;
   case 'Terrain Pulse':
-    basePower = move.bp * (isGrounded(attacker, field) && field.terrain ? 2 : 1);
+    basePower = move.bp * (isGrounded(attacker, field, field.attackerSide.isIngrain) && field.terrain ? 2 : 1);
     desc.moveBP = basePower;
     break;
   case 'Rising Voltage':
-    basePower = move.bp * ((isGrounded(defender, field) && field.hasTerrain('Electric')) ? 2 : 1);
+    basePower = move.bp * ((isGrounded(defender, field, field.defenderSide.isIngrain) && field.hasTerrain('Electric')) ? 2 : 1);
     desc.moveBP = basePower;
     break;
   case 'Psyblade':
@@ -1405,7 +1405,7 @@ export function calculateBasePowerSMSSSV(
     case 'Psychic':
       // Nature Power does not affect grounded Pokemon if it is affected by
       // Prankster and there is Psychic Terrain active
-      if (attacker.hasAbility('Prankster') && isGrounded(defender, field)) {
+      if (attacker.hasAbility('Prankster') && isGrounded(defender, field, field.defenderSide.isIngrain)) {
         basePower = 0;
         desc.attackerAbility = 'Prankster';
       } else {
@@ -1608,13 +1608,13 @@ export function calculateBPModsSMSSSV(
     bpMods.push(8192);
     desc.moveBP = basePower * 2;
   } else if (
-    move.named('Expanding Force') && isGrounded(attacker, field) && field.hasTerrain('Psychic')
+    move.named('Expanding Force') && isGrounded(attacker, field, field.attackerSide.isIngrain) && field.hasTerrain('Psychic')
   ) {
     move.target = 'allAdjacentFoes';
     bpMods.push(6144);
     desc.moveBP = basePower * 1.5;
   } else if ((move.named('Knock Off') && !resistedKnockOffDamage) ||
-    (move.named('Misty Explosion') && isGrounded(attacker, field) && field.hasTerrain('Misty')) ||
+    (move.named('Misty Explosion') && isGrounded(attacker, field, field.attackerSide.isIngrain) && field.hasTerrain('Misty')) ||
     (move.named('Grav Apple') && field.isGravity)
   ) {
     bpMods.push(6144);
@@ -1664,7 +1664,7 @@ export function calculateBPModsSMSSSV(
   // Field effects
 
   const terrainMultiplier = gen.num > 7 ? 5325 : 6144;
-  if (isGrounded(attacker, field)) {
+  if (isGrounded(attacker, field, field.attackerSide.isIngrain)) {
     if ((field.hasTerrain('Electric') && move.hasType('Electric')) ||
         (field.hasTerrain('Grassy') && move.hasType('Grass')) ||
         (field.hasTerrain('Psychic') && move.hasType('Psychic'))
@@ -1673,7 +1673,7 @@ export function calculateBPModsSMSSSV(
       desc.terrain = field.terrain;
     }
   }
-  if (isGrounded(defender, field)) {
+  if (isGrounded(defender, field, field.defenderSide.isIngrain)) {
     if ((field.hasTerrain('Misty') && move.hasType('Dragon')) ||
         (field.hasTerrain('Grassy') && move.named('Bulldoze', 'Earthquake'))
     ) {
