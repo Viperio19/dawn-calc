@@ -302,6 +302,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Sky' ? 'Flying'
         : field.chromaticField === 'Haunted-Graveyard' ? 'Ghost'
         : field.chromaticField === 'Flower-Garden' ? 'Grass'
+        : field.chromaticField === 'Desert' ? 'Ground'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
       if (!(type === 'Normal')) {
@@ -621,6 +622,12 @@ export function calculateSMSSSV(
     typeEffectiveness = 1;
   }
 
+  // Desert - Bulldoze grounds adjacent foes; first hit neutral on Airborne foes
+  if (typeEffectiveness === 0 && field.chromaticField === 'Desert' && move.named('Bulldoze')) {
+    typeEffectiveness = 1;
+    desc.chromaticField = field.chromaticField;
+  }
+
   // Dragon's Den - Dragon Pulse can now hit Fairy type Pokemon (for Resisted Damage)
   if (typeEffectiveness === 0 && field.chromaticField === 'Dragons-Den' && move.named('Dragon Pulse')) {
     typeEffectiveness = 0.5;
@@ -745,6 +752,18 @@ export function calculateSMSSSV(
     }
   }
 
+  // Desert
+  if (field.chromaticField === 'Desert') {
+    if (attacker.item === 'Prism Scale' && move.category === 'Physical') {
+      desc.attackerItem = attacker.item;
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if (move.named('Sandsear Storm') && !defender.hasAbility('Magic Guard')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
   if (move.type === 'Stellar') {
     desc.defenderTera = defender.teraType; // always show in this case
     typeEffectiveness = !defender.teraType ? 1 : 2;
@@ -769,7 +788,7 @@ export function calculateSMSSSV(
       (move.hasType('Electric') &&
         defender.hasAbility('Lightning Rod', 'Motor Drive', 'Volt Absorb')) ||
       (move.hasType('Ground') &&
-        !field.isGravity && !move.named('Thousand Arrows') &&
+        !field.isGravity && !move.named('Thousand Arrows') && !(move.named('Bulldoze') && field.chromaticField === 'Desert') && // Desert - Bulldoze grounds adjacent foes; first hit neutral on Airborne foes
         !defender.hasItem('Iron Ball') &&
         (defender.hasAbility('Levitate') || defender.hasAbility('Lunar Idol') ||
         defender.hasAbility('Solar Idol') || defender.named('Probopass-Crest'))) ||
@@ -783,7 +802,7 @@ export function calculateSMSSSV(
     return result;
   }
 
-  if (move.hasType('Ground') && !move.named('Thousand Arrows') &&
+  if (move.hasType('Ground') && !move.named('Thousand Arrows') && !(move.named('Bulldoze') && field.chromaticField === 'Desert') && // Desert - Bulldoze grounds adjacent foes; first hit neutral on Airborne foes
       !field.isGravity && defender.hasItem('Air Balloon')) {
     desc.defenderItem = defender.item;
     return result;
@@ -1234,11 +1253,6 @@ export function calculateBasePowerSMSSSV(
 ) {
   const turnOrder = attacker.stats.spe > defender.stats.spe ? 'first' : 'last';
 
-  // Fields - Nature Power categories
-  const NATURE_POWER_PHYSICAL = [
-    'Ring-Arena', 'Haunted-Graveyard', 'Flower-Garden',
-  ];
-
   let basePower: number;
 
   switch (move.name) {
@@ -1379,7 +1393,7 @@ export function calculateBasePowerSMSSSV(
     }
     break;
   case 'Nature Power':
-    move.category = (field.chromaticField && NATURE_POWER_PHYSICAL.includes(field.chromaticField)) ? 'Physical': 'Special';
+    move.category = 'Special';
     move.secondaries = true;
 
     // Nature Power cannot affect Dark-types if it is affected by Prankster
@@ -1417,7 +1431,7 @@ export function calculateBasePowerSMSSSV(
       basePower = 80;
       desc.moveName = 'Tri Attack';
     }
-    // Fields - Nature Power base power and move names
+    // Fields - Nature Power move base power, name and category
     if (desc.moveName === 'Tri Attack')
       switch (field.chromaticField) {
       case 'Jungle':
@@ -1442,6 +1456,7 @@ export function calculateBasePowerSMSSSV(
         break;
       case 'Ring-Arena':
         basePower = 120;
+        move.category = 'Physical';
         desc.moveName = 'Close Combat';
         break;
       case 'Volcanic-Top':
@@ -1454,11 +1469,17 @@ export function calculateBasePowerSMSSSV(
         break;
       case 'Haunted-Graveyard':
         basePower = 90;
+        move.category = 'Physical';
         desc.moveName = 'Phantom Force';
         break;
       case 'Flower-Garden':
         basePower = 90;
         desc.moveName = 'Petal Blizzard';
+        break;
+      case 'Desert':
+        basePower = 90;
+        move.category = 'Physical';
+        desc.moveName = 'Thousand Waves';
         break;
       case 'Inverse':
         basePower = 0;
@@ -1505,6 +1526,13 @@ export function calculateBasePowerSMSSSV(
     break;
   default:
     basePower = move.bp;
+  }
+
+  // Desert - Dig is 100 base power
+  if (field.chromaticField === 'Desert' && move.named('Dig')) {
+    basePower = 100;
+    desc.moveBP = basePower;
+    desc.chromaticField = field.chromaticField;
   }
 
   if (attacker.named('Cinccino-Crest')) {
@@ -1760,6 +1788,12 @@ export function calculateBPModsSMSSSV(
   ) {
     bpMods.push(5325);
     desc.attackerAbility = attacker.ability;
+  // Desert - Activates Sand Force
+  } else if ((attacker.hasAbility('Sand Force') &&
+              field.chromaticField === 'Desert' && move.hasType('Rock', 'Ground', 'Steel'))) {
+    bpMods.push(5325);
+    desc.attackerAbility = attacker.ability;
+    desc.chromaticField = field.chromaticField;
   }
 
   if (field.attackerSide.isBattery && move.category === 'Special') {
@@ -2238,6 +2272,12 @@ export function calculateAtModsSMSSSV(
     }
   }
 
+  // Desert - Scald and Steam Eruption deal 1.1x damage
+  if (field.chromaticField === 'Desert' && move.named('Scald', 'Steam Eruption')) {
+    atMods.push(4505);
+    desc.chromaticField = field.chromaticField;
+  }
+
   // Fields - Prism Scale Effects: Miscellaneous boosts
   if ((attacker.hasItem('Prism Scale') && !(field.chromaticField === 'None'))) {
     // Inverse - The user's next move becomes typeless and deals 1.5x damage until it's switched out
@@ -2696,6 +2736,16 @@ export function calculateFinalModsSMSSSV(
       finalMods.push(2048);
     }
     desc.defenderItem = defender.item;
+  }
+
+  // Fields - Final Modifiers
+
+  // Desert - Sand Veil instead makes user receive ¾ damage dealt in Sandstorm
+  if (field.chromaticField === 'Desert' && defender.hasAbility('Sand Veil') && field.hasWeather('Sand')) {
+    finalMods.push(3072);    
+    desc.defenderAbility = defender.ability;
+    desc.weather = field.weather;
+    desc.chromaticField = field.chromaticField;
   }
 
   return finalMods;

@@ -782,7 +782,8 @@ function getEndOfTurn(
 
   if (!defender.hasAbility('Magic Guard') && !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
       (TRAPPING.includes(move.name) || (TRAPPING_JUNGLE.includes(move.name) && field.chromaticField === 'Jungle') || // Jungle - Certain moves apply Infestation
-      (move.named('Leaf Tornado') && field.chromaticField === 'Flower-Garden'))) { // Flower Garden - Leaf Tornado is now a binding move that deals 1/8 max HP per turn for 2-5 turns
+      (move.named('Leaf Tornado') && field.chromaticField === 'Flower-Garden') || // Flower Garden - Leaf Tornado is now a binding move that deals 1/8 max HP per turn for 2-5 turns
+      (move.named('Sandsear Storm') && field.chromaticField === 'Desert'))) { // Desert - Sandsear Storm applies Sand Tomb trapping and chip damage effect 
     if (attacker.hasItem('Binding Band')) {
       damage -= gen.num > 5 ? Math.floor(defender.maxHP() / 6) : Math.floor(defender.maxHP() / 8);
       texts.push('trapping damage');
@@ -1251,6 +1252,7 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Jungle":
     case "Eclipse":
     case "Sky":
+    case "Desert":
     case "Inverse":
       output += ' on ' + description.chromaticField + ' Field';
       break;
