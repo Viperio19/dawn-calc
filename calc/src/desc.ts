@@ -733,7 +733,7 @@ function getEndOfTurn(
   }
 
   if (field.hasTerrain('Grassy')) {
-    if (isGrounded(defender, field) && !healBlock) {
+    if (isGrounded(defender, field, field.defenderSide.isIngrain) && !healBlock) {
       damage += Math.floor(defender.maxHP() / 16);
       texts.push('Grassy Terrain recovery');
     }
