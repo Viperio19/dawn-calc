@@ -27,8 +27,8 @@ const EV_ITEMS = [
   'Power Weight',
 ];
 
-export function isGrounded(pokemon: Pokemon, field: Field) {
-  return (field.isGravity || pokemon.hasItem('Iron Ball') ||
+export function isGrounded(pokemon: Pokemon, field: Field, ingrain: boolean) {
+  return (field.isGravity || pokemon.hasItem('Iron Ball') || ingrain || 
     (!pokemon.hasType('Flying') &&
       !pokemon.hasAbility('Levitate') &&
       !pokemon.hasAbility('Lunar Idol') &&
