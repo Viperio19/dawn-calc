@@ -301,6 +301,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Volcanic-Top' ? 'Fire'
         : field.chromaticField === 'Sky' ? 'Flying'
         : field.chromaticField === 'Haunted-Graveyard' ? 'Ghost'
+        : field.chromaticField === 'Flower-Garden' ? 'Grass'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
       if (!(type === 'Normal')) {
@@ -454,9 +455,9 @@ export function calculateSMSSSV(
 
   // FIXME: this is incorrect, should be move.flags.heal, not move.drain
   if ((attacker.hasAbility('Triage') && move.drain) ||
-      (attacker.hasAbility('Gale Wings') &&
-       move.hasType('Flying') &&
-       (attacker.curHP() === attacker.maxHP() || field.chromaticField === 'Sky'))) { // Sky - Activates Gale Wings regardless of HP
+      (attacker.hasAbility('Gale Wings') && move.hasType('Flying') &&
+       (attacker.curHP() === attacker.maxHP() || field.chromaticField === 'Sky')) || // Sky - Activates Gale Wings regardless of HP
+      (move.named('Grassy Glide') && (field.hasTerrain('Grassy') || field.chromaticField === 'Flower-Garden'))) { // Flower Garden - Grassy Glide has +1 priority
     move.priority = 1;
     desc.attackerAbility = attacker.ability;
   }
@@ -666,7 +667,8 @@ export function calculateSMSSSV(
 
   // Jungle
   if (field.chromaticField === 'Jungle') {
-    if (move.named('Fell Stinger', 'Silver Wind', 'Steamroller')) {
+    if (move.named('Fell Stinger', 'Silver Wind', 'Steamroller') &&
+        !defender.hasAbility('Magic Guard') && !(defender.hasAbility('Shield Dust'))) {
       desc.chromaticField = field.chromaticField;
     } else if (move.named('Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash')) {
       desc.moveType = '+ Grass' as TypeName;
@@ -727,6 +729,18 @@ export function calculateSMSSSV(
     }
 
     if (!(defender.hasStatus('slp') || defender.hasAbility('Comatose')) && move.named('Dream Eater')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Flower Garden
+  if (field.chromaticField === 'Flower-Garden') {
+    if (defender.item === 'Prism Scale' && field.defenderSide.isIngrain) {
+      desc.defenderItem = defender.item;
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if (move.named('Leaf Tornado') && !defender.hasAbility('Magic Guard')) {
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -1222,7 +1236,7 @@ export function calculateBasePowerSMSSSV(
 
   // Fields - Nature Power categories
   const NATURE_POWER_PHYSICAL = [
-    'Ring-Arena', 'Haunted-Graveyard',
+    'Ring-Arena', 'Haunted-Graveyard', 'Flower-Garden',
   ];
 
   let basePower: number;
@@ -1441,6 +1455,10 @@ export function calculateBasePowerSMSSSV(
       case 'Haunted-Graveyard':
         basePower = 90;
         desc.moveName = 'Phantom Force';
+        break;
+      case 'Flower-Garden':
+        basePower = 90;
+        desc.moveName = 'Petal Blizzard';
         break;
       case 'Inverse':
         basePower = 0;
@@ -2052,6 +2070,14 @@ export function calculateAtModsSMSSSV(
     atMods.push(6144);
     desc.attackerAbility = attacker.ability;
     desc.weather = field.weather;
+  // Flower Garden - Activates Flower Gift
+  } else if (attacker.named('Cherrim') &&
+             attacker.hasAbility('Flower Gift') &&
+             field.chromaticField === 'Flower-Garden' &&
+             move.category === 'Physical') {
+    atMods.push(6144);
+    desc.attackerAbility = attacker.ability;
+    desc.chromaticField = field.chromaticField;
   } else if (
     // Gorilla Tactics has no effect during Dynamax (Anubis)
     (attacker.hasAbility('Gorilla Tactics') && move.category === 'Physical' &&
@@ -2071,7 +2097,8 @@ export function calculateAtModsSMSSSV(
     desc.attackerAbility = attacker.ability;
   } else if ((field.chromaticField === 'Jungle' && attacker.hasAbility('Swarm') && move.hasType('Bug')) || // Jungle - Activates Swarm
              (field.chromaticField === 'Thundering-Plateau' && attacker.hasAbility('Plus', 'Minus') && move.category === 'Special') || // Thundering Plateau - Activates Plus and Minus
-             (field.chromaticField === 'Volcanic-Top' && (attacker.hasAbility('Solar Power') || (attacker.hasAbility('Blaze') && move.hasType('Fire'))))) { // Volcanic Top - Activates Blaze and Solar Power
+             (field.chromaticField === 'Volcanic-Top' && (attacker.hasAbility('Solar Power') || (attacker.hasAbility('Blaze') && move.hasType('Fire')))) || // Volcanic Top - Activates Blaze and Solar Power
+             (field.chromaticField === 'Flower-Garden' && attacker.hasAbility('Overgrow') && move.hasType('Grass'))) { // Flower Garden - Activates Overgrow
     atMods.push(6144);
     desc.attackerAbility = attacker.ability;
     desc.chromaticField = field.chromaticField;
@@ -2193,17 +2220,25 @@ export function calculateAtModsSMSSSV(
 
   // Fields - Attack Modifiers
 
-  const HAUNTED_GRAVEYARD_BOOSTS = [
-    'Dazzling Gleam', 'Draining Kiss', 'Foul Play', 'Spirit Break'
-  ];
-
   // Haunted Graveyard - Dazzling Gleam, Draining Kiss, Foul Play, and Spirit Break deal 1.2x damage
-  if (field.chromaticField === 'Haunted-Graveyard' && HAUNTED_GRAVEYARD_BOOSTS.includes(move.name)) {
+  if (field.chromaticField === 'Haunted-Graveyard' && move.named('Dazzling Gleam', 'Draining Kiss', 'Foul Play', 'Spirit Break')) {
     atMods.push(4915);
     desc.chromaticField = field.chromaticField;
   }
 
-  // Fields - Prism Scale Effects
+  if (field.chromaticField === 'Flower-Garden') {
+    // Flower Garden - Horn Leech and Seed Bomb deal 1.3x damage
+    if (move.named('Horn Leech', 'Seed Bomb')) {
+      atMods.push(5324);
+      desc.chromaticField = field.chromaticField;
+    // Flower Garden - Leafage, Leaf Blade, Magical Leaf, Razor Leaf deal 1.2x damage
+    } else if (move.named('Leafage', 'Leaf Blade', 'Magical Leaf', 'Razor Leaf')) {
+      atMods.push(4915);
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Fields - Prism Scale Effects: Miscellaneous boosts
   if ((attacker.hasItem('Prism Scale') && !(field.chromaticField === 'None'))) {
     // Inverse - The user's next move becomes typeless and deals 1.5x damage until it's switched out
     if ((field.chromaticField === 'Inverse') && (move.hasType('???'))) {
@@ -2359,12 +2394,18 @@ export function calculateDfModsSMSSSV(
   } else if (
     defender.named('Cherrim') &&
     defender.hasAbility('Flower Gift') &&
-    field.hasWeather('Sun', 'Harsh Sunshine') &&
     !hitsPhysical
   ) {
-    dfMods.push(6144);
-    desc.defenderAbility = defender.ability;
-    desc.weather = field.weather;
+    if (field.hasWeather('Sun', 'Harsh Sunshine')) {
+      dfMods.push(6144);
+      desc.defenderAbility = defender.ability;
+      desc.weather = field.weather;
+    // Flower Garden - Activates Flower Gift
+    } else if (field.chromaticField === 'Flower-Garden') {
+      dfMods.push(6144);
+      desc.defenderAbility = defender.ability;
+      desc.chromaticField = field.chromaticField;
+    }
   } else if (
     field.defenderSide.isFlowerGift &&
     field.hasWeather('Sun', 'Harsh Sunshine') &&
@@ -2374,11 +2415,17 @@ export function calculateDfModsSMSSSV(
     desc.isFlowerGiftDefender = true;
   } else if (
     defender.hasAbility('Grass Pelt') &&
-    field.hasTerrain('Grassy') &&
     hitsPhysical
   ) {
-    dfMods.push(6144);
-    desc.defenderAbility = defender.ability;
+    // FLower Garden - Activates Grass Pelt | Grass Pelt boosts Defense by 2x (From 1.5x)
+    if (field.chromaticField === 'Flower-Garden') {
+      dfMods.push(8192);
+      desc.defenderAbility = defender.ability;
+      desc.chromaticField = field.chromaticField;
+    } else if (field.hasTerrain('Grassy')) {
+      dfMods.push(6144);
+      desc.defenderAbility = defender.ability;
+    }
   } else if (defender.hasAbility('Fur Coat') && hitsPhysical) {
     dfMods.push(8192);
     desc.defenderAbility = defender.ability;

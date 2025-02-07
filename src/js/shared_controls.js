@@ -751,13 +751,23 @@ $(".item").change(function () {
 	var chromaticField = $("#chromatic-field").val();
 	var id = pokeObj.prop("id");
 
-	// Sky - Prism Scale: Set Tailwind
-	if (chromaticField === 'Sky' && itemName === 'Prism Scale') {
-		if (id === 'p1') {
-			$("#tailwindL").prop("checked", true);
-		} else {
-			$("#tailwindR").prop("checked", true);
-		}			
+	// Fields - Prism Scale Effects: Applying effects
+	if (itemName === 'Prism Scale') {
+		// Sky - Prism Scale: Set Tailwind
+		if (chromaticField === 'Sky') {
+			if (id === 'p1') {
+				$("#tailwindL").prop("checked", true);
+			} else {
+				$("#tailwindR").prop("checked", true);
+			}
+		// Flower Garden - Prism Scale: Apply Ingrain
+		} else if (chromaticField === 'Flower-Garden') {
+			if (id === 'p1') {
+				$("#ingrainL").prop("checked", true);
+			} else {
+				$("#ingrainR").prop("checked", true);
+			}
+		}
 	}
 
 	if (chromaticField === 'Ring-Arena') {
