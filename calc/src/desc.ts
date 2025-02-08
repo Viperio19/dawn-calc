@@ -543,66 +543,92 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
   let damage = 0;
   const texts: string[] = [];
 
-  if (defender.hasItem('Heavy-Duty Boots')) {
-    return {damage, texts};
-  }
-  if (defenderSide.isSR && !defender.hasAbility('Magic Guard', 'Mountaineer') &&
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
-    const rockType = gen.types.get('rock' as ID)!;
-    let effectiveness =
-      rockType.effectiveness[defender.types[0]]! *
-      (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
-
-    // Snowy Peaks - Stealth Rocks do neutral damage to Ice Types instead of Super Effective
-    if (defender.hasType('Ice') && field.chromaticField === 'Snowy-Peaks') {
-      effectiveness /= 2;
-    }
-
-    // XOR between Torterra-Crest and Inverse Field so they cancel each other out
-    if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
-        (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Inverse - Inverse type effectiveness
-      effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to rock
-    }
+  // Acidic Wasteland - Hazards are consumed when set but regurgitate at the end of the turn as an attacking move
+  if (field.chromaticField === 'Acidic-Wasteland') {
+    // Acidic Wasteland - Regurgigated hazards: Stealth Rock applies double its normal effect
+    if (defenderSide.isSR) {
+      const rockType = gen.types.get('rock' as ID)!;
+      let effectiveness =
+        rockType.effectiveness[defender.types[0]]! *
+        (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
   
-    damage += Math.floor((effectiveness * defender.maxHP()) / 8);
-    texts.push('Stealth Rock');
-  }
-  if (defenderSide.steelsurge && !defender.hasAbility('Magic Guard', 'Mountaineer') &&
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
-    const steelType = gen.types.get('steel' as ID)!;
-    let effectiveness =
-      steelType.effectiveness[defender.types[0]]! *
-      (defender.types[1] ? steelType.effectiveness[defender.types[1]]! : 1);
-
-    // XOR between Torterra-Crest and Inverse Field so they cancel each other out
-    if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
-        (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Inverse - Inverse type effectiveness
-      effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to steel
-    }
-    
-    damage += Math.floor((effectiveness * defender.maxHP()) / 8);
-    texts.push('Steelsurge');
-  }
-
-  if (!defender.hasType('Flying') &&
-      !defender.hasAbility('Magic Guard', 'Levitate') && 
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
-      !defender.hasItem('Air Balloon') &&
-      !defender.named('Probopass-Crest')
-  ) {
-    if (defenderSide.spikes === 1) {
-      damage += Math.floor(defender.maxHP() / 8);
-      if (gen.num === 2) {
-        texts.push('Spikes');
-      } else {
-        texts.push('1 layer of Spikes');
+      if (defender.named('Torterra-Crest')) { // Torterra Crest - Inverse type effectiveness
+        effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to rock
       }
-    } else if (defenderSide.spikes === 2) {
-      damage += Math.floor(defender.maxHP() / 6);
-      texts.push('2 layers of Spikes');
-    } else if (defenderSide.spikes === 3) {
-      damage += Math.floor(defender.maxHP() / 4);
-      texts.push('3 layers of Spikes');
+
+      damage += Math.floor((effectiveness * defender.maxHP()) / 4);
+      texts.push('regurgitated Stealth Rock');    
+    }
+    // Acidic Wasteland - Regurgigated hazards: Spikes deal 33% of the Pokemon’s max HP
+    if (defenderSide.spikes != 0 &&
+        !defender.hasType('Flying') &&
+        !defender.hasAbility('Levitate') && 
+        !defender.hasItem('Air Balloon') &&
+        !defender.named('Probopass-Crest')) {
+      damage += Math.floor(defender.maxHP() / 3);
+      texts.push('regurgitated Spikes');
+    }
+  } else if (defender.hasItem('Heavy-Duty Boots') || defender.hasAbility('Magic Guard') ||
+       (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
+      return {damage, texts};
+  } else {
+    if (defenderSide.isSR && !defender.hasAbility('Mountaineer')) {
+      const rockType = gen.types.get('rock' as ID)!;
+      let effectiveness =
+        rockType.effectiveness[defender.types[0]]! *
+        (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
+
+      if (defender.named('Glaceon-Crest')) {
+        effectiveness = 0.5;
+      // Snowy Peaks - Stealth Rocks do neutral damage to Ice Types instead of Super Effective
+      } else if (defender.hasType('Ice') && field.chromaticField === 'Snowy-Peaks') {
+        effectiveness /= 2;
+      }
+
+      // XOR between Torterra-Crest and Inverse Field so they cancel each other out
+      if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
+          (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Inverse - Inverse type effectiveness
+        effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to rock
+      }
+      
+      damage += Math.floor((effectiveness * defender.maxHP()) / 8);
+      texts.push('Stealth Rock');
+    }
+    if (defenderSide.steelsurge && !defender.hasAbility('Mountaineer')) {
+      const steelType = gen.types.get('steel' as ID)!;
+      let effectiveness =
+        steelType.effectiveness[defender.types[0]]! *
+        (defender.types[1] ? steelType.effectiveness[defender.types[1]]! : 1);
+
+      // XOR between Torterra-Crest and Inverse Field so they cancel each other out
+      if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
+          (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Inverse - Inverse type effectiveness
+        effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to steel
+      }
+      
+      damage += Math.floor((effectiveness * defender.maxHP()) / 8);
+      texts.push('Steelsurge');
+    }
+
+    if (!defender.hasType('Flying') &&
+        !defender.hasAbility('Levitate') && 
+        !defender.hasItem('Air Balloon') &&
+        !defender.named('Probopass-Crest')
+    ) {
+      if (defenderSide.spikes === 1) {
+        damage += Math.floor(defender.maxHP() / 8);
+        if (gen.num === 2) {
+          texts.push('Spikes');
+        } else {
+          texts.push('1 layer of Spikes');
+        }
+      } else if (defenderSide.spikes === 2) {
+        damage += Math.floor(defender.maxHP() / 6);
+        texts.push('2 layers of Spikes');
+      } else if (defenderSide.spikes === 3) {
+        damage += Math.floor(defender.maxHP() / 4);
+        texts.push('3 layers of Spikes');
+      }
     }
   }
 
@@ -792,6 +818,19 @@ function getEndOfTurn(
   ) {
     damage -= Math.floor(defender.maxHP() / 8);
     texts.push('Bad Dreams');
+  // Acidic Wasteland - Activates Poison Heal
+  } else if (field.chromaticField === 'Acidic-Wasteland') {
+    if (defender.hasAbility('Poison Heal')) {
+      if (!healBlock) {
+        damage += Math.floor(defender.maxHP() / 8);
+        texts.push('Poison Heal');
+      }
+    } else if (defender.hasAbility('Liquid Ooze')) {
+      if (!healBlock) {
+        damage += Math.floor(defender.maxHP() / 16);
+        texts.push('Liquid Ooze recovery');
+      }      
+    }
   }
 
   if (!defender.hasAbility('Magic Guard') && !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
@@ -1281,6 +1320,7 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Flower-Garden":
     case "Snowy-Peaks":
     case "Blessed-Sanctum":
+    case "Acidic-Wasteland":
       output += ' on ' + description.chromaticField.replace('-', ' ');
       break;
     default:

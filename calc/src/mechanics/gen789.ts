@@ -236,13 +236,32 @@ export function calculateSMSSSV(
   // Merciless does not ignore Shell Armor, damage dealt to a poisoned Pokemon with Shell Armor
   // will not be a critical hit (UltiMario)
   let tempCritical = !defender.hasAbility('Battle Armor', 'Shell Armor') &&
-    (move.isCrit || (attacker.hasAbility('Merciless') && defender.hasStatus('psn', 'tox')) ||
+    (move.isCrit ||
     (attacker.named('Ariados-Crest') && (defender.status || defender.boosts.spe < 0)) ||
     (attacker.named('Samurott-Crest') && move.flags.slicing)) &&
     move.timesUsed === 1;
 
   if (tempCritical == 0)
     tempCritical = false;
+
+  if (!tempCritical && attacker.hasAbility('Merciless')) { 
+    if (defender.hasStatus('psn', 'tox')) {
+      tempCritical = true;
+      desc.attackerAbility = attacker.ability;
+    // Acidic Wasteland - Activates Merciless
+    } else if (field.chromaticField === 'Acidic-Wasteland') {
+      tempCritical = true;
+      desc.attackerAbility = attacker.ability;
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Ring Arena - Grit Stage Effects: 3 - 100% Crit chance
+  if (!tempCritical && attacker.gritStages! >= 3) {
+    tempCritical = true;
+    desc.gritStages = attacker.gritStages;
+    desc.chromaticField = field.chromaticField;
+  }
 
   const isCritical = tempCritical;
 
@@ -310,6 +329,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Snowy-Peaks' ? 'Ice'
         : field.chromaticField === 'Blessed-Sanctum' ?
           (attacker.item && attacker.item.includes('Plate')) ? getItemBoostType(attacker.item)! : 'Normal'
+        : field.chromaticField === 'Acidic-Wasteland' ? 'Poison'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
       if (type !== 'Normal' || field.chromaticField === 'Blessed-Sanctum') {
@@ -783,6 +803,14 @@ export function calculateSMSSSV(
         !defender.hasAbility('Magic Guard', 'Overcoat', 'Snow Cloak') &&
         !defender.hasItem('Safety Goggles') &&
         !defender.named('Empoleon-Crest')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Acidic Wasteland
+  if (field.chromaticField === 'Acidic-Wasteland') {
+    if ((attacker.hasAbility('Toxic Boost') && !attacker.hasStatus('psn', 'tox') && move.category === "Physical") ||
+        defender.hasAbility('Liquid Ooze')) {
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -1518,6 +1546,10 @@ export function calculateBasePowerSMSSSV(
         basePower = 0;
         desc.moveName = 'Trick Room';
         break;
+      case 'Acidic-Wasteland':
+        basePower = 90;
+        desc.moveName = 'Sludge Bomb';
+        break;
       default:
         basePower = 80;
         desc.moveName = 'Tri Attack';
@@ -1772,8 +1804,8 @@ export function calculateBPModsSMSSSV(
     }
   }
 
-  // Ring Arena - Grit Stage Effects: Attacks deal 1.5x damage
-  if (attacker.gritStages == 5) {
+  // Ring Arena - Grit Stage Effects: 5 - Attacks deal 1.5x damage
+  if (attacker.gritStages! >= 5) {
     bpMods.push(6144);
     desc.gritStages = attacker.gritStages;
     desc.chromaticField = field.chromaticField;
@@ -1786,7 +1818,7 @@ export function calculateBPModsSMSSSV(
     (attacker.hasAbility('Flare Boost') &&
       attacker.hasStatus('brn') && move.category === 'Special') ||
     (attacker.hasAbility('Toxic Boost') &&
-      attacker.hasStatus('psn', 'tox') && move.category === 'Physical') ||
+      (attacker.hasStatus('psn', 'tox') || field.chromaticField === 'Acidic-Wasteland') && move.category === 'Physical') || // Acidic Wasteland - Activates Toxic Boost
     (attacker.hasAbility('Mega Launcher') && move.flags.pulse) ||
     ((attacker.hasAbility('Strong Jaw') || attacker.named('Feraligatr-Crest')) && move.flags.bite) ||
     (attacker.hasAbility('Steely Spirit') && move.hasType('Steel')) ||
@@ -2333,6 +2365,12 @@ export function calculateAtModsSMSSSV(
     desc.chromaticField = field.chromaticField;
   }
 
+  // Acidic Wasteland - Mud Bomb, Mud Shot, Mud-Slap, and Muddy Water deal 1.3x damage
+  if (field.chromaticField === 'Acidic-Wasteland' && move.named('Mud Bomb', 'Mud Shot', 'Mud-Slap', 'Muddy Water')) {
+    atMods.push(5324);
+    desc.chromaticField = field.chromaticField;
+  }
+
   // Fields - Prism Scale Effects: Miscellaneous boosts
   if ((attacker.hasItem('Prism Scale') && !(field.chromaticField === 'None'))) {
     // Inverse - The user's next move becomes typeless and deals 1.5x damage until it's switched out
@@ -2383,8 +2421,8 @@ export function calculateDefenseSMSSSV(
   } else if (attacker.hasAbility('Unaware')) {
     defense = defender.rawStats[defenseStat];
     desc.attackerAbility = attacker.ability;
-  // Ring Arena - Grit Stage Effects: Attacks ignore the opponent's stat changes
-  } else if (attacker.gritStages && attacker.gritStages >= 1) {
+  // Ring Arena - Grit Stage Effects: 1 - Attacks ignore the opponent's stat changes
+  } else if (attacker.gritStages! >= 1) {
     defense = defender.rawStats[defenseStat];
     desc.gritStages = attacker.gritStages;
     desc.chromaticField = field.chromaticField;

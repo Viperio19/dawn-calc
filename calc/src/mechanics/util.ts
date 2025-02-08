@@ -854,6 +854,8 @@ export function getMimicryType(field: Field) {
     return "Ice" as TypeName;
   } else if (field.chromaticField === 'Blessed-Sanctum') {
     return "Normal" as TypeName;
+  } else if (field.chromaticField === 'Acidic-Wasteland') {
+    return "Poison" as TypeName;
   } else {
     return "???" as TypeName;
   }

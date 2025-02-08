@@ -478,15 +478,6 @@ function updateGritStages(pokeObj) {
 			$("#gritR1").prop("checked", true);
 		}
 	}
-
-	// Ring Arena - Grit Stage Effects: 3 - 100% Crit chance
-	for (i = 0; i < 4; i++) {
-		var moveObj = pokeObj.find(".move" + (i + 1) + " select.move-selector");
-		var moveGroupObj = moveObj.parent();
-		var moveName = moveObj.	val();
-		var move = moves[moveName] || moves['(No Move)'];
-		moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true || gritNew >= 3);
-	}
 }
 
 $("#chromatic-field").change(function () {
@@ -531,14 +522,6 @@ $("#chromatic-field").change(function () {
 
 		if (chromaticField === 'Ring-Arena') {
 			updateGritStages(pokeObj);
-		} else {
-			for (i = 0; i < 4; i++) {
-				var moveObj = pokeObj.find(".move" + (i + 1) + " select.move-selector");
-				var moveGroupObj = moveObj.parent();
-				var moveName = moveObj.	val();
-				var move = moves[moveName] || moves['(No Move)'];
-				moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true);
-			}
 		}
 	});
 });
@@ -676,10 +659,7 @@ $(".move-selector").change(function () {
 	moveGroupObj.children(".move-type").val(move.type);
 	moveGroupObj.children(".move-cat").val(move.category);
 	var pokeObj = $(this).closest(".poke-info");
-	var gritStages = pokeObj.prop("id") === 'p1'
-				   ? parseInt(pokeObj.find("input:radio[name='gritL']:checked").val())
-				   : parseInt(pokeObj.find("input:radio[name='gritR']:checked").val());
-	moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true || gritStages >= 3);
+	moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true);
 
 	var stat = move.category === 'Special' ? 'spa' : 'atk';
 	var pokeObj = $(this).closest(".poke-info");
@@ -784,21 +764,6 @@ $(".item").change(function () {
 	if (chromaticField === 'Ring-Arena') {
 		updateGritStages(pokeObj);
 	}
-});
-
-$(".grit").change(function () {
-	var pokeObj = $(this).closest(".poke-info");
-
-	for (i = 0; i < 4; i++) {
-		var moveObj = pokeObj.find(".move" + (i + 1) + " select.move-selector");
-		var moveGroupObj = moveObj.parent();
-		var moveName = moveObj.	val();
-		var move = moves[moveName] || moves['(No Move)'];
-		var gritStages = pokeObj.prop("id") === 'p1'
-						 ? parseInt(pokeObj.find("input:radio[name='gritL']:checked").val())
-						 : parseInt(pokeObj.find("input:radio[name='gritR']:checked").val());
-		moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true || gritStages >= 3);
-	}			
 });
 
 function smogonAnalysis(pokemonName) {
