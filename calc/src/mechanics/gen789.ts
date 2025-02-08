@@ -163,7 +163,7 @@ export function calculateSMSSSV(
   const defenderAbilityIgnored = defender.hasAbility(
     'Armor Tail', 'Aroma Veil', 'Aura Break', 'Battle Armor',
     'Big Pecks', 'Bulletproof', 'Clear Body', 'Contrary',
-    'Damp', 'Dazzling', 'Disguise', 'Dry Skin',
+    'Cute Charm', 'Damp', 'Dazzling', 'Disguise', 'Dry Skin',
     'Earth Eater', 'Filter', 'Flash Fire', 'Flower Gift',
     'Flower Veil', 'Fluffy', 'Friend Guard', 'Fur Coat',
     'Good as Gold', 'Grass Pelt', 'Guard Dog', 'Heatproof',
@@ -266,6 +266,10 @@ export function calculateSMSSSV(
     desc.moveType = type;
   } else if (move.named('Judgment') && attacker.item && attacker.item.includes('Plate')) {
     type = getItemBoostType(attacker.item)!;
+  // Blessed Sanctum - Multipulse: Hyper Voice, Tri Attack, and Echoed Voice become Judgement
+  } else if (move.named('Hyper Voice', 'Tri Attack', 'Echoed Voice') && field.chromaticField === 'Blessed-Sanctum' &&
+             attacker.item && attacker.item.includes('Plate')) {
+    type = getItemBoostType(attacker.item)!;
   } else if (move.originalName === 'Techno Blast' &&
     attacker.item && attacker.item.includes('Drive')) {
     type = getTechnoBlast(attacker.item)!;
@@ -304,9 +308,11 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Flower-Garden' ? 'Grass'
         : field.chromaticField === 'Desert' ? 'Ground'
         : field.chromaticField === 'Snowy-Peaks' ? 'Ice'
+        : field.chromaticField === 'Blessed-Sanctum' ?
+          (attacker.item && attacker.item.includes('Plate')) ? getItemBoostType(attacker.item)! : 'Normal'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
-      if (!(type === 'Normal')) {
+      if (type !== 'Normal' || field.chromaticField === 'Blessed-Sanctum') {
         desc.chromaticField = field.chromaticField;
       }
     } else {
@@ -392,7 +398,8 @@ export function calculateSMSSSV(
     'Weather Ball',
     'Terrain Pulse',
     'Struggle',
-  ) || (move.named('Tera Blast') && attacker.teraType);
+  ) || (move.named('Tera Blast') && attacker.teraType)
+    || (move.named('Hyper Voice', 'Tri Attack', 'Echoed Voice') && field.chromaticField === 'Blessed-Sanctum');
 
   if (!move.isZ && !noTypeChange) {
     const normal = type === 'Normal';
@@ -680,7 +687,7 @@ export function calculateSMSSSV(
       desc.chromaticField = field.chromaticField;
     } else if (move.named('Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash')) {
       desc.moveType = '+ Grass' as TypeName;
-      desc.chromaticField = field.chromaticField;      
+      desc.chromaticField = field.chromaticField;   
     }
   }
 
@@ -1499,8 +1506,13 @@ export function calculateBasePowerSMSSSV(
         break;
       case 'Snowy-Peaks':
         basePower = 120;
+        desc.moveBP = basePower;
         move.category = 'Physical';
         desc.moveName = 'Avalanche';
+        break;
+      case 'Blessed-Sanctum':
+        basePower = 100;
+        desc.moveName = 'Judgment';
         break;
       case 'Inverse':
         basePower = 0;
@@ -1511,7 +1523,6 @@ export function calculateBasePowerSMSSSV(
         desc.moveName = 'Tri Attack';
         break;
       }
-    desc.moveBP = basePower;
     break;
   case 'Water Shuriken':
     basePower = attacker.named('Greninja-Ash') && attacker.hasAbility('Battle Bond') ? 20 : 15;
@@ -1562,6 +1573,12 @@ export function calculateBasePowerSMSSSV(
     basePower = move.bp * 2;
     desc.moveBP = basePower;
     desc.chromaticField = field.chromaticField;
+  }
+
+  // Blessed Sanctum - Multipulse: Hyper Voice, Tri Attack, and Echoed Voice become Judgement
+  if (field.chromaticField === 'Blessed-Sanctum' && move.named('Hyper Voice', 'Tri Attack', 'Echoed Voice')) {
+    basePower = 100;
+    desc.moveName = 'Judgment';
   }
 
   if (attacker.named('Cinccino-Crest')) {
@@ -2310,6 +2327,12 @@ export function calculateAtModsSMSSSV(
     desc.chromaticField = field.chromaticField;
   }
 
+  // Blessed Sanctum - Multi-Attack, Mystical Fire, Sacred Fire, Ancient Power gain 1.2x power
+  if (field.chromaticField === 'Blessed-Sanctum' && move.named('Multi-Attack', 'Mystical Fire', 'Sacred Fire', 'Ancient Power')) {
+    atMods.push(4915);
+    desc.chromaticField = field.chromaticField;
+  }
+
   // Fields - Prism Scale Effects: Miscellaneous boosts
   if ((attacker.hasItem('Prism Scale') && !(field.chromaticField === 'None'))) {
     // Inverse - The user's next move becomes typeless and deals 1.5x damage until it's switched out
@@ -2669,7 +2692,8 @@ export function calculateFinalModsSMSSSV(
     finalMods.push(8192);
   }
 
-  if (defender.hasAbility('Multiscale', 'Shadow Shield'))
+  // Blessed Sanctum - Cute Charm grants Multiscale
+  if (defender.hasAbility('Multiscale', 'Shadow Shield') || (defender.hasAbility('Cute Charm') && field.chromaticField === 'Blessed-Sanctum'))
   {
     if (
       defender.curHP() === defender.maxHP() &&

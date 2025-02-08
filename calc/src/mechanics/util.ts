@@ -382,6 +382,14 @@ export function checkFieldBoosts(source: Pokemon, field: Field) {
     if (source.hasItem('Prism Scale')) {
       source.boosts.spe = Math.min(6, source.boosts.spe + 2);
     }    
+  } else if (field.chromaticField === 'Blessed-Sanctum') {
+    // Blessed-Sanctum - Fluffy and Fur Coat grant +1 Defense on entry
+    if (source.hasAbility('Fluffy', 'Fur Coat')) {
+      source.boosts.def = Math.min(6, source.boosts.def + 1);
+    // Blessed Sanctum - Run Away grants +1 Speed on entry
+    } else if (source.hasAbility('Run Away')) {
+      source.boosts.spe = Math.min(6, source.boosts.spe + 1);
+    }
   }
 }
 
@@ -844,6 +852,8 @@ export function getMimicryType(field: Field) {
     return "Ground" as TypeName;
   } else if (field.chromaticField === 'Snowy-Peaks') {
     return "Ice" as TypeName;
+  } else if (field.chromaticField === 'Blessed-Sanctum') {
+    return "Normal" as TypeName;
   } else {
     return "???" as TypeName;
   }

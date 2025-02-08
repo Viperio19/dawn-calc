@@ -1274,25 +1274,14 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
       output += " on Dragon's Den";
       break;
     case "Thundering-Plateau":
-      output += ' on Thundering Plateau';
-      break;
     case "Starlight-Arena":
-      output += ' on Starlight Arena';
-      break;
     case "Ring-Arena":
-      output += ' on Ring Arena';
-      break;
     case "Volcanic-Top":
-      output += ' on Volcanic Top';
-      break;
     case "Haunted-Graveyard":
-      output += ' on Haunted Graveyard';
-      break;
     case "Flower-Garden":
-      output += ' on Flower Garden';
-      break;
     case "Snowy-Peaks":
-      output += ' on Snowy Peaks';
+    case "Blessed-Sanctum":
+      output += ' on ' + description.chromaticField.replace('-', ' ');
       break;
     default:
       output += ' on ' + description.chromaticField;
