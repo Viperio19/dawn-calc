@@ -321,7 +321,7 @@ export function checkCrestBoosts(source: Pokemon) {
 }
 
 // Fields - Stat boosts from Prism Scale or abilities
-export function checkFieldBoosts(source: Pokemon, field: Field) {
+export function checkFieldEntryEffects(source: Pokemon, field: Field) {
   if (field.chromaticField === 'Dragons-Den') {
     // Dragon's Den - Prism Scale: Boosts Speed +1 
     if (source.hasItem('Prism Scale')) {
@@ -389,6 +389,11 @@ export function checkFieldBoosts(source: Pokemon, field: Field) {
     // Blessed Sanctum - Run Away grants +1 Speed on entry
     } else if (source.hasAbility('Run Away')) {
       source.boosts.spe = Math.min(6, source.boosts.spe + 1);
+    }
+  } else if (field.chromaticField === 'Ancient-Ruins') {
+    // Ancient Ruins - Anticipation and Forewarn grant +1 Special Attack on entry
+    if (source.hasAbility('Anticipation', 'Forewarn')) {
+      source.boosts.spa = Math.min(6, source.boosts.spa + 1);
     }
   }
 }
@@ -856,6 +861,8 @@ export function getMimicryType(field: Field) {
     return "Normal" as TypeName;
   } else if (field.chromaticField === 'Acidic-Wasteland') {
     return "Poison" as TypeName;
+  } else if (field.chromaticField === 'Ancient-Ruins') {
+    return "Psychic" as TypeName;
   } else {
     return "???" as TypeName;
   }

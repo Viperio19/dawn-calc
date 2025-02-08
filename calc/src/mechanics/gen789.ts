@@ -21,7 +21,7 @@ import {
   checkDauntlessShield,
   checkDownload,
   checkEmbody,
-  checkFieldBoosts,
+  checkFieldEntryEffects,
   checkForecast,
   checkInfiltrator,
   checkIntimidate,
@@ -87,8 +87,8 @@ export function calculateSMSSSV(
   checkIntrepidSword(defender, gen);
   checkCrestBoosts(attacker);
   checkCrestBoosts(defender);
-  checkFieldBoosts(attacker, field);
-  checkFieldBoosts(defender, field);
+  checkFieldEntryEffects(attacker, field);
+  checkFieldEntryEffects(defender, field);
 
   checkWindRider(attacker, field.attackerSide);
   checkWindRider(defender, field.defenderSide);
@@ -330,6 +330,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Blessed-Sanctum' ?
           (attacker.item && attacker.item.includes('Plate')) ? getItemBoostType(attacker.item)! : 'Normal'
         : field.chromaticField === 'Acidic-Wasteland' ? 'Poison'
+        : field.chromaticField === 'Ancient-Ruins' ? 'Psychic'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
       if (type !== 'Normal' || field.chromaticField === 'Blessed-Sanctum') {
@@ -345,7 +346,8 @@ export function calculateSMSSSV(
 
     // If the Nature Power user has the ability Prankster, it cannot affect
     // Dark-types or grounded foes if Psychic Terrain is active
-    if (!(move.named('Nature Power') && attacker.hasAbility('Prankster')) &&
+    if (!(move.named('Nature Power') && (attacker.hasAbility('Prankster')) ||
+      (attacker.hasAbility('Telepathy') && field.chromaticField === 'Ancient-Ruins')) && // Ancient Ruins - Telepathy grants Prankster
       ((defender.types.includes('Dark') ||
       (field.hasTerrain('Psychic') && isGrounded(defender, field, field.defenderSide.isIngrain))))) {
       desc.moveType = type;
@@ -1448,10 +1450,11 @@ export function calculateBasePowerSMSSSV(
     move.secondaries = true;
 
     // Nature Power cannot affect Dark-types if it is affected by Prankster
-    if (attacker.hasAbility('Prankster') && defender.types.includes('Dark')) {
+    if (attacker.hasAbility('Prankster') && (defender.types.includes('Dark') ||
+       (attacker.hasAbility('Telepathy') && field.chromaticField === 'Ancient-Ruins'))) { // Ancient Ruins - Telepathy grants Prankster
       basePower = 0;
       desc.moveName = 'Nature Power';
-      desc.attackerAbility = 'Prankster';
+      desc.attackerAbility = attacker.ability;
       break;
     }
     switch (field.terrain) {
@@ -1470,9 +1473,10 @@ export function calculateBasePowerSMSSSV(
     case 'Psychic':
       // Nature Power does not affect grounded Pokemon if it is affected by
       // Prankster and there is Psychic Terrain active
-      if (attacker.hasAbility('Prankster') && isGrounded(defender, field, field.defenderSide.isIngrain)) {
+      if (isGrounded(defender, field, field.defenderSide.isIngrain) && (attacker.hasAbility('Prankster') ||
+         (attacker.hasAbility('Telepathy') && field.chromaticField === 'Ancient-Ruins'))) { // Ancient Ruins - Telepathy grants Prankster
         basePower = 0;
-        desc.attackerAbility = 'Prankster';
+        desc.attackerAbility = attacker.ability;
       } else {
         basePower = 90;
         desc.moveName = 'Psychic';
@@ -1542,13 +1546,17 @@ export function calculateBasePowerSMSSSV(
         basePower = 100;
         desc.moveName = 'Judgment';
         break;
-      case 'Inverse':
-        basePower = 0;
-        desc.moveName = 'Trick Room';
-        break;
       case 'Acidic-Wasteland':
         basePower = 90;
         desc.moveName = 'Sludge Bomb';
+        break;
+      case 'Ancient-Ruins':
+        basePower = 80;
+        desc.moveName = 'Eerie Spell';
+        break;
+      case 'Inverse':
+        basePower = 0;
+        desc.moveName = 'Trick Room';
         break;
       default:
         basePower = 80;
@@ -2233,12 +2241,21 @@ export function calculateAtModsSMSSSV(
   } else if (attacker.hasAbility('Stakeout') && attacker.abilityOn) {
     atMods.push(8192);
     desc.attackerAbility = attacker.ability;
-  } else if (
-    (attacker.hasAbility('Water Bubble') && move.hasType('Water')) ||
-    (attacker.hasAbility('Huge Power', 'Pure Power') && move.category === 'Physical')
-  ) {
+  } else if (attacker.hasAbility('Water Bubble') && move.hasType('Water')) {
     atMods.push(8192);
     desc.attackerAbility = attacker.ability;
+  } else if (attacker.hasAbility('Huge Power', 'Pure Power')) {
+    if (field.chromaticField === 'Ancient-Ruins') {
+      // Ancient Ruins - Huge Power and Pure Power now doubles the higher attacking stat
+      if (move.category == (attacker.stats.atk > attacker.stats.spa ? 'Physical' : 'Special')) {
+        atMods.push(8192);
+        desc.attackerAbility = attacker.ability;
+        desc.chromaticField = field.chromaticField;
+      }
+    } else if (move.category === 'Physical') {
+      atMods.push(8192);
+      desc.attackerAbility = attacker.ability;
+    }
   }
 
   if (
@@ -2369,6 +2386,20 @@ export function calculateAtModsSMSSSV(
   if (field.chromaticField === 'Acidic-Wasteland' && move.named('Mud Bomb', 'Mud Shot', 'Mud-Slap', 'Muddy Water')) {
     atMods.push(5324);
     desc.chromaticField = field.chromaticField;
+  }
+
+  // Ancient Ruins - Aura Sphere deals 1.1x damage, Mystical Fire deals 1.2x damage, and Magical Leaf deals 1.3x damage
+  if (field.chromaticField === 'Ancient-Ruins') {
+    if (move.named('Aura Sphere')) {
+      atMods.push(4505);
+      desc.chromaticField = field.chromaticField;
+    } else if (move.named('Mystical Fire')) {
+      atMods.push(4915);
+      desc.chromaticField = field.chromaticField;
+    } else if (move.named('Magical Leaf')) {
+      atMods.push(5324);
+      desc.chromaticField = field.chromaticField;
+    }
   }
 
   // Fields - Prism Scale Effects: Miscellaneous boosts

@@ -480,6 +480,31 @@ function updateGritStages(pokeObj) {
 	}
 }
 
+// Fields - Prism Scale Effects: Applying effects
+function setPrismScaleEffects(pokeObj) {
+	var chromaticField = $("#chromatic-field").val();
+	var id = pokeObj.prop("id");
+
+	// Sky - Prism Scale: Applies Tailwind
+	if (chromaticField === 'Sky') {
+		if (id === 'p1') {
+			$("#tailwindL").prop("checked", true);
+		} else {
+			$("#tailwindR").prop("checked", true);
+		}
+	// Flower Garden - Prism Scale: Applies Ingrain
+	} else if (chromaticField === 'Flower-Garden') {
+		if (id === 'p1') {
+			$("#ingrainL").prop("checked", true);
+		} else {
+			$("#ingrainR").prop("checked", true);
+		}
+	// Ancient Ruins - Prism Scale: Sets Wonder Room
+	} else if (chromaticField === 'Ancient-Ruins') {
+		$("#wonderroom").prop("checked", true);
+	}
+}
+
 $("#chromatic-field").change(function () {
 	var chromaticField = $("#chromatic-field").val();
 
@@ -511,13 +536,8 @@ $("#chromatic-field").change(function () {
 
 		stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (teraType === "Stellar" && checked));
 		
-		// Sky - Prism Scale: Applies Tailwind
-		if (chromaticField === 'Sky' && item === 'Prism Scale') {
-			if (id === 'p1') {
-				$("#tailwindL").prop("checked", true);
-			} else {
-				$("#tailwindR").prop("checked", true);
-			}			
+		if (item === 'Prism Scale') {
+			setPrismScaleEffects(pokeObj)			
 		}
 
 		if (chromaticField === 'Ring-Arena') {
@@ -740,25 +760,9 @@ $(".item").change(function () {
 	autosetQP($(this).closest(".poke-info"));
 
 	var chromaticField = $("#chromatic-field").val();
-	var id = pokeObj.prop("id");
 
-	// Fields - Prism Scale Effects: Applying effects
 	if (itemName === 'Prism Scale') {
-		// Sky - Prism Scale: Set Tailwind
-		if (chromaticField === 'Sky') {
-			if (id === 'p1') {
-				$("#tailwindL").prop("checked", true);
-			} else {
-				$("#tailwindR").prop("checked", true);
-			}
-		// Flower Garden - Prism Scale: Apply Ingrain
-		} else if (chromaticField === 'Flower-Garden') {
-			if (id === 'p1') {
-				$("#ingrainL").prop("checked", true);
-			} else {
-				$("#ingrainR").prop("checked", true);
-			}
-		}
+		setPrismScaleEffects(pokeObj)			
 	}
 
 	if (chromaticField === 'Ring-Arena') {
