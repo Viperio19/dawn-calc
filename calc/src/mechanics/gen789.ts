@@ -303,6 +303,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Haunted-Graveyard' ? 'Ghost'
         : field.chromaticField === 'Flower-Garden' ? 'Grass'
         : field.chromaticField === 'Desert' ? 'Ground'
+        : field.chromaticField === 'Snowy-Peaks' ? 'Ice'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
       if (!(type === 'Normal')) {
@@ -760,6 +761,21 @@ export function calculateSMSSSV(
     }
 
     if (move.named('Sandsear Storm') && !defender.hasAbility('Magic Guard')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Snowy Peaks
+  if (field.chromaticField === 'Snowy-Peaks') {
+    if (defender.hasAbility('Ice Body') && !field.hasWeather('Hail', 'Snow')) {
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if (field.hasWeather('Snow') &&
+        !defender.hasType('Ice') &&
+        !defender.hasAbility('Magic Guard', 'Overcoat', 'Snow Cloak') &&
+        !defender.hasItem('Safety Goggles') &&
+        !defender.named('Empoleon-Crest')) {
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -1481,6 +1497,11 @@ export function calculateBasePowerSMSSSV(
         move.category = 'Physical';
         desc.moveName = 'Thousand Waves';
         break;
+      case 'Snowy-Peaks':
+        basePower = 120;
+        move.category = 'Physical';
+        desc.moveName = 'Avalanche';
+        break;
       case 'Inverse':
         basePower = 0;
         desc.moveName = 'Trick Room';
@@ -1490,6 +1511,7 @@ export function calculateBasePowerSMSSSV(
         desc.moveName = 'Tri Attack';
         break;
       }
+    desc.moveBP = basePower;
     break;
   case 'Water Shuriken':
     basePower = attacker.named('Greninja-Ash') && attacker.hasAbility('Battle Bond') ? 20 : 15;
@@ -1531,6 +1553,13 @@ export function calculateBasePowerSMSSSV(
   // Desert - Dig is 100 base power
   if (field.chromaticField === 'Desert' && move.named('Dig')) {
     basePower = 100;
+    desc.moveBP = basePower;
+    desc.chromaticField = field.chromaticField;
+  }
+
+  // Snowy Peaks - Avalanche's power is always doubled
+  if (field.chromaticField === 'Snowy-Peaks' && move.named('Avalanche')) {
+    basePower = move.bp * 2;
     desc.moveBP = basePower;
     desc.chromaticField = field.chromaticField;
   }
@@ -1820,11 +1849,14 @@ export function calculateBPModsSMSSSV(
   // The -ate abilities already changed move typing earlier, so most checks are done and desc is set
   // However, Max Moves also don't boost -ate Abilities
   if (!move.isMax && hasAteAbilityTypeChange) {
-    if (attacker.hasAbility('Type Sync')) {
+    // Snowy Peaks - Refrigerate damage bonus is increased to 1.5x
+    if (attacker.hasAbility('Refrigerate') && field.chromaticField === 'Snowy-Peaks') {
+      bpMods.push(6144);
+      desc.chromaticField = field.chromaticField;
+    } else if (attacker.hasAbility('Type Sync')) {
       if (!attacker.named('Spectreon'))
         bpMods.push(4505);
-    }
-    else {
+    } else {
       bpMods.push(4915);
     }
   }

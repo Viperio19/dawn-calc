@@ -553,6 +553,11 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
       rockType.effectiveness[defender.types[0]]! *
       (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
 
+    // Snowy Peaks - Stealth Rocks do neutral damage to Ice Types instead of Super Effective
+    if (defender.hasType('Ice') && field.chromaticField === 'Snowy-Peaks') {
+      effectiveness /= 2;
+    }
+
     // XOR between Torterra-Crest and Inverse Field so they cancel each other out
     if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
         (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Inverse - Inverse type effectiveness
@@ -654,12 +659,21 @@ function getEndOfTurn(
       !defender.hasAbility('Magic Guard', 'Overcoat', 'Snow Cloak') &&
       !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
       !defender.hasItem('Safety Goggles') &&
-      !defender.named('Empoleon-Crest') && 
-      field.hasWeather('Hail')
+      !defender.named('Empoleon-Crest')
     ) {
-      damage -= Math.floor(defender.maxHP() / 16);
-      texts.push('hail damage');
+      // Snowy Peaks - Snow deals 1/16 weather damage like Sandstorm (Ice-types are immune)
+      if (field.hasWeather('Snow') && field.chromaticField === 'Snowy-Peaks') {
+        damage -= Math.floor(defender.maxHP() / 16);
+        texts.push('snow damage');
+      } else {
+        damage -= Math.floor(defender.maxHP() / 16);
+        texts.push('hail damage');
+      }
     }
+  // Snowy Peaks - Activates Ice Body
+  } else if (defender.hasAbility('Ice Body') && field.chromaticField === 'Snowy-Peaks') {
+    damage += Math.floor(defender.maxHP() / 16);
+    texts.push('Ice Body recovery');    
   }
   
   // Volcanic Top - Activates Solar Power
@@ -1276,6 +1290,9 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
       break;
     case "Flower-Garden":
       output += ' on Flower Garden';
+      break;
+    case "Snowy-Peaks":
+      output += ' on Snowy Peaks';
       break;
     default:
       output += ' on ' + description.chromaticField;

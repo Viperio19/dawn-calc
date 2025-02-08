@@ -377,6 +377,11 @@ export function checkFieldBoosts(source: Pokemon, field: Field) {
     if (source.hasItem('Prism Scale')) {
       source.boosts.atk = Math.min(6, source.boosts.atk + 1);
     }    
+  } else if (field.chromaticField === 'Snowy-Peaks') {
+    // Snowy Peaks - Prism Scale: Boosts Speed +2 
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.spe = Math.min(6, source.boosts.spe + 2);
+    }    
   }
 }
 
@@ -837,6 +842,8 @@ export function getMimicryType(field: Field) {
     return "Grass" as TypeName;
   } else if (field.chromaticField === 'Desert') {
     return "Ground" as TypeName;
+  } else if (field.chromaticField === 'Snowy-Peaks') {
+    return "Ice" as TypeName;
   } else {
     return "???" as TypeName;
   }
