@@ -127,6 +127,13 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
     speedMods.push(8192);
   }
 
+  // Fields - Speed Modifiers
+
+  // Cave - Float Stone grants the user 1.25x Speed
+  if (field.chromaticField === 'Cave' && pokemon.hasItem('Float Stone')) {
+    speedMods.push(5120);
+  }
+
   // Crests - Speed Modifiers
 
   if (pokemon.named('Ariados-Crest')) {
@@ -146,6 +153,7 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
   }
 
   speed = OF32(pokeRound((speed * chainMods(speedMods, 410, 131172)) / 4096));
+
   // Flower Garden - Chlorophyll additionally grants Quick Feet
   if (pokemon.hasStatus('par') && !(pokemon.hasAbility('Quick Feet') || (pokemon.hasAbility('Chlorophyll') && field.chromaticField === 'Flower-Garden'))) {
     speed = Math.floor(OF32(speed * (gen.num < 7 ? 25 : 50)) / 100);
@@ -256,6 +264,8 @@ export function checkIntimidate(gen: Generation, source: Pokemon, target: Pokemo
     target.hasAbility('Clear Body', 'White Smoke', 'Hyper Cutter', 'Full Metal Body') ||
     // More abilities now block Intimidate in Gen 8+ (DaWoblefet, Cloudy Mistral)
     (gen.num >= 8 && target.hasAbility('Inner Focus', 'Own Tempo', 'Oblivious', 'Scrappy')) ||
+    // Cave - Sturdy grants Clear Body
+    (target.hasAbility('Sturdy') && field.chromaticField === 'Cave') ||
     target.hasItem('Clear Amulet');
   if (source.hasAbility('Intimidate') && source.abilityOn && !blocked) {
     if (target.hasAbility('Contrary', 'Defiant', 'Guard Dog') ||
@@ -394,6 +404,18 @@ export function checkFieldEntryEffects(source: Pokemon, field: Field) {
     // Ancient Ruins - Anticipation and Forewarn grant +1 Special Attack on entry
     if (source.hasAbility('Anticipation', 'Forewarn')) {
       source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+    }
+  } else if (field.chromaticField === 'Cave') {
+    // Cave - Prism Scale: Boosts Def +1
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.def = Math.min(6, source.boosts.def + 1);
+    }
+    // Cave - Steam Engine grants +2 Speed on entry
+    if (source.hasAbility('Steam Engine')) {
+      source.boosts.spe = Math.min(6, source.boosts.spe + 2);
+    // Cave - Battle Armor and Shell Armor grants +1 Defense on entry
+    } else if (source.hasAbility('Battle Armor', 'Shell Armor')) {
+      source.boosts.def = Math.min(6, source.boosts.def + 1);
     }
   }
 }
@@ -863,6 +885,8 @@ export function getMimicryType(field: Field) {
     return "Poison" as TypeName;
   } else if (field.chromaticField === 'Ancient-Ruins') {
     return "Psychic" as TypeName;
+  } else if (field.chromaticField === 'Cave') {
+    return "Rock" as TypeName;
   } else {
     return "???" as TypeName;
   }

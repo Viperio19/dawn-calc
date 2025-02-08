@@ -331,6 +331,7 @@ export function calculateSMSSSV(
           (attacker.item && attacker.item.includes('Plate')) ? getItemBoostType(attacker.item)! : 'Normal'
         : field.chromaticField === 'Acidic-Wasteland' ? 'Poison'
         : field.chromaticField === 'Ancient-Ruins' ? 'Psychic'
+        : field.chromaticField === 'Cave' ? 'Rock'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
       if (type !== 'Normal' || field.chromaticField === 'Blessed-Sanctum') {
@@ -807,12 +808,29 @@ export function calculateSMSSSV(
         !defender.named('Empoleon-Crest')) {
       desc.chromaticField = field.chromaticField;
     }
+
+    if (field.defenderSide.isSR && defender.hasType('Ice') &&
+        !defender.hasItem('Heavy-Duty Boots') && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
+      desc.chromaticField = field.chromaticField;
+    }
   }
 
   // Acidic Wasteland
   if (field.chromaticField === 'Acidic-Wasteland') {
     if ((attacker.hasAbility('Toxic Boost') && !attacker.hasStatus('psn', 'tox') && move.category === "Physical") ||
         defender.hasAbility('Liquid Ooze')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Cave
+  if (field.chromaticField === 'Cave') {
+    if (move.named('Power Gem') && defender.stats.def < defender.stats.spd) {
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if (field.defenderSide.isSR && defender.hasType('Rock') &&
+        !defender.hasItem('Heavy-Duty Boots') && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -1553,6 +1571,11 @@ export function calculateBasePowerSMSSSV(
       case 'Ancient-Ruins':
         basePower = 80;
         desc.moveName = 'Eerie Spell';
+        break;
+      case 'Cave':
+        basePower = 75;
+        move.category = 'Physical';
+        desc.moveName = 'Rock Slide';
         break;
       case 'Inverse':
         basePower = 0;
@@ -2402,6 +2425,12 @@ export function calculateAtModsSMSSSV(
     }
   }
 
+  // Cave - Sound moves deal 1.3x damage
+  if (field.chromaticField === 'Cave' && move.flags.sound) {
+    atMods.push(5324);
+    desc.chromaticField = field.chromaticField;
+  }
+
   // Fields - Prism Scale Effects: Miscellaneous boosts
   if ((attacker.hasItem('Prism Scale') && !(field.chromaticField === 'None'))) {
     // Inverse - The user's next move becomes typeless and deals 1.5x damage until it's switched out
@@ -2432,7 +2461,8 @@ export function calculateDefenseSMSSSV(
 ) {
   let defense: number;
   const hitsPhysical = move.overrideDefensiveStat === 'def' || move.category === 'Physical' ||
-    (move.named('Shell Side Arm') && getShellSideArmCategory(attacker, defender) === 'Physical');
+    (move.named('Shell Side Arm') && getShellSideArmCategory(attacker, defender) === 'Physical') ||
+    (move.named('Power Gem') && field.chromaticField === 'Cave' && defender.stats.def < defender.stats.spd); // Cave - Power Gem targets the opponent's lower defense stat between Defense and Special Defense
   
   // Crests - Defense Stat Swaps (in general)
   const defenseStat = 
@@ -2463,9 +2493,16 @@ export function calculateDefenseSMSSSV(
   }
 
   // unlike all other defense modifiers, Sandstorm SpD boost gets applied directly
-  if (field.hasWeather('Sand') && (defender.hasType('Rock') || defender.hasInvisisbleType(attacker, field, 'Rock')) && !hitsPhysical) {
-    defense = pokeRound((defense * 3) / 2);
-    desc.weather = field.weather;
+  if (field.hasWeather('Sand') && (defender.hasType('Rock') || defender.hasInvisisbleType(attacker, field, 'Rock'))) {
+    if (!hitsPhysical) {
+      defense = pokeRound((defense * 3) / 2);
+      desc.weather = field.weather;
+    // Cave - Sandstorm boosts the Defense of Rock Types 1.2x
+    } else if (hitsPhysical && field.chromaticField === 'Cave') {
+      defense = pokeRound((defense * 6) / 5);
+      desc.weather = field.weather;
+      desc.chromaticField = field.chromaticField;
+    }
   }
   if (field.hasWeather('Snow') && (defender.hasType('Ice') || defender.hasInvisisbleType(attacker, field, 'Ice') || defender.named('Empoleon-Crest')) && hitsPhysical) {
     defense = pokeRound((defense * 3) / 2);
@@ -2867,7 +2904,7 @@ export function calculateFinalModsSMSSSV(
 
   // Desert - Sand Veil instead makes user receive ¾ damage dealt in Sandstorm
   if (field.chromaticField === 'Desert' && defender.hasAbility('Sand Veil') && field.hasWeather('Sand')) {
-    finalMods.push(3072);    
+    finalMods.push(3072);
     desc.defenderAbility = defender.ability;
     desc.weather = field.weather;
     desc.chromaticField = field.chromaticField;

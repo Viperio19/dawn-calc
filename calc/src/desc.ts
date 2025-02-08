@@ -585,6 +585,11 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
         effectiveness /= 2;
       }
 
+      // Cave - Stealth Rocks do resistant damage to Rock Type Pokemon
+      if (defender.hasType('Rock') && field.chromaticField === 'Cave') {
+        effectiveness /= 2;
+      }
+
       // XOR between Torterra-Crest and Inverse Field so they cancel each other out
       if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
           (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Inverse - Inverse type effectiveness
@@ -1306,6 +1311,7 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Eclipse":
     case "Sky":
     case "Desert":
+    case "Cave":
     case "Inverse":
       output += ' on ' + description.chromaticField + ' Field';
       break;
