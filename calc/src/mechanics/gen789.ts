@@ -817,7 +817,8 @@ export function calculateSMSSSV(
 
   // Acidic Wasteland
   if (field.chromaticField === 'Acidic-Wasteland') {
-    if ((attacker.hasAbility('Toxic Boost') && !attacker.hasStatus('psn', 'tox') && move.category === "Physical") ||
+    if ((attacker.hasAbility('Toxic Boost') && move.category === "Physical" && !attacker.hasStatus('psn', 'tox')) ||
+        ((defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) && !defender.hasStatus('psn', 'tox')) ||
         defender.hasAbility('Liquid Ooze')) {
       desc.chromaticField = field.chromaticField;
     }

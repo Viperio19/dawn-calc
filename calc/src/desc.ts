@@ -825,7 +825,7 @@ function getEndOfTurn(
     texts.push('Bad Dreams');
   // Acidic Wasteland - Activates Poison Heal
   } else if (field.chromaticField === 'Acidic-Wasteland') {
-    if (defender.hasAbility('Poison Heal')) {
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) {
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
