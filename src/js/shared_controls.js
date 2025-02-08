@@ -372,6 +372,7 @@ function autosetWeather(ability, i) {
 	}
 
 	var currentWeather = $("input:radio[name='weather']:checked").val();
+	var chromaticField = $("#chromatic-field").val();
 	if (lastAutoWeather.indexOf(currentWeather) === -1) {
 		lastManualWeather = currentWeather;
 		lastAutoWeather[1 - i] = "";
@@ -383,8 +384,11 @@ function autosetWeather(ability, i) {
 		$("#sun").prop("checked", true);
 		break;
 	case "Drizzle":
-		lastAutoWeather[i] = "Rain";
-		$("#rain").prop("checked", true);
+		// Desert - Drizzle fails
+		if (chromaticField !== 'Desert') {
+			lastAutoWeather[i] = "Rain";
+			$("#rain").prop("checked", true);
+		}
 		break;
 	case "Sand Stream":
 		lastAutoWeather[i] = "Sand";
@@ -495,6 +499,13 @@ $("#chromatic-field").change(function () {
 	$("#starstruckR").prop("checked", false);
 	$("#gritL0").prop("checked", true);
 	$("#gritR0").prop("checked", true);
+
+	var currentWeather = $("input:radio[name='weather']:checked").val();
+
+	// Desert - Drizzle and Rain Dance fail
+	if (chromaticField === 'Desert' && currentWeather === 'Rain') {
+		$("#clear").prop("checked", true);
+	}
 
 	var allPokemon = $('.poke-info');
 	allPokemon.each(function () {
@@ -751,13 +762,23 @@ $(".item").change(function () {
 	var chromaticField = $("#chromatic-field").val();
 	var id = pokeObj.prop("id");
 
-	// Sky - Prism Scale: Set Tailwind
-	if (chromaticField === 'Sky' && itemName === 'Prism Scale') {
-		if (id === 'p1') {
-			$("#tailwindL").prop("checked", true);
-		} else {
-			$("#tailwindR").prop("checked", true);
-		}			
+	// Fields - Prism Scale Effects: Applying effects
+	if (itemName === 'Prism Scale') {
+		// Sky - Prism Scale: Set Tailwind
+		if (chromaticField === 'Sky') {
+			if (id === 'p1') {
+				$("#tailwindL").prop("checked", true);
+			} else {
+				$("#tailwindR").prop("checked", true);
+			}
+		// Flower Garden - Prism Scale: Apply Ingrain
+		} else if (chromaticField === 'Flower-Garden') {
+			if (id === 'p1') {
+				$("#ingrainL").prop("checked", true);
+			} else {
+				$("#ingrainR").prop("checked", true);
+			}
+		}
 	}
 
 	if (chromaticField === 'Ring-Arena') {

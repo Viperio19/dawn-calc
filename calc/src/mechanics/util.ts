@@ -110,7 +110,8 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
       (pokemon.hasAbility('Surge Surfer') && terrain === 'Electric')
   ) {
     speedMods.push(8192);
-  } else if (pokemon.hasAbility('Quick Feet') && pokemon.status) {
+  // Flower Garden - Chlorophyll additionally grants Quick Feet
+  } else if ((pokemon.hasAbility('Quick Feet') || (pokemon.hasAbility('Chlorophyll') && field.chromaticField === 'Flower-Garden')) && pokemon.status) {
     speedMods.push(6144);
   } else if (pokemon.hasAbility('Slow Start') && pokemon.abilityOn) {
     speedMods.push(2048);
@@ -145,7 +146,8 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
   }
 
   speed = OF32(pokeRound((speed * chainMods(speedMods, 410, 131172)) / 4096));
-  if (pokemon.hasStatus('par') && !pokemon.hasAbility('Quick Feet')) {
+  // Flower Garden - Chlorophyll additionally grants Quick Feet
+  if (pokemon.hasStatus('par') && !(pokemon.hasAbility('Quick Feet') || (pokemon.hasAbility('Chlorophyll') && field.chromaticField === 'Flower-Garden'))) {
     speed = Math.floor(OF32(speed * (gen.num < 7 ? 25 : 50)) / 100);
   }
 
@@ -369,6 +371,11 @@ export function checkFieldBoosts(source: Pokemon, field: Field) {
     // Haunted Graveyard - Prism Scale: Boosts Special Defense +1
     if (source.hasItem('Prism Scale')) {
       source.boosts.spd = Math.min(6, source.boosts.spd + 1);
+    }
+  } else if (field.chromaticField === 'Desert') {
+    // Desert - Prism Scale: Boosts Attack +1
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.atk = Math.min(6, source.boosts.atk + 1);
     }    
   }
 }
@@ -826,6 +833,10 @@ export function getMimicryType(field: Field) {
     return "Flying" as TypeName;
   } else if (field.chromaticField === 'Haunted-Graveyard') {
     return "Ghost" as TypeName;
+  } else if (field.chromaticField === 'Flower-Garden') {
+    return "Grass" as TypeName;
+  } else if (field.chromaticField === 'Desert') {
+    return "Ground" as TypeName;
   } else {
     return "???" as TypeName;
   }

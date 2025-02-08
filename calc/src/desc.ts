@@ -697,7 +697,7 @@ function getEndOfTurn(
   }
 
   if (field.defenderSide.isIngrain && !healBlock) {
-    let recovery = Math.floor(defender.maxHP() / 16);
+    let recovery = Math.floor(defender.maxHP() / (field.chromaticField === 'Flower-Garden' ? 8 : 16)); // Flower Garden - Ingrain restores 1/8th of the user's Max HP
     if (defender.hasItem('Big Root')) recovery = Math.trunc(recovery * 5324 / 4096);
     damage += recovery;
     texts.push('Ingrain recovery');
@@ -733,7 +733,8 @@ function getEndOfTurn(
   }
 
   if (field.hasTerrain('Grassy')) {
-    if (isGrounded(defender, field, field.defenderSide.isIngrain) && !healBlock) {
+    // Flower Garden - Grassy Terrain only heals Grass Type Pokemon
+    if (isGrounded(defender, field, field.defenderSide.isIngrain) && !healBlock && !(field.chromaticField === 'Flower-Garden' && !defender.hasType('Grass'))) {
       damage += Math.floor(defender.maxHP() / 16);
       texts.push('Grassy Terrain recovery');
     }
@@ -780,7 +781,9 @@ function getEndOfTurn(
   }
 
   if (!defender.hasAbility('Magic Guard') && !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
-      (TRAPPING.includes(move.name) || (TRAPPING_JUNGLE.includes(move.name) && field.chromaticField === 'Jungle'))) { // Jungle - Certain moves apply Infestation
+      (TRAPPING.includes(move.name) || (TRAPPING_JUNGLE.includes(move.name) && field.chromaticField === 'Jungle') || // Jungle - Certain moves apply Infestation
+      (move.named('Leaf Tornado') && field.chromaticField === 'Flower-Garden') || // Flower Garden - Leaf Tornado is now a binding move that deals 1/8 max HP per turn for 2-5 turns
+      (move.named('Sandsear Storm') && field.chromaticField === 'Desert'))) { // Desert - Sandsear Storm applies Sand Tomb trapping and chip damage effect 
     if (attacker.hasItem('Binding Band')) {
       damage -= gen.num > 5 ? Math.floor(defender.maxHP() / 6) : Math.floor(defender.maxHP() / 8);
       texts.push('trapping damage');
@@ -1249,6 +1252,7 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Jungle":
     case "Eclipse":
     case "Sky":
+    case "Desert":
     case "Inverse":
       output += ' on ' + description.chromaticField + ' Field';
       break;
@@ -1270,8 +1274,11 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Haunted-Graveyard":
       output += ' on Haunted Graveyard';
       break;
+    case "Flower-Garden":
+      output += ' on Flower Garden';
+      break;
     default:
-      output += 'on ' + description.chromaticField;
+      output += ' on ' + description.chromaticField;
       break;
     }
   }
