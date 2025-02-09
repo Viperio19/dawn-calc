@@ -1387,6 +1387,7 @@ function createField() {
 		spikes = [~~$("input:radio[name='spikesL']:checked").val(), ~~$("input:radio[name='spikesR']:checked").val()];
 	}
 	var steelsurge = [$("#steelsurgeL").prop("checked"), $("#steelsurgeR").prop("checked")];
+	var isStickyWeb = [$("#stickywebL").prop("checked"), $("#stickywebR").prop("checked")];
 	var vinelash = [$("#vinelashL").prop("checked"), $("#vinelashR").prop("checked")];
 	var wildfire = [$("#wildfireL").prop("checked"), $("#wildfireR").prop("checked")];
 	var cannonade = [$("#cannonadeL").prop("checked"), $("#cannonadeR").prop("checked")];
@@ -1415,7 +1416,7 @@ function createField() {
 
 	var createSide = function (i) {
 		return new calc.Side({
-			spikes: spikes[i], isSR: isSR[i], steelsurge: steelsurge[i],
+			spikes: spikes[i], isSR: isSR[i], steelsurge: steelsurge[i], isStickyWeb: isStickyWeb[i],
 			vinelash: vinelash[i], wildfire: wildfire[i], cannonade: cannonade[i], volcalith: volcalith[i],
 			isReflect: isReflect[i], isLightScreen: isLightScreen[i], isProtected: isProtected[i], isIngrain: isIngrain[i],
 			isAquaRing: isAquaRing[i], isSeeded: isSeeded[i], isNightmare: isNightmare[i], isForesight: isForesight[i],

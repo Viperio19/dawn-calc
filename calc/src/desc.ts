@@ -594,15 +594,20 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
         effectiveness /= 2;
       }
 
-      // Cave - Stealth Rocks do resistant damage to Rock Type Pokemon
-      if (defender.hasType('Rock') && field.chromaticField === 'Cave') {
-        effectiveness /= 2;
+      // Cave - Stealth Rocks do resisted damage to rock types
+      if (defender.hasType('Rock') && field.chromaticField === 'Cave' && effectiveness > 0.5) {
+        effectiveness = 0.5;
       }
 
       // XOR between Torterra-Crest and Inverse Field so they cancel each other out
       if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
           (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Inverse - Inverse type effectiveness
         effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to rock
+      }
+      
+      // Cave - Stealth Rocks do at least neutral damage to non-rock types
+      if (field.chromaticField === 'Cave' && !defender.hasType('Rock') && effectiveness < 1) {
+        effectiveness = 1;
       }
       
       // Undercolony - Shell Armor & Battle Armor makes user resist the Rock type
@@ -648,6 +653,12 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
         damage += Math.floor(defender.maxHP() / 4);
         texts.push('3 layers of Spikes');
       }
+    }
+
+    // Jungle - Sticky Web deals 1/8th of a Flying type’s Max HP on entry
+    if (defender.hasType('Flying') && field.chromaticField === 'Jungle') {
+      damage += Math.floor(defender.maxHP() / 8);
+      texts.push('Sticky Web');
     }
   }
 
@@ -729,7 +740,8 @@ function getEndOfTurn(
 
   const loseItem = move.named('Knock Off') && !defender.hasAbility('Sticky Hold');
   // psychic noise should suppress all recovery effects
-  const healBlock = move.named('Psychic Noise') &&
+  const healBlock = (move.named('Psychic Noise') ||
+    ((move.named('Shock Wave') || move.named('Nature Power')) && field.chromaticField === 'Thundering-Plateau')) && // Thundering Plateau - Shock Wave applies Heal Block
     !(
       // suppression conditions
       attacker.hasAbility('Sheer Force') ||

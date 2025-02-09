@@ -197,6 +197,9 @@ export function getMoveEffectiveness(
   // Undercolony - Rock Throw is super effective vs Ground types
   } else if (field.chromaticField === 'Undercolony' && move.named('Rock Throw') && type === 'Ground') {
     return 2;
+  // Dragon's Den - Dragon Pulse can now hit Fairy type Pokemon (for Resisted Damage)
+  } else if (field.chromaticField === 'Dragons-Den' && move.named('Dragon Pulse') && type === 'Fairy') {
+    return 0.5;
   } else {
     let effectiveness = gen.types.get(toID(move.type))!.effectiveness[type]!;
     if (effectiveness === 0 && isRingTarget) {
@@ -323,6 +326,14 @@ export function checkIntrepidSword(source: Pokemon, gen: Generation) {
 export function checkDauntlessShield(source: Pokemon, gen: Generation) {
   if (source.hasAbility('Dauntless Shield') && gen.num > 7) {
     source.boosts.def = Math.min(6, source.boosts.def + 1);
+  }
+}
+
+export function checkStickyWeb(source: Pokemon, field: Field, stickyWeb: boolean) {
+  if (stickyWeb && !source.hasItem('Heavy-Duty Boots') && !source.hasAbility('Clear Body', 'White Smoke', 'Full Metal Body')) {
+    // Jungle - Sticky Web reduces Speed by one additional stage
+    let boosts = field.chromaticField === 'Jungle' ? 2 : 1;
+    source.boosts.spe = Math.max(-6, source.boosts.spe - boosts);
   }
 }
 

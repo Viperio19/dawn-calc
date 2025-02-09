@@ -29,6 +29,7 @@ import {
   checkItem,
   checkMultihitBoost,
   checkSeedBoost,
+  checkStickyWeb,
   checkTeraformZero,
   checkWindRider,
   checkWonderRoom,
@@ -85,6 +86,8 @@ export function calculateSMSSSV(
   checkDownload(defender, attacker, field.isWonderRoom);
   checkIntrepidSword(attacker, gen);
   checkIntrepidSword(defender, gen);
+  checkStickyWeb(attacker, field, field.attackerSide.isStickyWeb);
+  checkStickyWeb(defender, field, field.defenderSide.isStickyWeb);
   checkCrestBoosts(attacker);
   checkCrestBoosts(defender);
   checkFieldEntryEffects(attacker, field);
@@ -667,12 +670,6 @@ export function calculateSMSSSV(
     desc.chromaticField = field.chromaticField;
   }
 
-  // Dragon's Den - Dragon Pulse can now hit Fairy type Pokemon (for Resisted Damage)
-  if (typeEffectiveness === 0 && field.chromaticField === 'Dragons-Den' && move.named('Dragon Pulse')) {
-    typeEffectiveness = 0.5;
-    desc.chromaticField = field.chromaticField;
-  }
-
   if (typeEffectiveness === 0) {
     return result;
   }
@@ -705,12 +702,6 @@ export function calculateSMSSSV(
 
   // Fields - Text for description
 
-  // Eclipse
-  if (field.chromaticField === 'Eclipse' && move.named('Solar Beam', 'Solar Blade')) {
-    desc.chromaticField = field.chromaticField;
-    return result; // Results in no damage
-  }
-
   // Jungle
   if (field.chromaticField === 'Jungle') {
     if (move.named('Fell Stinger', 'Silver Wind', 'Steamroller') &&
@@ -722,9 +713,17 @@ export function calculateSMSSSV(
     }
   }
 
-  // Inverse
-  if (field.chromaticField === 'Inverse') {
+  // Eclipse
+  if (field.chromaticField === 'Eclipse' && move.named('Solar Beam', 'Solar Blade')) {
     desc.chromaticField = field.chromaticField;
+    return result; // Results in no damage
+  }
+
+  // Dragon's Den
+  if (field.chromaticField === 'Dragons-Den') {
+    if (move.named('Dragon Pulse') && defender.hasType('Fairy')) {
+      desc.chromaticField = field.chromaticField;
+    }
   }
 
   // Thundering Plateau
@@ -838,8 +837,7 @@ export function calculateSMSSSV(
       desc.chromaticField = field.chromaticField;
     }
 
-    if (field.defenderSide.isSR && defender.hasType('Rock') &&
-        !defender.hasItem('Heavy-Duty Boots') && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
+    if (field.defenderSide.isSR && !defender.hasItem('Heavy-Duty Boots') && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -849,6 +847,11 @@ export function calculateSMSSSV(
     if (move.named('Rock Throw') && defender.hasType('Ground')) {
       desc.chromaticField = field.chromaticField;
     }
+  }
+
+  // Inverse
+  if (field.chromaticField === 'Inverse') {
+    desc.chromaticField = field.chromaticField;
   }
 
   if (move.type === 'Stellar') {
@@ -861,8 +864,9 @@ export function calculateSMSSSV(
   // Tera Shell works only at full HP, but for all hits of multi-hit moves
   if (defender.hasAbility('Tera Shell') &&
       defender.curHP() === defender.maxHP() &&
-      (!field.defenderSide.isSR && (!field.defenderSide.spikes || defender.hasType('Flying')) ||
-      defender.hasItem('Heavy-Duty Boots'))
+      (!field.defenderSide.isSR && (!field.defenderSide.spikes || defender.hasType('Flying')) &&
+      !(field.defenderSide.isStickyWeb && defender.hasType('Flying') && field.chromaticField === 'Jungle') || // Jungle - Sticky Web deals 1/8th of a Flying type’s Max HP on entry
+      defender.hasItem('Heavy-Duty Boots')) 
   ) {
     typeEffectiveness = 0.5;
     desc.defenderAbility = defender.ability;
@@ -2846,7 +2850,8 @@ export function calculateFinalModsSMSSSV(
     if (
       defender.curHP() === defender.maxHP() &&
       hitCount === 0 &&
-      (!field.defenderSide.isSR && (!field.defenderSide.spikes || defender.hasType('Flying')) ||
+      (!field.defenderSide.isSR && (!field.defenderSide.spikes || defender.hasType('Flying')) &&
+      !(field.defenderSide.isStickyWeb && defender.hasType('Flying') && field.chromaticField === 'Jungle') || // Jungle - Sticky Web deals 1/8th of a Flying type’s Max HP on entry
       defender.hasItem('Heavy-Duty Boots')) && !attacker.hasAbility('Parental Bond (Child)')
     ) {
       finalMods.push(2048);
