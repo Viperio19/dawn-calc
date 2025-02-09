@@ -54,7 +54,7 @@ export interface RawDesc {
   rivalry?: 'buffed' | 'nerfed';
   terrain?: Terrain;
   chromaticField?: string;
-  starstruck?: boolean;
+  fieldCondition?: string;
   gritStages?: number;
   weather?: Weather;
   isTailwind?: boolean;
@@ -98,6 +98,7 @@ export function displayMove(
   defender: Pokemon,
   move: Move,
   damage: Damage,
+  field: Field,
   notation = '%'
 ) {
   const [minDamage, maxDamage] = damageRange(damage);
@@ -108,7 +109,7 @@ export function displayMove(
   const maxDisplay = toDisplay(notation, max, defender.maxHP());
 
   const recoveryText = getRecovery(gen, attacker, defender, move, damage, notation).text;
-  const recoilText = getRecoil(gen, attacker, defender, move, damage, notation).text;
+  const recoilText = getRecoil(gen, attacker, defender, move, damage, field, notation).text;
 
   return `${minDisplay} - ${maxDisplay}${notation}${recoveryText &&
     ` (${recoveryText})`}${recoilText && ` (${recoilText})`}`;
@@ -212,6 +213,7 @@ export function getRecoil(
   defender: Pokemon,
   move: Move,
   damage: Damage,
+  field: Field,
   notation = '%'
 ) {
   const [minDamage, maxDamage] = damageRange(damage);
@@ -222,14 +224,20 @@ export function getRecoil(
   let text = '';
 
   const damageOverflow = minDamage > defender.curHP() || maxDamage > defender.curHP();
-  if (move.recoil || defender.named('Bastiodon-Crest')) {
+  if (move.recoil || defender.named('Bastiodon-Crest') || (move.named('Megahorn') && field.chromaticField === 'Undercolony')) {
     let tempMod = 0;
     
     if (move.recoil) {
       tempMod += (move.recoil[0] / move.recoil[1]) * 100;
     }
+
     if (defender.named('Bastiodon-Crest')) {
       tempMod += 50;
+    }
+
+    // Undercolony - Megahorn is now 100% accurate, but user takes 1/3 recoil damage
+    if (move.named('Megahorn') && field.chromaticField === 'Undercolony') {
+      tempMod += (1 / 3) * 100;
     }
 
     const mod = tempMod;
@@ -572,7 +580,8 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
        (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
       return {damage, texts};
   } else {
-    if (defenderSide.isSR && !defender.hasAbility('Mountaineer')) {
+    if (defenderSide.isSR && !defender.hasAbility('Mountaineer') &&
+        !(defender.hasType('Rock') && field.chromaticField === 'Undercolony')) { // Undercolony - Rock types absorb Stealth Rocks
       const rockType = gen.types.get('rock' as ID)!;
       let effectiveness =
         rockType.effectiveness[defender.types[0]]! *
@@ -596,6 +605,11 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
         effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to rock
       }
       
+      // Undercolony - Shell Armor & Battle Armor makes user resist the Rock type
+      if (field.chromaticField === 'Undercolony' && defender.hasAbility('Shell Armor', 'Battle Armor') && effectiveness > 0.5) {
+        effectiveness = 0.5;
+      }
+
       damage += Math.floor((effectiveness * defender.maxHP()) / 8);
       texts.push('Stealth Rock');
     }
@@ -1178,8 +1192,8 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   output = appendIfSet(output, description.attackerItem);
   output = appendIfSet(output, description.attackerAbility);
   output = appendIfSet(output, description.rivalry);
-  if (description.starstruck) {
-    output += 'Starstruck ';
+  if (description.fieldCondition) {
+    output += description.fieldCondition + ' ';
   }
   if (description.isBurned) {
     output += 'burned ';
@@ -1311,7 +1325,6 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Eclipse":
     case "Sky":
     case "Desert":
-    case "Cave":
     case "Inverse":
       output += ' on ' + description.chromaticField + ' Field';
       break;
@@ -1330,6 +1343,8 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Ancient-Ruins":
       output += ' on ' + description.chromaticField.replace('-', ' ');
       break;
+    case "Cave":
+    case "Undercolony":
     default:
       output += ' on ' + description.chromaticField;
       break;

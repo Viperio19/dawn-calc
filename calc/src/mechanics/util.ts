@@ -194,6 +194,9 @@ export function getMoveEffectiveness(
       gen.types.get(toID(move.type))!.effectiveness[type]! *
       gen.types.get('grass' as ID)!.effectiveness[type]!
     );
+  // Undercolony - Rock Throw is super effective vs Ground types
+  } else if (field.chromaticField === 'Undercolony' && move.named('Rock Throw') && type === 'Ground') {
+    return 2;
   } else {
     let effectiveness = gen.types.get(toID(move.type))!.effectiveness[type]!;
     if (effectiveness === 0 && isRingTarget) {

@@ -332,6 +332,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Acidic-Wasteland' ? 'Poison'
         : field.chromaticField === 'Ancient-Ruins' ? 'Psychic'
         : field.chromaticField === 'Cave' ? 'Rock'
+        : field.chromaticField === 'Undercolony' ? 'Bug'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
       if (type !== 'Normal' || field.chromaticField === 'Blessed-Sanctum') {
@@ -580,6 +581,13 @@ export function calculateSMSSSV(
   // Inverse - Normal type moves always hit for neutral damage
   if (field.chromaticField === 'Inverse' && move.hasType('Normal')) {
     typeEffectiveness = 1;
+  }
+
+  // Undercolony - Shell Armor & Battle Armor makes user resist the Rock type
+  if (field.chromaticField === 'Undercolony' && defender.hasAbility('Shell Armor', 'Battle Armor') && move.hasType('Rock') && typeEffectiveness > 0.5) {
+    typeEffectiveness = 0.5;
+    desc.defenderAbility = defender.ability;
+    desc.chromaticField = field.chromaticField;
   }
 
   // Crests - Resistances and Immunities
@@ -832,6 +840,13 @@ export function calculateSMSSSV(
 
     if (field.defenderSide.isSR && defender.hasType('Rock') &&
         !defender.hasItem('Heavy-Duty Boots') && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Undercolony
+  if (field.chromaticField === 'Undercolony') {
+    if (move.named('Rock Throw') && defender.hasType('Ground')) {
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -1578,6 +1593,12 @@ export function calculateBasePowerSMSSSV(
         move.category = 'Physical';
         desc.moveName = 'Rock Slide';
         break;
+      case 'Undercolony':
+        basePower = 80;
+        move.category = 'Physical';
+        move.drain = [1, 2];
+        desc.moveName = 'Leech Life';
+        break;
       case 'Inverse':
         basePower = 0;
         desc.moveName = 'Trick Room';
@@ -1643,6 +1664,13 @@ export function calculateBasePowerSMSSSV(
   if (field.chromaticField === 'Blessed-Sanctum' && move.named('Hyper Voice', 'Tri Attack', 'Echoed Voice')) {
     basePower = 100;
     desc.moveName = 'Judgment';
+  }
+
+  // Undercolony - Silver Wind gains +10 power for each of the user’s stat boosts
+  if (field.chromaticField === 'Undercolony' && move.named('Silver Wind')) {
+    basePower = move.bp + 10 * countBoosts(gen, attacker.boosts);
+    desc.moveBP = basePower;
+    desc.chromaticField = field.chromaticField;
   }
 
   if (attacker.named('Cinccino-Crest')) {
@@ -1947,6 +1975,11 @@ export function calculateBPModsSMSSSV(
   ) {
     bpMods.push(4915);
     desc.attackerAbility = attacker.ability;
+  // Undercolony - Rock Head grants Reckless
+  } else if ((attacker.hasAbility('Rock Head') && field.chromaticField === 'Undercolony' && (move.recoil || move.hasCrashDamage))) {
+    bpMods.push(4915);
+    desc.attackerAbility = attacker.ability;
+    desc.chromaticField = field.chromaticField;
   }
 
   if (gen.num <= 8 && defender.hasAbility('Heatproof') && move.hasType('Fire')) {
@@ -2432,6 +2465,13 @@ export function calculateAtModsSMSSSV(
     desc.chromaticField = field.chromaticField;
   }
 
+  // Undercolony - Broken Carapace: While	Bug & Rock types <50% HP gain 1.2x Attack and Spa Attack
+  if (field.chromaticField === 'Undercolony' && attacker.hasType('Bug', 'Rock') && attacker.curHP() < (attacker.maxHP() / 2)) {
+    atMods.push(4915);
+    desc.fieldCondition = 'Broken Carapace';
+    desc.chromaticField = field.chromaticField;
+  }
+
   // Fields - Prism Scale Effects: Miscellaneous boosts
   if ((attacker.hasItem('Prism Scale') && !(field.chromaticField === 'None'))) {
     // Inverse - The user's next move becomes typeless and deals 1.5x damage until it's switched out
@@ -2789,9 +2829,10 @@ export function calculateFinalModsSMSSSV(
   } else if (attacker.hasAbility('Tinted Lens') && typeEffectiveness < 1) {
     finalMods.push(8192);
     desc.attackerAbility = attacker.ability;
+  // Starlight Arena - Starstruck!: If a Pokémon has this effect (manual toggle), their attacks gain the Tinted Lens effect.
   } else if (attacker.isStarstruck && typeEffectiveness < 1) {
     finalMods.push(8192);
-    desc.starstruck = true;
+    desc.fieldCondition = 'Starstruck';
     desc.chromaticField = field.chromaticField;
   }
 

@@ -503,6 +503,17 @@ function setPrismScaleEffects(pokeObj) {
 	} else if (chromaticField === 'Ancient-Ruins') {
 		$("#wonderroom").prop("checked", true);
 	}
+	// Undercolony - Prism Scale: Applies Salt Cure to the opponent
+	else if (chromaticField === 'Undercolony') {
+		var allPokemon = $('.poke-info');
+		allPokemon.each(function () {
+			var pokeObj = $(this);
+			var id2 = pokeObj.prop("id");
+			if (id !== id2) {
+				pokeObj.find(".saltcure").prop("checked", true);
+			}
+		});
+	}
 }
 
 $("#chromatic-field").change(function () {
