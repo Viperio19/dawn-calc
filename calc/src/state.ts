@@ -72,6 +72,7 @@ export namespace State {
     isSR?: boolean;
     isReflect?: boolean;
     isLightScreen?: boolean;
+    isStickyWeb?: boolean;
     isProtected?: boolean;
     isSeeded?: boolean;
     isIngrain?: boolean;

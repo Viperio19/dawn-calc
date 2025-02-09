@@ -21,7 +21,7 @@ import {
   checkDauntlessShield,
   checkDownload,
   checkEmbody,
-  checkFieldBoosts,
+  checkFieldEntryEffects,
   checkForecast,
   checkInfiltrator,
   checkIntimidate,
@@ -29,6 +29,7 @@ import {
   checkItem,
   checkMultihitBoost,
   checkSeedBoost,
+  checkStickyWeb,
   checkTeraformZero,
   checkWindRider,
   checkWonderRoom,
@@ -85,10 +86,12 @@ export function calculateSMSSSV(
   checkDownload(defender, attacker, field.isWonderRoom);
   checkIntrepidSword(attacker, gen);
   checkIntrepidSword(defender, gen);
+  checkStickyWeb(attacker, field, field.attackerSide.isStickyWeb);
+  checkStickyWeb(defender, field, field.defenderSide.isStickyWeb);
   checkCrestBoosts(attacker);
   checkCrestBoosts(defender);
-  checkFieldBoosts(attacker, field);
-  checkFieldBoosts(defender, field);
+  checkFieldEntryEffects(attacker, field);
+  checkFieldEntryEffects(defender, field);
 
   checkWindRider(attacker, field.attackerSide);
   checkWindRider(defender, field.defenderSide);
@@ -163,7 +166,7 @@ export function calculateSMSSSV(
   const defenderAbilityIgnored = defender.hasAbility(
     'Armor Tail', 'Aroma Veil', 'Aura Break', 'Battle Armor',
     'Big Pecks', 'Bulletproof', 'Clear Body', 'Contrary',
-    'Damp', 'Dazzling', 'Disguise', 'Dry Skin',
+    'Cute Charm', 'Damp', 'Dazzling', 'Disguise', 'Dry Skin',
     'Earth Eater', 'Filter', 'Flash Fire', 'Flower Gift',
     'Flower Veil', 'Fluffy', 'Friend Guard', 'Fur Coat',
     'Good as Gold', 'Grass Pelt', 'Guard Dog', 'Heatproof',
@@ -236,13 +239,32 @@ export function calculateSMSSSV(
   // Merciless does not ignore Shell Armor, damage dealt to a poisoned Pokemon with Shell Armor
   // will not be a critical hit (UltiMario)
   let tempCritical = !defender.hasAbility('Battle Armor', 'Shell Armor') &&
-    (move.isCrit || (attacker.hasAbility('Merciless') && defender.hasStatus('psn', 'tox')) ||
+    (move.isCrit ||
     (attacker.named('Ariados-Crest') && (defender.status || defender.boosts.spe < 0)) ||
     (attacker.named('Samurott-Crest') && move.flags.slicing)) &&
     move.timesUsed === 1;
 
   if (tempCritical == 0)
     tempCritical = false;
+
+  if (!tempCritical && attacker.hasAbility('Merciless')) { 
+    if (defender.hasStatus('psn', 'tox')) {
+      tempCritical = true;
+      desc.attackerAbility = attacker.ability;
+    // Acidic Wasteland - Activates Merciless
+    } else if (field.chromaticField === 'Acidic-Wasteland') {
+      tempCritical = true;
+      desc.attackerAbility = attacker.ability;
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Ring Arena - Grit Stage Effects: 3 - 100% Crit chance
+  if (!tempCritical && attacker.gritStages! >= 3) {
+    tempCritical = true;
+    desc.gritStages = attacker.gritStages;
+    desc.chromaticField = field.chromaticField;
+  }
 
   const isCritical = tempCritical;
 
@@ -265,6 +287,10 @@ export function calculateSMSSSV(
     }
     desc.moveType = type;
   } else if (move.named('Judgment') && attacker.item && attacker.item.includes('Plate')) {
+    type = getItemBoostType(attacker.item)!;
+  // Blessed Sanctum - Multipulse: Hyper Voice, Tri Attack, and Echoed Voice become Judgement
+  } else if (move.named('Hyper Voice', 'Tri Attack', 'Echoed Voice') && field.chromaticField === 'Blessed-Sanctum' &&
+             attacker.item && attacker.item.includes('Plate')) {
     type = getItemBoostType(attacker.item)!;
   } else if (move.originalName === 'Techno Blast' &&
     attacker.item && attacker.item.includes('Drive')) {
@@ -303,9 +329,16 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Haunted-Graveyard' ? 'Ghost'
         : field.chromaticField === 'Flower-Garden' ? 'Grass'
         : field.chromaticField === 'Desert' ? 'Ground'
+        : field.chromaticField === 'Snowy-Peaks' ? 'Ice'
+        : field.chromaticField === 'Blessed-Sanctum' ?
+          (attacker.item && attacker.item.includes('Plate')) ? getItemBoostType(attacker.item)! : 'Normal'
+        : field.chromaticField === 'Acidic-Wasteland' ? 'Poison'
+        : field.chromaticField === 'Ancient-Ruins' ? 'Psychic'
+        : field.chromaticField === 'Cave' ? 'Rock'
+        : field.chromaticField === 'Undercolony' ? 'Bug'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
-      if (!(type === 'Normal')) {
+      if (type !== 'Normal' || field.chromaticField === 'Blessed-Sanctum') {
         desc.chromaticField = field.chromaticField;
       }
     } else {
@@ -318,7 +351,8 @@ export function calculateSMSSSV(
 
     // If the Nature Power user has the ability Prankster, it cannot affect
     // Dark-types or grounded foes if Psychic Terrain is active
-    if (!(move.named('Nature Power') && attacker.hasAbility('Prankster')) &&
+    if (!(move.named('Nature Power') && (attacker.hasAbility('Prankster')) ||
+      (attacker.hasAbility('Telepathy') && field.chromaticField === 'Ancient-Ruins')) && // Ancient Ruins - Telepathy grants Prankster
       ((defender.types.includes('Dark') ||
       (field.hasTerrain('Psychic') && isGrounded(defender, field, field.defenderSide.isIngrain))))) {
       desc.moveType = type;
@@ -391,7 +425,8 @@ export function calculateSMSSSV(
     'Weather Ball',
     'Terrain Pulse',
     'Struggle',
-  ) || (move.named('Tera Blast') && attacker.teraType);
+  ) || (move.named('Tera Blast') && attacker.teraType)
+    || (move.named('Hyper Voice', 'Tri Attack', 'Echoed Voice') && field.chromaticField === 'Blessed-Sanctum');
 
   if (!move.isZ && !noTypeChange) {
     const normal = type === 'Normal';
@@ -551,6 +586,13 @@ export function calculateSMSSSV(
     typeEffectiveness = 1;
   }
 
+  // Undercolony - Shell Armor & Battle Armor makes user resist the Rock type
+  if (field.chromaticField === 'Undercolony' && defender.hasAbility('Shell Armor', 'Battle Armor') && move.hasType('Rock') && typeEffectiveness > 0.5) {
+    typeEffectiveness = 0.5;
+    desc.defenderAbility = defender.ability;
+    desc.chromaticField = field.chromaticField;
+  }
+
   // Crests - Resistances and Immunities
 
   // Druddigon Crest - Gives immunity to fire type moves
@@ -628,12 +670,6 @@ export function calculateSMSSSV(
     desc.chromaticField = field.chromaticField;
   }
 
-  // Dragon's Den - Dragon Pulse can now hit Fairy type Pokemon (for Resisted Damage)
-  if (typeEffectiveness === 0 && field.chromaticField === 'Dragons-Den' && move.named('Dragon Pulse')) {
-    typeEffectiveness = 0.5;
-    desc.chromaticField = field.chromaticField;
-  }
-
   if (typeEffectiveness === 0) {
     return result;
   }
@@ -666,12 +702,6 @@ export function calculateSMSSSV(
 
   // Fields - Text for description
 
-  // Eclipse
-  if (field.chromaticField === 'Eclipse' && move.named('Solar Beam', 'Solar Blade')) {
-    desc.chromaticField = field.chromaticField;
-    return result; // Results in no damage
-  }
-
   // Jungle
   if (field.chromaticField === 'Jungle') {
     if (move.named('Fell Stinger', 'Silver Wind', 'Steamroller') &&
@@ -679,13 +709,21 @@ export function calculateSMSSSV(
       desc.chromaticField = field.chromaticField;
     } else if (move.named('Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash')) {
       desc.moveType = '+ Grass' as TypeName;
-      desc.chromaticField = field.chromaticField;      
+      desc.chromaticField = field.chromaticField;   
     }
   }
 
-  // Inverse
-  if (field.chromaticField === 'Inverse') {
+  // Eclipse
+  if (field.chromaticField === 'Eclipse' && move.named('Solar Beam', 'Solar Blade')) {
     desc.chromaticField = field.chromaticField;
+    return result; // Results in no damage
+  }
+
+  // Dragon's Den
+  if (field.chromaticField === 'Dragons-Den') {
+    if (move.named('Dragon Pulse') && defender.hasType('Fairy')) {
+      desc.chromaticField = field.chromaticField;
+    }
   }
 
   // Thundering Plateau
@@ -764,6 +802,58 @@ export function calculateSMSSSV(
     }
   }
 
+  // Snowy Peaks
+  if (field.chromaticField === 'Snowy-Peaks') {
+    if (defender.hasAbility('Ice Body') && !field.hasWeather('Hail', 'Snow')) {
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if (field.hasWeather('Snow') &&
+        !defender.hasType('Ice') &&
+        !defender.hasAbility('Magic Guard', 'Overcoat', 'Snow Cloak') &&
+        !defender.hasItem('Safety Goggles') &&
+        !defender.named('Empoleon-Crest')) {
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if (field.defenderSide.isSR && defender.hasType('Ice') &&
+        !defender.hasItem('Heavy-Duty Boots') && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Acidic Wasteland
+  if (field.chromaticField === 'Acidic-Wasteland') {
+    if ((attacker.hasAbility('Toxic Boost') && move.category === "Physical" && !attacker.hasStatus('psn', 'tox')) ||
+        ((defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) && !defender.hasStatus('psn', 'tox')) ||
+        defender.hasAbility('Liquid Ooze')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Cave
+  if (field.chromaticField === 'Cave') {
+    if (move.named('Power Gem') && defender.stats.def < defender.stats.spd) {
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if (field.defenderSide.isSR && !defender.hasItem('Heavy-Duty Boots') && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Undercolony
+  if (field.chromaticField === 'Undercolony') {
+    if (move.named('Rock Throw') && defender.hasType('Ground')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Inverse
+  if (field.chromaticField === 'Inverse') {
+    desc.chromaticField = field.chromaticField;
+  }
+
   if (move.type === 'Stellar') {
     desc.defenderTera = defender.teraType; // always show in this case
     typeEffectiveness = !defender.teraType ? 1 : 2;
@@ -774,8 +864,9 @@ export function calculateSMSSSV(
   // Tera Shell works only at full HP, but for all hits of multi-hit moves
   if (defender.hasAbility('Tera Shell') &&
       defender.curHP() === defender.maxHP() &&
-      (!field.defenderSide.isSR && (!field.defenderSide.spikes || defender.hasType('Flying')) ||
-      defender.hasItem('Heavy-Duty Boots'))
+      (!field.defenderSide.isSR && (!field.defenderSide.spikes || defender.hasType('Flying')) &&
+      !(field.defenderSide.isStickyWeb && defender.hasType('Flying') && field.chromaticField === 'Jungle') || // Jungle - Sticky Web deals 1/8th of a Flying type’s Max HP on entry
+      defender.hasItem('Heavy-Duty Boots')) 
   ) {
     typeEffectiveness = 0.5;
     desc.defenderAbility = defender.ability;
@@ -1397,10 +1488,11 @@ export function calculateBasePowerSMSSSV(
     move.secondaries = true;
 
     // Nature Power cannot affect Dark-types if it is affected by Prankster
-    if (attacker.hasAbility('Prankster') && defender.types.includes('Dark')) {
+    if (attacker.hasAbility('Prankster') && (defender.types.includes('Dark') ||
+       (attacker.hasAbility('Telepathy') && field.chromaticField === 'Ancient-Ruins'))) { // Ancient Ruins - Telepathy grants Prankster
       basePower = 0;
       desc.moveName = 'Nature Power';
-      desc.attackerAbility = 'Prankster';
+      desc.attackerAbility = attacker.ability;
       break;
     }
     switch (field.terrain) {
@@ -1419,9 +1511,10 @@ export function calculateBasePowerSMSSSV(
     case 'Psychic':
       // Nature Power does not affect grounded Pokemon if it is affected by
       // Prankster and there is Psychic Terrain active
-      if (attacker.hasAbility('Prankster') && isGrounded(defender, field, field.defenderSide.isIngrain)) {
+      if (isGrounded(defender, field, field.defenderSide.isIngrain) && (attacker.hasAbility('Prankster') ||
+         (attacker.hasAbility('Telepathy') && field.chromaticField === 'Ancient-Ruins'))) { // Ancient Ruins - Telepathy grants Prankster
         basePower = 0;
-        desc.attackerAbility = 'Prankster';
+        desc.attackerAbility = attacker.ability;
       } else {
         basePower = 90;
         desc.moveName = 'Psychic';
@@ -1481,6 +1574,35 @@ export function calculateBasePowerSMSSSV(
         move.category = 'Physical';
         desc.moveName = 'Thousand Waves';
         break;
+      case 'Snowy-Peaks':
+        basePower = 120;
+        desc.moveBP = basePower;
+        move.category = 'Physical';
+        desc.moveName = 'Avalanche';
+        break;
+      case 'Blessed-Sanctum':
+        basePower = 100;
+        desc.moveName = 'Judgment';
+        break;
+      case 'Acidic-Wasteland':
+        basePower = 90;
+        desc.moveName = 'Sludge Bomb';
+        break;
+      case 'Ancient-Ruins':
+        basePower = 80;
+        desc.moveName = 'Eerie Spell';
+        break;
+      case 'Cave':
+        basePower = 75;
+        move.category = 'Physical';
+        desc.moveName = 'Rock Slide';
+        break;
+      case 'Undercolony':
+        basePower = 80;
+        move.category = 'Physical';
+        move.drain = [1, 2];
+        desc.moveName = 'Leech Life';
+        break;
       case 'Inverse':
         basePower = 0;
         desc.moveName = 'Trick Room';
@@ -1531,6 +1653,26 @@ export function calculateBasePowerSMSSSV(
   // Desert - Dig is 100 base power
   if (field.chromaticField === 'Desert' && move.named('Dig')) {
     basePower = 100;
+    desc.moveBP = basePower;
+    desc.chromaticField = field.chromaticField;
+  }
+
+  // Snowy Peaks - Avalanche's power is always doubled
+  if (field.chromaticField === 'Snowy-Peaks' && move.named('Avalanche')) {
+    basePower = move.bp * 2;
+    desc.moveBP = basePower;
+    desc.chromaticField = field.chromaticField;
+  }
+
+  // Blessed Sanctum - Multipulse: Hyper Voice, Tri Attack, and Echoed Voice become Judgement
+  if (field.chromaticField === 'Blessed-Sanctum' && move.named('Hyper Voice', 'Tri Attack', 'Echoed Voice')) {
+    basePower = 100;
+    desc.moveName = 'Judgment';
+  }
+
+  // Undercolony - Silver Wind gains +10 power for each of the user’s stat boosts
+  if (field.chromaticField === 'Undercolony' && move.named('Silver Wind')) {
+    basePower = move.bp + 10 * countBoosts(gen, attacker.boosts);
     desc.moveBP = basePower;
     desc.chromaticField = field.chromaticField;
   }
@@ -1726,8 +1868,8 @@ export function calculateBPModsSMSSSV(
     }
   }
 
-  // Ring Arena - Grit Stage Effects: Attacks deal 1.5x damage
-  if (attacker.gritStages == 5) {
+  // Ring Arena - Grit Stage Effects: 5 - Attacks deal 1.5x damage
+  if (attacker.gritStages! >= 5) {
     bpMods.push(6144);
     desc.gritStages = attacker.gritStages;
     desc.chromaticField = field.chromaticField;
@@ -1740,7 +1882,7 @@ export function calculateBPModsSMSSSV(
     (attacker.hasAbility('Flare Boost') &&
       attacker.hasStatus('brn') && move.category === 'Special') ||
     (attacker.hasAbility('Toxic Boost') &&
-      attacker.hasStatus('psn', 'tox') && move.category === 'Physical') ||
+      (attacker.hasStatus('psn', 'tox') || field.chromaticField === 'Acidic-Wasteland') && move.category === 'Physical') || // Acidic Wasteland - Activates Toxic Boost
     (attacker.hasAbility('Mega Launcher') && move.flags.pulse) ||
     ((attacker.hasAbility('Strong Jaw') || attacker.named('Feraligatr-Crest')) && move.flags.bite) ||
     (attacker.hasAbility('Steely Spirit') && move.hasType('Steel')) ||
@@ -1820,11 +1962,14 @@ export function calculateBPModsSMSSSV(
   // The -ate abilities already changed move typing earlier, so most checks are done and desc is set
   // However, Max Moves also don't boost -ate Abilities
   if (!move.isMax && hasAteAbilityTypeChange) {
-    if (attacker.hasAbility('Type Sync')) {
+    // Snowy Peaks - Refrigerate damage bonus is increased to 1.5x
+    if (attacker.hasAbility('Refrigerate') && field.chromaticField === 'Snowy-Peaks') {
+      bpMods.push(6144);
+      desc.chromaticField = field.chromaticField;
+    } else if (attacker.hasAbility('Type Sync')) {
       if (!attacker.named('Spectreon'))
         bpMods.push(4505);
-    }
-    else {
+    } else {
       bpMods.push(4915);
     }
   }
@@ -1834,6 +1979,11 @@ export function calculateBPModsSMSSSV(
   ) {
     bpMods.push(4915);
     desc.attackerAbility = attacker.ability;
+  // Undercolony - Rock Head grants Reckless
+  } else if ((attacker.hasAbility('Rock Head') && field.chromaticField === 'Undercolony' && (move.recoil || move.hasCrashDamage))) {
+    bpMods.push(4915);
+    desc.attackerAbility = attacker.ability;
+    desc.chromaticField = field.chromaticField;
   }
 
   if (gen.num <= 8 && defender.hasAbility('Heatproof') && move.hasType('Fire')) {
@@ -2152,12 +2302,21 @@ export function calculateAtModsSMSSSV(
   } else if (attacker.hasAbility('Stakeout') && attacker.abilityOn) {
     atMods.push(8192);
     desc.attackerAbility = attacker.ability;
-  } else if (
-    (attacker.hasAbility('Water Bubble') && move.hasType('Water')) ||
-    (attacker.hasAbility('Huge Power', 'Pure Power') && move.category === 'Physical')
-  ) {
+  } else if (attacker.hasAbility('Water Bubble') && move.hasType('Water')) {
     atMods.push(8192);
     desc.attackerAbility = attacker.ability;
+  } else if (attacker.hasAbility('Huge Power', 'Pure Power')) {
+    if (field.chromaticField === 'Ancient-Ruins') {
+      // Ancient Ruins - Huge Power and Pure Power now doubles the higher attacking stat
+      if (move.category == (attacker.stats.atk > attacker.stats.spa ? 'Physical' : 'Special')) {
+        atMods.push(8192);
+        desc.attackerAbility = attacker.ability;
+        desc.chromaticField = field.chromaticField;
+      }
+    } else if (move.category === 'Physical') {
+      atMods.push(8192);
+      desc.attackerAbility = attacker.ability;
+    }
   }
 
   if (
@@ -2278,6 +2437,45 @@ export function calculateAtModsSMSSSV(
     desc.chromaticField = field.chromaticField;
   }
 
+  // Blessed Sanctum - Multi-Attack, Mystical Fire, Sacred Fire, Ancient Power gain 1.2x power
+  if (field.chromaticField === 'Blessed-Sanctum' && move.named('Multi-Attack', 'Mystical Fire', 'Sacred Fire', 'Ancient Power')) {
+    atMods.push(4915);
+    desc.chromaticField = field.chromaticField;
+  }
+
+  // Acidic Wasteland - Mud Bomb, Mud Shot, Mud-Slap, and Muddy Water deal 1.3x damage
+  if (field.chromaticField === 'Acidic-Wasteland' && move.named('Mud Bomb', 'Mud Shot', 'Mud-Slap', 'Muddy Water')) {
+    atMods.push(5324);
+    desc.chromaticField = field.chromaticField;
+  }
+
+  // Ancient Ruins - Aura Sphere deals 1.1x damage, Mystical Fire deals 1.2x damage, and Magical Leaf deals 1.3x damage
+  if (field.chromaticField === 'Ancient-Ruins') {
+    if (move.named('Aura Sphere')) {
+      atMods.push(4505);
+      desc.chromaticField = field.chromaticField;
+    } else if (move.named('Mystical Fire')) {
+      atMods.push(4915);
+      desc.chromaticField = field.chromaticField;
+    } else if (move.named('Magical Leaf')) {
+      atMods.push(5324);
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Cave - Sound moves deal 1.3x damage
+  if (field.chromaticField === 'Cave' && move.flags.sound) {
+    atMods.push(5324);
+    desc.chromaticField = field.chromaticField;
+  }
+
+  // Undercolony - Broken Carapace: While	Bug & Rock types <50% HP gain 1.2x Attack and Spa Attack
+  if (field.chromaticField === 'Undercolony' && attacker.hasType('Bug', 'Rock') && attacker.curHP() < (attacker.maxHP() / 2)) {
+    atMods.push(4915);
+    desc.fieldCondition = 'Broken Carapace';
+    desc.chromaticField = field.chromaticField;
+  }
+
   // Fields - Prism Scale Effects: Miscellaneous boosts
   if ((attacker.hasItem('Prism Scale') && !(field.chromaticField === 'None'))) {
     // Inverse - The user's next move becomes typeless and deals 1.5x damage until it's switched out
@@ -2308,7 +2506,8 @@ export function calculateDefenseSMSSSV(
 ) {
   let defense: number;
   const hitsPhysical = move.overrideDefensiveStat === 'def' || move.category === 'Physical' ||
-    (move.named('Shell Side Arm') && getShellSideArmCategory(attacker, defender) === 'Physical');
+    (move.named('Shell Side Arm') && getShellSideArmCategory(attacker, defender) === 'Physical') ||
+    (move.named('Power Gem') && field.chromaticField === 'Cave' && defender.stats.def < defender.stats.spd); // Cave - Power Gem targets the opponent's lower defense stat between Defense and Special Defense
   
   // Crests - Defense Stat Swaps (in general)
   const defenseStat = 
@@ -2328,8 +2527,8 @@ export function calculateDefenseSMSSSV(
   } else if (attacker.hasAbility('Unaware')) {
     defense = defender.rawStats[defenseStat];
     desc.attackerAbility = attacker.ability;
-  // Ring Arena - Grit Stage Effects: Attacks ignore the opponent's stat changes
-  } else if (attacker.gritStages && attacker.gritStages >= 1) {
+  // Ring Arena - Grit Stage Effects: 1 - Attacks ignore the opponent's stat changes
+  } else if (attacker.gritStages! >= 1) {
     defense = defender.rawStats[defenseStat];
     desc.gritStages = attacker.gritStages;
     desc.chromaticField = field.chromaticField;
@@ -2339,9 +2538,16 @@ export function calculateDefenseSMSSSV(
   }
 
   // unlike all other defense modifiers, Sandstorm SpD boost gets applied directly
-  if (field.hasWeather('Sand') && (defender.hasType('Rock') || defender.hasInvisisbleType(attacker, field, 'Rock')) && !hitsPhysical) {
-    defense = pokeRound((defense * 3) / 2);
-    desc.weather = field.weather;
+  if (field.hasWeather('Sand') && (defender.hasType('Rock') || defender.hasInvisisbleType(attacker, field, 'Rock'))) {
+    if (!hitsPhysical) {
+      defense = pokeRound((defense * 3) / 2);
+      desc.weather = field.weather;
+    // Cave - Sandstorm boosts the Defense of Rock Types 1.2x
+    } else if (hitsPhysical && field.chromaticField === 'Cave') {
+      defense = pokeRound((defense * 6) / 5);
+      desc.weather = field.weather;
+      desc.chromaticField = field.chromaticField;
+    }
   }
   if (field.hasWeather('Snow') && (defender.hasType('Ice') || defender.hasInvisisbleType(attacker, field, 'Ice') || defender.named('Empoleon-Crest')) && hitsPhysical) {
     defense = pokeRound((defense * 3) / 2);
@@ -2627,9 +2833,10 @@ export function calculateFinalModsSMSSSV(
   } else if (attacker.hasAbility('Tinted Lens') && typeEffectiveness < 1) {
     finalMods.push(8192);
     desc.attackerAbility = attacker.ability;
+  // Starlight Arena - Starstruck!: If a Pokémon has this effect (manual toggle), their attacks gain the Tinted Lens effect.
   } else if (attacker.isStarstruck && typeEffectiveness < 1) {
     finalMods.push(8192);
-    desc.starstruck = true;
+    desc.fieldCondition = 'Starstruck';
     desc.chromaticField = field.chromaticField;
   }
 
@@ -2637,12 +2844,14 @@ export function calculateFinalModsSMSSSV(
     finalMods.push(8192);
   }
 
-  if (defender.hasAbility('Multiscale', 'Shadow Shield'))
+  // Blessed Sanctum - Cute Charm grants Multiscale
+  if (defender.hasAbility('Multiscale', 'Shadow Shield') || (defender.hasAbility('Cute Charm') && field.chromaticField === 'Blessed-Sanctum'))
   {
     if (
       defender.curHP() === defender.maxHP() &&
       hitCount === 0 &&
-      (!field.defenderSide.isSR && (!field.defenderSide.spikes || defender.hasType('Flying')) ||
+      (!field.defenderSide.isSR && (!field.defenderSide.spikes || defender.hasType('Flying')) &&
+      !(field.defenderSide.isStickyWeb && defender.hasType('Flying') && field.chromaticField === 'Jungle') || // Jungle - Sticky Web deals 1/8th of a Flying type’s Max HP on entry
       defender.hasItem('Heavy-Duty Boots')) && !attacker.hasAbility('Parental Bond (Child)')
     ) {
       finalMods.push(2048);
@@ -2742,7 +2951,7 @@ export function calculateFinalModsSMSSSV(
 
   // Desert - Sand Veil instead makes user receive ¾ damage dealt in Sandstorm
   if (field.chromaticField === 'Desert' && defender.hasAbility('Sand Veil') && field.hasWeather('Sand')) {
-    finalMods.push(3072);    
+    finalMods.push(3072);
     desc.defenderAbility = defender.ability;
     desc.weather = field.weather;
     desc.chromaticField = field.chromaticField;
