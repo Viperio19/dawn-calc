@@ -641,6 +641,9 @@ class Item implements I.Item {
     this.id = toID(name);
     this.name = name as I.ItemName;
     this.megaEvolves = MEGA_STONES[name] as I.SpeciesName;
+    if (!this.megaEvolves) {
+      this.megaEvolves = MEGA_G_STONES[name] as I.SpeciesName;
+    }
     const berry = BERRIES[name];
     if (berry) {
       this.isBerry = true;

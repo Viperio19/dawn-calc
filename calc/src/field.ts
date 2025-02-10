@@ -84,6 +84,7 @@ export class Side implements State.Side {
   isSR: boolean;
   isReflect: boolean;
   isLightScreen: boolean;
+  isStickyWeb: boolean;
   isProtected: boolean;
   isIngrain: boolean;
   isAquaRing: boolean;
@@ -111,6 +112,7 @@ export class Side implements State.Side {
     this.isSR = !!side.isSR;
     this.isReflect = !!side.isReflect;
     this.isLightScreen = !!side.isLightScreen;
+    this.isStickyWeb = !!side.isStickyWeb;
     this.isProtected = !!side.isProtected;
     this.isIngrain = !!side.isIngrain;
     this.isAquaRing = !!side.isAquaRing;

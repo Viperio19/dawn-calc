@@ -110,7 +110,8 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
       (pokemon.hasAbility('Surge Surfer') && terrain === 'Electric')
   ) {
     speedMods.push(8192);
-  } else if (pokemon.hasAbility('Quick Feet') && pokemon.status) {
+  // Flower Garden - Chlorophyll additionally grants Quick Feet
+  } else if ((pokemon.hasAbility('Quick Feet') || (pokemon.hasAbility('Chlorophyll') && field.chromaticField === 'Flower-Garden')) && pokemon.status) {
     speedMods.push(6144);
   } else if (pokemon.hasAbility('Slow Start') && pokemon.abilityOn) {
     speedMods.push(2048);
@@ -124,6 +125,13 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
     speedMods.push(2048);
   } else if (pokemon.hasItem('Quick Powder') && pokemon.named('Ditto')) {
     speedMods.push(8192);
+  }
+
+  // Fields - Speed Modifiers
+
+  // Cave - Float Stone grants the user 1.25x Speed
+  if (field.chromaticField === 'Cave' && pokemon.hasItem('Float Stone')) {
+    speedMods.push(5120);
   }
 
   // Crests - Speed Modifiers
@@ -145,7 +153,9 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
   }
 
   speed = OF32(pokeRound((speed * chainMods(speedMods, 410, 131172)) / 4096));
-  if (pokemon.hasStatus('par') && !pokemon.hasAbility('Quick Feet')) {
+
+  // Flower Garden - Chlorophyll additionally grants Quick Feet
+  if (pokemon.hasStatus('par') && !(pokemon.hasAbility('Quick Feet') || (pokemon.hasAbility('Chlorophyll') && field.chromaticField === 'Flower-Garden'))) {
     speed = Math.floor(OF32(speed * (gen.num < 7 ? 25 : 50)) / 100);
   }
 
@@ -184,6 +194,12 @@ export function getMoveEffectiveness(
       gen.types.get(toID(move.type))!.effectiveness[type]! *
       gen.types.get('grass' as ID)!.effectiveness[type]!
     );
+  // Undercolony - Rock Throw is super effective vs Ground types
+  } else if (field.chromaticField === 'Undercolony' && move.named('Rock Throw') && type === 'Ground') {
+    return 2;
+  // Dragon's Den - Dragon Pulse can now hit Fairy type Pokemon (for Resisted Damage)
+  } else if (field.chromaticField === 'Dragons-Den' && move.named('Dragon Pulse') && type === 'Fairy') {
+    return 0.5;
   } else {
     let effectiveness = gen.types.get(toID(move.type))!.effectiveness[type]!;
     if (effectiveness === 0 && isRingTarget) {
@@ -254,6 +270,8 @@ export function checkIntimidate(gen: Generation, source: Pokemon, target: Pokemo
     target.hasAbility('Clear Body', 'White Smoke', 'Hyper Cutter', 'Full Metal Body') ||
     // More abilities now block Intimidate in Gen 8+ (DaWoblefet, Cloudy Mistral)
     (gen.num >= 8 && target.hasAbility('Inner Focus', 'Own Tempo', 'Oblivious', 'Scrappy')) ||
+    // Cave - Sturdy grants Clear Body
+    (target.hasAbility('Sturdy') && field.chromaticField === 'Cave') ||
     target.hasItem('Clear Amulet');
   if (source.hasAbility('Intimidate') && source.abilityOn && !blocked) {
     if (target.hasAbility('Contrary', 'Defiant', 'Guard Dog') ||
@@ -311,6 +329,14 @@ export function checkDauntlessShield(source: Pokemon, gen: Generation) {
   }
 }
 
+export function checkStickyWeb(source: Pokemon, field: Field, stickyWeb: boolean) {
+  if (stickyWeb && !source.hasItem('Heavy-Duty Boots') && !source.hasAbility('Clear Body', 'White Smoke', 'Full Metal Body')) {
+    // Jungle - Sticky Web reduces Speed by one additional stage
+    let boosts = field.chromaticField === 'Jungle' ? 2 : 1;
+    source.boosts.spe = Math.max(-6, source.boosts.spe - boosts);
+  }
+}
+
 export function checkCrestBoosts(source: Pokemon) {
   if (source.named('Vespiquen-Crest-Offense')) {
     source.boosts.atk = Math.min(6, source.boosts.atk + 1);
@@ -319,7 +345,7 @@ export function checkCrestBoosts(source: Pokemon) {
 }
 
 // Fields - Stat boosts from Prism Scale or abilities
-export function checkFieldBoosts(source: Pokemon, field: Field) {
+export function checkFieldEntryEffects(source: Pokemon, field: Field) {
   if (field.chromaticField === 'Dragons-Den') {
     // Dragon's Den - Prism Scale: Boosts Speed +1 
     if (source.hasItem('Prism Scale')) {
@@ -369,7 +395,42 @@ export function checkFieldBoosts(source: Pokemon, field: Field) {
     // Haunted Graveyard - Prism Scale: Boosts Special Defense +1
     if (source.hasItem('Prism Scale')) {
       source.boosts.spd = Math.min(6, source.boosts.spd + 1);
+    }
+  } else if (field.chromaticField === 'Desert') {
+    // Desert - Prism Scale: Boosts Attack +1
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.atk = Math.min(6, source.boosts.atk + 1);
     }    
+  } else if (field.chromaticField === 'Snowy-Peaks') {
+    // Snowy Peaks - Prism Scale: Boosts Speed +2 
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.spe = Math.min(6, source.boosts.spe + 2);
+    }    
+  } else if (field.chromaticField === 'Blessed-Sanctum') {
+    // Blessed-Sanctum - Fluffy and Fur Coat grant +1 Defense on entry
+    if (source.hasAbility('Fluffy', 'Fur Coat')) {
+      source.boosts.def = Math.min(6, source.boosts.def + 1);
+    // Blessed Sanctum - Run Away grants +1 Speed on entry
+    } else if (source.hasAbility('Run Away')) {
+      source.boosts.spe = Math.min(6, source.boosts.spe + 1);
+    }
+  } else if (field.chromaticField === 'Ancient-Ruins') {
+    // Ancient Ruins - Anticipation and Forewarn grant +1 Special Attack on entry
+    if (source.hasAbility('Anticipation', 'Forewarn')) {
+      source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+    }
+  } else if (field.chromaticField === 'Cave') {
+    // Cave - Prism Scale: Boosts Def +1
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.def = Math.min(6, source.boosts.def + 1);
+    }
+    // Cave - Steam Engine grants +2 Speed on entry
+    if (source.hasAbility('Steam Engine')) {
+      source.boosts.spe = Math.min(6, source.boosts.spe + 2);
+    // Cave - Battle Armor and Shell Armor grants +1 Defense on entry
+    } else if (source.hasAbility('Battle Armor', 'Shell Armor')) {
+      source.boosts.def = Math.min(6, source.boosts.def + 1);
+    }
   }
 }
 
@@ -826,6 +887,20 @@ export function getMimicryType(field: Field) {
     return "Flying" as TypeName;
   } else if (field.chromaticField === 'Haunted-Graveyard') {
     return "Ghost" as TypeName;
+  } else if (field.chromaticField === 'Flower-Garden') {
+    return "Grass" as TypeName;
+  } else if (field.chromaticField === 'Desert') {
+    return "Ground" as TypeName;
+  } else if (field.chromaticField === 'Snowy-Peaks') {
+    return "Ice" as TypeName;
+  } else if (field.chromaticField === 'Blessed-Sanctum') {
+    return "Normal" as TypeName;
+  } else if (field.chromaticField === 'Acidic-Wasteland') {
+    return "Poison" as TypeName;
+  } else if (field.chromaticField === 'Ancient-Ruins') {
+    return "Psychic" as TypeName;
+  } else if (field.chromaticField === 'Cave') {
+    return "Rock" as TypeName;
   } else {
     return "???" as TypeName;
   }

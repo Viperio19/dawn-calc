@@ -816,6 +816,7 @@
                     <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Misty" id="misty" /><label class="btn btn-xxxwide btn-right" for="misty">Misty Terrain</label>
                     <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Psychic" id="psychic" /><label class="btn btn-xxxwide btn-mid" for="psychic">Psychic Terrain</label>
                 </div>
+                <!-- Fields - Dropdown menu -->
                 <div class="fields">
                     <label>Field</label>
                     <select class="chromaticField gen-specific g9 calc-trigger" id="chromatic-field" style="margin: 5px auto;">
@@ -829,6 +830,14 @@
                         <option value="Volcanic-Top">Volcanic Top (Fire)</option>
                         <option value="Sky">Sky (Flying)</option>
                         <option value="Haunted-Graveyard">Haunted Graveyard (Ghost)</option>
+                        <option value="Flower-Garden">Flower Garden (Grass)</option>
+                        <option value="Desert">Desert (Ground)</option>
+                        <option value="Snowy-Peaks">Snowy Peaks (Ice)</option>
+                        <option value="Blessed-Sanctum">Blessed Sanctum (Normal)</option>
+                        <option value="Acidic-Wasteland">Acidic Wasteland (Poison)</option>
+                        <option value="Ancient-Ruins">Ancient Ruins (Psychic)</option>
+                        <option value="Cave">Cave (Rock)</option>
+                        <option value="Undercolony">Undercolony (Bug, Rock)</option>
                         <option value="Inverse">Inverse (All)</option>
                     </select>
                 </div>
@@ -989,6 +998,17 @@
                             <td><div class="right" title="Are there Spikes on this side of the field?">
                                 <input aria-describedby="selectSpikeInstruction" class="visually-hidden calc-trigger" type="checkbox" id="gscSpikesR" />
                                 <label class="btn" for="gscSpikesR">Spikes</label>
+                            </div></td>
+                        </tr>
+                        <tr class="gen-specific g6 g7 g8 g9">
+                            <div hidden id="selectStickyWebInstruction">Is Sticky Web affecting this side of the field?</div>
+                            <td><div class="left" title="Is Sticky Web affecting this side of the field?">
+                                <input aria-describedby="selectStickyWebInstruction" class="visually-hidden calc-trigger" type="checkbox" id="stickywebL" />
+                                <label class="btn btn-xwide" for="stickywebL">Sticky Web</label>
+                            </div></td>
+                            <td><div class="right" title="Is Sticky Web affecting this side of the field?">
+                                <input aria-describedby="selectStickyWebInstruction" class="visually-hidden calc-trigger" type="checkbox" id="stickywebR" />
+                                <label class="btn btn-xwide" for="stickywebR">Sticky Web</label>
                             </div></td>
                         </tr>
                         <tr>
