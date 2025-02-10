@@ -1765,6 +1765,11 @@ export function calculateBPModsSMSSSV(
     resistedKnockOffDamage = !!item.megaEvolves && defender.name.includes(item.megaEvolves);
   }
 
+  // Crests - Don't increase Knock Off damage
+  if (!resistedKnockOffDamage && defenderItem) {
+    resistedKnockOffDamage = defenderItem === 'Up-Grade' && defender.name.includes('-Crest');
+  }
+
   // Resist knock off damage if your item was already knocked off
   if (!resistedKnockOffDamage && hit > 1 && !defender.hasAbility('Sticky Hold')) {
     resistedKnockOffDamage = true;
