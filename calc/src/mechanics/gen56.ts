@@ -257,7 +257,7 @@ export function calculateBWXY(
     return result;
   }
 
-  if (move.priority > 0 && field.hasTerrain('Psychic') && isGrounded(defender, field, field.defenderSide.isIngrain)) {
+  if (move.priority > 0 && field.hasTerrain('Psychic') && isGrounded(defender, field, field.defenderSide)) {
     desc.terrain = field.terrain;
     return result;
   }
@@ -780,7 +780,7 @@ export function calculateBPModsBWXY(
 
   // It's not actually clear if the terrain modifiers are base damage mods like weather or are
   // base power mods like in Gen 7+, but the research doesn't exist for this yet so we match PS here
-  if (isGrounded(attacker, field, field.attackerSide.isIngrain)) {
+  if (isGrounded(attacker, field, field.attackerSide)) {
     if ((field.hasTerrain('Electric') && move.hasType('Electric')) ||
         (field.hasTerrain('Grassy') && move.hasType('Grass'))
     ) {
@@ -788,7 +788,7 @@ export function calculateBPModsBWXY(
       desc.terrain = field.terrain;
     }
   }
-  if (isGrounded(defender, field, field.defenderSide.isIngrain)) {
+  if (isGrounded(defender, field, field.defenderSide)) {
     if ((field.hasTerrain('Misty') && move.hasType('Dragon')) ||
         (field.hasTerrain('Grassy') && move.named('Bulldoze', 'Earthquake'))
     ) {

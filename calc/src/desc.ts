@@ -58,6 +58,7 @@ export interface RawDesc {
   gritStages?: number;
   weather?: Weather;
   isTailwind?: boolean;
+  isMagnetRise?: boolean;
   isDefenderDynamaxed?: boolean;
   reflectorOffenseTypes?: string;
   reflectorDefenseTypes?: string;
@@ -805,7 +806,7 @@ function getEndOfTurn(
 
   if (field.hasTerrain('Grassy')) {
     // Flower Garden - Grassy Terrain only heals Grass Type Pokemon
-    if (isGrounded(defender, field, field.defenderSide.isIngrain) && !healBlock && !(field.chromaticField === 'Flower-Garden' && !defender.hasType('Grass'))) {
+    if (isGrounded(defender, field, field.defenderSide) && !healBlock && !(field.chromaticField === 'Flower-Garden' && !defender.hasType('Grass'))) {
       damage += Math.floor(defender.maxHP() / 16);
       texts.push('Grassy Terrain recovery');
     }
