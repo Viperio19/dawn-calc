@@ -380,8 +380,11 @@ function autosetWeather(ability, i) {
 	switch (ability) {
 	case "Drought":
 	case "Orichalcum Pulse":
-		lastAutoWeather[i] = "Sun";
-		$("#sun").prop("checked", true);
+		// Eclipse - Drought and Orichalcum Pulse fail
+		if (chromaticField !== 'Eclipse') {
+			lastAutoWeather[i] = "Sun";
+			$("#sun").prop("checked", true);
+		}
 		break;
 	case "Drizzle":
 		// Desert - Drizzle fails
@@ -537,8 +540,10 @@ $("#chromatic-field").change(function () {
 
 	var currentWeather = $("input:radio[name='weather']:checked").val();
 
+	// Eclipse - Drought, Orichalcum Pulse and Sunny Day fail
+	if (chromaticField === 'Eclipse' && currentWeather === 'Sun') {
 	// Desert - Drizzle and Rain Dance fail
-	if (chromaticField === 'Desert' && currentWeather === 'Rain') {
+	} else if (chromaticField === 'Desert' && currentWeather === 'Rain') {
 		$("#clear").prop("checked", true);
 	}
 
