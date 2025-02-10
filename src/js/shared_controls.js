@@ -502,9 +502,15 @@ function setPrismScaleEffects(pokeObj) {
 	// Ancient Ruins - Prism Scale: Sets Wonder Room
 	} else if (chromaticField === 'Ancient-Ruins') {
 		$("#wonderroom").prop("checked", true);
-	}
+	// Factory - Prism Scale: Applies Magnet Rise
+	} else if (chromaticField === 'Factory') {
+		if (id === 'p1') {
+			$("#magnetRiseL").prop("checked", true);
+		} else {
+			$("#magnetRiseR").prop("checked", true);
+		}
 	// Undercolony - Prism Scale: Applies Salt Cure to the opponent
-	else if (chromaticField === 'Undercolony') {
+	} else if (chromaticField === 'Undercolony') {
 		var allPokemon = $('.poke-info');
 		allPokemon.each(function () {
 			var pokeObj = $(this);
@@ -524,6 +530,8 @@ $("#chromatic-field").change(function () {
 
 	$("#starstruckL").prop("checked", false);
 	$("#starstruckR").prop("checked", false);
+	$("#lockonL").prop("checked", false);
+	$("#lockonR").prop("checked", false);
 	$("#gritL0").prop("checked", true);
 	$("#gritR0").prop("checked", true);
 
@@ -1302,6 +1310,7 @@ function createPokemon(pokeInfo) {
 			isDynamaxed: isDynamaxed,
 			isSaltCure: pokeInfo.find(".saltcure").is(":checked"),
 			isStarstruck: pokeInfo.find(".starstruck").is(":checked"),
+			isLockOn: pokeInfo.find(".lockon").is(":checked"),
 			gritStages: pokeInfo.prop("id") === 'p1'
 					    ? parseInt(pokeInfo.find("input:radio[name='gritL']:checked").val())
 						: parseInt(pokeInfo.find("input:radio[name='gritR']:checked").val()),
@@ -1659,6 +1668,8 @@ function clearField() {
 	$("#gravity").prop("checked", false);
 	$("#starstruckL").prop("checked", false);
 	$("#starstruckR").prop("checked", false);
+	$("#lockonL").prop("checked", false);
+	$("#lockonR").prop("checked", false);
 	$("#gritL0").prop("checked", true);
 	$("#gritR0").prop("checked", true);
 	$("#srL").prop("checked", false);

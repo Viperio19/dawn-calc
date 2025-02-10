@@ -82,8 +82,8 @@ export function calculateSMSSSV(
   checkEmbody(defender, gen);
   checkIntimidate(gen, attacker, defender, field);
   checkIntimidate(gen, defender, attacker, field);
-  checkDownload(attacker, defender, field.isWonderRoom);
-  checkDownload(defender, attacker, field.isWonderRoom);
+  checkDownload(attacker, defender, field);
+  checkDownload(defender, attacker, field);
   checkIntrepidSword(attacker, gen);
   checkIntrepidSword(defender, gen);
   checkStickyWeb(attacker, field, field.attackerSide.isStickyWeb);
@@ -335,6 +335,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Acidic-Wasteland' ? 'Poison'
         : field.chromaticField === 'Ancient-Ruins' ? 'Psychic'
         : field.chromaticField === 'Cave' ? 'Rock'
+        : field.chromaticField === 'Factory' ? 'Steel'
         : field.chromaticField === 'Undercolony' ? 'Bug'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
@@ -714,9 +715,12 @@ export function calculateSMSSSV(
   }
 
   // Eclipse
-  if (field.chromaticField === 'Eclipse' && move.named('Solar Beam', 'Solar Blade')) {
-    desc.chromaticField = field.chromaticField;
-    return result; // Results in no damage
+  if (field.chromaticField === 'Eclipse') {
+    // Eclipse - Solar Beam and Solar Blade fail
+    if (move.named('Solar Beam', 'Solar Blade')) {
+      desc.chromaticField = field.chromaticField;
+      return result;
+    }
   }
 
   // Dragon's Den
@@ -839,6 +843,16 @@ export function calculateSMSSSV(
 
     if (field.defenderSide.isSR && !defender.hasItem('Heavy-Duty Boots') && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
       desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Factory
+  if (field.chromaticField === 'Factory') {
+    // Factory - Heatproof grants Fire immunity
+    if (defender.hasAbility('Heatproof') && move.hasType('Fire')) {
+      desc.defenderAbility = defender.ability;
+      desc.chromaticField = field.chromaticField;
+      return result;
     }
   }
 
@@ -1597,6 +1611,13 @@ export function calculateBasePowerSMSSSV(
         move.category = 'Physical';
         desc.moveName = 'Rock Slide';
         break;
+      case 'Factory':
+        basePower = 50;
+        move.category = 'Physical';
+        move.hits = 2;
+        desc.moveName = 'Gear Grind';
+        desc.hits = move.hits;
+        break;
       case 'Undercolony':
         basePower = 80;
         move.category = 'Physical';
@@ -1668,6 +1689,12 @@ export function calculateBasePowerSMSSSV(
   if (field.chromaticField === 'Blessed-Sanctum' && move.named('Hyper Voice', 'Tri Attack', 'Echoed Voice')) {
     basePower = 100;
     desc.moveName = 'Judgment';
+  }
+
+  // Factory - Magnet Bomb now acts like steel-type Special Future Sight
+  if (field.chromaticField === 'Factory' && move.named('Magnet Bomb')) {
+    move.category = 'Special';
+    desc.chromaticField = field.chromaticField;
   }
 
   // Undercolony - Silver Wind gains +10 power for each of the user’s stat boosts
@@ -1883,9 +1910,7 @@ export function calculateBPModsSMSSSV(
   // Abilities
 
   // Use BasePower after moves with custom BP to determine if Technician should boost
-  if (((attacker.hasAbility('Technician') || attacker.named('Dusknoir-Crest')) && basePower <= 60) ||
-    (attacker.hasAbility('Flare Boost') &&
-      attacker.hasStatus('brn') && move.category === 'Special') ||
+  if ((attacker.hasAbility('Flare Boost') && attacker.hasStatus('brn') && move.category === 'Special') ||
     (attacker.hasAbility('Toxic Boost') &&
       (attacker.hasStatus('psn', 'tox') || field.chromaticField === 'Acidic-Wasteland') && move.category === 'Physical') || // Acidic Wasteland - Activates Toxic Boost
     (attacker.hasAbility('Mega Launcher') && move.flags.pulse) ||
@@ -1897,6 +1922,18 @@ export function calculateBPModsSMSSSV(
   ) {
     bpMods.push(6144);
     desc.attackerAbility = attacker.ability;
+  }
+
+  if (attacker.hasAbility('Technician') || attacker.named('Dusknoir-Crest')) {
+    if (basePower <= 60) {
+      bpMods.push(6144);
+      desc.attackerAbility = 'Technician';
+    // Factory - Technician boosts base power up to 70 Base (TODO: CHECK IF DUSKNOIR SHOULD BE BUFFED BY THIS)
+    } else if (field.chromaticField === 'Factory' && basePower <= 70) {
+      bpMods.push(6144);
+      desc.attackerAbility = 'Technician';
+      desc.chromaticField = field.chromaticField;
+    }
   }
 
   const aura = `${move.type} Aura`;
@@ -2472,6 +2509,21 @@ export function calculateAtModsSMSSSV(
   if (field.chromaticField === 'Cave' && move.flags.sound) {
     atMods.push(5324);
     desc.chromaticField = field.chromaticField;
+  }
+
+  if (field.chromaticField === 'Factory') {
+    // Factory - Discharge deals 1.1x damage
+    if (move.named('Discharge')) {
+      atMods.push(4505);
+      desc.chromaticField = field.chromaticField;
+    }
+
+    // Factory - Lock On grants 2.5x power to the attack on the next turn
+    if (attacker.isLockOn) {
+      atMods.push(10240);
+      desc.fieldCondition = 'Lock On';
+      desc.chromaticField = field.chromaticField;
+    }
   }
 
   // Undercolony - Broken Carapace: While	Bug & Rock types <50% HP gain 1.2x Attack and Spa Attack

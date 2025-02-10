@@ -304,16 +304,17 @@ export function checkIntimidate(gen: Generation, source: Pokemon, target: Pokemo
   }
 }
 
-export function checkDownload(source: Pokemon, target: Pokemon, wonderRoomActive?: boolean) {
+export function checkDownload(source: Pokemon, target: Pokemon, field?: Field) {
   if (source.hasAbility('Download')) {
     let def = target.stats.def;
     let spd = target.stats.spd;
+    let boosts = field!.chromaticField === 'Factory' ? 2 : 1;
     // We swap the defense stats again here since Download ignores Wonder Room
-    if (wonderRoomActive) [def, spd] = [spd, def];
+    if (field!.isWonderRoom) [def, spd] = [spd, def];
     if (spd <= def) {
-      source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+      source.boosts.spa = Math.min(6, source.boosts.spa + boosts);
     } else {
-      source.boosts.atk = Math.min(6, source.boosts.atk + 1);
+      source.boosts.atk = Math.min(6, source.boosts.atk + boosts);
     }
   }
 }
@@ -385,8 +386,8 @@ export function checkFieldEntryEffects(source: Pokemon, field: Field) {
   } else if (field.chromaticField === 'Sky') {
     // Sky - Prism Scale: Lowers the user’s Defense and Special Defense by 1
     if (source.hasItem('Prism Scale')) {
-      source.boosts.def = Math.min(6, source.boosts.def - 1);
-      source.boosts.spd = Math.min(6, source.boosts.spd - 1);
+      source.boosts.def = Math.max(-6, source.boosts.def - 1);
+      source.boosts.spd = Math.max(-6, source.boosts.spd - 1);
     }
     // Sky - Early Bird grants +1 Speed on entry 
     if (source.hasAbility('Early Bird')) {
@@ -431,6 +432,16 @@ export function checkFieldEntryEffects(source: Pokemon, field: Field) {
     // Cave - Battle Armor and Shell Armor grants +1 Defense on entry
     } else if (source.hasAbility('Battle Armor', 'Shell Armor')) {
       source.boosts.def = Math.min(6, source.boosts.def + 1);
+    }
+  } else if (field.chromaticField === 'Factory') {
+    // Factory - Heavy Metal reduces Speed and raises Defense on entry
+    if (source.hasAbility('Heavy Metal')) {
+      source.boosts.spe = Math.max(-6, source.boosts.spe - 1);
+      source.boosts.def = Math.min(6, source.boosts.def + 1);
+    // Factory - Light Metal does the opposite on entry
+    } else if (source.hasAbility('Light Metal')) {
+      source.boosts.spe = Math.min(6, source.boosts.spe + 1);
+      source.boosts.def = Math.max(-6, source.boosts.def - 1);
     }
   }
 }
@@ -902,6 +913,8 @@ export function getMimicryType(field: Field) {
     return "Psychic" as TypeName;
   } else if (field.chromaticField === 'Cave') {
     return "Rock" as TypeName;
+  } else if (field.chromaticField === 'Factory') {
+    return "Steel" as TypeName;
   } else {
     return "???" as TypeName;
   }
