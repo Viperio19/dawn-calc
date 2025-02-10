@@ -80,6 +80,7 @@ export namespace State {
     isNightmare?: boolean;
     isForesight?: boolean;
     isTailwind?: boolean;
+    isMagnetRise?: boolean;
     isHelpingHand?: boolean;
     isFlowerGift?: boolean;
     isFriendGuard?: boolean;
