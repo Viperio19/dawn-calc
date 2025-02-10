@@ -1,7 +1,7 @@
-import * as I from './data/interface';
+import type * as I from './data/interface';
 import {Stats} from './stats';
 import {toID, extend, assignWithout} from './util';
-import {State} from './state';
+import type {State} from './state';
 import {Field, Side} from './field';
 import { getMimicryType } from './mechanics/util';
 
@@ -24,11 +24,14 @@ export class Pokemon implements State.Pokemon {
   isDynamaxed?: boolean;
   dynamaxLevel?: number;
   isSaltCure?: boolean;
+  isStarstruck?: boolean;
+  gritStages?: number;
   alliesFainted?: number;
   foesFainted?: number;
   relicanthTurns?: number;
   boostedStat?: I.StatIDExceptHP | 'auto';
   item?: I.ItemName;
+  disabledItem?: I.ItemName;
   teraType?: I.TypeName;
 
   nature: I.NatureName;
@@ -70,6 +73,8 @@ export class Pokemon implements State.Pokemon {
     this.dynamaxLevel = this.isDynamaxed
       ? (options.dynamaxLevel === undefined ? 10 : options.dynamaxLevel) : undefined;
     this.isSaltCure = !!options.isSaltCure;
+    this.isStarstruck = !!options.isStarstruck;
+    this.gritStages = options.gritStages;
     this.alliesFainted = options.alliesFainted;
     this.boostedStat = options.boostedStat;
     this.foesFainted = options.foesFainted;
@@ -192,6 +197,8 @@ export class Pokemon implements State.Pokemon {
       isDynamaxed: this.isDynamaxed,
       dynamaxLevel: this.dynamaxLevel,
       isSaltCure: this.isSaltCure,
+      isStarstruck: this.isStarstruck,
+      gritStages: this.gritStages,
       alliesFainted: this.alliesFainted,
       boostedStat: this.boostedStat,
       foesFainted: this.foesFainted,

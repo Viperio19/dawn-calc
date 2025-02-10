@@ -1,4 +1,4 @@
-import * as I from './data/interface';
+import type * as I from './data/interface';
 
 export namespace State {
   export interface Pokemon {
@@ -9,6 +9,8 @@ export namespace State {
     isDynamaxed?: boolean;
     dynamaxLevel?: number;
     isSaltCure?: boolean;
+    isStarstruck?: boolean;
+    gritStages?: number;
     alliesFainted?: number;
     boostedStat?: I.StatIDExceptHP | 'auto';
     foesFainted?: number;
@@ -70,8 +72,12 @@ export namespace State {
     isSR?: boolean;
     isReflect?: boolean;
     isLightScreen?: boolean;
+    isStickyWeb?: boolean;
     isProtected?: boolean;
     isSeeded?: boolean;
+    isIngrain?: boolean;
+    isAquaRing?: boolean;
+    isNightmare?: boolean;
     isForesight?: boolean;
     isTailwind?: boolean;
     isHelpingHand?: boolean;
@@ -81,6 +87,7 @@ export namespace State {
     isAreniteWall?: boolean;
     isBattery?: boolean;
     isPowerSpot?: boolean;
+    isSteelySpirit?: boolean;
     isSwitching?: 'out' | 'in';
   }
 }

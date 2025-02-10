@@ -1,5 +1,5 @@
-import {State} from './state';
-import {GameType, Weather, Terrain} from './data/interface';
+import type {State} from './state';
+import type {GameType, Weather, Terrain} from './data/interface';
 
 export class Field implements State.Field {
   gameType: GameType;
@@ -84,8 +84,12 @@ export class Side implements State.Side {
   isSR: boolean;
   isReflect: boolean;
   isLightScreen: boolean;
+  isStickyWeb: boolean;
   isProtected: boolean;
+  isIngrain: boolean;
+  isAquaRing: boolean;
   isSeeded: boolean;
+  isNightmare: boolean;
   isForesight: boolean;
   isTailwind: boolean;
   isHelpingHand: boolean;
@@ -95,6 +99,7 @@ export class Side implements State.Side {
   isAreniteWall: boolean;
   isBattery: boolean;
   isPowerSpot: boolean;
+  isSteelySpirit: boolean;
   isSwitching?: 'out' | 'in';
 
   constructor(side: State.Side = {}) {
@@ -107,8 +112,12 @@ export class Side implements State.Side {
     this.isSR = !!side.isSR;
     this.isReflect = !!side.isReflect;
     this.isLightScreen = !!side.isLightScreen;
+    this.isStickyWeb = !!side.isStickyWeb;
     this.isProtected = !!side.isProtected;
+    this.isIngrain = !!side.isIngrain;
+    this.isAquaRing = !!side.isAquaRing;
     this.isSeeded = !!side.isSeeded;
+    this.isNightmare = !!side.isNightmare;
     this.isForesight = !!side.isForesight;
     this.isTailwind = !!side.isTailwind;
     this.isHelpingHand = !!side.isHelpingHand;
@@ -118,6 +127,7 @@ export class Side implements State.Side {
     this.isAreniteWall = !!side.isAreniteWall;
     this.isBattery = !!side.isBattery;
     this.isPowerSpot = !!side.isPowerSpot;
+    this.isSteelySpirit = !!side.isSteelySpirit;
     this.isSwitching = side.isSwitching;
   }
 
