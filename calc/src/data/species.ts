@@ -10183,7 +10183,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   Torterra: {otherFormes: ['Torterra-Crest']},
   Toxtricity: {otherFormes: ['Toxtricity-Aevian', 'Toxtricity-Gmax', 'Toxtricity-Low-Key', 'Toxtricity-Low-Key-Gmax', 'Toxtricity-Mega-G']},
   Typhlosion: {otherFormes: ['Typhlosion-Hisui', 'Typhlosion-Crest']},
-  Urshifu: {otherFormes: ['Urshifu-Gmax', 'Urshifu-Mega-G', 'Urshifu-Rapid-Strike', 'Urshifu-Rapid-Strike-Gmax', 'Urshifu-Rapid-Strike-Mega-G']},
+  Urshifu: {otherFormes: ['Urshifu-Gmax', 'Urshifu-Mega-G', 'Urshifu-Rapid-Strike', 'Urshifu-Rapid-Strike-Gmax', 'Urshifu-RS-Mega-G']},
   Venusaur: {otherFormes: ['Venusaur-Mega', 'Venusaur-Gmax', 'Venusaur-Mega-G']},
   Vespiquen: {otherFormes: ['Vespiquen-Crest-Offense', 'Vespiquen-Crest-Defense']},
   Volcarona: {otherFormes: ['Volcarona-Aevian']},
@@ -10388,7 +10388,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     abilities: {0: 'Unseen Fist'},
     baseSpecies: 'Urshifu',
   },
-  'Urshifu-Rapid-Strike-Mega-G': {
+  'Urshifu-RS-Mega-G': {
     types: ['Fighting', 'Water'],
     bs: {hp: 100, at: 165, df: 110, sa: 73, sd: 70, sp: 132},
     weightkg: 221.6,
