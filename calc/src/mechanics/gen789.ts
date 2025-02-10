@@ -336,6 +336,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Ancient-Ruins' ? 'Psychic'
         : field.chromaticField === 'Cave' ? 'Rock'
         : field.chromaticField === 'Factory' ? 'Steel'
+        : field.chromaticField === 'Waters-Surface' ? 'Water'
         : field.chromaticField === 'Undercolony' ? 'Bug'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
@@ -753,8 +754,9 @@ export function calculateSMSSSV(
       desc.chromaticField = field.chromaticField;
     }
 
-    if (VOLCANIC_ERUPTION.includes(move.name) || (move.named('Nature Power') && !field.terrain) &&
-        !defender.hasAbility('Flash Fire', 'Well-Baked Body')) {
+    if ((VOLCANIC_ERUPTION.includes(move.name) || (move.named('Nature Power') && !field.terrain) &&
+          !defender.hasAbility('Flash Fire', 'Well-Baked Body')) ||
+        defender.hasAbility('Solar Power')) {
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -853,6 +855,15 @@ export function calculateSMSSSV(
       desc.defenderAbility = defender.ability;
       desc.chromaticField = field.chromaticField;
       return result;
+    }
+  }
+
+  // Water's Surface
+  if (field.chromaticField === 'Waters-Surface') {
+    if (defender.hasStatus('brn') ||
+        field.defenderSide.isAquaRing || 
+        (defender.hasAbility('Rain Dish') && !field.hasWeather('Rain', 'Heavy Rain') && field.chromaticField === 'Waters-Surface')) {
+      desc.chromaticField = field.chromaticField;
     }
   }
 
@@ -1618,6 +1629,10 @@ export function calculateBasePowerSMSSSV(
         desc.moveName = 'Gear Grind';
         desc.hits = move.hits;
         break;
+      case 'Waters-Surface':
+        basePower = 90;
+        desc.moveName = 'Surf';
+        break;
       case 'Undercolony':
         basePower = 80;
         move.category = 'Physical';
@@ -2324,7 +2339,8 @@ export function calculateAtModsSMSSSV(
   } else if ((field.chromaticField === 'Jungle' && attacker.hasAbility('Swarm') && move.hasType('Bug')) || // Jungle - Activates Swarm
              (field.chromaticField === 'Thundering-Plateau' && attacker.hasAbility('Plus', 'Minus') && move.category === 'Special') || // Thundering Plateau - Activates Plus and Minus
              (field.chromaticField === 'Volcanic-Top' && (attacker.hasAbility('Solar Power') || (attacker.hasAbility('Blaze') && move.hasType('Fire')))) || // Volcanic Top - Activates Blaze and Solar Power
-             (field.chromaticField === 'Flower-Garden' && attacker.hasAbility('Overgrow') && move.hasType('Grass'))) { // Flower Garden - Activates Overgrow
+             (field.chromaticField === 'Flower-Garden' && attacker.hasAbility('Overgrow') && move.hasType('Grass')) || // Flower Garden - Activates Overgrow
+             (field.chromaticField === 'Waters-Surface' && attacker.hasAbility('Torrent') && move.hasType('Water'))) { // Water's Surface - Activates Torrent
     atMods.push(6144);
     desc.attackerAbility = attacker.ability;
     desc.chromaticField = field.chromaticField;
@@ -2522,6 +2538,18 @@ export function calculateAtModsSMSSSV(
     if (attacker.isLockOn) {
       atMods.push(10240);
       desc.fieldCondition = 'Lock On';
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  if (field.chromaticField === 'Waters-Surface') {
+    // Water's Surface - Discharge, Parabolic Charge, and Shock Wave deal 1.3x damage
+    if (move.named('Discharge', 'Parabolic Charge', 'Shock Wave')) {
+      atMods.push(5324);
+      desc.chromaticField = field.chromaticField;
+    // Water's Surface - Dive is 1-Turn and deals 1.2x damage
+    } else if (move.named('Dive')) {
+      atMods.push(4915);
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -2827,7 +2855,13 @@ function calculateBaseDamageSMSSSV(
       (field.hasWeather('Sun', 'Harsh Sunshine') && move.hasType('Fire')) ||
       (field.hasWeather('Rain', 'Heavy Rain') && move.hasType('Water'))
     ) {
-      baseDamage = pokeRound(OF32(baseDamage * 6144) / 4096);
+      let modifier = 6144;
+      // Water's Surface - Rain boosts Water Type moves 1.6x (From 1.5x)
+      if (field.hasWeather('Rain', 'Heavy Rain') && field.chromaticField === 'Waters-Surface') {
+        modifier = 6554;
+        desc.chromaticField = field.chromaticField;
+      }
+      baseDamage = pokeRound(OF32(baseDamage * modifier) / 4096);
       desc.weather = field.weather;
     } else if (
       (field.hasWeather('Sun') && move.hasType('Water')) ||

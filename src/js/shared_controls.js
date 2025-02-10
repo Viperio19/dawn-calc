@@ -512,6 +512,13 @@ function setPrismScaleEffects(pokeObj) {
 		} else {
 			$("#magnetRiseR").prop("checked", true);
 		}
+	// Water's Surface - Prism Scale: Applies Aqua Ring
+	} else if (chromaticField === 'Waters-Surface') {
+		if (id === 'p1') {
+			$("#aquaRingL").prop("checked", true);
+		} else {
+			$("#aquaRingR").prop("checked", true);
+		}
 	// Undercolony - Prism Scale: Applies Salt Cure to the opponent
 	} else if (chromaticField === 'Undercolony') {
 		var allPokemon = $('.poke-info');

@@ -443,6 +443,11 @@ export function checkFieldEntryEffects(source: Pokemon, field: Field) {
       source.boosts.spe = Math.min(6, source.boosts.spe + 1);
       source.boosts.def = Math.max(-6, source.boosts.def - 1);
     }
+  } else if (field.chromaticField === 'Waters-Surface') {
+    // Water's Surface - Activates Water Compaction
+    if (source.hasAbility('Water Compaction')) {
+      source.boosts.def = Math.min(6, source.boosts.def + 2);
+    }
   }
 }
 
@@ -915,6 +920,8 @@ export function getMimicryType(field: Field) {
     return "Rock" as TypeName;
   } else if (field.chromaticField === 'Factory') {
     return "Steel" as TypeName;
+  } else if (field.chromaticField === 'Waters-Surface') {
+    return "Water" as TypeName;
   } else {
     return "???" as TypeName;
   }

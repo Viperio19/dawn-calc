@@ -727,16 +727,24 @@ function getEndOfTurn(
         texts.push('hail damage');
       }
     }
+  }
+
+  // Volcanic Top - Activates Solar Power
+  if (defender.hasAbility('Solar Power') && !field.hasWeather('Sun', 'Harsh Sunshine') && field.chromaticField === 'Volcanic-Top') {
+    damage -= Math.floor(defender.maxHP() / 8);
+    texts.push('Solar Power damage');
+  }
+
   // Snowy Peaks - Activates Ice Body
-  } else if (defender.hasAbility('Ice Body') && field.chromaticField === 'Snowy-Peaks') {
+  if (defender.hasAbility('Ice Body') && !field.hasWeather('Hail', 'Snow') && field.chromaticField === 'Snowy-Peaks') {
     damage += Math.floor(defender.maxHP() / 16);
     texts.push('Ice Body recovery');    
   }
   
-  // Volcanic Top - Activates Solar Power
-  if (!(field.hasWeather('Sun', 'Harsh Sunshine')) && field.chromaticField === 'Volcanic-Top' && defender.hasAbility('Solar Power')) {
-    damage -= Math.floor(defender.maxHP() / 8);
-    texts.push('Solar Power damage on Volcanic Top');
+  // Water's Surface - Activates Rain Dish
+  if (defender.hasAbility('Rain Dish') && !field.hasWeather('Rain', 'Heavy Rain') && field.chromaticField === 'Waters-Surface') {
+    damage += Math.floor(defender.maxHP() / 16);
+    texts.push('Rain Dish recovery');
   }
 
   const loseItem = move.named('Knock Off') && !defender.hasAbility('Sticky Hold');
@@ -776,7 +784,7 @@ function getEndOfTurn(
   }
 
   if ((field.defenderSide.isAquaRing || defender.named('Phione-Crest')) && !healBlock) {
-    let recovery = Math.floor(defender.maxHP() / 16);
+    let recovery = Math.floor(defender.maxHP() / (field.chromaticField === 'Waters-Surface' ? 10: 16));
     if (defender.hasItem('Big Root')) recovery = Math.trunc(recovery * 5324 / 4096);
     damage += recovery;
     texts.push('Aqua Ring recovery');
@@ -833,15 +841,21 @@ function getEndOfTurn(
                !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
       texts.push('toxic damage');
     }
-  } else if (defender.hasStatus('brn')) {
+  } else if (defender.hasStatus('brn') && !defender.hasAbility('Magic Guard') && 
+            !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
+    let modifier = 1;
+
     if (defender.hasAbility('Heatproof')) {
-      damage -= Math.floor(defender.maxHP() / (gen.num > 6 ? 32 : 16));
-      texts.push('reduced burn damage');
-    } else if (!defender.hasAbility('Magic Guard') && 
-               !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
-      damage -= Math.floor(defender.maxHP() / (gen.num === 1 || gen.num > 6 ? 16 : 8));
-      texts.push('burn damage');
+      modifier *= 2;
     }
+
+    // Water's Surface - Burn damage is halved
+    if (field.chromaticField === 'Waters-Surface') {
+      modifier *= 2;
+    }
+
+    damage -= Math.floor(defender.maxHP() / ((gen.num === 1 || gen.num > 6 ? 16 : 8) * modifier));
+    texts.push((modifier > 1 ? 'reduced ' : '') + 'burn damage');
   } else if (
     (defender.hasStatus('slp') || defender.hasAbility('Comatose')) &&
     (attacker.hasAbility('Bad Dreams') || field.chromaticField === 'Haunted-Graveyard') && // Haunted Graveyard - Bad Dreams is always active
@@ -1342,9 +1356,6 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Inverse":
       output += ' on ' + description.chromaticField + ' Field';
       break;
-    case "Dragons-Den":
-      output += " on Dragon's Den";
-      break;
     case "Thundering-Plateau":
     case "Starlight-Arena":
     case "Ring-Arena":
@@ -1356,6 +1367,12 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Acidic-Wasteland":
     case "Ancient-Ruins":
       output += ' on ' + description.chromaticField.replace('-', ' ');
+      break;
+    case "Dragons-Den":
+      output += " on Dragon's Den";
+      break;
+    case "Waters-Surface": 
+      output += " on Water's Surface";
       break;
     case "Cave":
     case "Undercolony":
