@@ -516,14 +516,16 @@ function setPrismScaleEffects(pokeObj) {
 	} else if (chromaticField === 'Undercolony') {
 		var allPokemon = $('.poke-info');
 		allPokemon.each(function () {
-			var pokeObj = $(this);
-			var id2 = pokeObj.prop("id");
+			var pokemon = $(this);
+			var id2 = pokemon.prop("id");
 			if (id !== id2) {
-				pokeObj.find(".saltcure").prop("checked", true);
+				pokemon.find(".saltcure").prop("checked", true);
 			}
 		});
 	}
 }
+
+const weatherAbilities = ["Drought", "Orichalcum Pulse", "Drizzle", "Sand Stream", "Snow Warning", "Desolate Land", "Primordial Sea", "Delta Stream"];
 
 $("#chromatic-field").change(function () {
 	var chromaticField = $("#chromatic-field").val();
@@ -540,23 +542,27 @@ $("#chromatic-field").change(function () {
 
 	var currentWeather = $("input:radio[name='weather']:checked").val();
 
-	// Eclipse - Drought, Orichalcum Pulse and Sunny Day fail
-	if (chromaticField === 'Eclipse' && currentWeather === 'Sun') {
-	// Desert - Drizzle and Rain Dance fail
-	} else if (chromaticField === 'Desert' && currentWeather === 'Rain') {
+	if ((chromaticField === 'Eclipse' && currentWeather === 'Sun') || // Eclipse - Drought, Orichalcum Pulse and Sunny Day fail
+	   (chromaticField === 'Desert' && currentWeather === 'Rain')) { // Desert - Drizzle and Rain Dance fail
 		$("#clear").prop("checked", true);
 	}
 
 	var allPokemon = $('.poke-info');
 	allPokemon.each(function () {
 		var pokeObj = $(this);
-		var id = pokeObj.prop("id");
 	
 		var ability = pokeObj.find(".ability").val();
 		var item = pokeObj.find(".item").val();
 
 		var teraType = pokeObj.find(".teraType").val();
 		var checked = pokeObj.find(".teraToggle").prop("checked");
+
+		currentWeather = $("input:radio[name='weather']:checked").val();
+
+		// Update weather for abilities that might fail on certain fields
+		if (currentWeather === "" && weatherAbilities.includes(ability)) {
+			autosetWeather(ability, 0);
+		}
 
 		stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (teraType === "Stellar" && checked));
 		
