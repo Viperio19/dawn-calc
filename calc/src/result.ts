@@ -59,7 +59,7 @@ export class Result {
   }
 
   moveDesc(notation = '%') {
-    return displayMove(this.gen, this.attacker, this.defender, this.move, this.damage, notation);
+    return displayMove(this.gen, this.attacker, this.defender, this.move, this.damage, this.field, notation);
   }
 
   recovery(notation = '%') {
@@ -67,7 +67,7 @@ export class Result {
   }
 
   recoil(notation = '%') {
-    return getRecoil(this.gen, this.attacker, this.defender, this.move, this.damage, notation);
+    return getRecoil(this.gen, this.attacker, this.defender, this.move, this.damage, this.field, notation);
   }
 
   kochance(err = true) {

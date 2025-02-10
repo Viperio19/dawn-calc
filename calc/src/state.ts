@@ -72,8 +72,11 @@ export namespace State {
     isSR?: boolean;
     isReflect?: boolean;
     isLightScreen?: boolean;
+    isStickyWeb?: boolean;
     isProtected?: boolean;
     isSeeded?: boolean;
+    isIngrain?: boolean;
+    isAquaRing?: boolean;
     isNightmare?: boolean;
     isForesight?: boolean;
     isTailwind?: boolean;

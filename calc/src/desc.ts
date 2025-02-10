@@ -54,7 +54,7 @@ export interface RawDesc {
   rivalry?: 'buffed' | 'nerfed';
   terrain?: Terrain;
   chromaticField?: string;
-  starstruck?: boolean;
+  fieldCondition?: string;
   gritStages?: number;
   weather?: Weather;
   isTailwind?: boolean;
@@ -98,6 +98,7 @@ export function displayMove(
   defender: Pokemon,
   move: Move,
   damage: Damage,
+  field: Field,
   notation = '%'
 ) {
   const [minDamage, maxDamage] = damageRange(damage);
@@ -108,7 +109,7 @@ export function displayMove(
   const maxDisplay = toDisplay(notation, max, defender.maxHP());
 
   const recoveryText = getRecovery(gen, attacker, defender, move, damage, notation).text;
-  const recoilText = getRecoil(gen, attacker, defender, move, damage, notation).text;
+  const recoilText = getRecoil(gen, attacker, defender, move, damage, field, notation).text;
 
   return `${minDisplay} - ${maxDisplay}${notation}${recoveryText &&
     ` (${recoveryText})`}${recoilText && ` (${recoilText})`}`;
@@ -212,6 +213,7 @@ export function getRecoil(
   defender: Pokemon,
   move: Move,
   damage: Damage,
+  field: Field,
   notation = '%'
 ) {
   const [minDamage, maxDamage] = damageRange(damage);
@@ -222,14 +224,20 @@ export function getRecoil(
   let text = '';
 
   const damageOverflow = minDamage > defender.curHP() || maxDamage > defender.curHP();
-  if (move.recoil || defender.named('Bastiodon-Crest')) {
+  if (move.recoil || defender.named('Bastiodon-Crest') || (move.named('Megahorn') && field.chromaticField === 'Undercolony')) {
     let tempMod = 0;
     
     if (move.recoil) {
       tempMod += (move.recoil[0] / move.recoil[1]) * 100;
     }
+
     if (defender.named('Bastiodon-Crest')) {
       tempMod += 50;
+    }
+
+    // Undercolony - Megahorn is now 100% accurate, but user takes 1/3 recoil damage
+    if (move.named('Megahorn') && field.chromaticField === 'Undercolony') {
+      tempMod += (1 / 3) * 100;
     }
 
     const mod = tempMod;
@@ -543,61 +551,114 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
   let damage = 0;
   const texts: string[] = [];
 
-  if (defender.hasItem('Heavy-Duty Boots')) {
-    return {damage, texts};
-  }
-  if (defenderSide.isSR && !defender.hasAbility('Magic Guard', 'Mountaineer') &&
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
-    const rockType = gen.types.get('rock' as ID)!;
-    let effectiveness =
-      rockType.effectiveness[defender.types[0]]! *
-      (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
-
-    // XOR between Torterra-Crest and Inverse Field so they cancel each other out
-    if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
-        (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Inverse - Inverse type effectiveness
-      effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to rock
-    }
+  // Acidic Wasteland - Hazards are consumed when set but regurgitate at the end of the turn as an attacking move
+  if (field.chromaticField === 'Acidic-Wasteland') {
+    // Acidic Wasteland - Regurgigated hazards: Stealth Rock applies double its normal effect
+    if (defenderSide.isSR) {
+      const rockType = gen.types.get('rock' as ID)!;
+      let effectiveness =
+        rockType.effectiveness[defender.types[0]]! *
+        (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
   
-    damage += Math.floor((effectiveness * defender.maxHP()) / 8);
-    texts.push('Stealth Rock');
-  }
-  if (defenderSide.steelsurge && !defender.hasAbility('Magic Guard', 'Mountaineer') &&
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
-    const steelType = gen.types.get('steel' as ID)!;
-    let effectiveness =
-      steelType.effectiveness[defender.types[0]]! *
-      (defender.types[1] ? steelType.effectiveness[defender.types[1]]! : 1);
-
-    // XOR between Torterra-Crest and Inverse Field so they cancel each other out
-    if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
-        (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Inverse - Inverse type effectiveness
-      effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to steel
-    }
-    
-    damage += Math.floor((effectiveness * defender.maxHP()) / 8);
-    texts.push('Steelsurge');
-  }
-
-  if (!defender.hasType('Flying') &&
-      !defender.hasAbility('Magic Guard', 'Levitate') && 
-      !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
-      !defender.hasItem('Air Balloon') &&
-      !defender.named('Probopass-Crest')
-  ) {
-    if (defenderSide.spikes === 1) {
-      damage += Math.floor(defender.maxHP() / 8);
-      if (gen.num === 2) {
-        texts.push('Spikes');
-      } else {
-        texts.push('1 layer of Spikes');
+      if (defender.named('Torterra-Crest')) { // Torterra Crest - Inverse type effectiveness
+        effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to rock
       }
-    } else if (defenderSide.spikes === 2) {
-      damage += Math.floor(defender.maxHP() / 6);
-      texts.push('2 layers of Spikes');
-    } else if (defenderSide.spikes === 3) {
-      damage += Math.floor(defender.maxHP() / 4);
-      texts.push('3 layers of Spikes');
+
+      damage += Math.floor((effectiveness * defender.maxHP()) / 4);
+      texts.push('regurgitated Stealth Rock');    
+    }
+    // Acidic Wasteland - Regurgigated hazards: Spikes deal 33% of the Pokemon’s max HP
+    if (defenderSide.spikes != 0 &&
+        !defender.hasType('Flying') &&
+        !defender.hasAbility('Levitate') && 
+        !defender.hasItem('Air Balloon') &&
+        !defender.named('Probopass-Crest')) {
+      damage += Math.floor(defender.maxHP() / 3);
+      texts.push('regurgitated Spikes');
+    }
+  } else if (defender.hasItem('Heavy-Duty Boots') || defender.hasAbility('Magic Guard') ||
+       (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
+      return {damage, texts};
+  } else {
+    if (defenderSide.isSR && !defender.hasAbility('Mountaineer') &&
+        !(defender.hasType('Rock') && field.chromaticField === 'Undercolony')) { // Undercolony - Rock types absorb Stealth Rocks
+      const rockType = gen.types.get('rock' as ID)!;
+      let effectiveness =
+        rockType.effectiveness[defender.types[0]]! *
+        (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
+
+      if (defender.named('Glaceon-Crest')) {
+        effectiveness = 0.5;
+      // Snowy Peaks - Stealth Rocks do neutral damage to Ice Types instead of Super Effective
+      } else if (defender.hasType('Ice') && field.chromaticField === 'Snowy-Peaks') {
+        effectiveness /= 2;
+      }
+
+      // Cave - Stealth Rocks do resisted damage to rock types
+      if (defender.hasType('Rock') && field.chromaticField === 'Cave' && effectiveness > 0.5) {
+        effectiveness = 0.5;
+      }
+
+      // XOR between Torterra-Crest and Inverse Field so they cancel each other out
+      if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
+          (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Inverse - Inverse type effectiveness
+        effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to rock
+      }
+      
+      // Cave - Stealth Rocks do at least neutral damage to non-rock types
+      if (field.chromaticField === 'Cave' && !defender.hasType('Rock') && effectiveness < 1) {
+        effectiveness = 1;
+      }
+      
+      // Undercolony - Shell Armor & Battle Armor makes user resist the Rock type
+      if (field.chromaticField === 'Undercolony' && defender.hasAbility('Shell Armor', 'Battle Armor') && effectiveness > 0.5) {
+        effectiveness = 0.5;
+      }
+
+      damage += Math.floor((effectiveness * defender.maxHP()) / 8);
+      texts.push('Stealth Rock');
+    }
+    if (defenderSide.steelsurge && !defender.hasAbility('Mountaineer')) {
+      const steelType = gen.types.get('steel' as ID)!;
+      let effectiveness =
+        steelType.effectiveness[defender.types[0]]! *
+        (defender.types[1] ? steelType.effectiveness[defender.types[1]]! : 1);
+
+      // XOR between Torterra-Crest and Inverse Field so they cancel each other out
+      if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
+          (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Inverse - Inverse type effectiveness
+        effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to steel
+      }
+      
+      damage += Math.floor((effectiveness * defender.maxHP()) / 8);
+      texts.push('Steelsurge');
+    }
+
+    if (!defender.hasType('Flying') &&
+        !defender.hasAbility('Levitate') && 
+        !defender.hasItem('Air Balloon') &&
+        !defender.named('Probopass-Crest')
+    ) {
+      if (defenderSide.spikes === 1) {
+        damage += Math.floor(defender.maxHP() / 8);
+        if (gen.num === 2) {
+          texts.push('Spikes');
+        } else {
+          texts.push('1 layer of Spikes');
+        }
+      } else if (defenderSide.spikes === 2) {
+        damage += Math.floor(defender.maxHP() / 6);
+        texts.push('2 layers of Spikes');
+      } else if (defenderSide.spikes === 3) {
+        damage += Math.floor(defender.maxHP() / 4);
+        texts.push('3 layers of Spikes');
+      }
+    }
+
+    // Jungle - Sticky Web deals 1/8th of a Flying type’s Max HP on entry
+    if (defender.hasType('Flying') && field.chromaticField === 'Jungle') {
+      damage += Math.floor(defender.maxHP() / 8);
+      texts.push('Sticky Web');
     }
   }
 
@@ -654,12 +715,21 @@ function getEndOfTurn(
       !defender.hasAbility('Magic Guard', 'Overcoat', 'Snow Cloak') &&
       !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
       !defender.hasItem('Safety Goggles') &&
-      !defender.named('Empoleon-Crest') && 
-      field.hasWeather('Hail')
+      !defender.named('Empoleon-Crest')
     ) {
-      damage -= Math.floor(defender.maxHP() / 16);
-      texts.push('hail damage');
+      // Snowy Peaks - Snow deals 1/16 weather damage like Sandstorm (Ice-types are immune)
+      if (field.hasWeather('Snow') && field.chromaticField === 'Snowy-Peaks') {
+        damage -= Math.floor(defender.maxHP() / 16);
+        texts.push('snow damage');
+      } else {
+        damage -= Math.floor(defender.maxHP() / 16);
+        texts.push('hail damage');
+      }
     }
+  // Snowy Peaks - Activates Ice Body
+  } else if (defender.hasAbility('Ice Body') && field.chromaticField === 'Snowy-Peaks') {
+    damage += Math.floor(defender.maxHP() / 16);
+    texts.push('Ice Body recovery');    
   }
   
   // Volcanic Top - Activates Solar Power
@@ -670,7 +740,8 @@ function getEndOfTurn(
 
   const loseItem = move.named('Knock Off') && !defender.hasAbility('Sticky Hold');
   // psychic noise should suppress all recovery effects
-  const healBlock = move.named('Psychic Noise') &&
+  const healBlock = (move.named('Psychic Noise') ||
+    ((move.named('Shock Wave') || move.named('Nature Power')) && field.chromaticField === 'Thundering-Plateau')) && // Thundering Plateau - Shock Wave applies Heal Block
     !(
       // suppression conditions
       attacker.hasAbility('Sheer Force') ||
@@ -696,6 +767,20 @@ function getEndOfTurn(
     texts.push('Sticky Barb damage');
   }
 
+  if (field.defenderSide.isIngrain && !healBlock) {
+    let recovery = Math.floor(defender.maxHP() / (field.chromaticField === 'Flower-Garden' ? 8 : 16)); // Flower Garden - Ingrain restores 1/8th of the user's Max HP
+    if (defender.hasItem('Big Root')) recovery = Math.trunc(recovery * 5324 / 4096);
+    damage += recovery;
+    texts.push('Ingrain recovery');
+  }
+
+  if ((field.defenderSide.isAquaRing || defender.named('Phione-Crest')) && !healBlock) {
+    let recovery = Math.floor(defender.maxHP() / 16);
+    if (defender.hasItem('Big Root')) recovery = Math.trunc(recovery * 5324 / 4096);
+    damage += recovery;
+    texts.push('Aqua Ring recovery');
+  }
+
   if (field.defenderSide.isSeeded) {
     if (!defender.hasAbility('Magic Guard') && 
         !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
@@ -719,7 +804,8 @@ function getEndOfTurn(
   }
 
   if (field.hasTerrain('Grassy')) {
-    if (isGrounded(defender, field) && !healBlock) {
+    // Flower Garden - Grassy Terrain only heals Grass Type Pokemon
+    if (isGrounded(defender, field, field.defenderSide.isIngrain) && !healBlock && !(field.chromaticField === 'Flower-Garden' && !defender.hasType('Grass'))) {
       damage += Math.floor(defender.maxHP() / 16);
       texts.push('Grassy Terrain recovery');
     }
@@ -763,10 +849,25 @@ function getEndOfTurn(
   ) {
     damage -= Math.floor(defender.maxHP() / 8);
     texts.push('Bad Dreams');
+  // Acidic Wasteland - Activates Poison Heal
+  } else if (field.chromaticField === 'Acidic-Wasteland') {
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) {
+      if (!healBlock) {
+        damage += Math.floor(defender.maxHP() / 8);
+        texts.push('Poison Heal');
+      }
+    } else if (defender.hasAbility('Liquid Ooze')) {
+      if (!healBlock) {
+        damage += Math.floor(defender.maxHP() / 16);
+        texts.push('Liquid Ooze recovery');
+      }      
+    }
   }
 
   if (!defender.hasAbility('Magic Guard') && !(defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') && // Jungle - Shield Dust grants Magic Guard
-      (TRAPPING.includes(move.name) || (TRAPPING_JUNGLE.includes(move.name) && field.chromaticField === 'Jungle'))) { // Jungle - Certain moves apply Infestation
+      (TRAPPING.includes(move.name) || (TRAPPING_JUNGLE.includes(move.name) && field.chromaticField === 'Jungle') || // Jungle - Certain moves apply Infestation
+      (move.named('Leaf Tornado') && field.chromaticField === 'Flower-Garden') || // Flower Garden - Leaf Tornado is now a binding move that deals 1/8 max HP per turn for 2-5 turns
+      (move.named('Sandsear Storm') && field.chromaticField === 'Desert'))) { // Desert - Sandsear Storm applies Sand Tomb trapping and chip damage effect 
     if (attacker.hasItem('Binding Band')) {
       damage -= gen.num > 5 ? Math.floor(defender.maxHP() / 6) : Math.floor(defender.maxHP() / 8);
       texts.push('trapping damage');
@@ -834,11 +935,6 @@ function getEndOfTurn(
   if (defender.named('Meganium-Crest')) {
     damage += Math.floor(defender.maxHP() / 16);
     texts.push('Crest recovery');
-  }
-
-  if (defender.named('Phione-Crest')) {
-    damage += Math.floor(defender.maxHP() / 16);
-    texts.push('Aqua Ring recovery');
   }
 
   if (attacker.named('Shiinotic-Crest') && defender.status) {
@@ -1108,8 +1204,8 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   output = appendIfSet(output, description.attackerItem);
   output = appendIfSet(output, description.attackerAbility);
   output = appendIfSet(output, description.rivalry);
-  if (description.starstruck) {
-    output += 'Starstruck ';
+  if (description.fieldCondition) {
+    output += description.fieldCondition + ' ';
   }
   if (description.isBurned) {
     output += 'burned ';
@@ -1240,6 +1336,7 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Jungle":
     case "Eclipse":
     case "Sky":
+    case "Desert":
     case "Inverse":
       output += ' on ' + description.chromaticField + ' Field';
       break;
@@ -1247,22 +1344,21 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
       output += " on Dragon's Den";
       break;
     case "Thundering-Plateau":
-      output += ' on Thundering Plateau';
-      break;
     case "Starlight-Arena":
-      output += ' on Starlight Arena';
-      break;
     case "Ring-Arena":
-      output += ' on Ring Arena';
-      break;
     case "Volcanic-Top":
-      output += ' on Volcanic Top';
-      break;
     case "Haunted-Graveyard":
-      output += ' on Haunted Graveyard';
+    case "Flower-Garden":
+    case "Snowy-Peaks":
+    case "Blessed-Sanctum":
+    case "Acidic-Wasteland":
+    case "Ancient-Ruins":
+      output += ' on ' + description.chromaticField.replace('-', ' ');
       break;
+    case "Cave":
+    case "Undercolony":
     default:
-      output += 'on ' + description.chromaticField;
+      output += ' on ' + description.chromaticField;
       break;
     }
   }

@@ -372,6 +372,7 @@ function autosetWeather(ability, i) {
 	}
 
 	var currentWeather = $("input:radio[name='weather']:checked").val();
+	var chromaticField = $("#chromatic-field").val();
 	if (lastAutoWeather.indexOf(currentWeather) === -1) {
 		lastManualWeather = currentWeather;
 		lastAutoWeather[1 - i] = "";
@@ -383,8 +384,11 @@ function autosetWeather(ability, i) {
 		$("#sun").prop("checked", true);
 		break;
 	case "Drizzle":
-		lastAutoWeather[i] = "Rain";
-		$("#rain").prop("checked", true);
+		// Desert - Drizzle fails
+		if (chromaticField !== 'Desert') {
+			lastAutoWeather[i] = "Rain";
+			$("#rain").prop("checked", true);
+		}
 		break;
 	case "Sand Stream":
 		lastAutoWeather[i] = "Sand";
@@ -474,14 +478,41 @@ function updateGritStages(pokeObj) {
 			$("#gritR1").prop("checked", true);
 		}
 	}
+}
 
-	// Ring Arena - Grit Stage Effects: 3 - 100% Crit chance
-	for (i = 0; i < 4; i++) {
-		var moveObj = pokeObj.find(".move" + (i + 1) + " select.move-selector");
-		var moveGroupObj = moveObj.parent();
-		var moveName = moveObj.	val();
-		var move = moves[moveName] || moves['(No Move)'];
-		moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true || gritNew >= 3);
+// Fields - Prism Scale Effects: Applying effects
+function setPrismScaleEffects(pokeObj) {
+	var chromaticField = $("#chromatic-field").val();
+	var id = pokeObj.prop("id");
+
+	// Sky - Prism Scale: Applies Tailwind
+	if (chromaticField === 'Sky') {
+		if (id === 'p1') {
+			$("#tailwindL").prop("checked", true);
+		} else {
+			$("#tailwindR").prop("checked", true);
+		}
+	// Flower Garden - Prism Scale: Applies Ingrain
+	} else if (chromaticField === 'Flower-Garden') {
+		if (id === 'p1') {
+			$("#ingrainL").prop("checked", true);
+		} else {
+			$("#ingrainR").prop("checked", true);
+		}
+	// Ancient Ruins - Prism Scale: Sets Wonder Room
+	} else if (chromaticField === 'Ancient-Ruins') {
+		$("#wonderroom").prop("checked", true);
+	}
+	// Undercolony - Prism Scale: Applies Salt Cure to the opponent
+	else if (chromaticField === 'Undercolony') {
+		var allPokemon = $('.poke-info');
+		allPokemon.each(function () {
+			var pokeObj = $(this);
+			var id2 = pokeObj.prop("id");
+			if (id !== id2) {
+				pokeObj.find(".saltcure").prop("checked", true);
+			}
+		});
 	}
 }
 
@@ -496,6 +527,13 @@ $("#chromatic-field").change(function () {
 	$("#gritL0").prop("checked", true);
 	$("#gritR0").prop("checked", true);
 
+	var currentWeather = $("input:radio[name='weather']:checked").val();
+
+	// Desert - Drizzle and Rain Dance fail
+	if (chromaticField === 'Desert' && currentWeather === 'Rain') {
+		$("#clear").prop("checked", true);
+	}
+
 	var allPokemon = $('.poke-info');
 	allPokemon.each(function () {
 		var pokeObj = $(this);
@@ -509,25 +547,12 @@ $("#chromatic-field").change(function () {
 
 		stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (teraType === "Stellar" && checked));
 		
-		// Sky - Prism Scale: Applies Tailwind
-		if (chromaticField === 'Sky' && item === 'Prism Scale') {
-			if (id === 'p1') {
-				$("#tailwindL").prop("checked", true);
-			} else {
-				$("#tailwindR").prop("checked", true);
-			}			
+		if (item === 'Prism Scale') {
+			setPrismScaleEffects(pokeObj)			
 		}
 
 		if (chromaticField === 'Ring-Arena') {
 			updateGritStages(pokeObj);
-		} else {
-			for (i = 0; i < 4; i++) {
-				var moveObj = pokeObj.find(".move" + (i + 1) + " select.move-selector");
-				var moveGroupObj = moveObj.parent();
-				var moveName = moveObj.	val();
-				var move = moves[moveName] || moves['(No Move)'];
-				moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true);
-			}
 		}
 	});
 });
@@ -665,10 +690,7 @@ $(".move-selector").change(function () {
 	moveGroupObj.children(".move-type").val(move.type);
 	moveGroupObj.children(".move-cat").val(move.category);
 	var pokeObj = $(this).closest(".poke-info");
-	var gritStages = pokeObj.prop("id") === 'p1'
-				   ? parseInt(pokeObj.find("input:radio[name='gritL']:checked").val())
-				   : parseInt(pokeObj.find("input:radio[name='gritR']:checked").val());
-	moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true || gritStages >= 3);
+	moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true);
 
 	var stat = move.category === 'Special' ? 'spa' : 'atk';
 	var pokeObj = $(this).closest(".poke-info");
@@ -749,35 +771,14 @@ $(".item").change(function () {
 	autosetQP($(this).closest(".poke-info"));
 
 	var chromaticField = $("#chromatic-field").val();
-	var id = pokeObj.prop("id");
 
-	// Sky - Prism Scale: Set Tailwind
-	if (chromaticField === 'Sky' && itemName === 'Prism Scale') {
-		if (id === 'p1') {
-			$("#tailwindL").prop("checked", true);
-		} else {
-			$("#tailwindR").prop("checked", true);
-		}			
+	if (itemName === 'Prism Scale') {
+		setPrismScaleEffects(pokeObj)			
 	}
 
 	if (chromaticField === 'Ring-Arena') {
 		updateGritStages(pokeObj);
 	}
-});
-
-$(".grit").change(function () {
-	var pokeObj = $(this).closest(".poke-info");
-
-	for (i = 0; i < 4; i++) {
-		var moveObj = pokeObj.find(".move" + (i + 1) + " select.move-selector");
-		var moveGroupObj = moveObj.parent();
-		var moveName = moveObj.	val();
-		var move = moves[moveName] || moves['(No Move)'];
-		var gritStages = pokeObj.prop("id") === 'p1'
-						 ? parseInt(pokeObj.find("input:radio[name='gritL']:checked").val())
-						 : parseInt(pokeObj.find("input:radio[name='gritR']:checked").val());
-		moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true || gritStages >= 3);
-	}			
 });
 
 function smogonAnalysis(pokemonName) {
@@ -1386,6 +1387,7 @@ function createField() {
 		spikes = [~~$("input:radio[name='spikesL']:checked").val(), ~~$("input:radio[name='spikesR']:checked").val()];
 	}
 	var steelsurge = [$("#steelsurgeL").prop("checked"), $("#steelsurgeR").prop("checked")];
+	var isStickyWeb = [$("#stickywebL").prop("checked"), $("#stickywebR").prop("checked")];
 	var vinelash = [$("#vinelashL").prop("checked"), $("#vinelashR").prop("checked")];
 	var wildfire = [$("#wildfireL").prop("checked"), $("#wildfireR").prop("checked")];
 	var cannonade = [$("#cannonadeL").prop("checked"), $("#cannonadeR").prop("checked")];
@@ -1395,6 +1397,8 @@ function createField() {
 	var isReflect = [$("#reflectL").prop("checked"), $("#reflectR").prop("checked")];
 	var isLightScreen = [$("#lightScreenL").prop("checked"), $("#lightScreenR").prop("checked")];
 	var isProtected = [$("#protectL").prop("checked"), $("#protectR").prop("checked")];
+	var isIngrain = [$("#ingrainL").prop("checked"), $("#ingrainR").prop("checked")];
+	var isAquaRing = [$("#aquaRingL").prop("checked"), $("#aquaRingR").prop("checked")];
 	var isSeeded = [$("#leechSeedL").prop("checked"), $("#leechSeedR").prop("checked")];
 	var isNightmare = [$("#nightmareL").prop("checked"), $("#nightmareR").prop("checked")];
 	var isForesight = [$("#foresightL").prop("checked"), $("#foresightR").prop("checked")];
@@ -1412,10 +1416,10 @@ function createField() {
 
 	var createSide = function (i) {
 		return new calc.Side({
-			spikes: spikes[i], isSR: isSR[i], steelsurge: steelsurge[i],
+			spikes: spikes[i], isSR: isSR[i], steelsurge: steelsurge[i], isStickyWeb: isStickyWeb[i],
 			vinelash: vinelash[i], wildfire: wildfire[i], cannonade: cannonade[i], volcalith: volcalith[i],
-			isReflect: isReflect[i], isLightScreen: isLightScreen[i],
-			isProtected: isProtected[i], isSeeded: isSeeded[i], isNightmare: isNightmare[i], isForesight: isForesight[i],
+			isReflect: isReflect[i], isLightScreen: isLightScreen[i], isProtected: isProtected[i], isIngrain: isIngrain[i],
+			isAquaRing: isAquaRing[i], isSeeded: isSeeded[i], isNightmare: isNightmare[i], isForesight: isForesight[i],
 			isTailwind: isTailwind[i], isHelpingHand: isHelpingHand[i], isFlowerGift: isFlowerGift[i], isFriendGuard: isFriendGuard[i],
 			isAuroraVeil: isAuroraVeil[i], isAreniteWall: isAreniteWall[i], isBattery: isBattery[i], isPowerSpot: isPowerSpot[i], isSwitching: isSwitchingOut[i] ? 'out' : undefined
 		});
