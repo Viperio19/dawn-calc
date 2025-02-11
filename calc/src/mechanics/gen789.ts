@@ -704,10 +704,22 @@ export function calculateSMSSSV(
 
   // Fields - Text for description
 
+  const healBlock = (move.named('Psychic Noise') ||
+  ((move.named('Shock Wave') || move.named('Nature Power')) && field.chromaticField === 'Thundering-Plateau')) && // Thundering Plateau - Shock Wave applies Heal Block
+  !(
+    // suppression conditions
+    attacker.hasAbility('Sheer Force') ||
+    defender.hasItem('Covert Cloak') ||
+    defender.hasAbility('Shield Dust', 'Aroma Veil')
+  );
+
+  // Jungle - Shield Dust grants Magic Guard
+  const defenderMagicGuard = defender.hasAbility('Magic Guard') || (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
+  const attackerMagicGuard = attacker.hasAbility('Magic Guard') || (attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
+
   if (field.chromaticField === 'Jungle') {
     // Jungle - Fell Stinger, Silver Wind, and Steamroller apply Infestation
-    if (move.named('Fell Stinger', 'Silver Wind', 'Steamroller') &&
-        !defender.hasAbility('Magic Guard') && !(defender.hasAbility('Shield Dust'))) {
+    if (move.named('Fell Stinger', 'Silver Wind', 'Steamroller') && !defenderMagicGuard) {
       desc.chromaticField = field.chromaticField;
     }
   
@@ -741,7 +753,7 @@ export function calculateSMSSSV(
     }
 
     // Thundering Plateau - Volt Absorb restores 1/16 of the user's Max HP per turn
-    if (defender.hasAbility('Volt Absorb')) {
+    if (defender.hasAbility('Volt Absorb') && !healBlock) {
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -758,8 +770,8 @@ export function calculateSMSSSV(
     }
 
     // Volcanic Top - Volcanic Eruption
-    if ((VOLCANIC_ERUPTION.includes(move.name) || (move.named('Nature Power') && !field.terrain) &&
-          !defender.hasAbility('Flash Fire', 'Well-Baked Body')) ||
+    if (((VOLCANIC_ERUPTION.includes(move.name) || (move.named('Nature Power') && !field.terrain)) &&
+          !defender.hasAbility('Flash Fire', 'Well-Baked Body') && !defenderMagicGuard) ||
         defender.hasAbility('Solar Power')) {
       desc.chromaticField = field.chromaticField;
     }
@@ -774,8 +786,7 @@ export function calculateSMSSSV(
   }
 
   if (field.chromaticField === 'Haunted-Graveyard') {
-    if (((defender.hasStatus('slp') || defender.hasAbility('Comatose')) &&
-          !defender.hasAbility('Magic Guard') && !attacker.hasAbility('Bad Dreams')) || // Haunted Graveyard - Bad Dreams is always active
+    if (((defender.hasStatus('slp') || defender.hasAbility('Comatose')) && !defenderMagicGuard && !attacker.hasAbility('Bad Dreams')) || // Haunted Graveyard - Bad Dreams is always active
         (move.named('Dream Eater') && !(defender.hasStatus('slp') || defender.hasAbility('Comatose')))) { // Haunted Graveyward - Dream Eater never fails
       desc.chromaticField = field.chromaticField;
     }
@@ -789,13 +800,13 @@ export function calculateSMSSSV(
 
   if (field.chromaticField === 'Flower-Garden') {
     // Flower Garden - Prism Scale: Applies Ingrain
-    if (defender.item === 'Prism Scale' && field.defenderSide.isIngrain) {
+    if (defender.item === 'Prism Scale' && field.defenderSide.isIngrain && !healBlock) {
       desc.defenderItem = defender.item;
       desc.chromaticField = field.chromaticField;
     }
 
     // Flower Garden - Leaf Tornado is now a binding move that deals 1/8 max HP per turn for 2-5 turns
-    if (move.named('Leaf Tornado') && !defender.hasAbility('Magic Guard')) {
+    if (move.named('Leaf Tornado') && !defenderMagicGuard) {
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -808,7 +819,7 @@ export function calculateSMSSSV(
     }
 
     // Desert - Sandsear Storm applies Sand Tomb trapping and chip damage effect
-    if (move.named('Sandsear Storm') && !defender.hasAbility('Magic Guard')) {
+    if (move.named('Sandsear Storm') && !defenderMagicGuard) {
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -817,20 +828,21 @@ export function calculateSMSSSV(
     // Snow deals 1/16 weather damage like Sandstorm (Ice-types are immune)
     if (field.hasWeather('Snow') &&
         !defender.hasType('Ice') &&
-        !defender.hasAbility('Magic Guard', 'Overcoat', 'Snow Cloak') &&
+        !defender.hasAbility('Overcoat', 'Snow Cloak') &&
         !defender.hasItem('Safety Goggles') &&
-        !defender.named('Empoleon-Crest')) {
+        !defender.named('Empoleon-Crest') &&
+        !defenderMagicGuard) {
       desc.chromaticField = field.chromaticField;
     }
 
     // Snowy Peaks - Activates Ice Body
-    if (defender.hasAbility('Ice Body') && !field.hasWeather('Hail', 'Snow')) {
+    if (defender.hasAbility('Ice Body') && !field.hasWeather('Hail', 'Snow') && !healBlock) {
       desc.chromaticField = field.chromaticField;
     }
   
     // Snowy Peaks - Stealth Rocks do neutral damage to Ice Types instead of Super Effective
     if (field.defenderSide.isSR && defender.hasType('Ice') &&
-        !defender.hasItem('Heavy-Duty Boots') && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
+        !defender.hasItem('Heavy-Duty Boots') && !defender.hasAbility('Mountaineer') && !defenderMagicGuard) {
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -838,8 +850,8 @@ export function calculateSMSSSV(
  
   if (field.chromaticField === 'Acidic-Wasteland') {
     if ((attacker.hasAbility('Toxic Boost') && move.category === "Physical" && !attacker.hasStatus('psn', 'tox')) || // Acidic Wasteland - Activates Toxic Boost
-        ((defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) && !defender.hasStatus('psn', 'tox')) || // Acidic Wasteland - Activates Poison Heal
-        defender.hasAbility('Liquid Ooze')) { // Acidic Wasteland - Activates Liquid Ooze
+        ((((defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) && !defender.hasStatus('psn', 'tox')) || // Acidic Wasteland - Activates Poison Heal
+        defender.hasAbility('Liquid Ooze')) && !healBlock)) { // Acidic Wasteland - Activates Liquid Ooze
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -866,9 +878,9 @@ export function calculateSMSSSV(
   }
 
   if (field.chromaticField === 'Waters-Surface') {
-    if (defender.hasStatus('brn') || // Water's Surface - Burn damage is halved
-        field.defenderSide.isAquaRing || // Water's Surface - Aqua Ring restores 1/10 of the user's Max HP per turn
-        (defender.hasAbility('Rain Dish') && !field.hasWeather('Rain', 'Heavy Rain') && field.chromaticField === 'Waters-Surface')) { // Water's Surface - Activates Rain Dish
+    if ((defender.hasStatus('brn') && !defenderMagicGuard) || // Water's Surface - Burn damage is halved
+        (((defender.hasAbility('Rain Dish') && !field.hasWeather('Rain', 'Heavy Rain') && field.chromaticField === 'Waters-Surface') || // Water's Surface - Activates Rain Dish
+        (field.defenderSide.isAquaRing || defender.named('Phione-Crest'))) && !healBlock)) { // Water's Surface - Aqua Ring restores 1/10 of the user's Max HP per turn
       desc.chromaticField = field.chromaticField;
     }
   }
