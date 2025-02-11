@@ -380,8 +380,11 @@ function autosetWeather(ability, i) {
 	switch (ability) {
 	case "Drought":
 	case "Orichalcum Pulse":
-		lastAutoWeather[i] = "Sun";
-		$("#sun").prop("checked", true);
+		// Eclipse - Drought and Orichalcum Pulse fail
+		if (chromaticField !== 'Eclipse') {
+			lastAutoWeather[i] = "Sun";
+			$("#sun").prop("checked", true);
+		}
 		break;
 	case "Drizzle":
 		// Desert - Drizzle fails
@@ -502,19 +505,34 @@ function setPrismScaleEffects(pokeObj) {
 	// Ancient Ruins - Prism Scale: Sets Wonder Room
 	} else if (chromaticField === 'Ancient-Ruins') {
 		$("#wonderroom").prop("checked", true);
-	}
+	// Factory - Prism Scale: Applies Magnet Rise
+	} else if (chromaticField === 'Factory') {
+		if (id === 'p1') {
+			$("#magnetRiseL").prop("checked", true);
+		} else {
+			$("#magnetRiseR").prop("checked", true);
+		}
+	// Water's Surface - Prism Scale: Applies Aqua Ring
+	} else if (chromaticField === 'Waters-Surface') {
+		if (id === 'p1') {
+			$("#aquaRingL").prop("checked", true);
+		} else {
+			$("#aquaRingR").prop("checked", true);
+		}
 	// Undercolony - Prism Scale: Applies Salt Cure to the opponent
-	else if (chromaticField === 'Undercolony') {
+	} else if (chromaticField === 'Undercolony') {
 		var allPokemon = $('.poke-info');
 		allPokemon.each(function () {
-			var pokeObj = $(this);
-			var id2 = pokeObj.prop("id");
+			var pokemon = $(this);
+			var id2 = pokemon.prop("id");
 			if (id !== id2) {
-				pokeObj.find(".saltcure").prop("checked", true);
+				pokemon.find(".saltcure").prop("checked", true);
 			}
 		});
 	}
 }
+
+const weatherAbilities = ["Drought", "Orichalcum Pulse", "Drizzle", "Sand Stream", "Snow Warning", "Desolate Land", "Primordial Sea", "Delta Stream"];
 
 $("#chromatic-field").change(function () {
 	var chromaticField = $("#chromatic-field").val();
@@ -524,26 +542,34 @@ $("#chromatic-field").change(function () {
 
 	$("#starstruckL").prop("checked", false);
 	$("#starstruckR").prop("checked", false);
+	$("#lockonL").prop("checked", false);
+	$("#lockonR").prop("checked", false);
 	$("#gritL0").prop("checked", true);
 	$("#gritR0").prop("checked", true);
 
 	var currentWeather = $("input:radio[name='weather']:checked").val();
 
-	// Desert - Drizzle and Rain Dance fail
-	if (chromaticField === 'Desert' && currentWeather === 'Rain') {
+	if ((chromaticField === 'Eclipse' && currentWeather === 'Sun') || // Eclipse - Drought, Orichalcum Pulse and Sunny Day fail
+	   (chromaticField === 'Desert' && currentWeather === 'Rain')) { // Desert - Drizzle and Rain Dance fail
 		$("#clear").prop("checked", true);
 	}
 
 	var allPokemon = $('.poke-info');
 	allPokemon.each(function () {
 		var pokeObj = $(this);
-		var id = pokeObj.prop("id");
 	
 		var ability = pokeObj.find(".ability").val();
 		var item = pokeObj.find(".item").val();
 
 		var teraType = pokeObj.find(".teraType").val();
 		var checked = pokeObj.find(".teraToggle").prop("checked");
+
+		currentWeather = $("input:radio[name='weather']:checked").val();
+
+		// Update weather for abilities that might fail on certain fields
+		if (currentWeather === "" && weatherAbilities.includes(ability)) {
+			autosetWeather(ability, 0);
+		}
 
 		stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (teraType === "Stellar" && checked));
 		
@@ -1302,6 +1328,7 @@ function createPokemon(pokeInfo) {
 			isDynamaxed: isDynamaxed,
 			isSaltCure: pokeInfo.find(".saltcure").is(":checked"),
 			isStarstruck: pokeInfo.find(".starstruck").is(":checked"),
+			isLockOn: pokeInfo.find(".lockon").is(":checked"),
 			gritStages: pokeInfo.prop("id") === 'p1'
 					    ? parseInt(pokeInfo.find("input:radio[name='gritL']:checked").val())
 						: parseInt(pokeInfo.find("input:radio[name='gritR']:checked").val()),
@@ -1659,6 +1686,8 @@ function clearField() {
 	$("#gravity").prop("checked", false);
 	$("#starstruckL").prop("checked", false);
 	$("#starstruckR").prop("checked", false);
+	$("#lockonL").prop("checked", false);
+	$("#lockonR").prop("checked", false);
 	$("#gritL0").prop("checked", true);
 	$("#gritR0").prop("checked", true);
 	$("#srL").prop("checked", false);
