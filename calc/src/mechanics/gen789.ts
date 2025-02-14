@@ -1090,40 +1090,8 @@ export function calculateSMSSSV(
     desc.defenderItem = defender.item;
   }
 
-  // the random factor is applied between the crit mod and the stab mod, so don't apply anything
-  // below this until we're inside the loop
-  let stabMod = 4096;
-  if (attacker.hasOriginalType(move.type) || attacker.hasAbility('Mastery')) {
-    stabMod += 2048;
-  } else if ((attacker.hasAbility('Protean', 'Libero') || attacker.named('Boltund-Crest')) && !attacker.teraType) {
-    stabMod += 2048;
-    desc.attackerAbility = attacker.ability;
-  } else if (attacker.hasAbility('Mimicry') && getMimicryType(field) === move.type) {
-    stabMod += 2048;
-    desc.mimicryOffenseType = getMimicryType(field);
-  // Starlight Arena - Victory Star changes the user’s primary type to Fairy
-  } else if (attacker.hasAbility('Victory Star') && field.chromaticField === 'Starlight-Arena' && move.hasType('Fairy')) {
-    stabMod += 2048;
-    desc.chromaticField = field.chromaticField;
-  // Crests - STAB additions
-  } else if (attacker.named('Empoleon-Crest') && move.hasType('Ice')) {
-    stabMod += 2048;
-  } else if (attacker.named('Luxray-Crest') && move.hasType('Dark')) {
-    stabMod += 2048;
-  } else if ((attacker.named('Probopass-Crest') || attacker.named('Electric Nose')) && move.hasType('Electric')) {
-    stabMod += 2048;
-  } else if (attacker.named('Samurott-Crest') && move.hasType('Fighting')) {
-    stabMod += 2048;
-  } else if (attacker.named('Simipour-Crest') && move.hasType('Grass')) {
-    stabMod += 2048;
-  } else if (attacker.named('Simisage-Crest') && move.hasType('Fire')) {
-    stabMod += 2048;
-  } else if (attacker.named('Simisear-Crest') && move.hasType('Water')) {
-    stabMod += 2048;
-  } 
-
-  let preStellarStabMod = getStabMod(attacker, move, desc);
-  stabMod = getStellarStabMod(attacker, move, preStellarStabMod);
+  let preStellarStabMod = getStabMod(attacker, move, field, field.attackerSide, desc);
+  let stabMod = getStellarStabMod(attacker, move, preStellarStabMod);
 
   const teraType = attacker.teraType;
   if (teraType === move.type && teraType !== 'Stellar') {
@@ -1298,7 +1266,7 @@ export function calculateSMSSSV(
 
       if (move.timesUsed! > 1) {
         // Adaptability does not change between hits of a multihit, only between turns
-        preStellarStabMod = getStabMod(attacker, move, desc);
+        preStellarStabMod = getStabMod(attacker, move, field, field.attackerSide, desc);
         // Hack to make Tera Shell with multihit moves, but not over multiple turns
         typeEffectiveness = turn2typeEffectiveness;
         // Stellar damage boost applies for 1 turn, but all hits of multihit.
