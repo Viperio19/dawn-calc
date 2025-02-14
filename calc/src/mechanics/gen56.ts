@@ -329,7 +329,7 @@ export function calculateBWXY(
 
   // the random factor is applied between the crit mod and the stab mod, so don't apply anything
   // below this until we're inside the loop
-  let stabMod = getStabMod(attacker, move, desc);
+  let stabMod = getStabMod(attacker, move, field, field.attackerSide, desc);
 
   const applyBurn =
     attacker.hasStatus('brn') &&
@@ -395,7 +395,7 @@ export function calculateBWXY(
 
       if (move.timesUsed! > 1) {
         // Adaptability does not change between hits of a multihit, only between turns
-        stabMod = getStabMod(attacker, move, desc);
+        stabMod = getStabMod(attacker, move, field, field.attackerSide, desc);
       }
 
       const newBasePower = calculateBasePowerBWXY(

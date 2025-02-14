@@ -783,23 +783,54 @@ export function getWeight(pokemon: Pokemon, desc: RawDesc, role: 'defender' | 'a
   return weightHG / 10;
 }
 
-export function getStabMod(pokemon: Pokemon, move: Move, desc: RawDesc) {
+export function getStabMod(pokemon: Pokemon, move: Move, field: Field, side: Side, desc: RawDesc) {
   let stabMod = 4096;
-  if (pokemon.hasOriginalType(move.type)) {
+  if (pokemon.hasAbility('Mastery')) {
     stabMod += 2048;
-  } else if (pokemon.hasAbility('Protean', 'Libero') && !pokemon.teraType) {
+  } else if (pokemon.hasAbility('Mimicry') && getMimicryType(field) === move.type) {
+    stabMod += 2048;
+  // Starlight Arena - Victory Star changes the user’s primary type to Fairy
+  } else if (pokemon.hasAbility('Victory Star') && field.chromaticField === 'Starlight-Arena') {
+    if (move.hasType('Fairy')) {
+      stabMod += 2048;
+      desc.attackerAbility = pokemon.ability;
+      desc.chromaticField = field.chromaticField;
+    } else if (move.type !== pokemon.types[0] && pokemon.hasOriginalType(move.type)) {
+      stabMod += 2048;
+    }
+  } else if (pokemon.hasOriginalType(move.type)) {
+    stabMod += 2048;
+  } else if ((pokemon.hasAbility('Protean', 'Libero') || pokemon.named('Boltund-Crest')) && !pokemon.teraType) {
     stabMod += 2048;
     desc.attackerAbility = pokemon.ability;
-  }
+  } else if (pokemon.named('Empoleon-Crest') && move.hasType('Ice')) {
+    stabMod += 2048;
+  } else if (pokemon.named('Luxray-Crest') && move.hasType('Dark')) {
+    stabMod += 2048;
+  } else if ((pokemon.named('Probopass-Crest') || pokemon.named('Electric Nose')) && move.hasType('Electric')) {
+    stabMod += 2048;
+  } else if (pokemon.named('Samurott-Crest') && move.hasType('Fighting')) {
+    stabMod += 2048;
+  } else if (pokemon.named('Simipour-Crest') && move.hasType('Grass')) {
+    stabMod += 2048;
+  } else if (pokemon.named('Simisage-Crest') && move.hasType('Fire')) {
+    stabMod += 2048;
+  } else if (pokemon.named('Simisear-Crest') && move.hasType('Water')) {
+    stabMod += 2048;
+  } 
+
   const teraType = pokemon.teraType;
+
   if (teraType === move.type && teraType !== 'Stellar') {
     stabMod += 2048;
     desc.attackerTera = teraType;
   }
+
   if (pokemon.hasAbility('Adaptability') && pokemon.hasType(move.type)) {
     stabMod += teraType && pokemon.hasOriginalType(teraType) ? 1024 : 2048;
     desc.attackerAbility = pokemon.ability;
   }
+
   return stabMod;
 }
 
