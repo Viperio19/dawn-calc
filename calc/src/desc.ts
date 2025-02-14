@@ -895,8 +895,8 @@ function getEndOfTurn(
        (TRAPPING_JUNGLE.includes(move.name) && field.chromaticField === 'Jungle') || // Jungle - Certain moves apply Infestation
        (move.named('Leaf Tornado') && field.chromaticField === 'Flower-Garden') || // Flower Garden - Leaf Tornado is now a binding move that deals 1/8 max HP per turn for 2-5 turns
        (move.named('Sandsear Storm') && field.chromaticField === 'Desert'))) { // Desert - Sandsear Storm applies Sand Tomb trapping and chip damage effect 
-    // Underwater - TODO: Whirlpool deals ⅙ of the target’s Max HP per turn
-    if (attacker.hasItem('Binding Band')) {
+    // Underwater - Whirlpool deals ⅙ of the target’s Max HP per turn
+    if (attacker.hasItem('Binding Band') || (move.named('Whirlpool') && field.chromaticField === 'Underwater')) {
       damage -= gen.num > 5 ? Math.floor(defender.maxHP() / 6) : Math.floor(defender.maxHP() / 8);
       texts.push('trapping damage');
     } else {
