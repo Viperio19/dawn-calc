@@ -91,6 +91,7 @@ export class Side implements State.Side {
   isSeeded: boolean;
   isNightmare: boolean;
   isForesight: boolean;
+  isSoak: boolean;
   isTailwind: boolean;
   isMagnetRise: boolean;
   isHelpingHand: boolean;
@@ -120,6 +121,7 @@ export class Side implements State.Side {
     this.isSeeded = !!side.isSeeded;
     this.isNightmare = !!side.isNightmare;
     this.isForesight = !!side.isForesight;
+    this.isSoak = !!side.isSoak;
     this.isTailwind = !!side.isTailwind;
     this.isMagnetRise = !!side.isMagnetRise;
     this.isHelpingHand = !!side.isHelpingHand;

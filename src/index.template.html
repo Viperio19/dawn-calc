@@ -847,6 +847,7 @@
                         <option value="Cave">Cave (Rock)</option>
                         <option value="Factory">Factory (Steel)</option>
                         <option value="Waters-Surface">Water's Surface (Water)</option>
+                        <option value="Underwater">Underwater (Water)</option>
                         <option value="Undercolony">Undercolony (Bug, Rock)</option>
                         <option value="Inverse">Inverse (All)</option>
                     </select>
@@ -865,7 +866,7 @@
                 <hr class="gen-specific g6 g7 g8 g9" />
                 <div aria-labelledby="selectWeatherInstruction" role="radiogroup">
                     <span class="visually-hidden" id="selectWeatherInstruction">Select the current weather condition.</span>
-                    <div class="gen-specific g3 g4 g5 g6 g7 g8 g9" style="width: 22.2em; margin: 5px auto;" title="Select the current weather condition.">
+                    <div class="gen-specific g3 g4 g5 g6 g7 g8 g9 field-specific-not Underwater" style="width: 22.2em; margin: 5px auto;" title="Select the current weather condition.">
                         <input class="weather visually-hidden calc-trigger" type="radio" name="weather" value="" id="clear" checked="checked" />
                         <label class="btn btn-small btn-left" for="clear">None</label>
                         <input class="weather visually-hidden calc-trigger" type="radio" name="weather" value="Sun" id="sun" />
@@ -883,7 +884,7 @@
                             <label class="btn btn-small btn-right" for="snow">Snow</label>
                         </span>
                     </div>
-                    <div class="gen-specific g6 g7 g8 g9" title="Select the current weather condition.">
+                    <div class="gen-specific g6 g7 g8 g9 field-specific-not Underwater" title="Select the current weather condition.">
                         <input class="weather visually-hidden calc-trigger" type="radio" name="weather" value="Harsh Sunshine" id="harsh-sunshine" />
                         <label class="btn btn-xxxwide btn-left" for="harsh-sunshine">Harsh Sunshine</label>
                         <input class="weather visually-hidden calc-trigger" type="radio" name="weather" value="Heavy Rain" id="heavy-rain" />
@@ -1100,6 +1101,17 @@
                             <td><div class="right" title="Has this Pok&eacute;mon been revealed with Foresight or Odor Sleuth?">
                                 <input aria-describedby="selectRevealInstruction" class="visually-hidden calc-trigger" type="checkbox" id="foresightR" />
                                 <label class="btn btn-wide" for="foresightR">Foresight</label>
+                            </div></td>
+                        </tr>
+                        <tr class="gen-specific g5 g6 g7 g8 g9">
+                            <td><div class="left" title="Has this Pok&eacute;mon's been Soaked?">
+                                <div hidden id="selectSoakInstruction">Has this Pok&eacute;mon's been Soaked?</div>
+                                <input aria-describedby="selectSoakInstruction" class="visually-hidden calc-trigger" type="checkbox" id="soakL" />
+                                <label class="btn btn-wide" for="soakL">Soak</label>
+                            </div></td>
+                            <td><div class="right" title="Has this Pok&eacute;mon's been Soaked?">
+                                <input aria-describedby="selectSoakInstruction" class="visually-hidden calc-trigger" type="checkbox" id="soakR" />
+                                <label class="btn btn-wide" for="soakR">Soak</label>
                             </div></td>
                         </tr>
                         <tr class="gen-specific g4 g5 g6 g7 g8 g9">
