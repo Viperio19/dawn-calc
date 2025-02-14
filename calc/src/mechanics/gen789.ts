@@ -82,8 +82,8 @@ export function calculateSMSSSV(
   checkEmbody(defender, gen);
   checkIntimidate(gen, attacker, defender, field);
   checkIntimidate(gen, defender, attacker, field);
-  checkDownload(attacker, defender, field.isWonderRoom);
-  checkDownload(defender, attacker, field.isWonderRoom);
+  checkDownload(attacker, defender, field);
+  checkDownload(defender, attacker, field);
   checkIntrepidSword(attacker, gen);
   checkIntrepidSword(defender, gen);
   checkStickyWeb(attacker, field, field.attackerSide.isStickyWeb);
@@ -335,6 +335,8 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Acidic-Wasteland' ? 'Poison'
         : field.chromaticField === 'Ancient-Ruins' ? 'Psychic'
         : field.chromaticField === 'Cave' ? 'Rock'
+        : field.chromaticField === 'Factory' ? 'Steel'
+        : field.chromaticField === 'Waters-Surface' ? 'Water'
         : field.chromaticField === 'Undercolony' ? 'Bug'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
@@ -702,38 +704,56 @@ export function calculateSMSSSV(
 
   // Fields - Text for description
 
-  // Jungle
+  const healBlock = (move.named('Psychic Noise') ||
+  ((move.named('Shock Wave') || move.named('Nature Power')) && field.chromaticField === 'Thundering-Plateau')) && // Thundering Plateau - Shock Wave applies Heal Block
+  !(
+    // suppression conditions
+    attacker.hasAbility('Sheer Force') ||
+    defender.hasItem('Covert Cloak') ||
+    defender.hasAbility('Shield Dust', 'Aroma Veil')
+  );
+
+  // Jungle - Shield Dust grants Magic Guard
+  const defenderMagicGuard = defender.hasAbility('Magic Guard') || (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
+  const attackerMagicGuard = attacker.hasAbility('Magic Guard') || (attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
+
   if (field.chromaticField === 'Jungle') {
-    if (move.named('Fell Stinger', 'Silver Wind', 'Steamroller') &&
-        !defender.hasAbility('Magic Guard') && !(defender.hasAbility('Shield Dust'))) {
+    // Jungle - Fell Stinger, Silver Wind, and Steamroller apply Infestation
+    if (move.named('Fell Stinger', 'Silver Wind', 'Steamroller') && !defenderMagicGuard) {
       desc.chromaticField = field.chromaticField;
-    } else if (move.named('Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash')) {
+    }
+  
+    // Jungle - Air Cutter, Air Slash, Cut, Fury Cutter, Psycho Cut, and Slash, have an additional Grass Type
+    if (move.named('Air Cutter', 'Air Slash', 'Cut', 'Fury Cutter', 'Psycho Cut', 'Slash')) {
       desc.moveType = '+ Grass' as TypeName;
       desc.chromaticField = field.chromaticField;   
     }
   }
 
-  // Eclipse
-  if (field.chromaticField === 'Eclipse' && move.named('Solar Beam', 'Solar Blade')) {
-    desc.chromaticField = field.chromaticField;
-    return result; // Results in no damage
+  if (field.chromaticField === 'Eclipse') {
+    // Eclipse - Solar Beam and Solar Blade fail
+    if (move.named('Solar Beam', 'Solar Blade')) {
+      desc.chromaticField = field.chromaticField;
+      return result;
+    }
   }
 
-  // Dragon's Den
   if (field.chromaticField === 'Dragons-Den') {
+    // Dragon's Den - Dragon Pulse can now hit Fairy type Pokemon (for Resisted Damage)
     if (move.named('Dragon Pulse') && defender.hasType('Fairy')) {
       desc.chromaticField = field.chromaticField;
     }
   }
 
-  // Thundering Plateau
   if (field.chromaticField === 'Thundering-Plateau') {
+    // Thundering Plateau - Prism Scale: Applies Charge
     if (defender.item === 'Prism Scale' && move.category === 'Special') {
       desc.defenderItem = defender.item;
       desc.chromaticField = field.chromaticField;
     }
 
-    if (defender.hasAbility('Volt Absorb')) {
+    // Thundering Plateau - Volt Absorb restores 1/16 of the user's Max HP per turn
+    if (defender.hasAbility('Volt Absorb') && !healBlock) {
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -742,115 +762,138 @@ export function calculateSMSSSV(
     'Bulldoze', 'Earthquake', 'Eruption', 'Lava Plume', 'Magma Storm', 'Magnitude', 'Stomping Tantrum',
   ];
 
-  // Volcanic Top
   if (field.chromaticField === 'Volcanic-Top') {
+    // Volcanic Top - Prism Scale: Boosts Special Attack +1
     if (attacker.item === 'Prism Scale' && move.category === 'Special') {
       desc.attackerItem = attacker.item;
       desc.chromaticField = field.chromaticField;
     }
 
-    if (VOLCANIC_ERUPTION.includes(move.name) || (move.named('Nature Power') && !field.terrain) &&
-        !defender.hasAbility('Flash Fire', 'Well-Baked Body')) {
+    // Volcanic Top - Volcanic Eruption
+    if (((VOLCANIC_ERUPTION.includes(move.name) || (move.named('Nature Power') && !field.terrain)) &&
+          !defender.hasAbility('Flash Fire', 'Well-Baked Body') && !defenderMagicGuard) ||
+        defender.hasAbility('Solar Power')) {
       desc.chromaticField = field.chromaticField;
     }
   }
 
-  // Sky
-  if (field.chromaticField === 'Sky' && defender.item === 'Prism Scale' && move.bp != 0) {
-    desc.defenderItem = defender.item;
-    desc.chromaticField = field.chromaticField;
+  if (field.chromaticField === 'Sky') {
+    // Sky - Prism Scale: Lowers the user’s Defense and Special Defense by 1
+    if (defender.item === 'Prism Scale' && move.bp != 0) {
+      desc.defenderItem = defender.item;
+      desc.chromaticField = field.chromaticField;
+    }
   }
 
-  // Haunted Graveyard
   if (field.chromaticField === 'Haunted-Graveyard') {
-    if ((defender.hasStatus('slp') || defender.hasAbility('Comatose')) && !defender.hasAbility('Magic Guard')
-    ) {
+    if (((defender.hasStatus('slp') || defender.hasAbility('Comatose')) && !defenderMagicGuard && !attacker.hasAbility('Bad Dreams')) || // Haunted Graveyard - Bad Dreams is always active
+        (move.named('Dream Eater') && !(defender.hasStatus('slp') || defender.hasAbility('Comatose')))) { // Haunted Graveyward - Dream Eater never fails
       desc.chromaticField = field.chromaticField;
     }
 
+    // Haunted Graveyard - Prism Scale: Boosts Special Defense +1
     if (defender.item === 'Prism Scale' && move.category === 'Special' && !move.named('Nature Power')) {
       desc.defenderItem = defender.item;
       desc.chromaticField = field.chromaticField;
     }
-
-    if (!(defender.hasStatus('slp') || defender.hasAbility('Comatose')) && move.named('Dream Eater')) {
-      desc.chromaticField = field.chromaticField;
-    }
   }
 
-  // Flower Garden
   if (field.chromaticField === 'Flower-Garden') {
-    if (defender.item === 'Prism Scale' && field.defenderSide.isIngrain) {
+    // Flower Garden - Prism Scale: Applies Ingrain
+    if (defender.item === 'Prism Scale' && field.defenderSide.isIngrain && !healBlock) {
       desc.defenderItem = defender.item;
       desc.chromaticField = field.chromaticField;
     }
 
-    if (move.named('Leaf Tornado') && !defender.hasAbility('Magic Guard')) {
+    // Flower Garden - Leaf Tornado is now a binding move that deals 1/8 max HP per turn for 2-5 turns
+    if (move.named('Leaf Tornado') && !defenderMagicGuard) {
       desc.chromaticField = field.chromaticField;
     }
   }
 
-  // Desert
   if (field.chromaticField === 'Desert') {
+    // Desert - Prism Scale: Boosts Attack + 1
     if (attacker.item === 'Prism Scale' && move.category === 'Physical') {
       desc.attackerItem = attacker.item;
       desc.chromaticField = field.chromaticField;
     }
 
-    if (move.named('Sandsear Storm') && !defender.hasAbility('Magic Guard')) {
+    // Desert - Sandsear Storm applies Sand Tomb trapping and chip damage effect
+    if (move.named('Sandsear Storm') && !defenderMagicGuard) {
       desc.chromaticField = field.chromaticField;
     }
   }
 
-  // Snowy Peaks
   if (field.chromaticField === 'Snowy-Peaks') {
-    if (defender.hasAbility('Ice Body') && !field.hasWeather('Hail', 'Snow')) {
-      desc.chromaticField = field.chromaticField;
-    }
-
+    // Snow deals 1/16 weather damage like Sandstorm (Ice-types are immune)
     if (field.hasWeather('Snow') &&
         !defender.hasType('Ice') &&
-        !defender.hasAbility('Magic Guard', 'Overcoat', 'Snow Cloak') &&
+        !defender.hasAbility('Overcoat', 'Snow Cloak') &&
         !defender.hasItem('Safety Goggles') &&
-        !defender.named('Empoleon-Crest')) {
+        !defender.named('Empoleon-Crest') &&
+        !defenderMagicGuard) {
       desc.chromaticField = field.chromaticField;
     }
 
+    // Snowy Peaks - Activates Ice Body
+    if (defender.hasAbility('Ice Body') && !field.hasWeather('Hail', 'Snow') && !healBlock) {
+      desc.chromaticField = field.chromaticField;
+    }
+  
+    // Snowy Peaks - Stealth Rocks do neutral damage to Ice Types instead of Super Effective
     if (field.defenderSide.isSR && defender.hasType('Ice') &&
-        !defender.hasItem('Heavy-Duty Boots') && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
+        !defender.hasItem('Heavy-Duty Boots') && !defender.hasAbility('Mountaineer') && !defenderMagicGuard) {
       desc.chromaticField = field.chromaticField;
     }
   }
 
-  // Acidic Wasteland
+ 
   if (field.chromaticField === 'Acidic-Wasteland') {
-    if ((attacker.hasAbility('Toxic Boost') && move.category === "Physical" && !attacker.hasStatus('psn', 'tox')) ||
-        ((defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) && !defender.hasStatus('psn', 'tox')) ||
-        defender.hasAbility('Liquid Ooze')) {
+    if ((attacker.hasAbility('Toxic Boost') && move.category === "Physical" && !attacker.hasStatus('psn', 'tox')) || // Acidic Wasteland - Activates Toxic Boost
+        ((((defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) && !defender.hasStatus('psn', 'tox')) || // Acidic Wasteland - Activates Poison Heal
+        defender.hasAbility('Liquid Ooze')) && !healBlock)) { // Acidic Wasteland - Activates Liquid Ooze
       desc.chromaticField = field.chromaticField;
     }
   }
 
-  // Cave
   if (field.chromaticField === 'Cave') {
-    if (move.named('Power Gem') && defender.stats.def < defender.stats.spd) {
-      desc.chromaticField = field.chromaticField;
-    }
-
+    // Cave - Stealth Rocks do resisted damage to rock types and at least neutral damage to non-rock types
     if (field.defenderSide.isSR && !defender.hasItem('Heavy-Duty Boots') && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
       desc.chromaticField = field.chromaticField;
     }
+  
+    // Cave - Power Gem targets the opponent's lower defense stat between Defense and Special Defense
+    if (move.named('Power Gem') && defender.stats.def < defender.stats.spd) {
+      desc.chromaticField = field.chromaticField;
+    }
   }
 
-  // Undercolony
+  if (field.chromaticField === 'Factory') {
+    // Factory - Heatproof grants Fire immunity
+    if (defender.hasAbility('Heatproof') && move.hasType('Fire')) {
+      desc.defenderAbility = defender.ability;
+      desc.chromaticField = field.chromaticField;
+      return result;
+    }
+  }
+
+  if (field.chromaticField === 'Waters-Surface') {
+    if ((defender.hasStatus('brn') && !defenderMagicGuard) || // Water's Surface - Burn damage is halved
+        (((defender.hasAbility('Rain Dish') && !field.hasWeather('Rain', 'Heavy Rain') && field.chromaticField === 'Waters-Surface') || // Water's Surface - Activates Rain Dish
+        (field.defenderSide.isAquaRing || defender.named('Phione-Crest'))) && !healBlock)) { // Water's Surface - Aqua Ring restores 1/10 of the user's Max HP per turn
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
   if (field.chromaticField === 'Undercolony') {
+    // Undercolony - Rock Throw is super effective vs Ground types
     if (move.named('Rock Throw') && defender.hasType('Ground')) {
       desc.chromaticField = field.chromaticField;
     }
   }
 
-  // Inverse
   if (field.chromaticField === 'Inverse') {
+    // Inverse - The type chart is inverted [Immunities are now 2x weaknesses] (always print the field name because of this)
     desc.chromaticField = field.chromaticField;
   }
 
@@ -1597,6 +1640,17 @@ export function calculateBasePowerSMSSSV(
         move.category = 'Physical';
         desc.moveName = 'Rock Slide';
         break;
+      case 'Factory':
+        basePower = 50;
+        move.category = 'Physical';
+        move.hits = 2;
+        desc.moveName = 'Gear Grind';
+        desc.hits = move.hits;
+        break;
+      case 'Waters-Surface':
+        basePower = 90;
+        desc.moveName = 'Surf';
+        break;
       case 'Undercolony':
         basePower = 80;
         move.category = 'Physical';
@@ -1668,6 +1722,12 @@ export function calculateBasePowerSMSSSV(
   if (field.chromaticField === 'Blessed-Sanctum' && move.named('Hyper Voice', 'Tri Attack', 'Echoed Voice')) {
     basePower = 100;
     desc.moveName = 'Judgment';
+  }
+
+  // Factory - Magnet Bomb now acts like steel-type Special Future Sight
+  if (field.chromaticField === 'Factory' && move.named('Magnet Bomb')) {
+    move.category = 'Special';
+    desc.chromaticField = field.chromaticField;
   }
 
   // Undercolony - Silver Wind gains +10 power for each of the user’s stat boosts
@@ -1883,9 +1943,7 @@ export function calculateBPModsSMSSSV(
   // Abilities
 
   // Use BasePower after moves with custom BP to determine if Technician should boost
-  if (((attacker.hasAbility('Technician') || attacker.named('Dusknoir-Crest')) && basePower <= 60) ||
-    (attacker.hasAbility('Flare Boost') &&
-      attacker.hasStatus('brn') && move.category === 'Special') ||
+  if ((attacker.hasAbility('Flare Boost') && attacker.hasStatus('brn') && move.category === 'Special') ||
     (attacker.hasAbility('Toxic Boost') &&
       (attacker.hasStatus('psn', 'tox') || field.chromaticField === 'Acidic-Wasteland') && move.category === 'Physical') || // Acidic Wasteland - Activates Toxic Boost
     (attacker.hasAbility('Mega Launcher') && move.flags.pulse) ||
@@ -1897,6 +1955,18 @@ export function calculateBPModsSMSSSV(
   ) {
     bpMods.push(6144);
     desc.attackerAbility = attacker.ability;
+  }
+
+  if (attacker.hasAbility('Technician') || attacker.named('Dusknoir-Crest')) {
+    if (basePower <= 60) {
+      bpMods.push(6144);
+      desc.attackerAbility = 'Technician';
+    // Factory - Technician boosts base power up to 70 Base (TODO: CHECK IF DUSKNOIR SHOULD BE BUFFED BY THIS)
+    } else if (field.chromaticField === 'Factory' && basePower <= 70) {
+      bpMods.push(6144);
+      desc.attackerAbility = 'Technician';
+      desc.chromaticField = field.chromaticField;
+    }
   }
 
   const aura = `${move.type} Aura`;
@@ -2287,7 +2357,8 @@ export function calculateAtModsSMSSSV(
   } else if ((field.chromaticField === 'Jungle' && attacker.hasAbility('Swarm') && move.hasType('Bug')) || // Jungle - Activates Swarm
              (field.chromaticField === 'Thundering-Plateau' && attacker.hasAbility('Plus', 'Minus') && move.category === 'Special') || // Thundering Plateau - Activates Plus and Minus
              (field.chromaticField === 'Volcanic-Top' && (attacker.hasAbility('Solar Power') || (attacker.hasAbility('Blaze') && move.hasType('Fire')))) || // Volcanic Top - Activates Blaze and Solar Power
-             (field.chromaticField === 'Flower-Garden' && attacker.hasAbility('Overgrow') && move.hasType('Grass'))) { // Flower Garden - Activates Overgrow
+             (field.chromaticField === 'Flower-Garden' && attacker.hasAbility('Overgrow') && move.hasType('Grass')) || // Flower Garden - Activates Overgrow
+             (field.chromaticField === 'Waters-Surface' && attacker.hasAbility('Torrent') && move.hasType('Water'))) { // Water's Surface - Activates Torrent
     atMods.push(6144);
     desc.attackerAbility = attacker.ability;
     desc.chromaticField = field.chromaticField;
@@ -2472,6 +2543,33 @@ export function calculateAtModsSMSSSV(
   if (field.chromaticField === 'Cave' && move.flags.sound) {
     atMods.push(5324);
     desc.chromaticField = field.chromaticField;
+  }
+
+  if (field.chromaticField === 'Factory') {
+    // Factory - Discharge deals 1.1x damage
+    if (move.named('Discharge')) {
+      atMods.push(4505);
+      desc.chromaticField = field.chromaticField;
+    }
+
+    // Factory - Lock On grants 2.5x power to the attack on the next turn
+    if (attacker.isLockOn) {
+      atMods.push(10240);
+      desc.fieldCondition = 'Lock On';
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  if (field.chromaticField === 'Waters-Surface') {
+    // Water's Surface - Discharge, Parabolic Charge, and Shock Wave deal 1.3x damage
+    if (move.named('Discharge', 'Parabolic Charge', 'Shock Wave')) {
+      atMods.push(5324);
+      desc.chromaticField = field.chromaticField;
+    // Water's Surface - Dive is 1-Turn and deals 1.2x damage
+    } else if (move.named('Dive')) {
+      atMods.push(4915);
+      desc.chromaticField = field.chromaticField;
+    }
   }
 
   // Undercolony - Broken Carapace: While	Bug & Rock types <50% HP gain 1.2x Attack and Spa Attack
@@ -2775,7 +2873,13 @@ function calculateBaseDamageSMSSSV(
       (field.hasWeather('Sun', 'Harsh Sunshine') && move.hasType('Fire')) ||
       (field.hasWeather('Rain', 'Heavy Rain') && move.hasType('Water'))
     ) {
-      baseDamage = pokeRound(OF32(baseDamage * 6144) / 4096);
+      let modifier = 6144;
+      // Water's Surface - Rain boosts Water Type moves 1.6x (From 1.5x)
+      if (field.hasWeather('Rain', 'Heavy Rain') && field.chromaticField === 'Waters-Surface') {
+        modifier = 6554;
+        desc.chromaticField = field.chromaticField;
+      }
+      baseDamage = pokeRound(OF32(baseDamage * modifier) / 4096);
       desc.weather = field.weather;
     } else if (
       (field.hasWeather('Sun') && move.hasType('Water')) ||

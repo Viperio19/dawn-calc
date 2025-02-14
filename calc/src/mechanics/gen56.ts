@@ -62,8 +62,8 @@ export function calculateBWXY(
 
   checkIntimidate(gen, attacker, defender, field);
   checkIntimidate(gen, defender, attacker, field);
-  checkDownload(attacker, defender, field.isWonderRoom);
-  checkDownload(defender, attacker, field.isWonderRoom);
+  checkDownload(attacker, defender, field);
+  checkDownload(defender, attacker, field);
 
   computeFinalStats(gen, attacker, defender, field, 'atk', 'spa');
 

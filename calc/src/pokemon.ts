@@ -25,6 +25,7 @@ export class Pokemon implements State.Pokemon {
   dynamaxLevel?: number;
   isSaltCure?: boolean;
   isStarstruck?: boolean;
+  isLockOn?: boolean;
   gritStages?: number;
   alliesFainted?: number;
   foesFainted?: number;
@@ -74,6 +75,7 @@ export class Pokemon implements State.Pokemon {
       ? (options.dynamaxLevel === undefined ? 10 : options.dynamaxLevel) : undefined;
     this.isSaltCure = !!options.isSaltCure;
     this.isStarstruck = !!options.isStarstruck;
+    this.isLockOn = !!options.isLockOn;
     this.gritStages = options.gritStages;
     this.alliesFainted = options.alliesFainted;
     this.boostedStat = options.boostedStat;
@@ -198,6 +200,7 @@ export class Pokemon implements State.Pokemon {
       dynamaxLevel: this.dynamaxLevel,
       isSaltCure: this.isSaltCure,
       isStarstruck: this.isStarstruck,
+      isLockOn: this.isLockOn,
       gritStages: this.gritStages,
       alliesFainted: this.alliesFainted,
       boostedStat: this.boostedStat,

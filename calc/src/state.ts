@@ -10,6 +10,7 @@ export namespace State {
     dynamaxLevel?: number;
     isSaltCure?: boolean;
     isStarstruck?: boolean;
+    isLockOn?: boolean;
     gritStages?: number;
     alliesFainted?: number;
     boostedStat?: I.StatIDExceptHP | 'auto';
