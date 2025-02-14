@@ -135,6 +135,14 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
     speedMods.push(5120);
   }
 
+  // Underwater - All non-Water Type Pokemon have their Speed reduced to 0.75x
+  if (field.chromaticField === 'Underwater' &&
+      !pokemon.hasType('Water') &&
+      !pokemon.hasAbility('Swift Swim', 'Steelworker', 'Levitate', 'Magic Guard') &&
+      !(side.isSoak && !pokemon.teraType)) {
+    speedMods.push(3072);
+  }
+
   // Crests - Speed Modifiers
 
   if (pokemon.named('Ariados-Crest')) {
@@ -195,12 +203,15 @@ export function getMoveEffectiveness(
       gen.types.get(toID(move.type))!.effectiveness[type]! *
       gen.types.get('grass' as ID)!.effectiveness[type]!
     );
-  // Undercolony - Rock Throw is super effective vs Ground types
-  } else if (field.chromaticField === 'Undercolony' && move.named('Rock Throw') && type === 'Ground') {
-    return 2;
   // Dragon's Den - Dragon Pulse can now hit Fairy type Pokemon (for Resisted Damage)
   } else if (field.chromaticField === 'Dragons-Den' && move.named('Dragon Pulse') && type === 'Fairy') {
     return 0.5;
+  // Underwater - Dive has the Freeze-Dry effect
+  } else if (field.chromaticField === 'Underwater' && (move.named('Dive') || (move.named('Nature Power') && !field.terrain)) && type === 'Water') {
+    return 2;
+  // Undercolony - Rock Throw is super effective vs Ground types
+  } else if (field.chromaticField === 'Undercolony' && move.named('Rock Throw') && type === 'Ground') {
+    return 2;
   } else {
     let effectiveness = gen.types.get(toID(move.type))!.effectiveness[type]!;
     if (effectiveness === 0 && isRingTarget) {
@@ -447,6 +458,11 @@ export function checkFieldEntryEffects(source: Pokemon, field: Field) {
     // Water's Surface - Activates Water Compaction
     if (source.hasAbility('Water Compaction')) {
       source.boosts.def = Math.min(6, source.boosts.def + 2);
+    }
+  } else if (field.chromaticField === 'Underwater') {
+    // Underwater - Prism Scale: Boosts the users Speed by 1 stage
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.spe = Math.min(6, source.boosts.spe + 1);
     }
   }
 }
@@ -787,8 +803,17 @@ export function getStabMod(pokemon: Pokemon, move: Move, field: Field, side: Sid
   let stabMod = 4096;
   if (pokemon.hasAbility('Mastery')) {
     stabMod += 2048;
-  } else if (pokemon.hasAbility('Mimicry') && getMimicryType(field) === move.type) {
-    stabMod += 2048;
+  } else if (side.isSoak) {
+    if (move.hasType('Water')) {
+      stabMod += 2048;
+    }
+    desc.isAttackerSoak = true;
+  } else if (pokemon.hasAbility('Mimicry')) {
+    if (getMimicryType(field) === move.type) {
+      stabMod += 2048;
+    }
+    desc.attackerAbility = pokemon.ability;
+    desc.attackerType = getMimicryType(field);
   // Starlight Arena - Victory Star changes the user’s primary type to Fairy
   } else if (pokemon.hasAbility('Victory Star') && field.chromaticField === 'Starlight-Arena') {
     if (move.hasType('Fairy')) {
@@ -952,6 +977,8 @@ export function getMimicryType(field: Field) {
   } else if (field.chromaticField === 'Factory') {
     return "Steel" as TypeName;
   } else if (field.chromaticField === 'Waters-Surface') {
+    return "Water" as TypeName;
+  } else if (field.chromaticField === 'Underwater') {
     return "Water" as TypeName;
   } else {
     return "???" as TypeName;

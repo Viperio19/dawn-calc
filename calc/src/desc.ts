@@ -59,11 +59,13 @@ export interface RawDesc {
   weather?: Weather;
   isTailwind?: boolean;
   isMagnetRise?: boolean;
+  isAttackerSoak?: boolean;
+  isDefenderSoak?: boolean;
   isDefenderDynamaxed?: boolean;
   reflectorOffenseTypes?: string;
   reflectorDefenseTypes?: string;
-  mimicryOffenseType?: string;
-  mimicryDefenseType?: string;
+  defenderType?: string;
+  attackerType?: string;
   mirrorBeamType?: string;
 }
 
@@ -767,6 +769,12 @@ function getEndOfTurn(
     texts.push('Rain Dish recovery');
   }
 
+  // Underwater - Dry Skin and Water Absorb restore 1/8 of the user’s Max HP
+  if (defender.hasAbility('Dry Skin', 'Water Absorb') && field.chromaticField === 'Underwater' && !healBlock) {
+    damage += Math.floor(defender.maxHP() / 8);
+    texts.push(defender.ability + ' recovery');
+  }
+
   if (defender.hasItem('Leftovers') && !loseItem && !healBlock) {
     damage += Math.floor(defender.maxHP() / 16);
     texts.push('Leftovers recovery');
@@ -887,6 +895,7 @@ function getEndOfTurn(
        (TRAPPING_JUNGLE.includes(move.name) && field.chromaticField === 'Jungle') || // Jungle - Certain moves apply Infestation
        (move.named('Leaf Tornado') && field.chromaticField === 'Flower-Garden') || // Flower Garden - Leaf Tornado is now a binding move that deals 1/8 max HP per turn for 2-5 turns
        (move.named('Sandsear Storm') && field.chromaticField === 'Desert'))) { // Desert - Sandsear Storm applies Sand Tomb trapping and chip damage effect 
+    // Underwater - TODO: Whirlpool deals ⅙ of the target’s Max HP per turn
     if (attacker.hasItem('Binding Band')) {
       damage -= gen.num > 5 ? Math.floor(defender.maxHP() / 6) : Math.floor(defender.maxHP() / 8);
       texts.push('trapping damage');
@@ -1239,6 +1248,10 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   }
   if (description.attackerTera) {
     output += `Tera ${description.attackerTera} `;
+  } else if (description.isAttackerSoak) {
+    output += `Soak `;
+  } else if (description.attackerType) {
+    output += description.attackerType + ' ';
   }
 
   if (description.isStellarFirstUse) {
@@ -1250,12 +1263,6 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   }
   if (description.isSwordOfRuin) {
     output += 'Sword of Ruin ';
-  }
-  // if (description.reflectorOffenseTypes) {
-  //   output += 'Reflector ' + description.reflectorOffenseTypes;
-  // }
-  if (description.mimicryOffenseType) {
-    output += 'Mimicry ' + description.mimicryOffenseType + ' ';
   }
   output += description.attackerName + ' ';
   if (description.isHelpingHand) {
@@ -1310,7 +1317,6 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     output += Math.min(10, description.relicanthTurnsDefense) +
       ` ${description.relicanthTurnsDefense === 1 ? 'Turn' : 'Turns'} `;
   }
-
   if (description.isTabletsOfRuin) {
     output += 'Tablets of Ruin ';
   }
@@ -1325,12 +1331,10 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   }
   if (description.defenderTera) {
     output += `Tera ${description.defenderTera} `;
-  }
-  // if (description.reflectorDefenseTypes) {
-  //   output += 'Reflector ' + description.reflectorDefenseTypes;
-  // }
-  if (description.mimicryDefenseType) {
-    output += 'Mimicry ' + description.mimicryDefenseType + ' ';
+  } else if (description.isDefenderSoak) {
+    output += `Soak `;
+  } else if (description.defenderType) {
+    output += description.defenderType + ' ';
   }
   output += description.defenderName;
   if (description.weather && description.terrain) {
@@ -1372,6 +1376,7 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
       output += " on Water's Surface";
       break;
     case "Cave":
+    case "Underwater":
     case "Undercolony":
     default:
       output += ' on ' + description.chromaticField;
