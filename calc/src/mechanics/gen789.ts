@@ -198,7 +198,7 @@ export function calculateSMSSSV(
     'Photon Geyser',
     'Searing Sunraze Smash',
     'Sunsteel Strike'
-  );
+  ) || (field.chromaticField === 'Underwater' && move.named('Wave Crash')); // Underwater - Wave Crash ignores the abilities of other Pokémon
 
   if (defenderAbilityIgnored && (attackerIgnoresAbility || moveIgnoresAbility)) {
     if (attackerIgnoresAbility) desc.attackerAbility = attacker.ability;
@@ -337,6 +337,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Cave' ? 'Rock'
         : field.chromaticField === 'Factory' ? 'Steel'
         : field.chromaticField === 'Waters-Surface' ? 'Water'
+        : field.chromaticField === 'Underwater' ? 'Water'
         : field.chromaticField === 'Undercolony' ? 'Bug'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : 'Normal';
@@ -509,17 +510,27 @@ export function calculateSMSSSV(
   let type1 = defender.types[0];
   let type2 = defender.types[1];
 
-  if (defender.hasAbility('Mimicry') && getMimicryType(field) != "???") {
+  if (field.defenderSide.isSoak) {
+    type1 = 'Water' as TypeName;
+    type2 = "???";
+
+    desc.isDefenderSoak = true;
+    desc.defenderType = type1;
+  } else if (defender.hasAbility('Mimicry') && getMimicryType(field) != "???") {
     type1 = getMimicryType(field);
     type2 = "???";
 
-    desc.mimicryDefenseType = type1;
+    desc.defenderAbility = defender.ability;
+    desc.defenderType = type1;
   }
 
   // Starlight Arena - Victory Star changes the user’s primary type to Fairy
   if (defender.hasAbility('Victory Star') && field.chromaticField === 'Starlight-Arena') {
     type1 = 'Fairy' as TypeName;
-    desc.mimicryDefenseType = type1;
+  
+    desc.chromaticField = field.chromaticField;
+    desc.defenderAbility = defender.ability;
+    desc.defenderType = type1;
   }
 
   let type1Effectiveness = getMoveEffectiveness(
@@ -586,6 +597,14 @@ export function calculateSMSSSV(
   // Inverse - Normal type moves always hit for neutral damage
   if (field.chromaticField === 'Inverse' && move.hasType('Normal')) {
     typeEffectiveness = 1;
+  }
+
+  // Underwater - Steelworker grants Steel type resistances and immunities
+  if (field.chromaticField === 'Underwater' && defender.hasAbility('Steelworker')) {
+    if (move.hasType('Normal', 'Flying', 'Rock', 'Bug', 'Steel', 'Grass', 'Psychic', 'Ice', 'Dragon', 'Fairy')) // Steel Resistances
+      typeEffectiveness *= 0.5;
+    if (move.hasType('Poison')) // Steel Immunities
+      typeEffectiveness = 0;    
   }
 
   // Undercolony - Shell Armor & Battle Armor makes user resist the Rock type
@@ -881,6 +900,29 @@ export function calculateSMSSSV(
     if ((defender.hasStatus('brn') && !defenderMagicGuard) || // Water's Surface - Burn damage is halved
         (((defender.hasAbility('Rain Dish') && !field.hasWeather('Rain', 'Heavy Rain') && field.chromaticField === 'Waters-Surface') || // Water's Surface - Activates Rain Dish
         (field.defenderSide.isAquaRing || defender.named('Phione-Crest'))) && !healBlock)) { // Water's Surface - Aqua Ring restores 1/10 of the user's Max HP per turn
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  if (field.chromaticField === 'Underwater') {
+    // Underwater - Prism Scale: Applies Soak (Self)
+    if (attacker.item === 'Prism Scale' && field.attackerSide.isSoak && move.bp != 0) {
+      desc.attackerItem = attacker.item;
+      desc.chromaticField = field.chromaticField;
+    }
+    if (defender.item === 'Prism Scale' && field.defenderSide.isSoak && move.bp != 0) {
+      desc.defenderItem = defender.item;
+      desc.chromaticField = field.chromaticField;
+    }
+
+    // Underwater - Steelworker grants Steel type resistances and immunities
+    if (defender.hasAbility('Steelworker') && move.hasType('Normal', 'Flying', 'Rock', 'Bug', 'Steel', 'Grass', 'Psychic', 'Ice', 'Dragon', 'Fairy', 'Poison')) {
+      desc.defenderAbility = defender.ability;
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if ((move.named('Dive') || (move.named('Nature Power') && !field.terrain)) && defender.hasType('Water') || // Underwater - Dive has the Freeze-Dry effect
+        (defender.hasAbility('Dry Skin', 'Water Absorb') && !healBlock)) { // Underwater - Dry Skin and Water Absorb restore 1/8 of the user’s Max HP
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -1618,6 +1660,11 @@ export function calculateBasePowerSMSSSV(
       case 'Waters-Surface':
         basePower = 90;
         desc.moveName = 'Surf';
+        break;
+      case 'Underwater':
+        basePower = 80;
+        move.category = 'Physical';
+        desc.moveName = 'Dive';
         break;
       case 'Undercolony':
         basePower = 80;
@@ -2536,6 +2583,14 @@ export function calculateAtModsSMSSSV(
     // Water's Surface - Dive is 1-Turn and deals 1.2x damage
     } else if (move.named('Dive')) {
       atMods.push(4915);
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  if (field.chromaticField === 'Underwater') {
+    // Underwater - Anchor Shot, Discharge, Parabolic Charge, Shock Wave, Sludge Wave, Triple Dive, and Water Pulse deal 1.3x damage
+    if (move.named('Anchor Shot', 'Discharge', 'Parabolic Charge', 'Shock Wave', 'Sludge Wave', 'Triple Dive', 'Water Pulse')) {
+      atMods.push(5324);
       desc.chromaticField = field.chromaticField;
     }
   }

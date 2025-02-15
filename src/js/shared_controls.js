@@ -371,8 +371,14 @@ function autosetWeather(ability, i) {
 		return;
 	}
 
-	var currentWeather = $("input:radio[name='weather']:checked").val();
 	var chromaticField = $("#chromatic-field").val();
+
+	// Underwater - Weather fails
+	if (chromaticField === 'Underwater') {
+		return;
+	}
+
+	var currentWeather = $("input:radio[name='weather']:checked").val();
 	if (lastAutoWeather.indexOf(currentWeather) === -1) {
 		lastManualWeather = currentWeather;
 		lastAutoWeather[1 - i] = "";
@@ -519,6 +525,13 @@ function setPrismScaleEffects(pokeObj) {
 		} else {
 			$("#aquaRingR").prop("checked", true);
 		}
+	// Underwater - Prism Scale: Applies Soak (Self)
+	} else if (chromaticField === 'Underwater') {
+		if (id === 'p1') {
+			$("#soakL").prop("checked", true);
+		} else {
+			$("#soakR").prop("checked", true);
+		}
 	// Undercolony - Prism Scale: Applies Salt Cure to the opponent
 	} else if (chromaticField === 'Undercolony') {
 		var allPokemon = $('.poke-info');
@@ -540,6 +553,9 @@ $("#chromatic-field").change(function () {
 	$(".field-specific." + chromaticField).show();
 	$(".field-specific").not("." + chromaticField).hide();
 
+	$(".field-specific-not." + chromaticField).hide();
+	$(".field-specific-not").not("." + chromaticField).show();
+
 	$("#starstruckL").prop("checked", false);
 	$("#starstruckR").prop("checked", false);
 	$("#lockonL").prop("checked", false);
@@ -550,7 +566,8 @@ $("#chromatic-field").change(function () {
 	var currentWeather = $("input:radio[name='weather']:checked").val();
 
 	if ((chromaticField === 'Eclipse' && currentWeather === 'Sun') || // Eclipse - Drought, Orichalcum Pulse and Sunny Day fail
-	   (chromaticField === 'Desert' && currentWeather === 'Rain')) { // Desert - Drizzle and Rain Dance fail
+	   (chromaticField === 'Desert' && currentWeather === 'Rain') || // Desert - Drizzle and Rain Dance fail
+		chromaticField === 'Underwater') { // Underwater - Weather fails
 		$("#clear").prop("checked", true);
 	}
 
@@ -1429,6 +1446,7 @@ function createField() {
 	var isSeeded = [$("#leechSeedL").prop("checked"), $("#leechSeedR").prop("checked")];
 	var isNightmare = [$("#nightmareL").prop("checked"), $("#nightmareR").prop("checked")];
 	var isForesight = [$("#foresightL").prop("checked"), $("#foresightR").prop("checked")];
+	var isSoak = [$("#soakL").prop("checked"), $("#soakR").prop("checked")];
 	var isMagnetRise = [$("#magnetRiseL").prop("checked"), $("#magnetRiseR").prop("checked")];
 	var isHelpingHand = [$("#helpingHandL").prop("checked"), $("#helpingHandR").prop("checked")];
 	var isTailwind = [$("#tailwindL").prop("checked"), $("#tailwindR").prop("checked")];
@@ -1447,7 +1465,7 @@ function createField() {
 			spikes: spikes[i], isSR: isSR[i], steelsurge: steelsurge[i], isStickyWeb: isStickyWeb[i],
 			vinelash: vinelash[i], wildfire: wildfire[i], cannonade: cannonade[i], volcalith: volcalith[i],
 			isReflect: isReflect[i], isLightScreen: isLightScreen[i], isProtected: isProtected[i], isIngrain: isIngrain[i],
-			isAquaRing: isAquaRing[i], isSeeded: isSeeded[i], isNightmare: isNightmare[i], isForesight: isForesight[i], isTailwind: isTailwind[i],
+			isAquaRing: isAquaRing[i], isSeeded: isSeeded[i], isNightmare: isNightmare[i], isForesight: isForesight[i], isSoak: isSoak[i], isTailwind: isTailwind[i],
 			isMagnetRise: isMagnetRise[i], isHelpingHand: isHelpingHand[i], isFlowerGift: isFlowerGift[i], isFriendGuard: isFriendGuard[i],
 			isAuroraVeil: isAuroraVeil[i], isAreniteWall: isAreniteWall[i], isBattery: isBattery[i], isPowerSpot: isPowerSpot[i], isSwitching: isSwitchingOut[i] ? 'out' : undefined
 		});

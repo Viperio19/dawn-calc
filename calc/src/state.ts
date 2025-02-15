@@ -80,6 +80,7 @@ export namespace State {
     isAquaRing?: boolean;
     isNightmare?: boolean;
     isForesight?: boolean;
+    isSoak?: boolean;
     isTailwind?: boolean;
     isMagnetRise?: boolean;
     isHelpingHand?: boolean;
