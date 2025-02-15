@@ -1,10 +1,11 @@
-import {State} from './state';
-import {GameType, Weather, Terrain} from './data/interface';
+import type {State} from './state';
+import type {GameType, Weather, Terrain} from './data/interface';
 
 export class Field implements State.Field {
   gameType: GameType;
   weather?: Weather;
   terrain?: Terrain;
+  chromaticField?: string;
   isMagicRoom: boolean;
   isWonderRoom: boolean;
   isGravity: boolean;
@@ -21,6 +22,7 @@ export class Field implements State.Field {
   constructor(field: Partial<State.Field> = {}) {
     this.gameType = field.gameType || 'Singles';
     this.terrain = field.terrain;
+    this.chromaticField = field.chromaticField;
     this.weather = field.weather;
     this.isMagicRoom = !!field.isMagicRoom;
     this.isWonderRoom = !!field.isWonderRoom;
@@ -55,6 +57,7 @@ export class Field implements State.Field {
       gameType: this.gameType,
       weather: this.weather,
       terrain: this.terrain,
+      chromaticField: this.chromaticField,
       isMagicRoom: this.isMagicRoom,
       isWonderRoom: this.isWonderRoom,
       isGravity: this.isGravity,
@@ -81,10 +84,16 @@ export class Side implements State.Side {
   isSR: boolean;
   isReflect: boolean;
   isLightScreen: boolean;
+  isStickyWeb: boolean;
   isProtected: boolean;
+  isIngrain: boolean;
+  isAquaRing: boolean;
   isSeeded: boolean;
+  isNightmare: boolean;
   isForesight: boolean;
+  isSoak: boolean;
   isTailwind: boolean;
+  isMagnetRise: boolean;
   isHelpingHand: boolean;
   isFlowerGift: boolean;
   isFriendGuard: boolean;
@@ -92,6 +101,7 @@ export class Side implements State.Side {
   isAreniteWall: boolean;
   isBattery: boolean;
   isPowerSpot: boolean;
+  isSteelySpirit: boolean;
   isSwitching?: 'out' | 'in';
 
   constructor(side: State.Side = {}) {
@@ -104,10 +114,16 @@ export class Side implements State.Side {
     this.isSR = !!side.isSR;
     this.isReflect = !!side.isReflect;
     this.isLightScreen = !!side.isLightScreen;
+    this.isStickyWeb = !!side.isStickyWeb;
     this.isProtected = !!side.isProtected;
+    this.isIngrain = !!side.isIngrain;
+    this.isAquaRing = !!side.isAquaRing;
     this.isSeeded = !!side.isSeeded;
+    this.isNightmare = !!side.isNightmare;
     this.isForesight = !!side.isForesight;
+    this.isSoak = !!side.isSoak;
     this.isTailwind = !!side.isTailwind;
+    this.isMagnetRise = !!side.isMagnetRise;
     this.isHelpingHand = !!side.isHelpingHand;
     this.isFlowerGift = !!side.isFlowerGift;
     this.isFriendGuard = !!side.isFriendGuard;
@@ -115,6 +131,7 @@ export class Side implements State.Side {
     this.isAreniteWall = !!side.isAreniteWall;
     this.isBattery = !!side.isBattery;
     this.isPowerSpot = !!side.isPowerSpot;
+    this.isSteelySpirit = !!side.isSteelySpirit;
     this.isSwitching = side.isSwitching;
   }
 

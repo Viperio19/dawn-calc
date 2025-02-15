@@ -1,4 +1,4 @@
-import * as I from './interface';
+import type * as I from './interface';
 import {toID} from '../util';
 
 const RBY: string[] = [];
@@ -470,7 +470,41 @@ SS.push('Utility Umbrella', 'Vile Vial');
 // Because we support National Dex all Past items are added back in
 SS.push(...GSC_ONLY, 'Old Amber');
 
+export const MEGA_G_STONES: {[species: string]: string} = {
+  Alcremieite: 'Alcremie',
+  Appletunite: 'Appletun',
+  'Blastoiseite G': 'Blastoise',
+  Butterfreeite: 'Butterfree',
+  Centiskorchite: 'Centiskorch',
+  'Charizardite G': 'Charizard',
+  Cinderaceite: 'Cinderace',
+  Coalossalite: 'Coalossal',
+  Copperajahite: 'Copperajah',
+  Corviknightite: 'Corviknight',
+  Drednawite: 'Drednaw',
+  Duraludonite: 'Duraludon',
+  Flappleite: 'Flapple',
+  Garbodorite: 'Garbodor',
+  'Gengarite G': 'Gengar',
+  Grimmsnarlite: 'Grimmsnarl',
+  Hattereneite: 'Hatterene',
+  Inteleonite: 'Inteleon',
+  Kinglerite: 'Kingler',
+  Laprasite: 'Lapras',
+  Machampite: 'Machamp',
+  Melmetalite: 'Melmetal',
+  Orbeetleite: 'Orbeetle',
+  Rillaboomite: 'Rillaboom',
+  Sandacondaite: 'Sandaconda',
+  Snorlaxite: 'Snorlax',
+  Toxtricityite: 'Toxtricity',
+  Urshifuite: 'Urshifu',
+  Urshifurapidstrikeite: 'Urshifu-Rapid-Strike',
+  'Venusaurite G': 'Venusaur',
+};
+
 const SV = SS.concat([
+  ...Object.keys(MEGA_G_STONES),
   'Adamant Crystal',
   'Auspicious Armor',
   'Ability Shield',
@@ -607,6 +641,9 @@ class Item implements I.Item {
     this.id = toID(name);
     this.name = name as I.ItemName;
     this.megaEvolves = MEGA_STONES[name] as I.SpeciesName;
+    if (!this.megaEvolves) {
+      this.megaEvolves = MEGA_G_STONES[name] as I.SpeciesName;
+    }
     const berry = BERRIES[name];
     if (berry) {
       this.isBerry = true;

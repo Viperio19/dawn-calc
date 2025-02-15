@@ -1,5 +1,5 @@
-import * as I from '../data/interface';
-import {toID, DeepPartial, assignWithout, extend} from '../util';
+import type * as I from '../data/interface';
+import {type DeepPartial, toID, assignWithout, extend} from '../util';
 
 export interface MoveData {
   readonly name?: string;
@@ -26,6 +26,7 @@ export interface MoveData {
   readonly isZ?: boolean;
   readonly isMax?: boolean;
   readonly multihit?: number | number[];
+  readonly multiaccuracy?: boolean;
 
   readonly bp: number;
   readonly zp?: number;
@@ -379,7 +380,7 @@ const ADV_PATCH: {[name: string]: DeepPartial<MoveData>} = {
   Surf: {target: 'allAdjacentFoes'},
   Thief: {makesContact: true},
   Thrash: {makesContact: true},
-  'Triple Kick': {makesContact: true, multihit: 3},
+  'Triple Kick': {makesContact: true, multihit: 3, multiaccuracy: true},
   'Vine Whip': {makesContact: true},
   Waterfall: {makesContact: true},
   Wrap: {makesContact: true},
@@ -3607,6 +3608,7 @@ const SS_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     category: 'Physical',
     makesContact: true,
     multihit: 3,
+    multiaccuracy: true,
     zp: 120,
     maxPower: 140,
   },
@@ -4202,7 +4204,6 @@ const SV_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     maxPower: 130,
     secondaries: true,
     isSound: true,
-    makesContact: true,
   },
   'Aqua Step': {
     bp: 80,
@@ -4483,7 +4484,6 @@ const SV_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     makesContact: true,
     isPunch: true,
     priority: 1,
-    // Sheer Force boost implemented in gen789.ts
   },
   'Kowtow Cleave': {
     bp: 85,
@@ -4619,6 +4619,7 @@ const SV_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     makesContact: true,
     isSlicing: true,
     multihit: 10,
+    multiaccuracy: true,
   },
   Pounce: {
     bp: 50,
@@ -5067,6 +5068,23 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     zp: 175,
     maxPower: 90,
   },
+  'Hoarfrost Moon': {
+    bp: 90,
+    type: 'Ice',
+    category: 'Special',
+    zp: 175,
+    maxPower: 130,
+    secondaries: true,
+    target: 'allAdjacentFoes',
+  },
+  'Solar Flare': {
+    bp: 100,
+    type: 'Fire',
+    category: 'Physical',
+    zp: 180,
+    maxPower: 130,
+    secondaries: true,
+  },
 };
 
 const SV: {[name: string]: MoveData} = extend(true, {}, SS, SV_PATCH, CHROMATIC_PATCH);
@@ -5126,6 +5144,7 @@ class Move implements I.Move {
   readonly zp?: number;
   readonly maxPower?: number;
   readonly multihit?: number | number[];
+  readonly multiaccuracy?: boolean;
 
   private static readonly FLAGS = new Set([
     'bp',

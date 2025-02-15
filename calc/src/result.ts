@@ -1,8 +1,8 @@
-import {RawDesc, display, displayMove, getRecovery, getRecoil, getKOChance} from './desc';
-import {Generation} from './data/interface';
-import {Field} from './field';
-import {Move} from './move';
-import {Pokemon} from './pokemon';
+import {type RawDesc, display, displayMove, getRecovery, getRecoil, getKOChance} from './desc';
+import type {Generation} from './data/interface';
+import type {Field} from './field';
+import type {Move} from './move';
+import type {Pokemon} from './pokemon';
 
 export type Damage = number | number[] | [number, number] | [number[], number[]];
 
@@ -59,7 +59,7 @@ export class Result {
   }
 
   moveDesc(notation = '%') {
-    return displayMove(this.gen, this.attacker, this.defender, this.move, this.damage, notation);
+    return displayMove(this.gen, this.attacker, this.defender, this.move, this.damage, this.field, notation);
   }
 
   recovery(notation = '%') {
@@ -67,7 +67,7 @@ export class Result {
   }
 
   recoil(notation = '%') {
-    return getRecoil(this.gen, this.attacker, this.defender, this.move, this.damage, notation);
+    return getRecoil(this.gen, this.attacker, this.defender, this.move, this.damage, this.field, notation);
   }
 
   kochance(err = true) {
