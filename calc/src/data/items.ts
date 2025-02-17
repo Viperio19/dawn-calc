@@ -470,6 +470,7 @@ SS.push('Utility Umbrella', 'Vile Vial');
 // Because we support National Dex all Past items are added back in
 SS.push(...GSC_ONLY, 'Old Amber');
 
+// Mega-Gmax - Mega Stones
 export const MEGA_G_STONES: {[species: string]: string} = {
   Alcremieite: 'Alcremie',
   Appletunite: 'Appletun',

@@ -31,11 +31,9 @@ export function isGrounded(pokemon: Pokemon, field: Field, side: Side) {
   return (field.isGravity || pokemon.hasItem('Iron Ball') || side.isIngrain || 
     (!side.isMagnetRise &&
       !pokemon.hasType('Flying') &&
-      !pokemon.hasAbility('Levitate') &&
-      !pokemon.hasAbility('Lunar Idol') &&
-      !pokemon.hasAbility('Solar Idol') &&
+      !pokemon.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') && // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
       !pokemon.hasItem('Air Balloon') &&
-      !pokemon.named('Probopass-Crest')));
+      !pokemon.named('Probopass-Crest'))); // Probopass Crest - Grants Levitate
 }
 
 export function getModifiedStat(stat: number, mod: number, gen?: Generation) {
@@ -107,7 +105,7 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
       (pokemon.hasAbility('Chlorophyll') && weather.includes('Sun')) ||
       (pokemon.hasAbility('Sand Rush') && weather === 'Sand') ||
       (pokemon.hasAbility('Swift Swim') && weather.includes('Rain')) ||
-      ((pokemon.hasAbility('Slush Rush') || pokemon.named('Empoleon-Crest')) && ['Hail', 'Snow'].includes(weather)) ||
+      ((pokemon.hasAbility('Slush Rush') || pokemon.named('Empoleon-Crest')) && ['Hail', 'Snow'].includes(weather)) || // Empoleon Crest - Grants Slush Rush
       (pokemon.hasAbility('Surge Surfer') && terrain === 'Electric')
   ) {
     speedMods.push(8192);
@@ -145,18 +143,22 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
 
   // Crests - Speed Modifiers
 
+  // Ariados Crest - Increases Speed by 50%
   if (pokemon.named('Ariados-Crest')) {
     speedMods.push(6144);
   }
 
+  // Magcargo Crest - Swaps its Defense and Speed stats
   if (pokemon.named('Magcargo-Crest')) {
     speed = getModifiedStat(pokemon.rawStats.def, pokemon.boosts.def, gen);
   }
 
+  // Oricorio Crest - Increases Speed by 25%.
   if (pokemon.named('Oricorio-Crest-Baile') || pokemon.named('Oricorio-Crest-Pa\'u') || pokemon.named('Oricorio-Crest-Pom-Pom') || pokemon.named('Oricorio-Crest-Sensu')) {
     speedMods.push(5120);
   }
 
+  // Seviper Crest - Increases Speed by 50%
   if (pokemon.named('Seviper-Crest')) {
     speedMods.push(6144);
   }
@@ -298,21 +300,6 @@ export function checkIntimidate(gen: Generation, source: Pokemon, target: Pokemo
       target.boosts.spa = Math.min(6, target.boosts.spa + 2);
     }
   }
-
-  if (source.named('Thievul-Crest') && !blocked) {
-    if (target.hasAbility('Contrary', 'Competitive')) {
-      target.boosts.spa = Math.min(6, target.boosts.spa + 1);
-    } else if (target.hasAbility('Simple')) {
-      target.boosts.spa = Math.max(-6, target.boosts.spa - 2);
-    } else {
-      target.boosts.spa = Math.max(-6, target.boosts.spa - 1);
-    }
-    if (target.hasAbility('Defiant') || (target.hasAbility('Steadfast') && field.chromaticField === 'Ring-Arena')) { // Ring Arena - Steadfast grants Defiant
-      target.boosts.atk = Math.min(6, target.boosts.atk + 2);
-    }
-
-    source.boosts.spa = Math.min(6, source.boosts.atk + 1);
-  }
 }
 
 export function checkDownload(source: Pokemon, target: Pokemon, field?: Field) {
@@ -350,10 +337,29 @@ export function checkStickyWeb(source: Pokemon, field: Field, stickyWeb: boolean
   }
 }
 
-export function checkCrestBoosts(source: Pokemon) {
-  if (source.named('Vespiquen-Crest-Offense')) {
-    source.boosts.atk = Math.min(6, source.boosts.atk + 1);
-    source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+export function checkCrestEntryEffects(gen: Generation, source: Pokemon, target: Pokemon, field: Field) {
+  const blocked =
+    target.hasAbility('Clear Body', 'White Smoke', 'Hyper Cutter', 'Full Metal Body') ||
+    // More abilities now block Intimidate in Gen 8+ (DaWoblefet, Cloudy Mistral)
+    (gen.num >= 8 && target.hasAbility('Inner Focus', 'Own Tempo', 'Oblivious', 'Scrappy')) ||
+    // Cave - Sturdy grants Clear Body
+    (target.hasAbility('Sturdy') && field.chromaticField === 'Cave') ||
+    target.hasItem('Clear Amulet');
+  
+  // Thievul Crest - "Steals" one stage of Special Attack from the opponent. (Decreases one stage on entry, increases one stage to self)
+  if (source.named('Thievul-Crest') && !blocked) {
+    if (target.hasAbility('Contrary', 'Competitive')) {
+      target.boosts.spa = Math.min(6, target.boosts.spa + 1);
+    } else if (target.hasAbility('Simple')) {
+      target.boosts.spa = Math.max(-6, target.boosts.spa - 2);
+    } else if (target.hasAbility('Defiant') || (target.hasAbility('Steadfast') && field.chromaticField === 'Ring-Arena')) { // Ring Arena - Steadfast grants Defiant
+      target.boosts.spa = Math.max(-6, target.boosts.spa - 1);
+      target.boosts.atk = Math.min(6, target.boosts.atk + 2);
+    } else {
+      target.boosts.spa = Math.max(-6, target.boosts.spa - 1);
+    }
+
+    source.boosts.spa = Math.min(6, source.boosts.atk + (source.hasAbility('Simple') ? 2 : 1));
   }
 }
 
@@ -801,6 +807,7 @@ export function getWeight(pokemon: Pokemon, desc: RawDesc, role: 'defender' | 'a
 
 export function getStabMod(pokemon: Pokemon, move: Move, field: Field, side: Side, desc: RawDesc) {
   let stabMod = 4096;
+  // Custom Eeveelutions - Mastery: Grants STAB on all moves
   if (pokemon.hasAbility('Mastery')) {
     stabMod += 2048;
   } else if (side.isSoak) {
@@ -825,21 +832,28 @@ export function getStabMod(pokemon: Pokemon, move: Move, field: Field, side: Sid
     }
   } else if (pokemon.hasOriginalType(move.type)) {
     stabMod += 2048;
-  } else if ((pokemon.hasAbility('Protean', 'Libero') || pokemon.named('Boltund-Crest')) && !pokemon.teraType) {
+  } else if ((pokemon.hasAbility('Protean', 'Libero') || pokemon.named('Boltund-Crest')) && !pokemon.teraType) { // Boltund Crest - Grants Libero
     stabMod += 2048;
     desc.attackerAbility = pokemon.ability;
+  // Empoleon Crest - Grants STAB on Ice Moves
   } else if (pokemon.named('Empoleon-Crest') && move.hasType('Ice')) {
     stabMod += 2048;
+  // Luxray Crest - Grants STAB on Dark moves
   } else if (pokemon.named('Luxray-Crest') && move.hasType('Dark')) {
     stabMod += 2048;
+  // Probopass Crest - Grants STAB on Electric moves
   } else if ((pokemon.named('Probopass-Crest') || pokemon.named('Electric Nose')) && move.hasType('Electric')) {
     stabMod += 2048;
+  // Samurott Crest - Grants STAB on Fighting moves
   } else if (pokemon.named('Samurott-Crest') && move.hasType('Fighting')) {
     stabMod += 2048;
+  // Simipour Crest - Grants STAB on Grass moves
   } else if (pokemon.named('Simipour-Crest') && move.hasType('Grass')) {
     stabMod += 2048;
+  // Simisage Crest - Grants STAB on Fire moves
   } else if (pokemon.named('Simisage-Crest') && move.hasType('Fire')) {
     stabMod += 2048;
+  // Simisear Crest - Grants STAB on Water moves
   } else if (pokemon.named('Simisear-Crest') && move.hasType('Water')) {
     stabMod += 2048;
   } 
