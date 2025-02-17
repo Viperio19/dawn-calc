@@ -10024,6 +10024,7 @@ const SV_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   },
 };
 
+// Crests - Aevian - Mega-Gmax - Custom Eeveelutions - Form declarations for all these new forms
 const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   Alcremie: {otherFormes: ['Alcremie-Gmax', 'Alcremie-Mega-G']},
   Ampharos: {otherFormes: ['Ampharos-Aevian', 'Ampharos-Aevian-Crest', 'Ampharos-Mega']},

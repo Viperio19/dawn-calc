@@ -303,6 +303,7 @@ $(".ability").bind("keyup change", function () {
 	
 	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (teraType === "Stellar" && checked));
 
+	// Spiritomb Crest - Show dropdown menus for selecting how many allies and foes have fainted
 	if (pokemon.name === "Spiritomb-Crest") {
 		$(this).closest(".poke-info").find(".alliesFainted").show();
 		$(this).closest(".poke-info").find(".foesFainted").show();
@@ -317,6 +318,7 @@ $(".ability").bind("keyup change", function () {
 		$(this).closest(".poke-info").find(".foesFainted").hide();
 	}
 
+	// Relicanth Crest - Show dropdown menu for selecting how many turns Relicanth has been in battle
 	if (pokemon.name === "Relicanth-Crest") {
 		$(this).closest(".poke-info").find(".relicanthTurns").show();
 	} else {
@@ -654,7 +656,7 @@ function autosetStatus(p, item, pokeObj) {
 		lastAutoStatus[p] = "Burned";
 		$(p + " .status").val("Burned");
 		$(p + " .status").change();
-	} else if (item === "Toxic Orb" || pokemon.named('Zangoose-Crest')) {
+	} else if (item === "Toxic Orb" || pokemon.named('Zangoose-Crest')) { // Zangoose Crest - Poisons Zangoose
 		lastAutoStatus[p] = "Badly Poisoned";
 		$(p + " .status").val("Badly Poisoned");
 		$(p + " .status").change();
@@ -740,8 +742,7 @@ $(".move-selector").change(function () {
 	var fullSetName = pokeObj.find("input.set-selector").val();
 	var pokemonName = fullSetName.substring(0, fullSetName.indexOf(" ("));
 	var stockpile = moveName === 'Spit Up' || (moveName === 'Belch' && startsWith(pokemonName, "Swalot")); 
-	var moveSlot = startsWith(pokemonName, "Ampharos-Aevian"); 
-	if (Array.isArray(move.multihit) || (!isNaN(move.multihit) && move.multiaccuracy)) {
+	if (Array.isArray(move.multihit) || (!isNaN(move.multihit) && move.multiaccuracy) || startsWith(pokemonName, "Cinccino-Crest")) {
 		moveGroupObj.children(".move-times").hide();
 		moveGroupObj.children(".stockpile").hide();
 		moveGroupObj.children(".move-hits").empty();
@@ -749,6 +750,11 @@ $(".move-selector").change(function () {
 			for (var i = 1; i <= move.multihit; i++) {
 				moveGroupObj.children(".move-hits").append("<option value=" + i + ">" + i + " hits</option>");
 			}
+		// Cinccino Crest - All moves non flat damage moves turn into multi-strike moves. 2-5 hits of 35% the BP
+		} else if (startsWith(pokemonName, "Cinccino-Crest")) {
+			for (var i = 2; i <= 5; i++) {
+				moveGroupObj.children(".move-hits").append("<option value=" + i + ">" + i + " hits</option>");
+			}			
 		} else {
 			for (var i = 1; i <= move.multihit[1]; i++) {
 				moveGroupObj.children(".move-hits").append("<option value=" + i + ">" + i + " hits</option>");
@@ -778,11 +784,6 @@ $(".move-selector").change(function () {
 		moveGroupObj.children(".move-times").show();
 	}
 	moveGroupObj.children(".move-z").prop("checked", false);
-	if (moveSlot) {
-		moveGroupObj.children(".move-slot").show();
-	} else {
-		moveGroupObj.children(".move-slot").hide();
-	}
 });
 
 $(".item").change(function () {
@@ -1359,10 +1360,10 @@ function createPokemon(pokeInfo) {
 			status: CALC_STATUS[pokeInfo.find(".status").val()],
 			toxicCounter: pokeInfo.find(".status").val() === 'Badly Poisoned' ? ~~pokeInfo.find(".toxic-counter").val() : 0,
 			moves: [
-				getMoveDetails(pokeInfo.find(".move1"), opts),
-				getMoveDetails(pokeInfo.find(".move2"), opts),
-				getMoveDetails(pokeInfo.find(".move3"), opts),
-				getMoveDetails(pokeInfo.find(".move4"), opts),
+				getMoveDetails(pokeInfo.find(".move1"), opts, 1),
+				getMoveDetails(pokeInfo.find(".move2"), opts, 2),
+				getMoveDetails(pokeInfo.find(".move3"), opts, 3),
+				getMoveDetails(pokeInfo.find(".move4"), opts, 4),
 			],
 			overrides: {
 				baseStats: baseStats,
@@ -1378,7 +1379,7 @@ function getGender(gender) {
 	return 'F';
 }
 
-function getMoveDetails(moveInfo, opts) {
+function getMoveDetails(moveInfo, opts, moveSlot) {
 	var moveName = moveInfo.find("select.move-selector").val();
 	var isZMove = gen > 6 && moveInfo.find("input.move-z").prop("checked");
 	var isCrit = moveInfo.find(".move-crit").prop("checked");
@@ -1387,7 +1388,6 @@ function getMoveDetails(moveInfo, opts) {
 	var timesUsed = +moveInfo.find(".move-times").val();
 	var timesUsedWithMetronome = moveInfo.find(".metronome").is(':visible') ? +moveInfo.find(".metronome").val() : 1;
 	var stockpiles = +moveInfo.find(".stockpile").val();
-	var moveSlot = +moveInfo.find(".move-slot").val();
 	var overrides = {
 		basePower: +moveInfo.find(".move-bp").val(),
 		type: moveInfo.find(".move-type").val()
