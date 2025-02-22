@@ -331,9 +331,7 @@ export function checkDauntlessShield(source: Pokemon, gen: Generation) {
 
 export function checkStickyWeb(source: Pokemon, field: Field, stickyWeb: boolean) {
   if (stickyWeb && !source.hasItem('Heavy-Duty Boots') && !source.hasAbility('Clear Body', 'White Smoke', 'Full Metal Body')) {
-    // Jungle - Sticky Web reduces Speed by one additional stage
-    let boosts = field.chromaticField === 'Jungle' ? 2 : 1;
-    source.boosts.spe = Math.max(-6, source.boosts.spe - boosts);
+    source.boosts.spe = Math.max(-6, source.boosts.spe - 1);
   }
 }
 

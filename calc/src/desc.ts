@@ -660,12 +660,6 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
         texts.push('3 layers of Spikes');
       }
     }
-
-    // Jungle - Sticky Web deals 1/8th of a Flying type’s Max HP on entry
-    if (defender.hasType('Flying') && field.chromaticField === 'Jungle') {
-      damage += Math.floor(defender.maxHP() / 8);
-      texts.push('Sticky Web');
-    }
   }
 
   if (isNaN(damage)) {
