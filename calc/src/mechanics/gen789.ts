@@ -86,12 +86,12 @@ export function calculateSMSSSV(
   checkDownload(defender, attacker, field);
   checkIntrepidSword(attacker, gen);
   checkIntrepidSword(defender, gen);
-  checkStickyWeb(attacker, field, field.attackerSide.isStickyWeb);
-  checkStickyWeb(defender, field, field.defenderSide.isStickyWeb);
+  checkStickyWeb(attacker, field, field.attackerSide);
+  checkStickyWeb(defender, field, field.defenderSide);
   checkCrestEntryEffects(gen, attacker, defender, field);
   checkCrestEntryEffects(gen, defender, attacker, field);
-  checkFieldEntryEffects(attacker, field);
-  checkFieldEntryEffects(defender, field);
+  checkFieldEntryEffects(gen, attacker, defender, field);
+  checkFieldEntryEffects(gen, defender, attacker, field);
 
   checkWindRider(attacker, field.attackerSide);
   checkWindRider(defender, field.defenderSide);
@@ -257,6 +257,12 @@ export function calculateSMSSSV(
       desc.attackerAbility = attacker.ability;
       desc.chromaticField = field.chromaticField;
     }
+  }
+
+  // Jungle - Fell Stinger, Silver Wind, and Steamroller deals critical hits to slowed targets
+  if (!tempCritical && move.named('Fell Stinger', 'Silver Wind', 'Steamroller') && field.chromaticField === 'Jungle' && defender.boosts.spe < 0) {
+    tempCritical = true;
+    desc.chromaticField = field.chromaticField;
   }
 
   // Ring Arena - Grit Stage Effects: 3 - 100% Crit chance
@@ -505,7 +511,8 @@ export function calculateSMSSSV(
   if (((attacker.hasAbility('Triage') || attacker.named('Cherrim-Crest') || attacker.named('Cherrim-Crest-Sunshine')) && move.drain) || // Cherrim Crest - Grants Triage
       (attacker.hasAbility('Gale Wings') && move.hasType('Flying') &&
        (attacker.curHP() === attacker.maxHP() || field.chromaticField === 'Sky')) || // Sky - Activates Gale Wings regardless of HP
-      (move.named('Grassy Glide') && (field.hasTerrain('Grassy') || field.chromaticField === 'Flower-Garden'))) { // Flower Garden - Grassy Glide has +1 priority
+      (move.named('Grassy Glide') && (field.hasTerrain('Grassy') || field.chromaticField === 'Flower-Garden')) || // Flower Garden - Grassy Glide has +1 priority
+      (move.named('Twineedle') && field.chromaticField === 'Jungle') ) { // Jungle - Twineedle gains +1 priority
     move.priority = 1;
     desc.attackerAbility = attacker.ability;
   }
@@ -1730,6 +1737,15 @@ export function calculateBasePowerSMSSSV(
   }
 
   // Fields - Move modifications (base power, name, category)
+
+  // Jungle - Signal Beam becomes 50 base power and hits twice
+  if (field.chromaticField === 'Jungle' && move.named('Signal Beam')) {
+    basePower = 50;
+    move.hits = 2;
+    desc.hits = move.hits;
+    desc.moveBP = basePower;
+    desc.chromaticField = field.chromaticField;
+  }
 
   // Desert - Dig is 100 base power
   if (field.chromaticField === 'Desert' && move.named('Dig')) {
