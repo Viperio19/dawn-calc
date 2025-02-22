@@ -548,10 +548,6 @@ const TRAPPING = [
   'Thunder Cage', 'Whirlpool', 'Wrap', 'G-Max Sandblast', 'G-Max Centiferno',
 ];
 
-const TRAPPING_JUNGLE = [
-  'Fell Stinger', 'Silver Wind', 'Steamroller',
-];
-
 function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, field: Field) {
   let damage = 0;
   const texts: string[] = [];
@@ -659,12 +655,6 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
         damage += Math.floor(defender.maxHP() / 4);
         texts.push('3 layers of Spikes');
       }
-    }
-
-    // Jungle - Sticky Web deals 1/8th of a Flying type’s Max HP on entry
-    if (defender.hasType('Flying') && field.chromaticField === 'Jungle') {
-      damage += Math.floor(defender.maxHP() / 8);
-      texts.push('Sticky Web');
     }
   }
 
@@ -897,7 +887,6 @@ function getEndOfTurn(
   if (!defenderMagicGuard &&
       (TRAPPING.includes(move.name) ||
        (attacker.named('Vespiquen-Crest-Offense') && move.named('Attack Order')) || // Vespiquen Crest - Attack order applies Infestation
-       (TRAPPING_JUNGLE.includes(move.name) && field.chromaticField === 'Jungle') || // Jungle - Certain moves apply Infestation
        (move.named('Leaf Tornado') && field.chromaticField === 'Flower-Garden') || // Flower Garden - Leaf Tornado is now a binding move that deals 1/8 max HP per turn for 2-5 turns
        (move.named('Sandsear Storm') && field.chromaticField === 'Desert'))) { // Desert - Sandsear Storm applies Sand Tomb trapping and chip damage effect 
     // Underwater - Whirlpool deals ⅙ of the target’s Max HP per turn
@@ -988,6 +977,28 @@ function getEndOfTurn(
   }
 
   // Fields - End of turn text
+
+  // Jungle - Cutting moves deal an additional 1/8th max hp, modified by type effectiveness [Grass Type] to affected opposing Pokémon
+  if (field.chromaticField === 'Jungle' && move.flags.slicing && !defenderMagicGuard) {
+    const grassType = gen.types.get('grass' as ID)!;
+    let effectiveness =
+    grassType.effectiveness[defender.types[0]]! *
+      (defender.types[1] ? grassType.effectiveness[defender.types[1]]! : 1);
+
+    // Torterra Crest - Inverse type effectiveness
+    if (defender.named('Torterra-Crest')) { 
+      effectiveness = 1 / effectiveness;
+    }
+  
+    damage -= Math.floor((effectiveness * defender.maxHP()) / 8);
+    texts.push('Tree Slam damage');
+  }
+
+  // Jungle - Parasite - Users holding Binding Band cause Pokémon on the opposing side of the field to lose 6% of their max hp at the end of each turn
+  if (field.chromaticField === 'Jungle' && attacker.hasItem('Binding Band') && !defenderMagicGuard) {
+    damage -= Math.floor(defender.maxHP() / 16);
+    texts.push('Parasite damage');
+  }
 
   // Thundering Plateau - Volt Absorb restores 1/16 of the user's Max HP per turn
   if (field.chromaticField === 'Thundering-Plateau' && defender.hasAbility('Volt Absorb') && !healBlock) {

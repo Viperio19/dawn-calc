@@ -86,12 +86,12 @@ export function calculateSMSSSV(
   checkDownload(defender, attacker, field);
   checkIntrepidSword(attacker, gen);
   checkIntrepidSword(defender, gen);
-  checkStickyWeb(attacker, field, field.attackerSide.isStickyWeb);
-  checkStickyWeb(defender, field, field.defenderSide.isStickyWeb);
+  checkStickyWeb(attacker, field, field.attackerSide);
+  checkStickyWeb(defender, field, field.defenderSide);
   checkCrestEntryEffects(gen, attacker, defender, field);
   checkCrestEntryEffects(gen, defender, attacker, field);
-  checkFieldEntryEffects(attacker, field);
-  checkFieldEntryEffects(defender, field);
+  checkFieldEntryEffects(gen, attacker, defender, field);
+  checkFieldEntryEffects(gen, defender, attacker, field);
 
   checkWindRider(attacker, field.attackerSide);
   checkWindRider(defender, field.defenderSide);
@@ -259,6 +259,12 @@ export function calculateSMSSSV(
     }
   }
 
+  // Jungle - Fell Stinger, Silver Wind, and Steamroller deals critical hits to slowed targets
+  if (!tempCritical && move.named('Fell Stinger', 'Silver Wind', 'Steamroller') && field.chromaticField === 'Jungle' && defender.boosts.spe < 0) {
+    tempCritical = true;
+    desc.chromaticField = field.chromaticField;
+  }
+
   // Ring Arena - Grit Stage Effects: 3 - 100% Crit chance
   if (!tempCritical && attacker.gritStages! >= 3) {
     tempCritical = true;
@@ -402,8 +408,7 @@ export function calculateSMSSSV(
   ) {
     move.target = 'allAdjacentFoes';
     type = 'Stellar';
-  // Jungle - X-Scissor removes Light Screen, Reflect, and Aurora Veil from the target's side
-  } else if (move.named('Brick Break', 'Psychic Fangs') || (move.named('X-Scissor') && field.chromaticField === 'Jungle')) {
+  } else if (move.named('Brick Break', 'Psychic Fangs')) {
     field.defenderSide.isReflect = false;
     field.defenderSide.isLightScreen = false;
     field.defenderSide.isAuroraVeil = false;
@@ -506,7 +511,8 @@ export function calculateSMSSSV(
   if (((attacker.hasAbility('Triage') || attacker.named('Cherrim-Crest') || attacker.named('Cherrim-Crest-Sunshine')) && move.drain) || // Cherrim Crest - Grants Triage
       (attacker.hasAbility('Gale Wings') && move.hasType('Flying') &&
        (attacker.curHP() === attacker.maxHP() || field.chromaticField === 'Sky')) || // Sky - Activates Gale Wings regardless of HP
-      (move.named('Grassy Glide') && (field.hasTerrain('Grassy') || field.chromaticField === 'Flower-Garden'))) { // Flower Garden - Grassy Glide has +1 priority
+      (move.named('Grassy Glide') && (field.hasTerrain('Grassy') || field.chromaticField === 'Flower-Garden')) || // Flower Garden - Grassy Glide has +1 priority
+      (move.named('Twineedle') && field.chromaticField === 'Jungle') ) { // Jungle - Twineedle gains +1 priority
     move.priority = 1;
     desc.attackerAbility = attacker.ability;
   }
@@ -957,8 +963,7 @@ export function calculateSMSSSV(
   // Tera Shell works only at full HP, but for all hits of multi-hit moves
   if (defender.hasAbility('Tera Shell') &&
       defender.curHP() === defender.maxHP() &&
-      (!field.defenderSide.isSR && (!field.defenderSide.spikes || defender.hasType('Flying')) &&
-      !(field.defenderSide.isStickyWeb && defender.hasType('Flying') && field.chromaticField === 'Jungle') || // Jungle - Sticky Web deals 1/8th of a Flying type’s Max HP on entry
+      (!field.defenderSide.isSR && (!field.defenderSide.spikes || defender.hasType('Flying')) ||
       defender.hasItem('Heavy-Duty Boots')) 
   ) {
     typeEffectiveness = 0.5;
@@ -1732,6 +1737,15 @@ export function calculateBasePowerSMSSSV(
   }
 
   // Fields - Move modifications (base power, name, category)
+
+  // Jungle - Signal Beam becomes 50 base power and hits twice
+  if (field.chromaticField === 'Jungle' && move.named('Signal Beam')) {
+    basePower = 50;
+    move.hits = 2;
+    desc.hits = move.hits;
+    desc.moveBP = basePower;
+    desc.chromaticField = field.chromaticField;
+  }
 
   // Desert - Dig is 100 base power
   if (field.chromaticField === 'Desert' && move.named('Dig')) {
@@ -3009,8 +3023,7 @@ export function calculateFinalModsSMSSSV(
     if (
       defender.curHP() === defender.maxHP() &&
       hitCount === 0 &&
-      (!field.defenderSide.isSR && (!field.defenderSide.spikes || defender.hasType('Flying')) &&
-      !(field.defenderSide.isStickyWeb && defender.hasType('Flying') && field.chromaticField === 'Jungle') || // Jungle - Sticky Web deals 1/8th of a Flying type’s Max HP on entry
+      (!field.defenderSide.isSR && (!field.defenderSide.spikes || defender.hasType('Flying')) ||
       defender.hasItem('Heavy-Duty Boots')) && !attacker.hasAbility('Parental Bond (Child)')
     ) {
       finalMods.push(2048);
