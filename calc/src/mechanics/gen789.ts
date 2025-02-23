@@ -1218,35 +1218,58 @@ export function calculateSMSSSV(
   }
 
   // Probopass Crest - After an attack, each mini nose casts a 20BP type-based damage after a damaging move. (3 Attacks: steel, rock, electric [Special])
-  let noseDamage: number[] | undefined;;
+  let noseDamage: number[] | undefined;
   if (attacker.named('Probopass-Crest') && move.hits === 1) {
-    const noseElectric = attacker.clone();
-    const noseRock = attacker.clone();
-    const noseSteel = attacker.clone();
-    noseElectric.name = 'Electric Nose' as SpeciesName;
-    noseRock.name = 'Rock Nose' as SpeciesName;
-    noseSteel.name = 'Steel Nose' as SpeciesName;
+    const nose = attacker.clone();
+    nose.name = 'Probopass Nose' as SpeciesName;
     let noseMove = move.clone(); 
     noseMove.bp = 20;
     noseMove.category = 'Special';
-    desc.attackerAbility = "POGCHAMPION";
 
     noseMove.type = 'Electric';
     noseMove.name = 'Electric POGCHAMPION' as MoveName;
-    checkMultihitBoost(gen, noseElectric, defender, noseMove, field, desc);
-    let noseElectricDamage = calculateSMSSSV(gen, noseElectric, defender, noseMove, field).damage as number[];
+    checkMultihitBoost(gen, nose, defender, noseMove, field, desc);
+    let noseElectricDamage: number[] = new Array(16).fill(0);
+
+    let type = gen.types.get('electric' as ID)!;
+    let effectiveness =
+    type.effectiveness[defender.types[0]]! *
+      (defender.types[1] ? type.effectiveness[defender.types[1]]! : 1);
+
+    if (!defender.hasType('Ground') && !defender.hasAbility('Volt Absorb', 'Motor Drive', 'Lightning Rod') &&
+        !(defender.hasAbility('Wonder Guard') && effectiveness < 2)) {
+      noseElectricDamage = calculateSMSSSV(gen, nose, defender, noseMove, field).damage as number[];
+    }
 
     noseMove.type = 'Rock';
     noseMove.name = 'Rock POGCHAMPION' as MoveName;
-    checkMultihitBoost(gen, noseRock, defender, noseMove, field, desc);
-    let noseRockDamage = calculateSMSSSV(gen, noseRock, defender, noseMove, field).damage as number[];
+    checkMultihitBoost(gen, nose, defender, noseMove, field, desc);
+    let noseRockDamage: number[] = new Array(16).fill(0);
+
+    type = gen.types.get('rock' as ID)!;
+    effectiveness =
+    type.effectiveness[defender.types[0]]! *
+      (defender.types[1] ? type.effectiveness[defender.types[1]]! : 1);
+
+    if (!(defender.hasAbility('Wonder Guard') && effectiveness < 2)) {
+      noseRockDamage = calculateSMSSSV(gen, nose, defender, noseMove, field).damage as number[];
+    }
 
     noseMove.type = 'Steel';
     noseMove.name = 'Steel POGCHAMPION' as MoveName;
-    checkMultihitBoost(gen, noseSteel, defender, noseMove, field, desc);
-    let noseSteelDamage = calculateSMSSSV(gen, noseSteel, defender, noseMove, field).damage as number[];
+    checkMultihitBoost(gen, nose, defender, noseMove, field, desc);
+    let noseSteelDamage: number[] = new Array(16).fill(0);
 
-    noseDamage = noseElectricDamage
+    type = gen.types.get('steel' as ID)!;
+    effectiveness =
+    type.effectiveness[defender.types[0]]! *
+      (defender.types[1] ? type.effectiveness[defender.types[1]]! : 1);
+
+    if (!(defender.hasAbility('Wonder Guard') && effectiveness < 2)) {
+      noseSteelDamage = calculateSMSSSV(gen, nose, defender, noseMove, field).damage as number[];
+    }
+
+    noseDamage = new Array(16).fill(0);
 
     for (let i = 0; i < 16; i++) {
       noseDamage[i] = noseElectricDamage[i] + noseRockDamage[i] + noseSteelDamage[i];
