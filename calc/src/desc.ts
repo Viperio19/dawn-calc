@@ -356,8 +356,7 @@ export function getKOChance(
   // Jungle - Shield Dust grants Magic Guard
   // Rainbow - Flareon gets Magic Guard
     defender.hasStatus('tox') && !(defender.hasAbility('Magic Guard', 'Poison Heal') ||
-     (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) ||
-     (defender.named('Flareon') && field.chromaticField === 'Rainbow') ? defender.toxicCounter : 0;
+     (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) ? defender.toxicCounter : 0;
 
   // multi-hit moves have too many possibilities for brute-forcing to work, so reduce it
   // to an approximate distribution
@@ -691,8 +690,8 @@ function getEndOfTurn(
   
   // Jungle - Shield Dust grants Magic Guard
   // Rainbow - Flareon gets Magic Guard
-  const defenderMagicGuard = defender.hasAbility('Magic Guard') || (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') || (defender.named('Flareon') && field.chromaticField === 'Rainbow')
-  const attackerMagicGuard = attacker.hasAbility('Magic Guard') || (attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') || (defender.named('Flareon') && field.chromaticField === 'Rainbow')
+  const defenderMagicGuard = defender.hasAbility('Magic Guard') || (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
+  const attackerMagicGuard = attacker.hasAbility('Magic Guard') || (attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
 
   if (field.hasWeather('Sun', 'Harsh Sunshine')) {
     if (defender.hasAbility('Dry Skin', 'Solar Power')) {
