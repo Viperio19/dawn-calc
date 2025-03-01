@@ -4961,6 +4961,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     zp: 20,
     maxPower: 20,
   },
+  // Aevian - Moves
   'Deluge': {
     bp: 60,
     type: 'Water',
@@ -5054,7 +5055,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     maxPower: 70,
     makesContact: true,
   },
-  'Waking Shock': {
+  'Wake-Up Shock': {
     bp: 80,
     type: 'Electric',
     category: 'Physical',

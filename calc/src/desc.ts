@@ -67,6 +67,7 @@ export interface RawDesc {
   defenderType?: string;
   attackerType?: string;
   mirrorBeamType?: string;
+  moveSlot?: number;
 }
 
 export function display(
@@ -159,7 +160,7 @@ export function getRecovery(
       const range = [minD[i], maxD[i]];
       for (const j in recovery) {
         let drained = Math.round(range[j] * percentHealed);
-        if (attacker.hasItem('Big Root') || attacker.named('Shiinotic-Crest')) drained = Math.trunc(drained * 5324 / 4096);
+        if (attacker.hasItem('Big Root') || attacker.named('Shiinotic-Crest')) drained = Math.trunc(drained * 5324 / 4096); // Shiinotic Crest - Draining effect recovery is boosted by 30%
         recovery[j] += Math.min(drained * move.hits, max);
       }
     }
@@ -182,8 +183,10 @@ export function getRecovery(
 
   if ((attacker.named('Dusknoir-Crest') && move.named('Shadow Punch')) || attacker.named('Gothitelle-Crest-Dark')) {
     let tempPercentHealed = 0;
+    // Dusknoir Crest - Shadow Punch heals for 50% of the damage dealt
     if (attacker.named('Dusknoir-Crest')) {
       tempPercentHealed = 0.5;
+    // Gothitelle Crest - Drain 25% of damage dealt when dark
     } else if (attacker.named('Gothitelle-Crest-Dark')) {
       tempPercentHealed = 0.25;
     }
@@ -234,6 +237,7 @@ export function getRecoil(
       tempMod += (move.recoil[0] / move.recoil[1]) * 100;
     }
 
+    // Bastiodon Crest - Deals 50% of all damage it takes as recoil to the attacker
     if (defender.named('Bastiodon-Crest')) {
       tempMod += 50;
     }
@@ -352,8 +356,10 @@ export function getKOChance(
   const eot = getEndOfTurn(gen, attacker, defender, move, field);
   const toxicCounter =
   // Jungle - Shield Dust grants Magic Guard
+  // Rainbow - Flareon gets Magic Guard
     defender.hasStatus('tox') && !(defender.hasAbility('Magic Guard', 'Poison Heal') ||
-     (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) ? defender.toxicCounter : 0;
+     (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') ||
+     (defender.named('Flareon') && field.chromaticField === 'Rainbow')) ? defender.toxicCounter : 0;
 
   // multi-hit moves have too many possibilities for brute-forcing to work, so reduce it
   // to an approximate distribution
@@ -573,9 +579,9 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
     // Acidic Wasteland - Regurgigated hazards: Spikes deal 33% of the Pokemon’s max HP
     if (defenderSide.spikes != 0 &&
         !defender.hasType('Flying') &&
-        !defender.hasAbility('Levitate') && 
+        !defender.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') && // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
         !defender.hasItem('Air Balloon') &&
-        !defender.named('Probopass-Crest')) {
+        !defender.named('Probopass-Crest')) { // Probopass Crest - Grants Levitate
       damage += Math.floor(defender.maxHP() / 3);
       texts.push('regurgitated Spikes');
     }
@@ -590,7 +596,8 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
         rockType.effectiveness[defender.types[0]]! *
         (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
 
-      if (defender.named('Glaceon-Crest')) {
+      // Glaceon Crest - Gives resistance to fighting and rock type moves
+      if (defender.named('Glaceon-Crest') && effectiveness > 0.5) {
         effectiveness = 0.5;
       // Snowy Peaks - Stealth Rocks do neutral damage to Ice Types instead of Super Effective
       } else if (defender.hasType('Ice') && field.chromaticField === 'Snowy-Peaks') {
@@ -638,9 +645,9 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
     }
 
     if (!defender.hasType('Flying') &&
-        !defender.hasAbility('Levitate') && 
+        !defender.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') && // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
         !defender.hasItem('Air Balloon') &&
-        !defender.named('Probopass-Crest')
+        !defender.named('Probopass-Crest') // Probopass Crest - Grants Levitate
     ) {
       if (defenderSide.spikes === 1) {
         damage += Math.floor(defender.maxHP() / 8);
@@ -695,14 +702,16 @@ function getEndOfTurn(
     );
   
   // Jungle - Shield Dust grants Magic Guard
-  const defenderMagicGuard = defender.hasAbility('Magic Guard') || (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
-  const attackerMagicGuard = attacker.hasAbility('Magic Guard') || (attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
+  // Rainbow - Flareon gets Magic Guard
+  const defenderMagicGuard = defender.hasAbility('Magic Guard') || (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') || (defender.named('Flareon') && field.chromaticField === 'Rainbow')
+  const attackerMagicGuard = attacker.hasAbility('Magic Guard') || (attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') || (defender.named('Flareon') && field.chromaticField === 'Rainbow')
 
   if (field.hasWeather('Sun', 'Harsh Sunshine')) {
     if (defender.hasAbility('Dry Skin', 'Solar Power')) {
       damage -= Math.floor(defender.maxHP() / 8);
       texts.push(defender.ability + ' damage');
     }
+    // Druddigon Crest - If harsh sunlight is active, it will restore 1/8th of its maximum HP at the end of each turn
     if (defender.named('Druddigon-Crest') && !healBlock) {
       damage += Math.floor(defender.maxHP() / 8);
       texts.push('Crest recovery');
@@ -800,7 +809,7 @@ function getEndOfTurn(
     texts.push('Ingrain recovery');
   }
 
-  if ((field.defenderSide.isAquaRing || defender.named('Phione-Crest')) && !healBlock) {
+  if ((field.defenderSide.isAquaRing || defender.named('Phione-Crest')) && !healBlock) { // Phione Crest - Grants Aqua Ring
     let recovery = Math.floor(defender.maxHP() / (field.chromaticField === 'Waters-Surface' ? 10: 16));
     if (defender.hasItem('Big Root')) recovery = Math.trunc(recovery * 5324 / 4096);
     damage += recovery;
@@ -835,8 +844,11 @@ function getEndOfTurn(
     }
   }
 
+  // Zangoose Crest
+  // Rainbow - umbreon gets poison heal
   if (defender.hasStatus('psn')) {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) {
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest') || 
+      (defender.named('Umbreon') && field.chromaticField === 'Rainbow')) { // Zangoose Crest - Grants Poison Heal
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
@@ -846,7 +858,7 @@ function getEndOfTurn(
       texts.push('poison damage');
     }
   } else if (defender.hasStatus('tox')) {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) {
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest') || (defender.named('Umbreon') && field.chromaticField === 'Rainbow')) { // Zangoose Crest - Grants Poison Heal
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
@@ -877,7 +889,7 @@ function getEndOfTurn(
     texts.push('Bad Dreams');
   // Acidic Wasteland - Activates Poison Heal
   } else if (field.chromaticField === 'Acidic-Wasteland') {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) {
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) { // Zangoose Crest - Grants Poison Heal
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
@@ -892,6 +904,7 @@ function getEndOfTurn(
 
   if (!defenderMagicGuard &&
       (TRAPPING.includes(move.name) ||
+       (attacker.named('Vespiquen-Crest-Offense') && move.named('Attack Order')) || // Vespiquen Crest - Attack order applies Infestation
        (TRAPPING_JUNGLE.includes(move.name) && field.chromaticField === 'Jungle') || // Jungle - Certain moves apply Infestation
        (move.named('Leaf Tornado') && field.chromaticField === 'Flower-Garden') || // Flower Garden - Leaf Tornado is now a binding move that deals 1/8 max HP per turn for 2-5 turns
        (move.named('Sandsear Storm') && field.chromaticField === 'Desert'))) { // Desert - Sandsear Storm applies Sand Tomb trapping and chip damage effect 
@@ -948,31 +961,35 @@ function getEndOfTurn(
 
   // Crests - End of turn text
 
+  // Gothitelle Crest - Recovers 1/16th of its max HP per round when psychic
   if (defender.named('Gothitelle-Crest') && !healBlock) {
     damage += Math.floor(defender.maxHP() / 16);
     texts.push('Crest recovery');
   }
 
+  // Meganium Crest - Meganium and its allies heal 1/16 of their HP at the end of turn
   if (defender.named('Meganium-Crest') && !healBlock) {
     damage += Math.floor(defender.maxHP() / 16);
     texts.push('Crest recovery');
   }
 
+  // Shiinotic Crest - Drains 1/16th of Max HP from statused pokemon at end of turn
   if (attacker.named('Shiinotic-Crest') && defender.status && !defenderMagicGuard) {
     damage -= Math.floor(defender.maxHP() / 16);
     texts.push('Crest damage');
   }
-
   if (defender.named('Shiinotic-Crest') && attacker.status && !attackerMagicGuard && !healBlock) {
     damage += Math.floor(attacker.maxHP() / 16);
     texts.push('Crest recovery');
   }
 
+  // Spiritomb Crest - Recovers 1/32 of its max HP per turn for each fainted ally
   if (defender.named('Spiritomb-Crest') && defender.alliesFainted! > 0 && !healBlock) {
     damage += Math.floor(defender.maxHP() * defender.alliesFainted! / 32);
     texts.push('Crest recovery (' + Math.min(5, defender.alliesFainted!) + ` ${defender.alliesFainted === 1 ? 'ally' : 'allies'} fainted)`);
   }
 
+  // Vespiquen Crest - Grants a leftovers effect
   if (defender.named('Vespiquen-Crest-Defense') && !healBlock) {
     damage += Math.floor(defender.maxHP() / 16);
     texts.push('Crest recovery');
@@ -997,6 +1014,11 @@ function getEndOfTurn(
     let effectiveness =
     fireType.effectiveness[defender.types[0]]! *
       (defender.types[1] ? fireType.effectiveness[defender.types[1]]! : 1);
+
+    // Leafeon Crest - Gives resistance to fire and flying type moves
+    if (defender.named('Leafeon-Crest') && effectiveness > 0.5) {
+      effectiveness = 0.5;
+    }
 
     // Torterra Crest - Inverse type effectiveness
     if (defender.named('Torterra-Crest')) { 
@@ -1286,6 +1308,9 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   if (description.mirrorBeamType) {
     output += description.mirrorBeamType + ' ';
   }
+  if (description.moveSlot) {
+    output += 'move slot ' + description.moveSlot + ' ';
+  }
   output += description.moveName + ' ';
   if (description.moveBP && description.moveType) {
     output += '(' + description.moveBP + ' BP ' + description.moveType + ') ';
@@ -1377,6 +1402,7 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
       break;
     case "Cave":
     case "Underwater":
+    case "Rainbow":
     case "Undercolony":
     default:
       output += ' on ' + description.chromaticField;

@@ -110,10 +110,12 @@ export class Move implements State.Move {
               : data.multihit[0] + 1;
           }
         }
+      // Cinccino Crest - All moves non flat damage moves turn into multi-strike moves, 2-5 hits of 35% the BP
       } else if (options.species == 'Cinccino-Crest') {
         this.hits = (options.ability === 'Skill Link')
           ? 5
-          : 3;
+          : options.hits!;
+      // Ledian Crest - Punching Moves hit 4 Times
       } else if (options.species == 'Ledian-Crest' && data.flags.punch) {
         this.hits = 4;
       }

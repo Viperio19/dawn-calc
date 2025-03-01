@@ -154,10 +154,11 @@
                     <select aria-label="type2" class="type2 terrain-trigger calc-trigger"></select>
                     <small class="right">(<a class="analysis links-lighten" target="_blank" href="">Smogon&nbsp;analysis</a>)</small>
                 </div>
+                <!--// Rainbow - giving tera a way to be toggled elsehwere in the code-->
                 <div class="gen-specific g9">
                     <label>Tera Type</label>
                     <select class="teraType terrain-trigger calc-trigger"></select>
-                    <input type="checkbox" title= "Has this Pok&eacute;mon terastalized?" class="teraToggle terrain-trigger calc-trigger">
+                    <input type="checkbox" id="teraL" title= "Has this Pok&eacute;mon terastalized?" class="teraToggle terrain-trigger calc-trigger">
                 </div>
                 <div class="hide">
                     <label>Forme</label>
@@ -643,12 +644,6 @@
                     <option value="2">2 stockpiles</option>
                     <option value="3">3 stockpiles</option>
                 </select>
-                <select class="move-slot calc-trigger hide" title="What move slot is this move in?">>
-                    <option value="1">1st move slot</option>
-                    <option value="2">2nd move slot</option>
-                    <option value="3">3rd move slot</option>
-                    <option value="4">4th move slot</option>
-                </select>
             </div>
             <div class="move2">
                 <select class="move-selector calc-trigger small-select"></select>
@@ -690,12 +685,6 @@
                     <option value="1">1 stockpile</option>
                     <option value="2">2 stockpiles</option>
                     <option value="3">3 stockpiles</option>
-                </select>
-                <select class="move-slot calc-trigger hide" title="What move slot is this move in?">>
-                    <option value="1">1st move slot</option>
-                    <option value="2">2nd move slot</option>
-                    <option value="3">3rd move slot</option>
-                    <option value="4">4th move slot</option>
                 </select>
             </div>
             <div class="move3">
@@ -739,12 +728,6 @@
                     <option value="2">2 stockpiles</option>
                     <option value="3">3 stockpiles</option>
                 </select>
-                <select class="move-slot calc-trigger hide" title="What move slot is this move in?">>
-                    <option value="1">1st move slot</option>
-                    <option value="2">2nd move slot</option>
-                    <option value="3">3rd move slot</option>
-                    <option value="4">4th move slot</option>
-                </select>
             </div>
             <div class="move4">
                 <select class="move-selector calc-trigger small-select"></select>
@@ -787,12 +770,6 @@
                     <option value="2">2 stockpiles</option>
                     <option value="3">3 stockpiles</option>
                 </select>
-                <select class="move-slot calc-trigger hide" title="What move slot is this move in?">>
-                    <option value="1">1st move slot</option>
-                    <option value="2">2nd move slot</option>
-                    <option value="3">3rd move slot</option>
-                    <option value="4">4th move slot</option>
-                </select>
             </div>
         </fieldset>
     </div>
@@ -831,7 +808,6 @@
                         <option value="None">None</option>
                         <option value="Jungle">Jungle (Bug)</option>
                         <option value="Eclipse">Eclipse (Dark)</option>
-							   <option value="Undercolony">Rainbow Field (Eevee)</option>
                         <option value="Dragons-Den">Dragon's Den (Dragon)</option>
                         <option value="Thundering-Plateau">Thundering Plateau (Electric)</option>
                         <option value="Starlight-Arena">Starlight Arena (Fairy)</option>
@@ -849,6 +825,7 @@
                         <option value="Factory">Factory (Steel)</option>
                         <option value="Waters-Surface">Water's Surface (Water)</option>
                         <option value="Underwater">Underwater (Water)</option>
+                        <option value="Rainbow">Rainbow (Eevee)</option>
                         <option value="Undercolony">Undercolony (Bug, Rock)</option>
                         <option value="Inverse">Inverse (All)</option>
                     </select>
@@ -1288,10 +1265,11 @@
                     <select aria-label="Type 2" class="type2 terrain-trigger calc-trigger"></select>
                     <small class="right">(<a class="analysis links-lighten" target="_blank" href="">Smogon&nbsp;analysis</a>)</small>
                 </div>
+                <!--// Rainbow - giving tera a way to be toggled elsehwere in the code-->
                 <div class="gen-specific g9">
                     <label>Tera Type</label>
                     <select class="teraType terrain-trigger calc-trigger"></select>
-                    <input type="checkbox" title= "Has this Pok&eacute;mon terastalized?" class="teraToggle terrain-trigger calc-trigger">
+                    <input type="checkbox" id="teraR" title= "Has this Pok&eacute;mon terastalized?" class="teraToggle terrain-trigger calc-trigger">
                 </div>
                 <div class="hide">
                     <label>Forme</label>
@@ -1771,12 +1749,6 @@
                     <option value="2">2 stockpiles</option>
                     <option value="3">3 stockpiles</option>
                 </select>
-                <select class="move-slot calc-trigger hide" title="What move slot is this move in?">>
-                    <option value="1">1st move slot</option>
-                    <option value="2">2nd move slot</option>
-                    <option value="3">3rd move slot</option>
-                    <option value="4">4th move slot</option>
-                </select>
             </div>
             <div class="move2">
                 <select class="move-selector calc-trigger small-select"></select>
@@ -1818,12 +1790,6 @@
                     <option value="1">1 stockpile</option>
                     <option value="2">2 stockpiles</option>
                     <option value="3">3 stockpiles</option>
-                </select>
-                <select class="move-slot calc-trigger hide" title="What move slot is this move in?">>
-                    <option value="1">1st move slot</option>
-                    <option value="2">2nd move slot</option>
-                    <option value="3">3rd move slot</option>
-                    <option value="4">4th move slot</option>
                 </select>
             </div>
             <div class="move3">
@@ -1867,12 +1833,6 @@
                     <option value="2">2 stockpiles</option>
                     <option value="3">3 stockpiles</option>
                 </select>
-                <select class="move-slot calc-trigger hide" title="What move slot is this move in?">>
-                    <option value="1">1st move slot</option>
-                    <option value="2">2nd move slot</option>
-                    <option value="3">3rd move slot</option>
-                    <option value="4">4th move slot</option>
-                </select>
             </div>
             <div class="move4">
                 <select class="move-selector calc-trigger small-select"></select>
@@ -1914,12 +1874,6 @@
                     <option value="1">1 stockpile</option>
                     <option value="2">2 stockpiles</option>
                     <option value="3">3 stockpiles</option>
-                </select>
-                <select class="move-slot calc-trigger hide" title="What move slot is this move in?">>
-                    <option value="1">1st move slot</option>
-                    <option value="2">2nd move slot</option>
-                    <option value="3">3rd move slot</option>
-                    <option value="4">4th move slot</option>
                 </select>
             </div>
         </fieldset>
