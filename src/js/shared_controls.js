@@ -535,12 +535,12 @@ function setPrismScaleEffects(pokeObj) {
 			$("#soakR").prop("checked", true);
 		}
 	// Rainbow - Prism Scale: Terrastilizes Pokémon on swap in
-	} else if (chromaticField === 'Underwater') {
-		if (id === 'p1') {
-			$("#teraL").prop("checked", true);
-		} else {
-			$("#teraR").prop("checked", true);
-		}
+	//} else if (chromaticField === 'Underwater') {
+	//	if (id === 'p1') {
+	//		$("#teraL").prop("checked", true);
+	//	} else {
+	//		$("#teraR").prop("checked", true);
+	//	}
 	// Undercolony - Prism Scale: Applies Salt Cure to the opponent
 	} else if (chromaticField === 'Undercolony') {
 		var allPokemon = $('.poke-info');
