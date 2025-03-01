@@ -173,14 +173,6 @@ export class Pokemon implements State.Pokemon {
     return false;
   }
 
-  hasReflectorType(opponent: Pokemon, type: I.TypeName) {
-    return this.ability != 'Reflector'
-      ? false
-      : opponent.types[1]
-        ? opponent.types[1] === type
-        : opponent.types[0] === type;
-  }
-
   hasMimicryType(field: Field, type: I.TypeName) {
     return this.ability != 'Mimicry'
       ? false

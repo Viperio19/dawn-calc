@@ -62,8 +62,6 @@ export interface RawDesc {
   isAttackerSoak?: boolean;
   isDefenderSoak?: boolean;
   isDefenderDynamaxed?: boolean;
-  reflectorOffenseTypes?: string;
-  reflectorDefenseTypes?: string;
   defenderType?: string;
   attackerType?: string;
   mirrorBeamType?: string;
@@ -356,10 +354,8 @@ export function getKOChance(
   const eot = getEndOfTurn(gen, attacker, defender, move, field);
   const toxicCounter =
   // Jungle - Shield Dust grants Magic Guard
-  // Rainbow - Flareon gets Magic Guard
     defender.hasStatus('tox') && !(defender.hasAbility('Magic Guard', 'Poison Heal') ||
-     (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') ||
-     (defender.named('Flareon') && field.chromaticField === 'Rainbow')) ? defender.toxicCounter : 0;
+     (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) ? defender.toxicCounter : 0;
 
   // multi-hit moves have too many possibilities for brute-forcing to work, so reduce it
   // to an approximate distribution
@@ -552,10 +548,6 @@ const TRAPPING = [
   'Thunder Cage', 'Whirlpool', 'Wrap', 'G-Max Sandblast', 'G-Max Centiferno',
 ];
 
-const TRAPPING_JUNGLE = [
-  'Fell Stinger', 'Silver Wind', 'Steamroller',
-];
-
 function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, field: Field) {
   let damage = 0;
   const texts: string[] = [];
@@ -664,12 +656,6 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
         texts.push('3 layers of Spikes');
       }
     }
-
-    // Jungle - Sticky Web deals 1/8th of a Flying type’s Max HP on entry
-    if (defender.hasType('Flying') && field.chromaticField === 'Jungle') {
-      damage += Math.floor(defender.maxHP() / 8);
-      texts.push('Sticky Web');
-    }
   }
 
   if (isNaN(damage)) {
@@ -702,9 +688,8 @@ function getEndOfTurn(
     );
   
   // Jungle - Shield Dust grants Magic Guard
-  // Rainbow - Flareon gets Magic Guard
-  const defenderMagicGuard = defender.hasAbility('Magic Guard') || (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') || (defender.named('Flareon') && field.chromaticField === 'Rainbow')
-  const attackerMagicGuard = attacker.hasAbility('Magic Guard') || (attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') || (defender.named('Flareon') && field.chromaticField === 'Rainbow')
+  const defenderMagicGuard = defender.hasAbility('Magic Guard') || (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
+  const attackerMagicGuard = attacker.hasAbility('Magic Guard') || (attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
 
   if (field.hasWeather('Sun', 'Harsh Sunshine')) {
     if (defender.hasAbility('Dry Skin', 'Solar Power')) {
@@ -844,11 +829,8 @@ function getEndOfTurn(
     }
   }
 
-  // Zangoose Crest
-  // Rainbow - umbreon gets poison heal
   if (defender.hasStatus('psn')) {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest') || 
-      (defender.named('Umbreon') && field.chromaticField === 'Rainbow')) { // Zangoose Crest - Grants Poison Heal
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) { // Zangoose Crest - Grants Poison Heal
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
@@ -858,7 +840,7 @@ function getEndOfTurn(
       texts.push('poison damage');
     }
   } else if (defender.hasStatus('tox')) {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest') || (defender.named('Umbreon') && field.chromaticField === 'Rainbow')) { // Zangoose Crest - Grants Poison Heal
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) { // Zangoose Crest - Grants Poison Heal
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
@@ -905,7 +887,6 @@ function getEndOfTurn(
   if (!defenderMagicGuard &&
       (TRAPPING.includes(move.name) ||
        (attacker.named('Vespiquen-Crest-Offense') && move.named('Attack Order')) || // Vespiquen Crest - Attack order applies Infestation
-       (TRAPPING_JUNGLE.includes(move.name) && field.chromaticField === 'Jungle') || // Jungle - Certain moves apply Infestation
        (move.named('Leaf Tornado') && field.chromaticField === 'Flower-Garden') || // Flower Garden - Leaf Tornado is now a binding move that deals 1/8 max HP per turn for 2-5 turns
        (move.named('Sandsear Storm') && field.chromaticField === 'Desert'))) { // Desert - Sandsear Storm applies Sand Tomb trapping and chip damage effect 
     // Underwater - Whirlpool deals ⅙ of the target’s Max HP per turn
@@ -997,6 +978,34 @@ function getEndOfTurn(
 
   // Fields - End of turn text
 
+  // Jungle - Cutting moves deal an additional 1/8th max hp, modified by type effectiveness [Grass Type] to affected opposing Pokémon
+  if (field.chromaticField === 'Jungle' && move.flags.slicing && !defenderMagicGuard) {
+    const grassType = gen.types.get('grass' as ID)!;
+    let effectiveness =
+    grassType.effectiveness[defender.types[0]]! *
+      (defender.types[1] ? grassType.effectiveness[defender.types[1]]! : 1);
+
+    // Torterra Crest - Inverse type effectiveness
+    if (defender.named('Torterra-Crest')) { 
+      effectiveness = 1 / effectiveness;
+    // Simipour Crest - Simisage Crest - Give resistance to grass type moves (grass / fire pseudo-typings)
+    } else if (defender.named('Simipour-Crest', 'Simisage-Crest')) {
+      effectiveness *= 0.5;
+    // Whiscash Crest - Gives grass immunity
+    } else if (defender.named('Whiscash-Crest')) {
+      effectiveness = 0;
+    }
+  
+    damage -= Math.floor((effectiveness * defender.maxHP()) / 8);
+    texts.push('Tree Slam damage');
+  }
+
+  // Jungle - Parasite - Users holding Binding Band cause Pokémon on the opposing side of the field to lose 6% of their max hp at the end of each turn
+  if (field.chromaticField === 'Jungle' && attacker.hasItem('Binding Band') && !defenderMagicGuard) {
+    damage -= Math.floor(defender.maxHP() / 16);
+    texts.push('Parasite damage');
+  }
+
   // Thundering Plateau - Volt Absorb restores 1/16 of the user's Max HP per turn
   if (field.chromaticField === 'Thundering-Plateau' && defender.hasAbility('Volt Absorb') && !healBlock) {
     damage += Math.floor(defender.maxHP() / 16);
@@ -1018,11 +1027,12 @@ function getEndOfTurn(
     // Leafeon Crest - Gives resistance to fire and flying type moves
     if (defender.named('Leafeon-Crest') && effectiveness > 0.5) {
       effectiveness = 0.5;
-    }
-
     // Torterra Crest - Inverse type effectiveness
-    if (defender.named('Torterra-Crest')) { 
+    } else if (defender.named('Torterra-Crest')) { 
       effectiveness = 1 / effectiveness;
+    // Simisage Crest - Simisear Crest - Give resistance to fire type moves (fire / water pseudo-typings)
+    } else if (defender.named('Simisage-Crest', 'Simisear-Crest')) {
+      effectiveness *= 0.5;
     }
   
     damage -= Math.floor((effectiveness * defender.maxHP()) / 8);
@@ -1402,7 +1412,6 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
       break;
     case "Cave":
     case "Underwater":
-    case "Rainbow":
     case "Undercolony":
     default:
       output += ' on ' + description.chromaticField;
