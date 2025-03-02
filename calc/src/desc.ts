@@ -835,8 +835,10 @@ function getEndOfTurn(
     }
   }
 
+  // Rainbow - umbreon gets poison heal
   if (defender.hasStatus('psn')) {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) { // Zangoose Crest - Grants Poison Heal
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest') || 
+    (defender.named('Umbreon') && field.chromaticField === 'Rainbow')) { // Zangoose Crest - Grants Poison Heal
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
@@ -844,9 +846,10 @@ function getEndOfTurn(
     } else if (!defenderMagicGuard) {
       damage -= Math.floor(defender.maxHP() / (gen.num === 1 ? 16 : 8));
       texts.push('poison damage');
-    }
+    } // Rainbow - umbreon gets poison heal
   } else if (defender.hasStatus('tox')) {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) { // Zangoose Crest - Grants Poison Heal
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest') || 
+    (defender.named('Umbreon') && field.chromaticField === 'Rainbow')) { // Zangoose Crest - Grants Poison Heal
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
