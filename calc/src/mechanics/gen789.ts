@@ -2269,7 +2269,8 @@ export function calculateAttackSMSSSV(
   } else if (attackSource.boosts[attackStat] === 0 ||
     (isCritical && attackSource.boosts[attackStat] < 0)) {
     attack = attackSource.rawStats[attackStat];
-  } else if (defender.hasAbility('Unaware')) {
+  // Rainbow - Sylveon - gains Unaware defender
+  } else if (defender.hasAbility('Unaware') || (defender.named('Sylbeon') && field.chromaticField === 'Rainbow')) {
     attack = attackSource.rawStats[attackStat];
     desc.defenderAbility = defender.ability;
   } else {
@@ -2721,7 +2722,8 @@ export function calculateDefenseSMSSSV(
       (isCritical && defender.boosts[defenseStat] > 0) ||
       move.ignoreDefensive) {
     defense = defender.rawStats[defenseStat];
-  } else if (attacker.hasAbility('Unaware')) {
+  // Rainbow - Sylveon - gains Unaware attacker
+  } else if (attacker.hasAbility('Unaware') || (defender.named('Sylbeon') && field.chromaticField === 'Rainbow')) {
     defense = defender.rawStats[defenseStat];
     desc.attackerAbility = attacker.ability;
   // Ring Arena - Grit Stage Effects: 1 - Attacks ignore the opponent's stat changes
