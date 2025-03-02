@@ -632,17 +632,17 @@ function autosetTerrain(ability, i) {
 		break;
 	default:
 		// Rainbow - leafeon sets grassy terrain
-		if (chromaticField === 'Rainbow' && species == 'Leafon') {
-			lastAutoTerrain[i] = "Grassy";
-			$("#grassy").prop("checked", true);
-			break;
-		}
+		//if (chromaticField === 'Rainbow' && species == 'Leafon') {
+		//	lastAutoTerrain[i] = "Grassy";
+		//	$("#grassy").prop("checked", true);
+		//	break;
+		//}
 		// Rainbow - Jolteon sets electric terrain
-		if (chromaticField === 'Rainbow' && species == 'Jolteon') {
-			lastAutoTerrain[i] = "Electric";
-			$("#electric").prop("checked", true);
-			break;
-		}
+		//if (chromaticField === 'Rainbow' && species == 'Jolteon') {
+		//	lastAutoTerrain[i] = "Electric";
+		//	$("#electric").prop("checked", true);
+		//	break;
+		//}
 		// If no terrain setting it sets last
 		lastAutoTerrain[i] = "";
 		var newTerrain = lastAutoTerrain[1 - i] !== "" ? lastAutoTerrain[1 - i] : lastManualTerrain;
