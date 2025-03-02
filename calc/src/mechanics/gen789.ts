@@ -3037,6 +3037,10 @@ export function calculateFinalModsSMSSSV(
   } else if (attacker.hasAbility('Tinted Lens') && typeEffectiveness < 1) {
     finalMods.push(8192);
     desc.attackerAbility = attacker.ability;
+  // Rainbow Field - Glaceon gains tinted lens
+  } else if (attacker.name.includes('Glaceon') && (field.chromaticField === 'Rainbow') && typeEffectiveness < 1) {
+  finalMods.push(8192);
+  desc.attackerAbility = attacker.ability;
   // Starlight Arena - Starstruck!: If a Pokémon has this effect (manual toggle), their attacks gain the Tinted Lens effect.
   } else if (attacker.isStarstruck && typeEffectiveness < 1) {
     finalMods.push(8192);
