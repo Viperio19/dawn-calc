@@ -356,7 +356,8 @@ export function getKOChance(
   // Jungle - Shield Dust grants Magic Guard
   // Rainbow - Flareon gets Magic Guard
     defender.hasStatus('tox') && !(defender.hasAbility('Magic Guard', 'Poison Heal') ||
-     (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) ? defender.toxicCounter : 0;
+     (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') ||
+     (defender.named('Flareon') && field.chromaticField === 'Rainbow')) ? defender.toxicCounter : 0;
 
   // multi-hit moves have too many possibilities for brute-forcing to work, so reduce it
   // to an approximate distribution
@@ -579,7 +580,8 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
       texts.push('regurgitated Spikes');
     }
   } else if (defender.hasItem('Heavy-Duty Boots') || defender.hasAbility('Magic Guard') ||
-       (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
+       (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') ||
+       (defender.named('Flareon') && field.chromaticField === 'Rainbow')) { // Jungle - Shield Dust grants Magic Guard
       return {damage, texts};
   } else {
     if (defenderSide.isSR && !defender.hasAbility('Mountaineer') &&
@@ -690,8 +692,10 @@ function getEndOfTurn(
   
   // Jungle - Shield Dust grants Magic Guard
   // Rainbow - Flareon gets Magic Guard
-  const defenderMagicGuard = defender.hasAbility('Magic Guard') || (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
-  const attackerMagicGuard = attacker.hasAbility('Magic Guard') || (attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
+  const defenderMagicGuard = defender.hasAbility('Magic Guard') || (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') ||
+  (defender.named('Flareon') && field.chromaticField === 'Rainbow')
+  const attackerMagicGuard = attacker.hasAbility('Magic Guard') || (attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') ||
+  (defender.named('Flareon') && field.chromaticField === 'Rainbow')
 
   if (field.hasWeather('Sun', 'Harsh Sunshine')) {
     if (defender.hasAbility('Dry Skin', 'Solar Power')) {
