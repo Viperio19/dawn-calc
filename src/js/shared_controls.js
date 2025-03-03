@@ -632,13 +632,13 @@ function autosetTerrain(ability, i) {
 		break;
 	default:
 		// Rainbow - leafeon sets grassy terrain
-		if (chromaticField === 'Rainbow' && pokemonName == 'Leafon') {
+		if (chromaticField === 'Rainbow' && startsWith(pokemonName, 'Leafon')) {
 			lastAutoTerrain[i] = "Grassy";
 			$("#grassy").prop("checked", true);
 			break;
 		}
 		// Rainbow - Jolteon sets electric terrain
-		if (chromaticField === 'Rainbow' && pokemonName == 'Jolteon') {
+		if (chromaticField === 'Rainbow' && startsWith(pokemonName, 'Jolteon')) {
 			lastAutoTerrain[i] = "Electric";
 			$("#electric").prop("checked", true);
 			break;
