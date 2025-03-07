@@ -604,8 +604,9 @@ $("#chromatic-field").change(function () {
 
 var lastManualTerrain = "";
 var lastAutoTerrain = ["", ""];
-function autosetTerrain(ability, i, pokemonName) {
+function autosetTerrain(ability, i) {
 	var currentTerrain = $("input:checkbox[name='terrain']:checked").val() || "No terrain";
+	var fullSetName = pokeObj.find("input.set-selector").val();
 	var chromaticField = $("#chromatic-field").val();
 	var pokemonName = fullSetName.substring(0, fullSetName.indexOf(" ("));
 	if (lastAutoTerrain.indexOf(currentTerrain) === -1) {
