@@ -607,6 +607,7 @@ var lastAutoTerrain = ["", ""];
 function autosetTerrain(ability, i, pokemonName) {
 	var currentTerrain = $("input:checkbox[name='terrain']:checked").val() || "No terrain";
 	var chromaticField = $("#chromatic-field").val();
+	var pokemonName = fullSetName.substring(0, fullSetName.indexOf(" ("));
 	if (lastAutoTerrain.indexOf(currentTerrain) === -1) {
 		lastManualTerrain = currentTerrain;
 		lastAutoTerrain[1 - i] = "";
@@ -633,7 +634,7 @@ function autosetTerrain(ability, i, pokemonName) {
 		break;
 	default:
 		// Rainbow - leafeon sets grassy terrain
-		if (chromaticField === 'Rainbow' && startsWith(pokemonName, 'Leafon')) {
+		if (chromaticField === 'Rainbow' && startsWith(pokemonName, 'Leafeon')) {
 			lastAutoTerrain[i] = "Grassy";
 			$("#grassy").prop("checked", true);
 			break;
