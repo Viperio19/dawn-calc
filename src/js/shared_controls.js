@@ -534,6 +534,13 @@ function setPrismScaleEffects(pokeObj) {
 		} else {
 			$("#soakR").prop("checked", true);
 		}
+	// Rainbow - Prism Scale: Tera's the user
+	} else if (chromaticField === 'Underwater') {
+		if (id === 'p1') {
+			$("#soakL").prop("checked", true);
+		} else {
+			$("#soakR").prop("checked", true);
+		}
 	// Undercolony - Prism Scale: Applies Salt Cure to the opponent
 	} else if (chromaticField === 'Undercolony') {
 		var allPokemon = $('.poke-info');
