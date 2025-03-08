@@ -605,10 +605,6 @@ $("#chromatic-field").change(function () {
 var lastManualTerrain = "";
 var lastAutoTerrain = ["", ""];
 function autosetTerrain(ability, i, pokeObj) {
-	var currentTerrain = $("input:checkbox[name='terrain']:checked").val() || "No terrain";
-	var fullSetName = pokeObj.find("input.set-selector").val();
-	var chromaticField = $("#chromatic-field").val();
-	var pokemonName = fullSetName.substring(0, fullSetName.indexOf(" ("));
 	if (lastAutoTerrain.indexOf(currentTerrain) === -1) {
 		lastManualTerrain = currentTerrain;
 		lastAutoTerrain[1 - i] = "";
@@ -634,18 +630,7 @@ function autosetTerrain(ability, i, pokeObj) {
 		$("#psychic").prop("checked", true);
 		break;
 	default:
-		// Rainbow - leafeon sets grassy terrain
-		if (chromaticField === 'Rainbow' && startsWith(pokemonName, 'Leafeon')) {
-			lastAutoTerrain[i] = "Grassy";
-			$("#grassy").prop("checked", true);
-			break;
-		}
-		// Rainbow - Jolteon sets electric terrain
-		if (chromaticField === 'Rainbow' && startsWith(pokemonName, 'Jolteon')) {
-			lastAutoTerrain[i] = "Electric";
-			$("#electric").prop("checked", true);
-			break;
-		}
+		// Rainbow - leafeon sets grassy terrain Jolteon sets electric terrain was supposed to be here
 		// If no terrain setting it sets last
 		lastAutoTerrain[i] = "";
 		var newTerrain = lastAutoTerrain[1 - i] !== "" ? lastAutoTerrain[1 - i] : lastManualTerrain;
