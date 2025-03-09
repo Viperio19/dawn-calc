@@ -534,14 +534,6 @@ function setPrismScaleEffects(pokeObj) {
 		} else {
 			$("#soakR").prop("checked", true);
 		}
-	// Rainbow - Prism Scale: Terrastilizes Pokémon on swap in
-	//} else if (chromaticField === 'Underwater') {
-	//	if (id === 'p1') {
-	//		$("#teraL").prop("checked", true);
-	//	} else {
-	//		$("#teraR").prop("checked", true);
-	//	}
-	// Undercolony - Prism Scale: Applies Salt Cure to the opponent
 	} else if (chromaticField === 'Undercolony') {
 		var allPokemon = $('.poke-info');
 		allPokemon.each(function () {
@@ -638,17 +630,6 @@ function autosetTerrain(ability, i) {
 		$("#psychic").prop("checked", true);
 		break;
 	default:
-		// Rainbow - leafeon sets grassy terrain
-		if (chromaticField === 'Rainbow' && species == 'Leafon')
-			lastAutoTerrain[i] = "Grassy";
-			$("#grassy").prop("checked", true);
-			break;
-		// Rainbow - Jolteon sets electric terrain
-		if (chromaticField === 'Rainbow' && species == 'Jolteon')
-			lastAutoTerrain[i] = "Electric";
-			$("#electric").prop("checked", true);
-			break;
-		// If no terrain setting it sets last
 		lastAutoTerrain[i] = "";
 		var newTerrain = lastAutoTerrain[1 - i] !== "" ? lastAutoTerrain[1 - i] : lastManualTerrain;
 		if ("No terrain" !== newTerrain) {
