@@ -534,13 +534,6 @@ function setPrismScaleEffects(pokeObj) {
 		} else {
 			$("#soakR").prop("checked", true);
 		}
-	// Rainbow - Prism Scale: Tera's the user
-	} else if (chromaticField === 'Underwater') {
-		if (id === 'p1') {
-			$("#soakL").prop("checked", true);
-		} else {
-			$("#soakR").prop("checked", true);
-		}
 	// Undercolony - Prism Scale: Applies Salt Cure to the opponent
 	} else if (chromaticField === 'Undercolony') {
 		var allPokemon = $('.poke-info');
@@ -611,7 +604,8 @@ $("#chromatic-field").change(function () {
 
 var lastManualTerrain = "";
 var lastAutoTerrain = ["", ""];
-function autosetTerrain(ability, i, pokeObj) {
+function autosetTerrain(ability, i) {
+	var currentTerrain = $("input:checkbox[name='terrain']:checked").val() || "No terrain";
 	if (lastAutoTerrain.indexOf(currentTerrain) === -1) {
 		lastManualTerrain = currentTerrain;
 		lastAutoTerrain[1 - i] = "";
@@ -637,7 +631,7 @@ function autosetTerrain(ability, i, pokeObj) {
 		$("#psychic").prop("checked", true);
 		break;
 	default:
-		// Rainbow - leafeon sets grassy terrain Jolteon sets electric terrain was supposed to be here
+		// Rainbow - leafeon sets grassy terrain
 		// If no terrain setting it sets last
 		lastAutoTerrain[i] = "";
 		var newTerrain = lastAutoTerrain[1 - i] !== "" ? lastAutoTerrain[1 - i] : lastManualTerrain;
