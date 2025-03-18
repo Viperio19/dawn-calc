@@ -329,11 +329,10 @@ export function checkDauntlessShield(source: Pokemon, gen: Generation) {
   }
 }
 
-export function checkStickyWeb(source: Pokemon, field: Field, stickyWeb: boolean) {
-  if (stickyWeb && !source.hasItem('Heavy-Duty Boots') && !source.hasAbility('Clear Body', 'White Smoke', 'Full Metal Body')) {
-    // Jungle - Sticky Web reduces Speed by one additional stage
-    let boosts = field.chromaticField === 'Jungle' ? 2 : 1;
-    source.boosts.spe = Math.max(-6, source.boosts.spe - boosts);
+export function checkStickyWeb(source: Pokemon, field: Field, side: Side) {
+  if (side.isStickyWeb && !source.hasItem('Heavy-Duty Boots') && !source.hasAbility('Clear Body', 'White Smoke', 'Full Metal Body') &&
+      (isGrounded(source, field, side) || field.chromaticField === 'Jungle')) { // Jungle - Sticky Web affects non-grounded Pokemon
+    source.boosts.spe = Math.max(-6, source.boosts.spe - 1);
   }
 }
 
@@ -364,8 +363,13 @@ export function checkCrestEntryEffects(gen: Generation, source: Pokemon, target:
 }
 
 // Fields - Stat boosts from Prism Scale or abilities
-export function checkFieldEntryEffects(source: Pokemon, field: Field) {
-  if (field.chromaticField === 'Dragons-Den') {
+export function checkFieldEntryEffects(gen: Generation, source: Pokemon, target: Pokemon, field: Field) {
+  if (field.chromaticField === 'Jungle') {
+    // Jungle - Compound Eyes raises Special Attack by 2 for each of its stats lowered by a foe
+    if (source.hasAbility('Compound Eyes')) {
+      source.boosts.spa = Math.min(6, source.boosts.spa + 2 * countDrops(gen, source.boosts));
+    }
+  } else if (field.chromaticField === 'Dragons-Den') {
     // Dragon's Den - Prism Scale: Boosts Speed +1 
     if (source.hasItem('Prism Scale')) {
       source.boosts.spe = Math.min(6, source.boosts.spe + 1);
@@ -898,6 +902,21 @@ export function countBoosts(gen: Generation, boosts: StatsTable) {
     // Only positive boosts are counted
     const boost = boosts[stat];
     if (boost && boost > 0) sum += boost;
+  }
+  return sum;
+}
+
+export function countDrops(gen: Generation, boosts: StatsTable) {
+  let sum = 0;
+
+  const STATS: StatID[] = gen.num === 1
+    ? ['atk', 'def', 'spa', 'spe']
+    : ['atk', 'def', 'spa', 'spd', 'spe'];
+
+  for (const stat of STATS) {
+    // Only negative boosts are counted
+    const boost = boosts[stat];
+    if (boost && boost < 0) sum -= boost;
   }
   return sum;
 }
