@@ -877,16 +877,25 @@ export function getStabMod(pokemon: Pokemon, move: Move, field: Field, side: Sid
   return stabMod;
 }
 
-export function getStellarStabMod(pokemon: Pokemon, move: Move, stabMod = 1, turns = 0) {
+export function getStellarStabMod(pokemon: Pokemon, move: Move, field: Field, desc: RawDesc, stabMod = 1, turns = 0) {
   const isStellarBoosted =
     pokemon.teraType === 'Stellar' &&
-    ((move.isStellarFirstUse && turns === 0) || pokemon.named('Terapagos-Stellar'));
+    (move.isStellarFirstUse || pokemon.named('Terapagos-Stellar'));
   if (isStellarBoosted) {
     if (pokemon.hasOriginalType(move.type)) {
       stabMod += 2048;
     } else {
       stabMod = 4915;
     }
+  // Starlight Arena - Pixilate terastalizes the user into the Stellar Type
+  } else if (pokemon.hasAbility('Pixilate') && field.chromaticField === 'Starlight-Arena') {
+    if (pokemon.hasOriginalType(move.type)) {
+      stabMod += 2048;
+    } else {
+      stabMod = 4915;
+    }
+    desc.attackerTera = 'Stellar';
+    desc.chromaticField = field.chromaticField;
   }
   return stabMod;
 }
