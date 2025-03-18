@@ -351,6 +351,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Underwater' ? 'Water'
         : field.chromaticField === 'Undercolony' ? 'Bug'
         : field.chromaticField === 'Inverse' ? 'Psychic'
+        : field.chromaticField === 'Bewitched-Woods' ? 'Grass'
         : 'Normal';
       if (type !== 'Normal' || field.chromaticField === 'Blessed-Sanctum') {
         desc.chromaticField = field.chromaticField;
@@ -367,7 +368,7 @@ export function calculateSMSSSV(
     // Dark-types or grounded foes if Psychic Terrain is active
     if (!(move.named('Nature Power') && (attacker.hasAbility('Prankster')) ||
       (attacker.hasAbility('Telepathy') && field.chromaticField === 'Ancient-Ruins')) && // Ancient Ruins - Telepathy grants Prankster
-      ((defender.types.includes('Dark') ||
+      (((defender.types.includes('Dark') && field.chromaticField !== 'Bewitched-Woods') || // Bewitched Woods - Dark Types are no longer immune to Prankster moves
       (field.hasTerrain('Psychic') && isGrounded(defender, field, field.defenderSide))))) {
       desc.moveType = type;
     }
@@ -953,6 +954,13 @@ export function calculateSMSSSV(
     desc.chromaticField = field.chromaticField;
   }
 
+  if (field.chromaticField === 'Bewitched-Woods') {
+    if ((move.hasType('Grass') && defender.hasType('Steel')) || // Bewitched Woods - Grass Types now hit Steel Type Pokemon for neutral damage
+        (move.hasType('Poison') && defender.hasType('Fairy'))) { // Bewitched Woods - Poison attacks deal neutral damage to Fairy Types
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
   if (move.type === 'Stellar') {
     desc.defenderTera = defender.teraType; // always show in this case
     typeEffectiveness = !defender.teraType ? 1 : 2;
@@ -1046,7 +1054,10 @@ export function calculateSMSSSV(
     return result;
   }
 
-  if (move.named('Spectral Thief')) {
+  // Bewitched Woods - Punishment applies Spectral Thief effect
+  const punishmentBewitchedWoods = (move.named('Punishment') && field.chromaticField === 'Bewitched-Woods');
+
+  if (move.named('Spectral Thief') || punishmentBewitchedWoods) {
     let stat: StatID;
     for (stat in defender.boosts) {
       if (defender.boosts[stat] > 0) {
@@ -1057,6 +1068,9 @@ export function calculateSMSSSV(
         attacker.stats[stat] = getModifiedStat(attacker.rawStats[stat]!, attacker.boosts[stat]!);
         defender.boosts[stat] = 0;
         defender.stats[stat] = defender.rawStats[stat];
+
+        if (punishmentBewitchedWoods)
+          desc.chromaticField = field.chromaticField;
       }
     }
   }
@@ -1550,7 +1564,7 @@ export function calculateBasePowerSMSSSV(
     move.secondaries = true;
 
     // Nature Power cannot affect Dark-types if it is affected by Prankster
-    if (attacker.hasAbility('Prankster') && (defender.types.includes('Dark') ||
+    if (attacker.hasAbility('Prankster') && ((defender.types.includes('Dark') && field.chromaticField !== 'Bewitched-Woods') || // Bewitched Woods - Dark Types are no longer immune to Prankster moves
        (attacker.hasAbility('Telepathy') && field.chromaticField === 'Ancient-Ruins'))) { // Ancient Ruins - Telepathy grants Prankster
       basePower = 0;
       desc.moveName = 'Nature Power';
@@ -1685,6 +1699,10 @@ export function calculateBasePowerSMSSSV(
         basePower = 0;
         desc.moveName = 'Trick Room';
         break;
+      case 'Bewitched-Woods':
+        basePower = 0;
+        desc.moveName = 'Strength Sap';
+        break;
       default:
         basePower = 80;
         desc.moveName = 'Tri Attack';
@@ -1768,6 +1786,13 @@ export function calculateBasePowerSMSSSV(
   // Undercolony - Silver Wind gains +10 power for each of the user’s stat boosts
   if (field.chromaticField === 'Undercolony' && move.named('Silver Wind')) {
     basePower = move.bp + 10 * countBoosts(gen, attacker.boosts);
+    desc.moveBP = basePower;
+    desc.chromaticField = field.chromaticField;
+  }
+
+  // Bewitched Woods - Dark Type moves increase by 1.5x base power when targeting a Fairy Type Pokemon
+  if (field.chromaticField === 'Bewitched-Woods' && move.hasType('Dark') && defender.hasType('Fairy')) {
+    basePower *= 1.5;
     desc.moveBP = basePower;
     desc.chromaticField = field.chromaticField;
   }
@@ -2376,10 +2401,10 @@ export function calculateAtModsSMSSSV(
     atMods.push(6144);
     desc.attackerAbility = attacker.ability;
     desc.weather = field.weather;
-  // Flower Garden - Activates Flower Gift
+  // Flower Garden - Bewitched Woods - Activates Flower Gift regardless of weather
   } else if (attacker.named('Cherrim') &&
              attacker.hasAbility('Flower Gift') &&
-             field.chromaticField === 'Flower-Garden' &&
+             (field.chromaticField === 'Flower-Garden' || field.chromaticField === 'Bewitched-Woods') &&
              move.category === 'Physical') {
     atMods.push(6144);
     desc.attackerAbility = attacker.ability;
@@ -2445,12 +2470,18 @@ export function calculateAtModsSMSSSV(
   if (
     field.attackerSide.isFlowerGift &&
     !attacker.hasAbility('Flower Gift') &&
-    field.hasWeather('Sun', 'Harsh Sunshine') &&
     move.category === 'Physical') {
-    atMods.push(6144);
-    desc.weather = field.weather;
-    desc.isFlowerGiftAttacker = true;
-  }
+    if (field.hasWeather('Sun', 'Harsh Sunshine')) {
+      atMods.push(6144);
+      desc.weather = field.weather;
+      desc.isFlowerGiftAttacker = true;
+    // Flower Garden - Bewitched Woods - Activates Flower Gift regardless of weather
+    } else if (field.chromaticField === 'Flower-Garden' || field.chromaticField === 'Bewitched-Woods') {
+      atMods.push(6144);
+      desc.chromaticField = field.chromaticField;
+      desc.isFlowerGiftAttacker = true;
+    }
+  } 
 
   if (
     field.attackerSide.isSteelySpirit &&
@@ -2804,8 +2835,8 @@ export function calculateDfModsSMSSSV(
       dfMods.push(6144);
       desc.defenderAbility = defender.ability;
       desc.weather = field.weather;
-    // Flower Garden - Activates Flower Gift
-    } else if (field.chromaticField === 'Flower-Garden') {
+    // Flower Garden - Bewitched Woods - Activates Flower Gift regardless of weather
+    } else if (field.chromaticField === 'Flower-Garden' || field.chromaticField === 'Bewitched-Woods') {
       dfMods.push(6144);
       desc.defenderAbility = defender.ability;
       desc.chromaticField = field.chromaticField;

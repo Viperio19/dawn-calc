@@ -214,6 +214,10 @@ export function getMoveEffectiveness(
   // Undercolony - Rock Throw is super effective vs Ground types
   } else if (field.chromaticField === 'Undercolony' && move.named('Rock Throw') && type === 'Ground') {
     return 2;
+  } else if (field.chromaticField === 'Bewitched-Woods' &&
+             ((move.hasType('Grass') && type === 'Steel') || // Bewitched Woods - Grass Types now hit Steel Type Pokemon for neutral damage
+             (move.hasType('Poison') && type === 'Fairy'))) { // Bewitched Woods - Poison attacks deal neutral damage to Fairy Types
+    return 1;
   } else {
     let effectiveness = gen.types.get(toID(move.type))!.effectiveness[type]!;
     if (effectiveness === 0 && isRingTarget) {
