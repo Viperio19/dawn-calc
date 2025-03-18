@@ -988,6 +988,12 @@ function getEndOfTurn(
     // Torterra Crest - Inverse type effectiveness
     if (defender.named('Torterra-Crest')) { 
       effectiveness = 1 / effectiveness;
+    // Simipour Crest - Simisage Crest - Give resistance to grass type moves (grass / fire pseudo-typings)
+    } else if (defender.named('Simipour-Crest', 'Simisage-Crest')) {
+      effectiveness *= 0.5;
+    // Whiscash Crest - Gives grass immunity
+    } else if (defender.named('Whiscash-Crest')) {
+      effectiveness = 0;
     }
   
     damage -= Math.floor((effectiveness * defender.maxHP()) / 8);
@@ -1021,11 +1027,12 @@ function getEndOfTurn(
     // Leafeon Crest - Gives resistance to fire and flying type moves
     if (defender.named('Leafeon-Crest') && effectiveness > 0.5) {
       effectiveness = 0.5;
-    }
-
     // Torterra Crest - Inverse type effectiveness
-    if (defender.named('Torterra-Crest')) { 
+    } else if (defender.named('Torterra-Crest')) { 
       effectiveness = 1 / effectiveness;
+    // Simisage Crest - Simisear Crest - Give resistance to fire type moves (fire / water pseudo-typings)
+    } else if (defender.named('Simisage-Crest', 'Simisear-Crest')) {
+      effectiveness *= 0.5;
     }
   
     damage -= Math.floor((effectiveness * defender.maxHP()) / 8);

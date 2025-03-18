@@ -980,7 +980,7 @@ export function calculateSMSSSV(
         !field.isGravity && !move.named('Thousand Arrows') && !(move.named('Bulldoze') && field.chromaticField === 'Desert') && // Desert - Bulldoze grounds adjacent foes; first hit neutral on Airborne foes
         !defender.hasItem('Iron Ball') &&
         (defender.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') || // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
-        defender.named('Probopass-Crest'))) || // Probopass Crest - Grants Levitate
+        (defender.named('Probopass-Crest') && !attackerIgnoresAbility))) || // Probopass Crest - Grants Levitate
       (move.flags.bullet && defender.hasAbility('Bulletproof')) ||
       (move.flags.sound && !move.named('Clangorous Soul') && defender.hasAbility('Soundproof')) ||
       (move.priority > 0 && defender.hasAbility('Queenly Majesty', 'Dazzling', 'Armor Tail')) ||
@@ -1146,38 +1146,7 @@ export function calculateSMSSSV(
   }
 
   let preStellarStabMod = getStabMod(attacker, move, field, field.attackerSide, desc);
-  let stabMod = getStellarStabMod(attacker, move, preStellarStabMod);
-
-  const teraType = attacker.teraType;
-  if (teraType === move.type && teraType !== 'Stellar') {
-    stabMod += 2048;
-    desc.attackerTera = teraType;
-  }
-  if (attacker.hasAbility('Adaptability') && attacker.hasType(move.type)) {
-    stabMod += teraType && attacker.hasOriginalType(teraType) ? 1024 : 2048;
-    desc.attackerAbility = attacker.ability;
-  }
-
-  // TODO: For now all moves are always boosted
-  const isStellarBoosted =
-    attacker.teraType === 'Stellar' &&
-    (move.isStellarFirstUse || attacker.named('Terapagos-Stellar'));
-  if (isStellarBoosted) {
-    if (attacker.hasOriginalType(move.type)) {
-      stabMod += 2048;
-    } else {
-      stabMod = 4915;
-    }
-  // Starlight Arena - Pixilate terastalizes the user into the Stellar Type
-  } else if (attacker.hasAbility('Pixilate') && field.chromaticField === 'Starlight-Arena') {
-    if (attacker.hasOriginalType(move.type)) {
-      stabMod += 2048;
-    } else {
-      stabMod = 4915;
-    }
-    desc.attackerTera = 'Stellar';
-    desc.chromaticField = field.chromaticField;
-  }
+  let stabMod = getStellarStabMod(attacker, move, field, desc, preStellarStabMod);
 
   const applyBurn =
     attacker.hasStatus('brn') &&
@@ -1218,35 +1187,58 @@ export function calculateSMSSSV(
   }
 
   // Probopass Crest - After an attack, each mini nose casts a 20BP type-based damage after a damaging move. (3 Attacks: steel, rock, electric [Special])
-  let noseDamage: number[] | undefined;;
+  let noseDamage: number[] | undefined;
   if (attacker.named('Probopass-Crest') && move.hits === 1) {
-    const noseElectric = attacker.clone();
-    const noseRock = attacker.clone();
-    const noseSteel = attacker.clone();
-    noseElectric.name = 'Electric Nose' as SpeciesName;
-    noseRock.name = 'Rock Nose' as SpeciesName;
-    noseSteel.name = 'Steel Nose' as SpeciesName;
+    const nose = attacker.clone();
+    nose.name = 'Probopass Nose' as SpeciesName;
     let noseMove = move.clone(); 
     noseMove.bp = 20;
     noseMove.category = 'Special';
-    desc.attackerAbility = "POGCHAMPION";
 
     noseMove.type = 'Electric';
     noseMove.name = 'Electric POGCHAMPION' as MoveName;
-    checkMultihitBoost(gen, noseElectric, defender, noseMove, field, desc);
-    let noseElectricDamage = calculateSMSSSV(gen, noseElectric, defender, noseMove, field).damage as number[];
+    checkMultihitBoost(gen, nose, defender, noseMove, field, desc);
+    let noseElectricDamage: number[] = new Array(16).fill(0);
+
+    let type = gen.types.get('electric' as ID)!;
+    let effectiveness =
+    type.effectiveness[defender.types[0]]! *
+      (defender.types[1] ? type.effectiveness[defender.types[1]]! : 1);
+
+    if (!defender.hasType('Ground') && !defender.hasAbility('Volt Absorb', 'Motor Drive', 'Lightning Rod') &&
+        !(defender.hasAbility('Wonder Guard') && effectiveness < 2)) {
+      noseElectricDamage = calculateSMSSSV(gen, nose, defender, noseMove, field).damage as number[];
+    }
 
     noseMove.type = 'Rock';
     noseMove.name = 'Rock POGCHAMPION' as MoveName;
-    checkMultihitBoost(gen, noseRock, defender, noseMove, field, desc);
-    let noseRockDamage = calculateSMSSSV(gen, noseRock, defender, noseMove, field).damage as number[];
+    checkMultihitBoost(gen, nose, defender, noseMove, field, desc);
+    let noseRockDamage: number[] = new Array(16).fill(0);
+
+    type = gen.types.get('rock' as ID)!;
+    effectiveness =
+    type.effectiveness[defender.types[0]]! *
+      (defender.types[1] ? type.effectiveness[defender.types[1]]! : 1);
+
+    if (!(defender.hasAbility('Wonder Guard') && effectiveness < 2)) {
+      noseRockDamage = calculateSMSSSV(gen, nose, defender, noseMove, field).damage as number[];
+    }
 
     noseMove.type = 'Steel';
     noseMove.name = 'Steel POGCHAMPION' as MoveName;
-    checkMultihitBoost(gen, noseSteel, defender, noseMove, field, desc);
-    let noseSteelDamage = calculateSMSSSV(gen, noseSteel, defender, noseMove, field).damage as number[];
+    checkMultihitBoost(gen, nose, defender, noseMove, field, desc);
+    let noseSteelDamage: number[] = new Array(16).fill(0);
 
-    noseDamage = noseElectricDamage
+    type = gen.types.get('steel' as ID)!;
+    effectiveness =
+    type.effectiveness[defender.types[0]]! *
+      (defender.types[1] ? type.effectiveness[defender.types[1]]! : 1);
+
+    if (!(defender.hasAbility('Wonder Guard') && effectiveness < 2)) {
+      noseSteelDamage = calculateSMSSSV(gen, nose, defender, noseMove, field).damage as number[];
+    }
+
+    noseDamage = new Array(16).fill(0);
 
     for (let i = 0; i < 16; i++) {
       noseDamage[i] = noseElectricDamage[i] + noseRockDamage[i] + noseSteelDamage[i];
@@ -1329,7 +1321,7 @@ export function calculateSMSSSV(
         // Hack to make Tera Shell with multihit moves, but not over multiple turns
         typeEffectiveness = turn2typeEffectiveness;
         // Stellar damage boost applies for 1 turn, but all hits of multihit.
-        stabMod = getStellarStabMod(attacker, move, preStellarStabMod, times);
+        stabMod = getStellarStabMod(attacker, move, field, desc, preStellarStabMod, times);
       }
 
       const newBasePower = calculateBasePowerSMSSSV(
