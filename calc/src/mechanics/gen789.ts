@@ -980,7 +980,7 @@ export function calculateSMSSSV(
         !field.isGravity && !move.named('Thousand Arrows') && !(move.named('Bulldoze') && field.chromaticField === 'Desert') && // Desert - Bulldoze grounds adjacent foes; first hit neutral on Airborne foes
         !defender.hasItem('Iron Ball') &&
         (defender.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') || // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
-        defender.named('Probopass-Crest'))) || // Probopass Crest - Grants Levitate
+        (defender.named('Probopass-Crest') && !attackerIgnoresAbility))) || // Probopass Crest - Grants Levitate
       (move.flags.bullet && defender.hasAbility('Bulletproof')) ||
       (move.flags.sound && !move.named('Clangorous Soul') && defender.hasAbility('Soundproof')) ||
       (move.priority > 0 && defender.hasAbility('Queenly Majesty', 'Dazzling', 'Armor Tail')) ||
@@ -1146,38 +1146,7 @@ export function calculateSMSSSV(
   }
 
   let preStellarStabMod = getStabMod(attacker, move, field, field.attackerSide, desc);
-  let stabMod = getStellarStabMod(attacker, move, preStellarStabMod);
-
-  const teraType = attacker.teraType;
-  if (teraType === move.type && teraType !== 'Stellar') {
-    stabMod += 2048;
-    desc.attackerTera = teraType;
-  }
-  if (attacker.hasAbility('Adaptability') && attacker.hasType(move.type)) {
-    stabMod += teraType && attacker.hasOriginalType(teraType) ? 1024 : 2048;
-    desc.attackerAbility = attacker.ability;
-  }
-
-  // TODO: For now all moves are always boosted
-  const isStellarBoosted =
-    attacker.teraType === 'Stellar' &&
-    (move.isStellarFirstUse || attacker.named('Terapagos-Stellar'));
-  if (isStellarBoosted) {
-    if (attacker.hasOriginalType(move.type)) {
-      stabMod += 2048;
-    } else {
-      stabMod = 4915;
-    }
-  // Starlight Arena - Pixilate terastalizes the user into the Stellar Type
-  } else if (attacker.hasAbility('Pixilate') && field.chromaticField === 'Starlight-Arena') {
-    if (attacker.hasOriginalType(move.type)) {
-      stabMod += 2048;
-    } else {
-      stabMod = 4915;
-    }
-    desc.attackerTera = 'Stellar';
-    desc.chromaticField = field.chromaticField;
-  }
+  let stabMod = getStellarStabMod(attacker, move, field, desc, preStellarStabMod);
 
   const applyBurn =
     attacker.hasStatus('brn') &&
@@ -1352,7 +1321,7 @@ export function calculateSMSSSV(
         // Hack to make Tera Shell with multihit moves, but not over multiple turns
         typeEffectiveness = turn2typeEffectiveness;
         // Stellar damage boost applies for 1 turn, but all hits of multihit.
-        stabMod = getStellarStabMod(attacker, move, preStellarStabMod, times);
+        stabMod = getStellarStabMod(attacker, move, field, desc, preStellarStabMod, times);
       }
 
       const newBasePower = calculateBasePowerSMSSSV(
