@@ -989,7 +989,7 @@ export function calculateSMSSSV(
         defender.named('Probopass-Crest'))) || // Probopass Crest - Grants Levitate
       (move.flags.bullet && defender.hasAbility('Bulletproof')) ||
       (move.flags.sound && !move.named('Clangorous Soul') && defender.hasAbility('Soundproof')) ||
-      (move.priority > 0 && defender.hasAbility('Queenly Majesty', 'Dazzling', 'Armor Tail')) || (move.priority > 0 && defender.named('Sylveon') && field.chromaticField === 'Rainbow') ||// rainbow - espeon has dazzling
+      (move.priority > 0 && defender.hasAbility('Queenly Majesty', 'Dazzling', 'Armor Tail')) || (move.priority > 0 && defender.named('Espeon') && field.chromaticField === 'Rainbow') ||// rainbow - espeon has dazzling
       (move.hasType('Ground') && defender.hasAbility('Earth Eater')) ||
       (move.flags.wind && defender.hasAbility('Wind Rider'))
   ) {
