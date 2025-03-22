@@ -171,7 +171,7 @@ var SETDEX_ADV = {
     "ZU Offensive": {"ability":"Blaze","item":"Leftovers","nature":"Timid","ivs":{"at":30,"sa":30},"evs":{"df":4,"sa":252,"sp":252},"moves":["Fire Blast","Hidden Power Grass","Substitute","Toxic"]},
     "ZU Rest + Chesto Berry": {"ability":"Blaze","item":"Chesto Berry","nature":"Timid","ivs":{"at":30,"sa":30},"evs":{"hp":4,"sa":252,"sp":252},"moves":["Fire Blast","Hidden Power Grass","Quick Attack","Rest"]},
     "ZU Sunny Day": {"ability":"Blaze","item":"Petaya Berry","nature":"Naive","ivs":{"sa":30,"sd":30},"evs":{"at":4,"sa":252,"sp":252},"moves":["Sunny Day","Substitute","Fire Blast","Hidden Power Ground"]},
-    "ZU All-Out Attacker": {"ability":"Blaze","item":"Charcoal","nature":"Hasty","ivs":{"at":30,"sa":30},"evs":{"at":4,"sa":252,"sp":252},"moves":["Fire Blast","Overheat","Quick Attack","Hidden Power Grass"]}
+    "ZU All-out Attacker": {"ability":"Blaze","item":"Charcoal","nature":"Hasty","ivs":{"at":30,"sa":30},"evs":{"at":4,"sa":252,"sp":252},"moves":["Fire Blast","Overheat","Hidden Power Grass","Quick Attack"]}
   },
   "Typhlosion": {
     "OU Special Sweeper": {"ability":"Blaze","item":"Petaya Berry","nature":"Timid","ivs":{"at":30,"sa":30},"evs":{"hp":60,"sa":252,"sd":12,"sp":184},"moves":["Substitute","Sunny Day","Flamethrower","Hidden Power Grass"]},
@@ -1556,11 +1556,8 @@ var SETDEX_ADV = {
     "Ubers SubPetaya": {"ability":"Pressure","item":"Petaya Berry","nature":"Mild","ivs":{"hp":30},"evs":{"at":4,"sa":252,"sp":252},"moves":["Substitute","Ice Beam","Thunder","Superpower"]}
   },
   "Deoxys-Defense": {
-    "Ubers Spiker": {"ability":"Pressure","item":"Leftovers","nature":"Calm","evs":{"hp":252,"df":160,"sd":96},"moves":["Spikes","Night Shade","Toxic","Recover"]},
-    "Ubers Agility": {"ability":"Pressure","item":"Leftovers","nature":"Calm","evs":{"hp":252,"df":160,"sd":96},"moves":["Agility","Recover","Toxic","Taunt"]},
-    "Ubers Cosmic Power": {"ability":"Pressure","item":"Leftovers","nature":"Calm","evs":{"hp":252,"df":160,"sd":96},"moves":["Cosmic Power","Night Shade","Toxic","Rest"]},
-    "Ubers Calm Mind": {"ability":"Pressure","item":"Leftovers","nature":"Calm","evs":{"hp":252,"df":160,"sd":96},"moves":["Calm Mind","Ice Beam","Thunderbolt","Rest"]},
-    "Ubers CounterCoat": {"ability":"Pressure","item":"Leftovers","nature":"Calm","evs":{"hp":252,"df":152,"sd":96,"sp":8},"moves":["Counter","Mirror Coat","Taunt","Recover"]}
+    "Ubers Stall Lead": {"ability":"Pressure","item":"Leftovers","nature":"Calm","evs":{"hp":252,"sd":160,"sp":96},"moves":["Recover","Seismic Toss","Knock Off","Taunt"]},
+    "Ubers Offense Lead": {"ability":"Pressure","item":"Leftovers","nature":"Timid","evs":{"hp":252,"sd":4,"sp":252},"moves":["Spikes","Taunt","Seismic Toss","Recover"]}
   },
   "Deoxys-Speed": {
     "Ubers Staller": {"ability":"Pressure","item":"Leftovers","nature":"Timid","evs":{"hp":252,"df":120,"sd":120,"sp":16},"moves":["Taunt","Toxic","Knock Off","Recover"]},
