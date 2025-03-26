@@ -534,7 +534,7 @@ function setPrismScaleEffects(pokeObj) {
 		} else {
 			$("#soakR").prop("checked", true);
 		}
-	// Rainbow - Prism Scale: Applies tera 
+	// Rainbow - Prism Scale: Applies tera
 	} else if (chromaticField === 'Underwater') {
 		if (id === 'p1') {
 			$("#teraL").prop("checked", true);
