@@ -537,9 +537,9 @@ function setPrismScaleEffects(pokeObj) {
 	// Rainbow - Prism Scale: Applies tera 
 	} else if (chromaticField === 'Underwater') {
 		if (id === 'p1') {
-			//$("#soakL").prop("checked", true);
+			$("#teraL").prop("checked", true);
 		} else {
-			//$("#soakR").prop("checked", true);
+			$("#teraR").prop("checked", true);
 		}
 	// Undercolony - Prism Scale: Applies Salt Cure to the opponent
 	} else if (chromaticField === 'Undercolony') {
