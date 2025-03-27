@@ -158,7 +158,7 @@
                 <div class="gen-specific g9">
                     <label>Tera Type</label>
                     <select class="teraType terrain-trigger calc-trigger"></select>
-                    <input type="checkbox"  id="teraL" title= "Has this Pok&eacute;mon terastalized?" class="teraToggle terrain-trigger calc-trigger">
+                    <input type="checkbox"  id="teraL" title= "Has this Pok&eacute;mon terastalized?" class="teraToggle terrain-trigger calc-trigger" for="teraR">Tera Type</label>
                 </div>
                 <div class="hide">
                     <label>Forme</label>
@@ -1233,6 +1233,15 @@
                                 <button id="exportR">Export</button>
                             </div></td>
                         </tr>
+                        <!-- /rainbow please don't be a mistake-->
+                        <td><div class="left" title="Has this Pok&eacute;mon's been Soaked?">
+                            <div hidden id="selectSoakInstruction">Has this Pok&eacute;mon's been Soaked?</div>
+                            <input aria-describedby="selectSoakInstruction" class="visually-hidden calc-trigger" type="checkbox" id="soakL" />
+                            <label class="btn btn-wide" for="soakL">Soak</label>
+                        </div></td>
+                        <td><div class="right" title="Has this Pok&eacute;mon's been Soaked?">
+                            <input aria-describedby="selectSoakInstruction" class="visually-hidden calc-trigger" type="checkbox" id="soakR" />
+                            <label class="btn btn-wide" for="soakR">Soak</label>
                     </tbody>
                 </table>
             </fieldset>
@@ -1269,7 +1278,7 @@
                 <div class="gen-specific g9">
                     <label>Tera Type</label>
                     <select class="teraType terrain-trigger calc-trigger"></select>
-                    <input type="checkbox"  id="teraR" title= "Has this Pok&eacute;mon terastalized?" class="teraToggle terrain-trigger calc-trigger">
+                    <input type="checkbox"  id="teraR" title= "Has this Pok&eacute;mon terastalized?" class="teraToggle terrain-trigger calc-trigger" for="teraR">Tera Type</label>
                 </div>
                 <div class="hide">
                     <label>Forme</label>
