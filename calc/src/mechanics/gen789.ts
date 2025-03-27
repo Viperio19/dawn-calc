@@ -886,6 +886,12 @@ export function calculateSMSSSV(
     }
   }
 
+  // Rainbow - umbreon gains poison heal
+  if (field.chromaticField === 'Rainbow') {
+    if (defender.named('Umbreon') && !defender.hasStatus('psn', 'tox')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
  
   if (field.chromaticField === 'Acidic-Wasteland') {
     if ((attacker.hasAbility('Toxic Boost') && move.category === "Physical" && !attacker.hasStatus('psn', 'tox')) || // Acidic Wasteland - Activates Toxic Boost

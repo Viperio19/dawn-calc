@@ -528,7 +528,7 @@ function setPrismScaleEffects(pokeObj) {
 			$("#aquaRingR").prop("checked", true);
 		}
 	// Underwater - Prism Scale: Applies Soak (Self)
-	} else if (chromaticField === 'Underwater') {
+	} else if (chromaticField === 'Rainbow') {
 		if (id === 'p1') {
 			$("#soakL").prop("checked", true);
 		} else {
