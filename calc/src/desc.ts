@@ -879,8 +879,8 @@ function getEndOfTurn(
     damage -= Math.floor(defender.maxHP() / 8);
     texts.push('Bad Dreams');
   // Acidic Wasteland - Activates Poison Heal
-  } else if (field.chromaticField === 'Acidic-Wasteland') {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) { // Zangoose Crest - Grants Poison Heal
+  } else if (field.chromaticField === 'Acidic-Wasteland' || field.chromaticField === 'Rainbow' ) {
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest') || defender.named('Umbreon')) { // Zangoose Crest - Grants Poison Heal / Rainbow - umbreon gains poison heal
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
