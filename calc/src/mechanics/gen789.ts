@@ -2284,7 +2284,7 @@ export function calculateAttackSMSSSV(
   // Rainbow - Sylveon - gains Unaware defender
   } else if (defender.hasAbility('Unaware') || (defender.named('Sylveon') && field.chromaticField === 'Rainbow')) {
     attack = attackSource.rawStats[attackStat];
-    desc.defenderAbility = defender.ability;
+    desc.chromaticField = field.chromaticField;
   } else {
     attack = getModifiedStat(attackSource.rawStats[attackStat]!, attackSource.boosts[attackStat]!);
     desc.attackBoost = attackSource.boosts[attackStat];
@@ -2737,7 +2737,7 @@ export function calculateDefenseSMSSSV(
   // Rainbow - Sylveon - gains Unaware attacker
   } else if (attacker.hasAbility('Unaware') || (defender.named('Sylbeon') && field.chromaticField === 'Rainbow')) {
     defense = defender.rawStats[defenseStat];
-    desc.attackerAbility = attacker.ability;
+    desc.chromaticField = field.chromaticField;
   // Ring Arena - Grit Stage Effects: 1 - Attacks ignore the opponent's stat changes
   } else if (attacker.gritStages! >= 1) {
     defense = defender.rawStats[defenseStat];
@@ -3053,8 +3053,8 @@ export function calculateFinalModsSMSSSV(
     desc.attackerAbility = attacker.ability;
   // Rainbow Field - Glaceon gains tinted lens
   } else if (attacker.name.includes('Glaceon') && (field.chromaticField === 'Rainbow') && typeEffectiveness < 1) {
-  finalMods.push(8192);
-  desc.attackerAbility = attacker.ability;
+    finalMods.push(8192);
+    desc.chromaticField = field.chromaticField;
   // Starlight Arena - Starstruck!: If a Pokémon has this effect (manual toggle), their attacks gain the Tinted Lens effect.
   } else if (attacker.isStarstruck && typeEffectiveness < 1) {
     finalMods.push(8192);
