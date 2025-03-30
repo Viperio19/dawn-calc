@@ -3070,6 +3070,12 @@ export function calculateFinalModsSMSSSV(
   if (defender.isDynamaxed && move.named('Dynamax Cannon', 'Behemoth Blade', 'Behemoth Bash')) {
     finalMods.push(8192);
   }
+  
+  if(defender.hasStatus('brn') || defender.hasStatus('psn') || defender.hasStatus('tox')) {
+    if (defender.name.includes('Flareon') && (field.chromaticField === 'Rainbow')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
 
   // Blessed Sanctum - Cute Charm grants Multiscale
   if (defender.hasAbility('Multiscale', 'Shadow Shield') || (defender.hasAbility('Cute Charm') && field.chromaticField === 'Blessed-Sanctum'))

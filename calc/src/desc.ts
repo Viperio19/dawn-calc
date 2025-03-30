@@ -837,7 +837,7 @@ function getEndOfTurn(
 
   
   if (defender.hasStatus('psn')) {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) { // Zangoose Crest - Grants Poison Heal
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest') || field.chromaticField === 'Rainbow') { // Zangoose Crest - Grants Poison Heal
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
@@ -845,41 +845,37 @@ function getEndOfTurn(
     } else if (!defenderMagicGuard) {
       damage -= Math.floor(defender.maxHP() / (gen.num === 1 ? 16 : 8));
       texts.push('poison damage');
-    } // Rainbow - umbreon gets poison heal
+    } else if (defender.named('Umbreon') && !healBlock) { // Rainbow - umbreon gets poison heal, psn
+      damage += Math.floor(defender.maxHP() / 8);
+      texts.push('Poison Heal');
+    } else if (defender.name.includes('Flareon') && field.chromaticField === 'Rainbow') { // Rainbow Field - Flareon gains magic guard print, psn
+      texts.push('Magic Guard');
+    }
   } else if (defender.hasStatus('tox')) {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) { // Zangoose Crest - Grants Poison Heal
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest') || field.chromaticField === 'Rainbow') { // Zangoose Crest - Grants Poison Heal
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
       }
     } else if (!defenderMagicGuard) {
       texts.push('toxic damage');
+    } else if (defender.named('Umbreon') && !healBlock) { // Rainbow - umbreon gets poison heal, tox
+      damage += Math.floor(defender.maxHP() / 8);
+      texts.push('Poison Heal');
+    } else if (defender.name.includes('Flareon') && field.chromaticField === 'Rainbow') { // Rainbow Field - Flareon gains magic guard print, tox
+      texts.push('Magic Guard');
     }
   } else if (defender.hasStatus('brn') && !defenderMagicGuard) {
+    if (defender.name.includes('Flareon') && field.chromaticField === 'Rainbow') { // Rainbow Field - Flareon gains magic guard print burn
+      texts.push('Magic Guard');
+    }
     let modifier = 1;
 
     if (defender.hasAbility('Heatproof')) {
       modifier *= 2;
     }
 
-    // Rainbow - umbreon gets poison heal
-    if (field.chromaticField === 'Rainbow') {
-      if(defender.named('Umbreon')) {
-        if(defender.hasStatus('tox') || defender.hasStatus('psn')) {
-          damage += Math.floor(defender.maxHP() / 8);
-          texts.push('Poison Heal');
-        }
-      }
-    }
-
-    // Rainbow Field - Flareon gains magic guard print
-  if(field.chromaticField === 'Rainbow') {
-    if(defender.name.includes('Flareon')) {
-      if(defender.hasStatus('tox') || defender.hasStatus('psn') || defender.hasStatus('brn')) {
-        texts.push('Magic Guard');
-      }
-    }
-  }
+  
 
     // Water's Surface - Burn damage is halved
     if (field.chromaticField === 'Waters-Surface') {
