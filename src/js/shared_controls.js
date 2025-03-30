@@ -618,6 +618,7 @@ function autosetTerrain(ability, i) {
 		lastAutoTerrain[1 - i] = "";
 	}
 	// terrain input uses checkbox instead of radio, need to uncheck all first
+	// rainbow - adding Lefeaon and jolteons terrains
 	$("input:checkbox[name='terrain']:checked").prop("checked", false);
 	switch (ability) {
 	case "Electric Surge":
