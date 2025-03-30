@@ -999,7 +999,12 @@ export function calculateSMSSSV(
       (move.hasType('Ground') && defender.hasAbility('Earth Eater')) ||
       (move.flags.wind && defender.hasAbility('Wind Rider'))
   ) {
-    desc.defenderAbility = defender.ability;
+    if (field.chromaticField === 'Rainbow') {
+      desc.chromaticField = field.chromaticField;
+    }
+    else {
+      desc.defenderAbility = defender.ability;
+    }
     return result;
   }
 

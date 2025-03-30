@@ -870,8 +870,16 @@ function getEndOfTurn(
           texts.push('Poison Heal');
         }
       }
-
     }
+
+    // Rainbow Field - Flareon gains magic guard print
+  if(field.chromaticField === 'Rainbow') {
+    if(defender.name.includes('Flareon')) {
+      if(defender.hasStatus('tox') || defender.hasStatus('psn') || defender.hasStatus('brn')) {
+        texts.push('Magic Guard');
+      }
+    }
+  }
 
     // Water's Surface - Burn damage is halved
     if (field.chromaticField === 'Waters-Surface') {
