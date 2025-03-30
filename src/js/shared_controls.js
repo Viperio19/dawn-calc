@@ -641,6 +641,7 @@ function autosetTerrain(ability, i) {
 	default:
 		lastAutoTerrain[i] = "";
 		var newTerrain = lastAutoTerrain[1 - i] !== "" ? lastAutoTerrain[1 - i] : lastManualTerrain;
+		var chromaticField = $("#chromatic-field").val();
 		if ("No terrain" !== newTerrain) {
 			$("input:checkbox[name='terrain'][value='" + newTerrain + "']").prop("checked", true);
 		}
