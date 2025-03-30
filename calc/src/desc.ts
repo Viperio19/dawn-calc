@@ -835,10 +835,9 @@ function getEndOfTurn(
     }
   }
 
-  // Rainbow - umbreon gets poison heal
+  
   if (defender.hasStatus('psn')) {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest') || 
-    (defender.named('Umbreon') && field.chromaticField === 'Rainbow')) { // Zangoose Crest - Grants Poison Heal
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) { // Zangoose Crest - Grants Poison Heal
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
@@ -848,8 +847,7 @@ function getEndOfTurn(
       texts.push('poison damage');
     } // Rainbow - umbreon gets poison heal
   } else if (defender.hasStatus('tox')) {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest') || 
-    (defender.named('Umbreon') && field.chromaticField === 'Rainbow')) { // Zangoose Crest - Grants Poison Heal
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) { // Zangoose Crest - Grants Poison Heal
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
@@ -862,6 +860,17 @@ function getEndOfTurn(
 
     if (defender.hasAbility('Heatproof')) {
       modifier *= 2;
+    }
+
+    // Rainbow - umbreon gets poison heal
+    if (field.chromaticField === 'Rainbow') {
+      if(defender.named('Umbreon')) {
+        if(defender.hasStatus('tox') || defender.hasStatus('psn')) {
+          damage += Math.floor(defender.maxHP() / 8);
+          texts.push('Poison Heal');
+        }
+      }
+
     }
 
     // Water's Surface - Burn damage is halved
@@ -880,7 +889,7 @@ function getEndOfTurn(
     texts.push('Bad Dreams');
   // Acidic Wasteland - Activates Poison Heal
   } else if (field.chromaticField === 'Acidic-Wasteland' || field.chromaticField === 'Rainbow' ) {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest') || defender.named('Umbreon')) { // Zangoose Crest - Grants Poison Heal / Rainbow - umbreon gains poison heal
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest') || (defender.named('Umbreon') && field.chromaticField === 'Rainbow')) { // Zangoose Crest - Grants Poison Heal / Rainbow - umbreon gains poison heal
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
