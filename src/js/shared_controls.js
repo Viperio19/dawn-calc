@@ -639,9 +639,18 @@ function autosetTerrain(ability, i) {
 		$("#psychic").prop("checked", true);
 		break;
 	default:
+		//adding in jolteon and leafeon field effects
+		var chromaticField = $("#chromatic-field").val();
+		var pokemon = createPokemon(pokeObj);	
+		if (chromaticField === "Rainbow"){
+			if(pokemon.name === "Jolteon"){
+
+			} else if (pokemon.name === "Leafeon"){
+
+			}
+		}
 		lastAutoTerrain[i] = "";
 		var newTerrain = lastAutoTerrain[1 - i] !== "" ? lastAutoTerrain[1 - i] : lastManualTerrain;
-		var chromaticField = $("#chromatic-field").val();
 		if ("No terrain" !== newTerrain) {
 			$("input:checkbox[name='terrain'][value='" + newTerrain + "']").prop("checked", true);
 		}
