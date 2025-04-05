@@ -1434,6 +1434,7 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
       break;
     case "Cave":
     case "Underwater":
+    case "Rainbow":
     case "Undercolony":
     default:
       output += ' on ' + description.chromaticField;
