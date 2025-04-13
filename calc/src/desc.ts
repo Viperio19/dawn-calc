@@ -1403,6 +1403,7 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Acidic-Wasteland":
     case "Ancient-Ruins":
     case "Bewitched-Woods":
+    case "Forgotten-Battlefield":
       output += ' on ' + description.chromaticField.replace('-', ' ');
       break;
     case "Dragons-Den":
