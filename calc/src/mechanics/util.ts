@@ -141,11 +141,6 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
     speedMods.push(3072);
   }
 
-  // Forgotten Battlefield - Pokémon with Mummy have their Attack and Speed halved
-  if (field.chromaticField === 'Forgotten-Battlefield' && pokemon.hasAbility('Mummy')) {
-    speedMods.push(2048);
-  }
-
   // Crests - Speed Modifiers
 
   // Ariados Crest - Increases Speed by 50%
@@ -222,9 +217,6 @@ export function getMoveEffectiveness(
   } else if (field.chromaticField === 'Bewitched-Woods' &&
              ((move.hasType('Grass') && type === 'Steel') || // Bewitched Woods - Grass Types now hit Steel Type Pokemon for neutral damage
              (move.hasType('Poison') && type === 'Fairy'))) { // Bewitched Woods - Poison attacks deal neutral damage to Fairy Types
-    return 1;
-  // Forgotten Battlefield - Gigaton Hammer deals neutral damage to steel types
-  } else if (field.chromaticField === 'Forgotten-Battlefield' && move.named('Gigaton Hammer') && type === 'Steel') {
     return 1;
   } else {
     let effectiveness = gen.types.get(toID(move.type))!.effectiveness[type]!;
@@ -486,12 +478,6 @@ export function checkFieldEntryEffects(gen: Generation, source: Pokemon, target:
     if (source.hasItem('Prism Scale')) {
       source.boosts.spe = Math.min(6, source.boosts.spe + 1);
     }
-  } else if (field.chromaticField === 'Forgotten-Battlefield') {
-    // Forgotten Battlefield - Prism Scale: Grants +1 Attack and Speed
-    if (source.hasItem('Prism Scale')) {
-      source.boosts.atk = Math.min(6, source.boosts.atk + 1);
-      source.boosts.spe = Math.min(6, source.boosts.spe + 1);
-    }
   }
 }
 
@@ -578,15 +564,13 @@ export function checkMultihitBoost(
 
   const atkSimple = attacker.hasAbility('Simple') ? 2 : 1;
   const defSimple = defender.hasAbility('Simple') ? 2 : 1;
-  const ignoreDefenseBoosts = attacker.hasAbility('Unaware') ||
-                              (field.chromaticField === 'Forgotten-Battlefield' && attacker.hasItem('Rusted Sword')); // Forgotten Battlefield - Rusted Sword causes holder to ignore the foe's Defense and Special Defense raises
 
   if ((!defenderUsedItem) &&
     (defender.hasItem('Luminous Moss') && move.hasType('Water')) ||
     (defender.hasItem('Maranga Berry') && move.category === 'Special') ||
     (defender.hasItem('Kee Berry') && move.category === 'Physical')) {
     const defStat = defender.hasItem('Kee Berry') ? 'def' : 'spd';
-    if (ignoreDefenseBoosts) {
+    if (attacker.hasAbility('Unaware')) {
       desc.attackerAbility = attacker.ability;
     } else {
       if (defender.hasAbility('Contrary')) {
@@ -617,7 +601,7 @@ export function checkMultihitBoost(
   }
 
   if (defender.hasAbility('Stamina')) {
-    if (ignoreDefenseBoosts) {
+    if (attacker.hasAbility('Unaware')) {
       desc.attackerAbility = attacker.ability;
     } else {
       defender.boosts.def = Math.min(defender.boosts.def + 1, 6);
@@ -625,7 +609,7 @@ export function checkMultihitBoost(
       desc.defenderAbility = defender.ability;
     }
   } else if (defender.hasAbility('Water Compaction') && move.hasType('Water')) {
-    if (ignoreDefenseBoosts) {
+    if (attacker.hasAbility('Unaware')) {
       desc.attackerAbility = attacker.ability;
     } else {
       defender.boosts.def = Math.min(defender.boosts.def + 2, 6);
@@ -633,7 +617,7 @@ export function checkMultihitBoost(
       desc.defenderAbility = defender.ability;
     }
   } else if (defender.hasAbility('Weak Armor')) {
-    if (ignoreDefenseBoosts) {
+    if (attacker.hasAbility('Unaware')) {
       desc.attackerAbility = attacker.ability;
     } else {
       if (defender.hasItem('White Herb') && !defenderUsedItem && defender.boosts.def === 0) {
@@ -650,7 +634,7 @@ export function checkMultihitBoost(
   }
 
   if (move.dropsStats) {
-    if (ignoreDefenseBoosts) {
+    if (attacker.hasAbility('Unaware')) {
       desc.attackerAbility = attacker.ability;
     } else {
       // No move with dropsStats has fancy logic regarding category here

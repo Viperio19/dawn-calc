@@ -544,10 +544,6 @@ function setPrismScaleEffects(pokeObj) {
 				pokemon.find(".saltcure").prop("checked", true);
 			}
 		});
-	// Forgotten Battlefield - Prism Scale: Changes ability to Mummy
-	} else if (chromaticField === 'Forgotten-Battlefield') {
-		var abilityObj = pokeObj.find(".ability");
-		setSelectValueIfValid(abilityObj, "Mummy", "Mummy");
 	}
 }
 

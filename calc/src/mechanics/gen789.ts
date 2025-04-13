@@ -352,7 +352,6 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Undercolony' ? 'Bug'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : field.chromaticField === 'Bewitched-Woods' ? 'Grass'
-        : field.chromaticField === 'Forgotten-Battlefield' ? 'Ghost'
         : 'Normal';
       if (type !== 'Normal' || field.chromaticField === 'Blessed-Sanctum') {
         desc.chromaticField = field.chromaticField;
@@ -718,7 +717,7 @@ export function calculateSMSSSV(
       (move.named('Dream Eater') &&
         (!(defender.hasStatus('slp') || defender.hasAbility('Comatose') || field.chromaticField === 'Haunted-Graveyard'))) || // Haunted Graveyard - Dream Eater never fails
       (move.named('Steel Roller') && !field.terrain) ||
-      (move.named('Poltergeist') && (!defender.item || isQPActive(defender, field)) && field.chromaticField !== 'Forgotten-Battlefield') // Forgotten Battelfield - Poltergeist never fails
+      (move.named('Poltergeist') && (!defender.item || isQPActive(defender, field)))
   ) {
     return result;
   }
@@ -958,13 +957,6 @@ export function calculateSMSSSV(
   if (field.chromaticField === 'Bewitched-Woods') {
     if ((move.hasType('Grass') && defender.hasType('Steel')) || // Bewitched Woods - Grass Types now hit Steel Type Pokemon for neutral damage
         (move.hasType('Poison') && defender.hasType('Fairy'))) { // Bewitched Woods - Poison attacks deal neutral damage to Fairy Types
-      desc.chromaticField = field.chromaticField;
-    }
-  }
-
-  if (field.chromaticField === 'Forgotten-Battlefield') {
-    if ((move.named('Poltergeist') && (!defender.item || isQPActive(defender, field))) || // Forgotten Battlefield - Poltergeist never fails
-        (move.named('Gigaton Hammer') && defender.hasType('Steel'))) { // Forgotten Battlefield - Gigaton Hammer deals neutral damage to steel types
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -1468,16 +1460,6 @@ export function calculateBasePowerSMSSSV(
     desc.moveBP = basePower;
     break;
   case 'Hex':
-    basePower = move.bp;
-    if (defender.status || defender.hasAbility('Comatose')) {
-      basePower *= 2;
-    // Forgotten Battlefield - Hex also works on minor status conditions
-    } else if (field.defenderSide.isNightmare || field.defenderSide.isSeeded || defender.isSaltCure) {
-      basePower *= 2;
-      desc.chromaticField = field.chromaticField;
-    }
-    desc.moveBP = basePower;
-    break;
   case 'Infernal Parade':
   case 'Irritation': // Aevian - Irritation: Does double damage if the target has a status condition
     // Hex deals double damage to Pokemon with Comatose (ih8ih8sn0w)
@@ -1721,10 +1703,6 @@ export function calculateBasePowerSMSSSV(
         basePower = 0;
         desc.moveName = 'Strength Sap';
         break;
-      case 'Forgotten-Battlefield':
-        basePower = 0;
-        desc.moveName = 'Spite';
-        break;
       default:
         basePower = 80;
         desc.moveName = 'Tri Attack';
@@ -1815,13 +1793,6 @@ export function calculateBasePowerSMSSSV(
   // Bewitched Woods - Dark Type moves increase by 1.5x base power when targeting a Fairy Type Pokemon
   if (field.chromaticField === 'Bewitched-Woods' && move.hasType('Dark') && defender.hasType('Fairy')) {
     basePower *= 1.5;
-    desc.moveBP = basePower;
-    desc.chromaticField = field.chromaticField;
-  }
-
-  // Forgotten Battlefield - Sacred Sword is 120 Base Power when used by a Steel Type
-  if (field.chromaticField === 'Forgotten-Battlefield' && move.named('Sacred Sword') && attacker.hasType('Steel')) {
-    basePower = 120;
     desc.moveBP = basePower;
     desc.chromaticField = field.chromaticField;
   }
@@ -2295,11 +2266,6 @@ export function calculateAttackSMSSSV(
   } else if (defender.hasAbility('Unaware')) {
     attack = attackSource.rawStats[attackStat];
     desc.defenderAbility = defender.ability;
-  // Forgotten Battlefield - Rusted Shield causes holder to ignore the foe's Attack and Special Attack raises
-  } else if (field.chromaticField === 'Forgotten-Battlefield' && defender.hasItem('Rusted Shield')) {
-    attack = attackSource.rawStats[attackStat];
-    desc.defenderItem = defender.item;
-    desc.chromaticField = field.chromaticField;
   } else {
     attack = getModifiedStat(attackSource.rawStats[attackStat]!, attackSource.boosts[attackStat]!);
     desc.attackBoost = attackSource.boosts[attackStat];
@@ -2699,22 +2665,6 @@ export function calculateAtModsSMSSSV(
     desc.chromaticField = field.chromaticField;
   }
 
-  if (field.chromaticField === 'Forgotten-Battlefield') {
-    // Forgotten Battlefield - Pokémon with Mummy have their Attack and Speed halved
-    if (attacker.hasAbility('Mummy')) {
-      atMods.push(2048);
-      desc.attackerAbility = attacker.ability;
-      desc.chromaticField = field.chromaticField;
-    }
-
-    // Forgotten Battlefield - Smart Strike deals double damage against Fighting and Steel Types
-    if (move.named('Smart Strike') && defender.hasType('Fighting', 'Steel')) {
-      atMods.push(8192);
-      desc.chromaticField = field.chromaticField;
-    }
-
-  }
-
   // Fields - Prism Scale Effects: Miscellaneous boosts
   if ((attacker.hasItem('Prism Scale') && !(field.chromaticField === 'None'))) {
     // Inverse - The user's next move becomes typeless and deals 1.5x damage until it's switched out
@@ -2766,11 +2716,6 @@ export function calculateDefenseSMSSSV(
   } else if (attacker.hasAbility('Unaware')) {
     defense = defender.rawStats[defenseStat];
     desc.attackerAbility = attacker.ability;
-  // Forgotten Battlefield - Rusted Sword causes holder to ignore the foe's Defense and Special Defense raises
-  } else if (field.chromaticField === 'Forgotten-Battlefield' && attacker.hasItem('Rusted Sword')) {
-    defense = defender.rawStats[defenseStat];
-    desc.attackerItem = attacker.item;
-    desc.chromaticField = field.chromaticField;
   // Ring Arena - Grit Stage Effects: 1 - Attacks ignore the opponent's stat changes
   } else if (attacker.gritStages! >= 1) {
     defense = defender.rawStats[defenseStat];
