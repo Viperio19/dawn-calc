@@ -1806,7 +1806,7 @@ var SETDEX_SM = {
     "LC Bulky Attacker": {"level":5,"ability":"Torrent","item":"Eviolite","nature":"Impish","evs":{"at":196,"df":116,"sd":196},"moves":["Waterfall","Ice Beam","Superpower","Double-Edge"]}
   },
   "Swampert": {
-    "OU Rain Sweeper": {"ability":"Swift Swim","item":"Swampertite","nature":"Jolly","evs":{"at":252,"df":4,"sp":252},"moves":["Waterfall","Earthquake","Ice Punch","Stealth Rock"]},
+    "OU Rain Sweeper": {"ability":"Damp","item":"Swampertite","nature":"Jolly","evs":{"at":252,"sd":4,"sp":252},"moves":["Waterfall","Earthquake","Ice Punch","Stealth Rock"]},
     "UU Defensive": {"ability":"Torrent","item":"Leftovers","nature":"Relaxed","evs":{"hp":252,"df":252,"sd":4},"moves":["Stealth Rock","Earthquake","Scald","Toxic"]},
     "UU Choice Band": {"ability":"Torrent","item":"Choice Band","nature":"Adamant","evs":{"hp":88,"at":252,"sp":168},"moves":["Earthquake","Waterfall","Ice Punch","Toxic"]},
     "UU Offensive Stealth Rock": {"ability":"Torrent","item":"Life Orb","nature":"Adamant","evs":{"hp":92,"at":252,"sp":164},"moves":["Stealth Rock","Earthquake","Waterfall","Ice Punch"]},
@@ -1821,7 +1821,7 @@ var SETDEX_SM = {
     "CAP Showdown Usage": {"ability":"Torrent","item":"Swampertite","nature":"Adamant","evs":{"at":252,"sd":4,"sp":252},"moves":["Earthquake","Waterfall","Ice Punch","Stone Edge"]}
   },
   "Swampert-Mega": {
-    "OU Rain Sweeper": {"ability":"Swift Swim","item":"Swampertite","nature":"Jolly","evs":{"at":252,"df":4,"sp":252},"moves":["Waterfall","Earthquake","Ice Punch","Stealth Rock"]},
+    "OU Rain Sweeper": {"ability":"Swift Swim","item":"Swampertite","nature":"Jolly","evs":{"at":252,"sd":4,"sp":252},"moves":["Waterfall","Earthquake","Ice Punch","Stealth Rock"]},
     "Doubles OU Rain Attacker": {"ability":"Swift Swim","item":"Swampertite","nature":"Adamant","evs":{"at":252,"sd":4,"sp":252},"moves":["Waterfall","Earthquake","Superpower","Protect"]},
     "VGC 2018 Swampertite": {"level":50,"ability":"Swift Swim","item":"Swampertite","nature":"Adamant","evs":{"hp":116,"at":252,"sp":140},"moves":["Waterfall","Earthquake","Ice Punch","Protect"]},
     "Battle Spot Singles Mega Rain Attacker": {"level":50,"ability":"Swift Swim","item":"Swampertite","nature":"Adamant","evs":{"hp":4,"at":252,"sp":252},"moves":["Waterfall","Earthquake","Ice Punch","Substitute"]},
@@ -2311,7 +2311,7 @@ var SETDEX_SM = {
     "LC Dragon Dance": {"level":5,"ability":"Sheer Force","item":"Life Orb","nature":"Adamant","ivs":{"hp":0},"evs":{"at":236,"df":76,"sp":196},"moves":["Dragon Dance","Outrage","Zen Headbutt","Fire Fang"]}
   },
   "Salamence": {
-    "OU Flyinium Z": {"ability":"Moxie","item":"Flyinium Z","nature":"Jolly","evs":{"at":252,"df":4,"sp":252},"moves":["Dragon Dance","Fly","Earthquake","Substitute"]},
+    "OU Flyinium Z": {"ability":"Moxie","item":"Flyinium Z","nature":"Jolly","evs":{"at":252,"sd":4,"sp":252},"moves":["Dragon Dance","Fly","Earthquake","Substitute"]},
     "Ubers Dragon Dance": {"ability":"Intimidate","item":"Salamencite","nature":"Adamant","evs":{"hp":44,"at":252,"sp":212},"moves":["Dragon Dance","Double-Edge","Roost","Facade"]},
     "Ubers Offensive Defog": {"ability":"Intimidate","item":"Salamencite","nature":"Jolly","evs":{"at":252,"df":4,"sp":252},"moves":["Defog","Double-Edge","Roost","Facade"]},
     "Ubers Defensive": {"ability":"Intimidate","item":"Salamencite","nature":"Impish","evs":{"hp":248,"df":136,"sp":124},"moves":["Body Slam","Defog","Roost","Refresh"]},
@@ -3813,7 +3813,7 @@ var SETDEX_SM = {
   "Volcarona": {
     "OU Offensive Quiver Dance": {"ability":"Flame Body","item":"Buginium Z","nature":"Timid","evs":{"sa":252,"sd":4,"sp":252},"moves":["Quiver Dance","Fire Blast","Bug Buzz","Hidden Power Ground"]},
     "OU Substitute + Swarm": {"ability":"Swarm","item":"Leftovers","nature":"Timid","evs":{"hp":128,"sa":196,"sp":184},"moves":["Substitute","Quiver Dance","Bug Buzz","Flamethrower"]},
-    "OU Bulky Quiver Dance": {"ability":"Flame Body","item":"Buginium Z","nature":"Timid","evs":{"hp":248,"df":112,"sp":148},"moves":["Quiver Dance","Flamethrower","Bug Buzz","Roost"]},
+    "OU Bulky Quiver Dance": {"ability":"Flame Body","item":"Leftovers","nature":"Bold","evs":{"hp":248,"df":196,"sp":64},"moves":["Quiver Dance","Bug Buzz","Flamethrower","Roost"]},
     "Doubles OU Quiver Dance": {"ability":"Flame Body","item":"Buginium Z","nature":"Timid","evs":{"df":4,"sa":252,"sp":252},"moves":["Heat Wave","Bug Buzz","Quiver Dance","Protect"]},
     "Doubles OU Bulky Support": {"ability":"Flame Body","item":"Wiki Berry","nature":"Modest","evs":{"hp":240,"df":168,"sa":56,"sp":44},"moves":["Overheat","Rage Powder","Tailwind","Protect"]},
     "VGC 2018 Quiver Dance": {"level":50,"ability":"Flame Body","item":"Mago Berry","nature":"Modest","evs":{"hp":220,"df":4,"sa":68,"sd":76,"sp":140},"moves":["Flamethrower","Giga Drain","Quiver Dance","Protect"]},
@@ -4274,7 +4274,7 @@ var SETDEX_SM = {
     "RU Choice Band": {"ability":"Aura Break","item":"Choice Band","nature":"Jolly","evs":{"at":252,"sd":4,"sp":252},"moves":["Thousand Arrows","Outrage","Extreme Speed","Toxic"]}
   },
   "Diancie": {
-    "OU Offensive": {"ability":"Clear Body","item":"Diancite","nature":"Hasty","evs":{"at":4,"sa":252,"sp":252},"moves":["Stealth Rock","Moonblast","Diamond Storm","Earth Power"]},
+    "OU Offensive": {"ability":"Magic Bounce","item":"Diancite","nature":"Hasty","evs":{"at":4,"sa":252,"sp":252},"moves":["Stealth Rock","Moonblast","Diamond Storm","Earth Power"]},
     "OU Substitute + Endeavor": {"ability":"Magic Bounce","item":"Diancite","nature":"Jolly","evs":{"hp":240,"df":16,"sp":252},"moves":["Stealth Rock","Substitute","Endeavor","Diamond Storm"]},
     "Ubers Mega Diancie": {"ability":"Clear Body","item":"Diancite","nature":"Naive","evs":{"at":24,"sa":232,"sp":252},"moves":["Moonblast","Diamond Storm","Earth Power","Stealth Rock"]},
     "UU Support": {"ability":"Clear Body","item":"Leftovers","nature":"Calm","evs":{"hp":252,"df":4,"sd":252},"moves":["Stealth Rock","Heal Bell","Toxic","Moonblast"]},

@@ -371,6 +371,7 @@ var SETDEX_DPP = {
     "UU Bulky Spinblocker": {"ability":"Pressure","item":"Leftovers","nature":"Impish","evs":{"hp":252,"df":252,"sd":4},"moves":["Seismic Toss","Will-O-Wisp","Rest","Sleep Talk"]},
     "UU Trick Room Support": {"ability":"Pressure","item":"Leftovers","nature":"Relaxed","ivs":{"sp":0},"evs":{"hp":252,"df":252,"sd":4},"moves":["Trick Room","Seismic Toss","Will-O-Wisp","Pain Split"]},
     "NU Physical Wall": {"ability":"Pressure","item":"Leftovers","nature":"Impish","evs":{"hp":252,"df":252,"sd":4},"moves":["Seismic Toss","Will-O-Wisp","Pain Split","Protect"]},
+    "NU Offensive": {"ability":"Pressure","item":"Leftovers","nature":"Adamant","evs":{"hp":252,"at":252,"sd":4},"moves":["Shadow Sneak","Earthquake","Will-O-Wisp","Pain Split"]},
     "Doubles OU Trick Room": {"ability":"Pressure","item":"Mail","nature":"Relaxed","ivs":{"sp":0},"evs":{"hp":252,"df":96,"sd":160},"moves":["Trick Room","Rain Dance","Helping Hand","Night Shade"]}
   },
   "Regirock": {
@@ -1759,7 +1760,7 @@ var SETDEX_DPP = {
   "Swalot": {
     "UU Support": {"ability":"Liquid Ooze","item":"Leftovers","nature":"Calm","evs":{"hp":4,"df":252,"sd":252},"moves":["Encore","Yawn","Pain Split","Sludge Bomb"]},
     "UU RestTalk": {"ability":"Liquid Ooze","item":"Leftovers","nature":"Sassy","evs":{"hp":252,"df":144,"sd":112},"moves":["Rest","Sleep Talk","Sludge Bomb","Earthquake"]},
-    "ZU Specially Defensive": {"ability":"Liquid Ooze","item":"Leftovers","nature":"Careful","evs":{"hp":248,"sd":8},"moves":["Gunk Shot","Earthquake","Seed Bomb","Encore"]},
+    "ZU Specially Defensive": {"ability":"Liquid Ooze","item":"Leftovers","nature":"Careful","evs":{"hp":248,"sd":252,"sp":8},"moves":["Gunk Shot","Earthquake","Seed Bomb","Encore"]},
     "ZU Curse": {"ability":"Liquid Ooze","item":"Leftovers","nature":"Careful","evs":{"hp":248,"sd":252,"sp":8},"moves":["Curse","Rest","Sleep Talk","Fire Punch"]}
   },
   "Carvanha": {
