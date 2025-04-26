@@ -617,15 +617,6 @@ function autosetTerrain(ability, i) {
 		lastManualTerrain = currentTerrain;
 		lastAutoTerrain[1 - i] = "";
 	}
-	var chromaticField = $("#chromatic-field").val();
-	var pokemon = createPokemon(pokeObj);	
-	if (chromaticField === "Rainbow"){
-		if(pokemon.name === "Jolteon"){
-
-		} else if (pokemon.name === "Leafeon"){
-
-		}
-	}
 	// terrain input uses checkbox instead of radio, need to uncheck all first
 	// rainbow - adding Lefeaon and jolteons terrains
 	$("input:checkbox[name='terrain']:checked").prop("checked", false);
