@@ -888,7 +888,7 @@ export function calculateSMSSSV(
 
   // Rainbow - umbreon gains poison heal
   if (field.chromaticField === 'Rainbow') {
-    if (defender.named('Umbreon') && !defender.hasStatus('psn', 'tox')) {
+    if (defender.named('Umbreon') && defender.hasStatus('psn', 'tox')) {
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -1009,18 +1009,11 @@ export function calculateSMSSSV(
         (defender.named('Probopass-Crest') && !attackerIgnoresAbility))) || // Probopass Crest - Grants Levitate
       (move.flags.bullet && defender.hasAbility('Bulletproof')) ||
       (move.flags.sound && !move.named('Clangorous Soul') && defender.hasAbility('Soundproof')) ||
-      (move.priority > 0 && defender.hasAbility('Queenly Majesty', 'Dazzling', 'Armor Tail')) || (move.priority > 0 && defender.named('Espeon') && field.chromaticField === 'Rainbow') || // Rainbow - Espeon has Dazzling
+      (move.priority > 0 && defender.hasAbility('Queenly Majesty', 'Dazzling', 'Armor Tail')) || 
+      (move.priority > 0 && defender.named('Espeon') && field.chromaticField === 'Rainbow') || // Rainbow - Espeon has Dazzling
       (move.hasType('Ground') && defender.hasAbility('Earth Eater')) ||
       (move.flags.wind && defender.hasAbility('Wind Rider'))
-  ) {
-    if (field.chromaticField === 'Rainbow') {
-      desc.chromaticField = field.chromaticField;
-    }
-    else {
-      desc.defenderAbility = defender.ability;
-    }
-      return result;
-  }
+  )
 
   if (move.hasType('Ground') && !move.named('Thousand Arrows') && !(move.named('Bulldoze') && field.chromaticField === 'Desert') && // Desert - Bulldoze grounds adjacent foes; first hit neutral on Airborne foes
       !field.isGravity && defender.hasItem('Air Balloon')) {
@@ -2791,7 +2784,7 @@ export function calculateDefenseSMSSSV(
       move.ignoreDefensive) {
     defense = defender.rawStats[defenseStat];
   // Rainbow - Sylveon - gains Unaware attacker
-  } else if (attacker.hasAbility('Unaware') || (defender.named('Sylbeon') && field.chromaticField === 'Rainbow')) {
+  } else if (attacker.hasAbility('Unaware') || (attacker.named('Sylbeon') && field.chromaticField === 'Rainbow')) {
     defense = defender.rawStats[defenseStat]; 
     desc.chromaticField = field.chromaticField;   
   } else if (attacker.hasAbility('Unaware')) {
@@ -3116,7 +3109,7 @@ export function calculateFinalModsSMSSSV(
     finalMods.push(8192);
     desc.attackerAbility = attacker.ability;
   // Rainbow Field - Glaceon gains tinted lens
-  } else if (attacker.name.includes('Glaceon') && (field.chromaticField === 'Rainbow') && typeEffectiveness < 1) {
+  } else if (attacker.name.includes('Glaceon') && field.chromaticField === 'Rainbow' && typeEffectiveness < 1) {
   finalMods.push(8192);
   desc.chromaticField = field.chromaticField;
   // Starlight Arena - Starstruck!: If a Pokémon has this effect (manual toggle), their attacks gain the Tinted Lens effect.
@@ -3131,7 +3124,7 @@ export function calculateFinalModsSMSSSV(
   }
 
   if(defender.name.includes('Flareon') && (field.chromaticField === 'Rainbow')) {
-    if (defender.hasStatus('brn') || defender.hasStatus('psn') || defender.hasStatus('tox')) {
+    if (defender.hasStatus('brn', 'psn', 'tox') {
       desc.chromaticField = field.chromaticField;
     }
   }
