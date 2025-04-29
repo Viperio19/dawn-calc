@@ -836,7 +836,8 @@ function getEndOfTurn(
   }
 
   if (defender.hasStatus('psn')) {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest') || field.chromaticField === 'Rainbow') { // Zangoose Crest - Grants Poison Heal
+    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest') || // Zangoose Crest - Grants Poison Heal
+        ((field.chromaticField === 'Rainbow') && defender.named('Umbreon'))) { // Rainbow - Umbreon gains Poison Heal
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
