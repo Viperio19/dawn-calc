@@ -478,11 +478,8 @@ export function calculateSMSSSV(
     // Starlight Arena - Normal-type moves change to Fairy-type
     } else if ((isStarlightFairy = normal && field.chromaticField === 'Starlight-Arena')) {
       type = 'Fairy';
-    } else if (((attacker.name.includes('Umbreon')) || (attacker.name.includes('Espeon')) || 
-    (attacker.name.includes('Flareon')) || (attacker.name.includes('Vaporeon')) || 
-    (attacker.name.includes('Jolteon')) || (attacker.name.includes('Glaceon')) || 
-    (attacker.name.includes('Leafeon')) || (attacker.name.includes('Sylveon')) || 
-    (attacker.name.includes('Eevee'))) && (field.chromaticField === 'Rainbow') && (move.named('Quick Attack'))) {
+    } else if ((attacker.name.includes('Umbreon', 'Flareon', 'Vaporeon', 'Espeon', 'Jolteon', 'Glaceon', 'Leafeon', 'Sylveon', 'Eevee') &&
+    (field.chromaticField === 'Rainbow') && (move.named('Quick Attack'))) {
     type = attacker.types[0]; 
     } else if (move.named('Mirror Beam')) {
       // Aevian - Mirror Beam: If the user has a secondary type the move changes type to match the secondary typing of the user
