@@ -478,7 +478,7 @@ export function calculateSMSSSV(
     // Starlight Arena - Normal-type moves change to Fairy-type
     } else if ((isStarlightFairy = normal && field.chromaticField === 'Starlight-Arena')) {
       type = 'Fairy';
-    } else if ((attacker.name.includes('Umbreon', 'Flareon', 'Vaporeon', 'Espeon', 'Jolteon', 'Glaceon', 'Leafeon', 'Sylveon', 'Eevee') &&
+    } else if (attacker.named('Umbreon', 'Flareon', 'Vaporeon', 'Espeon', 'Jolteon', 'Glaceon', 'Leafeon', 'Sylveon', 'Eevee') &&
     (field.chromaticField === 'Rainbow') && (move.named('Quick Attack'))) {
     type = attacker.types[0]; 
     } else if (move.named('Mirror Beam')) {
@@ -3124,7 +3124,7 @@ export function calculateFinalModsSMSSSV(
   }
 
   if(defender.name.includes('Flareon') && (field.chromaticField === 'Rainbow')) {
-    if (defender.hasStatus('brn', 'psn', 'tox') {
+    if (defender.hasStatus('brn', 'psn', 'tox')) {
       desc.chromaticField = field.chromaticField;
     }
   }
