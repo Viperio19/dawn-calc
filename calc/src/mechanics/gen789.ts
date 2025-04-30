@@ -480,7 +480,8 @@ export function calculateSMSSSV(
       type = 'Fairy';
     } else if (attacker.named('Umbreon', 'Flareon', 'Vaporeon', 'Espeon', 'Jolteon', 'Glaceon', 'Leafeon', 'Sylveon', 'Eevee') &&
     (field.chromaticField === 'Rainbow') && (move.named('Quick Attack'))) {
-    type = attacker.types[0]; 
+      desc.chromaticField = field.chromaticField;
+      type = attacker.types[0]; 
     } else if (move.named('Mirror Beam')) {
       // Aevian - Mirror Beam: If the user has a secondary type the move changes type to match the secondary typing of the user
       if (attacker.types[1] && attacker.types[1] != ("???" as TypeName)) {
@@ -886,12 +887,6 @@ export function calculateSMSSSV(
     }
   }
 
-  // Rainbow - umbreon gains poison heal
-  if (field.chromaticField === 'Rainbow') {
-    if (defender.named('Umbreon') && defender.hasStatus('psn', 'tox')) {
-      desc.chromaticField = field.chromaticField;
-    }
-  }
  
   if (field.chromaticField === 'Acidic-Wasteland') {
     if ((attacker.hasAbility('Toxic Boost') && move.category === "Physical" && !attacker.hasStatus('psn', 'tox')) || // Acidic Wasteland - Activates Toxic Boost
@@ -949,6 +944,28 @@ export function calculateSMSSSV(
 
     if ((move.named('Dive') || (move.named('Nature Power') && !field.terrain)) && defender.hasType('Water') || // Underwater - Dive has the Freeze-Dry effect
         (defender.hasAbility('Dry Skin', 'Water Absorb') && !healBlock)) { // Underwater - Dry Skin and Water Absorb restore 1/8 of the user’s Max HP
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  // Rainbow - eevee effect descriptions
+      // Rainbow - umbreon gains poison heal
+  if (field.chromaticField === 'Rainbow') {
+    if (defender.named('Umbreon') && defender.hasStatus('psn', 'tox')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+   // Rainbow - flareon gains magic guard
+  if (field.chromaticField === 'Rainbow') {
+    if (defender.named('Flareon') && defender.hasStatus('psn', 'tox', 'brn')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  //espeon gains dazzling
+  if (field.chromaticField === 'Rainbow') {
+    if (move.priority > 0 && defender.named('Espeon')) {
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -2784,7 +2801,7 @@ export function calculateDefenseSMSSSV(
       move.ignoreDefensive) {
     defense = defender.rawStats[defenseStat];
   // Rainbow - Sylveon - gains Unaware attacker
-  } else if (attacker.hasAbility('Unaware') || (attacker.named('Sylbeon') && field.chromaticField === 'Rainbow')) {
+  } else if (attacker.hasAbility('Unaware') || (attacker.named('Sylveon') && field.chromaticField === 'Rainbow')) {
     defense = defender.rawStats[defenseStat]; 
     desc.chromaticField = field.chromaticField;   
   } else if (attacker.hasAbility('Unaware')) {
@@ -3121,12 +3138,6 @@ export function calculateFinalModsSMSSSV(
 
   if (defender.isDynamaxed && move.named('Dynamax Cannon', 'Behemoth Blade', 'Behemoth Bash')) {
     finalMods.push(8192);
-  }
-
-  if(defender.name.includes('Flareon') && (field.chromaticField === 'Rainbow')) {
-    if (defender.hasStatus('brn', 'psn', 'tox')) {
-      desc.chromaticField = field.chromaticField;
-    }
   }
 
   // Blessed Sanctum - Cute Charm grants Multiscale
