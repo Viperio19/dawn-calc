@@ -949,26 +949,18 @@ export function calculateSMSSSV(
   }
 
   // Rainbow - eevee effect descriptions
-      // Rainbow - umbreon gains poison heal
   if (field.chromaticField === 'Rainbow') {
-    if (defender.named('Umbreon') && defender.hasStatus('psn', 'tox')) {
+    if (defender.named('Umbreon') && defender.hasStatus('psn', 'tox')) { // Rainbow - umbreon gains poison heal
+      desc.chromaticField = field.chromaticField;
+    } 
+    if (defender.named('Flareon') && defender.hasStatus('psn', 'tox', 'brn')) { // Rainbow - flareon gains magic guard
+      desc.chromaticField = field.chromaticField;
+    }
+    if (move.priority > 0 && defender.named('Espeon')) { //espeon gains dazzling
       desc.chromaticField = field.chromaticField;
     }
   }
 
-   // Rainbow - flareon gains magic guard
-  if (field.chromaticField === 'Rainbow') {
-    if (defender.named('Flareon') && defender.hasStatus('psn', 'tox', 'brn')) {
-      desc.chromaticField = field.chromaticField;
-    }
-  }
-
-  //espeon gains dazzling
-  if (field.chromaticField === 'Rainbow') {
-    if (move.priority > 0 && defender.named('Espeon')) {
-      desc.chromaticField = field.chromaticField;
-    }
-  }
 
   if (field.chromaticField === 'Undercolony') {
     // Undercolony - Rock Throw is super effective vs Ground types
@@ -1029,8 +1021,10 @@ export function calculateSMSSSV(
       (move.priority > 0 && defender.hasAbility('Queenly Majesty', 'Dazzling', 'Armor Tail')) || 
       (move.priority > 0 && defender.named('Espeon') && field.chromaticField === 'Rainbow') || // Rainbow - Espeon has Dazzling
       (move.hasType('Ground') && defender.hasAbility('Earth Eater')) ||
-      (move.flags.wind && defender.hasAbility('Wind Rider'))
-  )
+      (move.flags.wind && defender.hasAbility('Wind Rider')) { 
+    desc.defenderAbility = defender.ability;
+    return result;
+  }
 
   if (move.hasType('Ground') && !move.named('Thousand Arrows') && !(move.named('Bulldoze') && field.chromaticField === 'Desert') && // Desert - Bulldoze grounds adjacent foes; first hit neutral on Airborne foes
       !field.isGravity && defender.hasItem('Air Balloon')) {
