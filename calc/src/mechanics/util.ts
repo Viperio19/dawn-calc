@@ -839,7 +839,7 @@ export function getStabMod(pokemon: Pokemon, move: Move, field: Field, side: Sid
       stabMod += 2048;
     }
     desc.isAttackerSoak = true;
-  } else if (pokemon.hasAbility('Mimicry')) {
+  } else if (pokemon.hasAbility('Mimicry') && !(getMimicryType(field) == "???" && field.chromaticField !== 'Rainbow')) {
     if (getMimicryType(field) === move.type) {
       stabMod += 2048;
     }
@@ -1042,6 +1042,8 @@ export function getMimicryType(field: Field) {
     return "Water" as TypeName;
   } else if (field.chromaticField === 'Underwater') {
     return "Water" as TypeName;
+  } else if (field.chromaticField === 'Rainbow') {
+    return "???" as TypeName;
   } else {
     return "???" as TypeName;
   }

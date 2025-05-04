@@ -613,7 +613,6 @@ $("#chromatic-field").change(function () {
 	});
 });
 
-// rainbow - couldn't add leafoen and jolteon terrain setting
 var lastManualTerrain = "";
 var lastAutoTerrain = ["", ""];
 function autosetTerrain(ability, i) {

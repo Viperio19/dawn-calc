@@ -349,6 +349,8 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Factory' ? 'Steel'
         : field.chromaticField === 'Waters-Surface' ? 'Water'
         : field.chromaticField === 'Underwater' ? 'Water'
+        : field.chromaticField === 'Rainbow' ?
+          (attacker.item && attacker.item.includes('Plate')) ? getItemBoostType(attacker.item)! : 'Normal'
         : field.chromaticField === 'Undercolony' ? 'Bug'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : field.chromaticField === 'Bewitched-Woods' ? 'Grass'
@@ -539,7 +541,7 @@ export function calculateSMSSSV(
 
     desc.isDefenderSoak = true;
     desc.defenderType = type1;
-  } else if (defender.hasAbility('Mimicry') && getMimicryType(field) != "???") {
+  } else if (defender.hasAbility('Mimicry') && !(getMimicryType(field) == "???" && field.chromaticField !== 'Rainbow')) { // Rainbow - Mimicry causes the user to become [Typeless]
     type1 = getMimicryType(field);
     type2 = "???";
 
@@ -954,8 +956,7 @@ export function calculateSMSSSV(
   }
 
   if (field.chromaticField === 'Rainbow') {
-    if ((defender.named('Umbreon') && defender.hasStatus('psn', 'tox') && !healBlock) || // Rainbow - Umbreon gains Poison Heal
-        (defender.named('Flareon') && defender.hasStatus('psn', 'tox', 'brn'))) { // Rainbow - Flareon gains Magic Guard
+    if ((defender.named('Umbreon') && defender.hasStatus('psn', 'tox') && !healBlock)) { // Rainbow - Umbreon gains Poison Heal
       desc.chromaticField = field.chromaticField;
     } 
   }
@@ -1728,6 +1729,10 @@ export function calculateBasePowerSMSSSV(
         basePower = 80;
         move.category = 'Physical';
         desc.moveName = 'Dive';
+        break;
+      case 'Rainbow':
+        basePower = 100;
+        desc.moveName = 'Judgment';
         break;
       case 'Undercolony':
         basePower = 80;
@@ -2803,7 +2808,7 @@ export function calculateDefenseSMSSSV(
   // Rainbow - Sylveon gains Unaware (attacker)
   } else if (attacker.named('Sylveon') && field.chromaticField === 'Rainbow') {
     defense = defender.rawStats[defenseStat];
-    desc.attackerAbility = attacker.ability;
+    desc.chromaticField = field.chromaticField;
   // Forgotten Battlefield - Rusted Sword causes holder to ignore the foe's Defense and Special Defense raises
   } else if (field.chromaticField === 'Forgotten-Battlefield' && attacker.hasItem('Rusted Sword')) {
     defense = defender.rawStats[defenseStat];
