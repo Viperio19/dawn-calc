@@ -534,6 +534,13 @@ function setPrismScaleEffects(pokeObj) {
 		} else {
 			$("#soakR").prop("checked", true);
 		}
+	// Rainbow - Prism Scale: Applies tera
+	} else if (chromaticField === 'Rainbow') {
+		if (id === 'p1') {
+			$("#teraL").prop("checked", true);
+		} else {
+			$("#teraR").prop("checked", true);
+		}
 	// Undercolony - Prism Scale: Applies Salt Cure to the opponent
 	} else if (chromaticField === 'Undercolony') {
 		var allPokemon = $('.poke-info');
@@ -606,6 +613,7 @@ $("#chromatic-field").change(function () {
 	});
 });
 
+// rainbow - couldn't add leafoen and jolteon terrain setting
 var lastManualTerrain = "";
 var lastAutoTerrain = ["", ""];
 function autosetTerrain(ability, i) {
