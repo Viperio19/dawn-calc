@@ -478,8 +478,9 @@ export function calculateSMSSSV(
     // Starlight Arena - Normal-type moves change to Fairy-type
     } else if ((isStarlightFairy = normal && field.chromaticField === 'Starlight-Arena')) {
       type = 'Fairy';
+    // Rainbow - Quick Attack matches the typing of the Eevee using it
     } else if (attacker.named('Umbreon', 'Flareon', 'Vaporeon', 'Espeon', 'Jolteon', 'Glaceon', 'Leafeon', 'Sylveon', 'Eevee') &&
-    (field.chromaticField === 'Rainbow') && (move.named('Quick Attack'))) {
+               field.chromaticField === 'Rainbow' && move.named('Quick Attack')) {
       desc.chromaticField = field.chromaticField;
       type = attacker.types[0]; 
     } else if (move.named('Mirror Beam')) {
@@ -754,8 +755,12 @@ export function calculateSMSSSV(
 
   // Jungle - Shield Dust grants Magic Guard
   // Rainbow - Flareon gains Magic Guard
-  const defenderMagicGuard = defender.hasAbility('Magic Guard') || (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') || (defender.named('Flareon') && field.chromaticField === 'Rainbow')
-  const attackerMagicGuard = attacker.hasAbility('Magic Guard') || (attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') || (defender.named('Flareon') && field.chromaticField === 'Rainbow')
+  const defenderMagicGuard = defender.hasAbility('Magic Guard') ||
+                             (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') ||
+                             (defender.named('Flareon') && field.chromaticField === 'Rainbow');
+  const attackerMagicGuard = attacker.hasAbility('Magic Guard') ||
+                             (attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') ||
+                             (attacker.named('Flareon') && field.chromaticField === 'Rainbow');
 
   if (field.chromaticField === 'Jungle') {
     // Jungle - Fell Stinger, Silver Wind, and Steamroller apply Infestation
@@ -948,19 +953,12 @@ export function calculateSMSSSV(
     }
   }
 
-  // Rainbow - eevee effect descriptions
   if (field.chromaticField === 'Rainbow') {
-    if (defender.named('Umbreon') && defender.hasStatus('psn', 'tox')) { // Rainbow - umbreon gains poison heal
+    if ((defender.named('Umbreon') && defender.hasStatus('psn', 'tox') && !healBlock) || // Rainbow - Umbreon gains Poison Heal
+        (defender.named('Flareon') && defender.hasStatus('psn', 'tox', 'brn'))) { // Rainbow - Flareon gains Magic Guard
       desc.chromaticField = field.chromaticField;
     } 
-    if (defender.named('Flareon') && defender.hasStatus('psn', 'tox', 'brn')) { // Rainbow - flareon gains magic guard
-      desc.chromaticField = field.chromaticField;
-    }
-    if (move.priority > 0 && defender.named('Espeon')) { //espeon gains dazzling
-      desc.chromaticField = field.chromaticField;
-    }
   }
-
 
   if (field.chromaticField === 'Undercolony') {
     // Undercolony - Rock Throw is super effective vs Ground types
@@ -1019,10 +1017,15 @@ export function calculateSMSSSV(
       (move.flags.bullet && defender.hasAbility('Bulletproof')) ||
       (move.flags.sound && !move.named('Clangorous Soul') && defender.hasAbility('Soundproof')) ||
       (move.priority > 0 && defender.hasAbility('Queenly Majesty', 'Dazzling', 'Armor Tail')) || 
-      (move.priority > 0 && defender.named('Espeon') && field.chromaticField === 'Rainbow') || // Rainbow - Espeon has Dazzling
       (move.hasType('Ground') && defender.hasAbility('Earth Eater')) ||
-      (move.flags.wind && defender.hasAbility('Wind Rider')) { 
+      (move.flags.wind && defender.hasAbility('Wind Rider'))) {
     desc.defenderAbility = defender.ability;
+    return result;
+  }
+
+  // Rainbow - Espeon gains Dazzling
+  if (field.chromaticField === 'Rainbow' && move.priority > 0 && defender.named('Espeon')) {
+    desc.chromaticField = field.chromaticField;
     return result;
   }
 
@@ -2308,16 +2311,16 @@ export function calculateAttackSMSSSV(
       attack = getModifiedStat(attacker.rawStats['spe']!, attacker.boosts['atk']!);
       desc.attackBoost = attackSource.boosts['atk'];
     }
-  // Rainbow - Sylveon - gains Unaware defender
-  } else if (defender.hasAbility('Unaware') || (defender.named('Sylveon') && field.chromaticField === 'Rainbow')) {
-    attack = attackSource.rawStats[attackStat];
-    desc.chromaticField = field.chromaticField;
   } else if (attackSource.boosts[attackStat] === 0 ||
     (isCritical && attackSource.boosts[attackStat] < 0)) {
     attack = attackSource.rawStats[attackStat];
   } else if (defender.hasAbility('Unaware')) {
     attack = attackSource.rawStats[attackStat];
     desc.defenderAbility = defender.ability;
+  // Rainbow - Sylveon gains Unaware (defender)
+  } else if (defender.named('Sylveon') && field.chromaticField === 'Rainbow') {
+    attack = attackSource.rawStats[attackStat];
+    desc.chromaticField = field.chromaticField;
   // Forgotten Battlefield - Rusted Shield causes holder to ignore the foe's Attack and Special Attack raises
   } else if (field.chromaticField === 'Forgotten-Battlefield' && defender.hasItem('Rusted Shield')) {
     attack = attackSource.rawStats[attackStat];
@@ -2794,11 +2797,11 @@ export function calculateDefenseSMSSSV(
       (isCritical && defender.boosts[defenseStat] > 0) ||
       move.ignoreDefensive) {
     defense = defender.rawStats[defenseStat];
-  // Rainbow - Sylveon - gains Unaware attacker
-  } else if (attacker.hasAbility('Unaware') || (attacker.named('Sylveon') && field.chromaticField === 'Rainbow')) {
-    defense = defender.rawStats[defenseStat]; 
-    desc.chromaticField = field.chromaticField;   
   } else if (attacker.hasAbility('Unaware')) {
+    defense = defender.rawStats[defenseStat];
+    desc.attackerAbility = attacker.ability;
+  // Rainbow - Sylveon gains Unaware (attacker)
+  } else if (attacker.named('Sylveon') && field.chromaticField === 'Rainbow') {
     defense = defender.rawStats[defenseStat];
     desc.attackerAbility = attacker.ability;
   // Forgotten Battlefield - Rusted Sword causes holder to ignore the foe's Defense and Special Defense raises
@@ -3119,10 +3122,10 @@ export function calculateFinalModsSMSSSV(
   } else if (attacker.hasAbility('Tinted Lens') && typeEffectiveness < 1) {
     finalMods.push(8192);
     desc.attackerAbility = attacker.ability;
-  // Rainbow Field - Glaceon gains tinted lens
+  // Rainbow Field - Glaceon gains Tinted Lens
   } else if (attacker.name.includes('Glaceon') && field.chromaticField === 'Rainbow' && typeEffectiveness < 1) {
-  finalMods.push(8192);
-  desc.chromaticField = field.chromaticField;
+    finalMods.push(8192);
+    desc.chromaticField = field.chromaticField;
   // Starlight Arena - Starstruck!: If a Pokémon has this effect (manual toggle), their attacks gain the Tinted Lens effect.
   } else if (attacker.isStarstruck && typeEffectiveness < 1) {
     finalMods.push(8192);

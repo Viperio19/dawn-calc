@@ -534,7 +534,7 @@ function setPrismScaleEffects(pokeObj) {
 		} else {
 			$("#soakR").prop("checked", true);
 		}
-	// Rainbow - Prism Scale: Applies tera
+	// Rainbow - Prism Scale: Terastallizes Pokémon
 	} else if (chromaticField === 'Rainbow') {
 		if (id === 'p1') {
 			$("#teraL").prop("checked", true);
