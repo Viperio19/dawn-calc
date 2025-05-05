@@ -141,6 +141,11 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
     speedMods.push(3072);
   }
 
+  // Ashen Beach - Being statused grants 1.5x speed
+  if (field.chromaticField === 'Ashen-Beach' && pokemon.status) {
+    speedMods.push(6144);
+  }
+
   // Forgotten Battlefield - Pokémon with Mummy have their Attack and Speed halved
   if (field.chromaticField === 'Forgotten-Battlefield' && pokemon.hasAbility('Mummy')) {
     speedMods.push(2048);
@@ -197,6 +202,7 @@ export function getMoveEffectiveness(
   isGhostRevealed?: boolean,
   isGravity?: boolean,
   isRingTarget?: boolean,
+  attacker?: Pokemon,
 ) {
   if (isGhostRevealed && type === 'Ghost' && move.hasType('Normal', 'Fighting')) {
     return 1;
@@ -223,6 +229,25 @@ export function getMoveEffectiveness(
              ((move.hasType('Grass') && type === 'Steel') || // Bewitched Woods - Grass Types now hit Steel Type Pokemon for neutral damage
              (move.hasType('Poison') && type === 'Fairy'))) { // Bewitched Woods - Poison attacks deal neutral damage to Fairy Types
     return 1;
+  } else if (field.chromaticField === 'Corrosive-Mist') {
+    let effectiveness = gen.types.get(toID(move.type))!.effectiveness[type]!;
+    const explosion = move.named('Explosion') || (move.named('Nature Power') && !field.terrain);
+
+    // Corrosion now affects Poison Type attacks as well [Super Effective]
+    if ((attacker?.hasAbility('Corrosion') || explosion) && move.hasType('Poison') && type === 'Steel') {
+      effectiveness = 2;
+    }
+
+    if (effectiveness === 0 && isRingTarget) {
+      effectiveness = 1;
+    }
+
+    // Explosion has Poison + Fire typing
+    if (explosion) {
+      effectiveness *= gen.types.get('fire' as ID)!.effectiveness[type]!;
+    }
+
+    return effectiveness;
   // Forgotten Battlefield - Gigaton Hammer deals neutral damage to steel types
   } else if (field.chromaticField === 'Forgotten-Battlefield' && move.named('Gigaton Hammer') && type === 'Steel') {
     return 1;
@@ -486,6 +511,17 @@ export function checkFieldEntryEffects(gen: Generation, source: Pokemon, target:
     if (source.hasItem('Prism Scale')) {
       source.boosts.spe = Math.min(6, source.boosts.spe + 1);
     }
+  } else if (field.chromaticField === 'Ashen-Beach') {
+    // Ashen Beach - Prism Scale: Boosts Attack, Special Attack (and Accuracy) +1
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.atk = Math.min(6, source.boosts.atk + 1);
+      source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+    }
+  } else if (field.chromaticField === 'Tempest') {
+    // Tempest - Big Pecks and Gulp Missile grant +1 Defense on entry
+    if (source.hasAbility('Big Pecks', 'Gulp Missile')) {
+      source.boosts.def = Math.min(6, source.boosts.def + 1);
+    }
   } else if (field.chromaticField === 'Forgotten-Battlefield') {
     // Forgotten Battlefield - Prism Scale: Grants +1 Attack and Speed
     if (source.hasItem('Prism Scale')) {
@@ -649,13 +685,20 @@ export function checkMultihitBoost(
     defender.stats.spe = getFinalSpeed(gen, defender, field, field.defenderSide);
   }
 
-  if (move.dropsStats) {
+  let dropsStats = move.dropsStats;
+
+  // Fable - Hyper Beam lowers Special Attack by 2 instead of recharging
+  if (field.chromaticField === 'Fable' && move.named('Hyper Beam')) {
+    dropsStats = 2;
+    desc.chromaticField = field.chromaticField;
+  }
+
+  if (dropsStats) {
     if (ignoreDefenseBoosts) {
       desc.attackerAbility = attacker.ability;
     } else {
       // No move with dropsStats has fancy logic regarding category here
       const stat = move.category === 'Special' ? 'spa' : 'atk';
-      let dropsStats = move.dropsStats;
 
       // Dragon's Den - Draco Meteor only drops 1 stage of Special Attack
       if (field.chromaticField === 'Dragons-Den' && move.named("Draco Meteor")) {
@@ -839,7 +882,7 @@ export function getStabMod(pokemon: Pokemon, move: Move, field: Field, side: Sid
       stabMod += 2048;
     }
     desc.isAttackerSoak = true;
-  } else if (pokemon.hasAbility('Mimicry')) {
+  } else if (pokemon.hasAbility('Mimicry') && !(getMimicryType(field) == "???" && field.chromaticField !== 'Rainbow')) {
     if (getMimicryType(field) === move.type) {
       stabMod += 2048;
     }
@@ -854,7 +897,7 @@ export function getStabMod(pokemon: Pokemon, move: Move, field: Field, side: Sid
     } else if (move.type !== pokemon.types[0] && pokemon.hasOriginalType(move.type)) {
       stabMod += 2048;
     }
-  } else if (pokemon.hasOriginalType(move.type)) {
+  } else if (pokemon.hasOriginalType(move.type) || (move.type2! && pokemon.hasOriginalType(move.type2))) {
     stabMod += 2048;
   } else if ((pokemon.hasAbility('Protean', 'Libero') || pokemon.named('Boltund-Crest')) && !pokemon.teraType) { // Boltund Crest - Grants Libero
     stabMod += 2048;
@@ -1042,6 +1085,8 @@ export function getMimicryType(field: Field) {
     return "Water" as TypeName;
   } else if (field.chromaticField === 'Underwater') {
     return "Water" as TypeName;
+  } else if (field.chromaticField === 'Rainbow') {
+    return "???" as TypeName;
   } else {
     return "???" as TypeName;
   }

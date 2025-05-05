@@ -23,6 +23,7 @@ export class Move implements State.Move {
   moveSlot?: number;
   bp: number;
   type: I.TypeName;
+  type2?: I.TypeName;
   category: I.MoveCategory;
   flags: I.MoveFlags;
   secondaries: any;
@@ -186,7 +187,7 @@ export class Move implements State.Move {
   }
 
   hasType(...types: Array<(I.TypeName | undefined)>) {
-    return types.includes(this.type);
+    return types.includes(this.type) || (this.type2! && types.includes(this.type2));
   }
 
   clone() {

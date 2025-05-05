@@ -51,13 +51,14 @@ export interface RawDesc {
   moveName: string;
   moveTurns?: string;
   moveType?: TypeName;
+  moveType2?: TypeName;
   rivalry?: 'buffed' | 'nerfed';
   terrain?: Terrain;
   chromaticField?: string;
   fieldCondition?: string;
   gritStages?: number;
   weather?: Weather;
-  isTailwind?: boolean;
+  subWeather?: string;
   isMagnetRise?: boolean;
   isAttackerSoak?: boolean;
   isDefenderSoak?: boolean;
@@ -110,7 +111,7 @@ export function displayMove(
   const minDisplay = toDisplay(notation, min, defender.maxHP());
   const maxDisplay = toDisplay(notation, max, defender.maxHP());
 
-  const recoveryText = getRecovery(gen, attacker, defender, move, damage, notation).text;
+  const recoveryText = getRecovery(gen, attacker, defender, move, damage, field, notation).text;
   const recoilText = getRecoil(gen, attacker, defender, move, damage, field, notation).text;
 
   return `${minDisplay} - ${maxDisplay}${notation}${recoveryText &&
@@ -123,6 +124,7 @@ export function getRecovery(
   defender: Pokemon,
   move: Move,
   damage: Damage,
+  field: Field,
   notation = '%'
 ) {
   const [minDamage, maxDamage] = damageRange(damage);
@@ -167,6 +169,19 @@ export function getRecovery(
   // Ring Arena - Grit Stage Effects: 2 - After an attack, the Pokemon gains 1/6 of the damage in HP dealt to other Pokemon
   if (attacker.gritStages && attacker.gritStages >= 2) {
     const percentHealed = 1 / 6;
+    const max = Math.round(defender.maxHP() * percentHealed);
+    for (let i = 0; i < minD.length; i++) {
+      const range = [minD[i], maxD[i]];
+      for (const j in recovery) {
+        let drained = Math.round(range[j] * percentHealed);
+        recovery[j] += Math.min(drained * move.hits, max);
+      }
+    }
+  }
+
+  // Ashen Beach - Scorching Sands recovers 50% of damage dealt
+  if (field.chromaticField === 'Ashen-Beach' && move.named('Scorching Sands')) {
+    const percentHealed = 1 / 2;
     const max = Math.round(defender.maxHP() * percentHealed);
     for (let i = 0; i < minD.length; i++) {
       const range = [minD[i], maxD[i]];
@@ -353,9 +368,13 @@ export function getKOChance(
   const hazards = getHazards(gen, defender, field.defenderSide, field);
   const eot = getEndOfTurn(gen, attacker, defender, move, field);
   const toxicCounter =
-  // Jungle - Shield Dust grants Magic Guard
-    defender.hasStatus('tox') && !(defender.hasAbility('Magic Guard', 'Poison Heal') ||
-     (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) ? defender.toxicCounter : 0;
+    defender.hasStatus('tox') &&
+    !(defender.hasAbility('Magic Guard', 'Poison Heal') ||
+     (defender.named('Zangoose-Crest')) || // Zangoose Crest - Grants Poison Heal
+     (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') || // Jungle - Shield Dust grants Magic Guard
+     (defender.named('Flareon') && field.chromaticField === 'Rainbow') || // Rainbow - Flareon gets Magic Guard
+     (field.chromaticField === 'Corrosive-Mist' && (defender.hasAbility('Toxic Chain', 'Poison Touch', 'Flash Fire') || // Corrosive Mist - Toxic Chain, Poison Touch, and Flash Fire grant Poison Heal / detonation clears status
+      move.named('Sludge Bomb', 'Temper Flare', 'Heat Wave')))) ? defender.toxicCounter : 0;
 
   // multi-hit moves have too many possibilities for brute-forcing to work, so reduce it
   // to an approximate distribution
@@ -578,7 +597,8 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
       texts.push('regurgitated Spikes');
     }
   } else if (defender.hasItem('Heavy-Duty Boots') || defender.hasAbility('Magic Guard') ||
-       (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')) { // Jungle - Shield Dust grants Magic Guard
+       (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') || // Jungle - Shield Dust grants Magic Guard
+       (defender.named('Flareon') && field.chromaticField === 'Rainbow')) { // Rainbow - Flareon gains Magic Guard
       return {damage, texts};
   } else {
     if (defenderSide.isSR && !defender.hasAbility('Mountaineer') &&
@@ -678,8 +698,10 @@ function getEndOfTurn(
   const loseItem = move.named('Knock Off') && !defender.hasAbility('Sticky Hold');
 
   // psychic noise should suppress all recovery effects
-  const healBlock = (move.named('Psychic Noise') ||
-    ((move.named('Shock Wave') || move.named('Nature Power')) && field.chromaticField === 'Thundering-Plateau')) && // Thundering Plateau - Shock Wave applies Heal Block
+  const healBlock =
+    (move.named('Psychic Noise') ||
+     ((move.named('Shock Wave') || move.named('Nature Power')) && field.chromaticField === 'Thundering-Plateau') || // Thundering Plateau - Shock Wave applies Heal Block
+     (attacker.hasItem('Prism Scale') || defender.hasItem('Prism Scale')) && field.chromaticField === 'Fable') && // Fable - Prism Scale: Apply Heal Block to both sides
     !(
       // suppression conditions
       attacker.hasAbility('Sheer Force') ||
@@ -688,8 +710,13 @@ function getEndOfTurn(
     );
   
   // Jungle - Shield Dust grants Magic Guard
-  const defenderMagicGuard = defender.hasAbility('Magic Guard') || (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
-  const attackerMagicGuard = attacker.hasAbility('Magic Guard') || (attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle')
+  // Rainbow - Flareon gains Magic Guard
+  const defenderMagicGuard = defender.hasAbility('Magic Guard') ||
+                             (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') ||
+                             (defender.named('Flareon') && field.chromaticField === 'Rainbow');
+  const attackerMagicGuard = attacker.hasAbility('Magic Guard') ||
+                             (attacker.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') ||
+                             (attacker.named('Flareon') && field.chromaticField === 'Rainbow');
 
   if (field.hasWeather('Sun', 'Harsh Sunshine')) {
     if (defender.hasAbility('Dry Skin', 'Solar Power')) {
@@ -829,8 +856,17 @@ function getEndOfTurn(
     }
   }
 
-  if (defender.hasStatus('psn')) {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) { // Zangoose Crest - Grants Poison Heal
+  const defenderPoisonHeal = defender.hasAbility('Poison Heal') ||
+                             defender.named('Zangoose-Crest') || // Zangoose Crest - Grants Poison Heal
+                             (field.chromaticField === 'Rainbow' && defender.named('Umbreon')) || // Rainbow - Umbreon gains Poison Heal
+                             (field.chromaticField === 'Corrosive-Mist' && defender.hasAbility('Toxic Chain', 'Poison Touch', 'Flash Fire')); // Corrosive Mist - Toxic Chain, Poison Touch, and Flash Fire grant Poison Heal
+
+  // Corrosive Mist - Sludge Bomb, Temper Flare and Heat Wave additionally detonate poisoned, badly poisoned, and burned Pokemon, cleansing status and dealing 33% of their max HP
+  if (field.chromaticField === 'Corrosive-Mist' && defender.hasStatus('psn', 'tox', 'brn') && move.named('Sludge Bomb', 'Temper Flare', 'Heat Wave', 'Corrosive Gas')) {
+    damage -= Math.floor(defender.maxHP() / 3);
+    texts.push('detonation damage');
+  } else if (defender.hasStatus('psn')) {
+    if (defenderPoisonHeal) {
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
@@ -840,7 +876,7 @@ function getEndOfTurn(
       texts.push('poison damage');
     }
   } else if (defender.hasStatus('tox')) {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) { // Zangoose Crest - Grants Poison Heal
+    if (defenderPoisonHeal) {
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
@@ -860,6 +896,11 @@ function getEndOfTurn(
       modifier *= 2;
     }
 
+    // Corrosive Mist - Burned pokemon take 1/8th of their max HP per turn
+    if (field.chromaticField === 'Corrosive-Mist') {
+      modifier /= 2;
+    }
+
     damage -= Math.floor(defender.maxHP() / ((gen.num === 1 || gen.num > 6 ? 16 : 8) * modifier));
     texts.push((modifier > 1 ? 'reduced ' : '') + 'burn damage');
   } else if (
@@ -871,7 +912,7 @@ function getEndOfTurn(
     texts.push('Bad Dreams');
   // Acidic Wasteland - Activates Poison Heal
   } else if (field.chromaticField === 'Acidic-Wasteland') {
-    if (defender.hasAbility('Poison Heal') || defender.named('Zangoose-Crest')) { // Zangoose Crest - Grants Poison Heal
+    if (defenderPoisonHeal) {
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
         texts.push('Poison Heal');
@@ -1037,6 +1078,12 @@ function getEndOfTurn(
   
     damage -= Math.floor((effectiveness * defender.maxHP()) / 8);
     texts.push('Volcanic Eruption damage');
+  }
+
+  // Ashen Beach - Sand Veil heals 1/8 at the end of each turn whilst in Sandstorm
+  if (field.chromaticField === 'Ashen-Beach' && defender.hasAbility('Sand Veil') && field.hasWeather('Sand') && !healBlock) {
+    damage += Math.floor(defender.maxHP() / 8);
+    texts.push('Sand Veil recovery');
   }
 
   return {damage, texts};
@@ -1326,6 +1373,8 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     output += '(' + description.moveBP + ' BP ' + description.moveType + ') ';
   } else if (description.moveBP) {
     output += '(' + description.moveBP + ' BP) ';
+  } else if (description.moveType && description.moveType2) {
+    output += '(' + description.moveType + ' / ' + description.moveType2 + ') ';
   } else if (description.moveType) {
     output += '(' + description.moveType + ') ';
   }
@@ -1378,8 +1427,9 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     output += ' in ' + description.weather;
   } else if (description.terrain) {
     output += ' in ' + description.terrain + ' Terrain';
-  } else if (description.isTailwind) {
-    output += ' in Tailwind';
+  }
+  if (description.subWeather) {
+    output += ' in ' + description.subWeather;
   }
   // Fields - Put field names at the end of damage calc text
   if (description.chromaticField) {
@@ -1389,9 +1439,20 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Sky":
     case "Desert":
     case "Factory":
+    case "Rainbow":
     case "Inverse":
+    case "Tempest":
       output += ' on ' + description.chromaticField + ' Field';
       break;
+    case "Dragons-Den":
+      output += " on Dragon's Den";
+      break;
+    case "Waters-Surface": 
+      output += " on Water's Surface";
+      break;
+    case "Cave":
+    case "Underwater":
+    case "Undercolony":
     case "Thundering-Plateau":
     case "Starlight-Arena":
     case "Ring-Arena":
@@ -1403,20 +1464,11 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Acidic-Wasteland":
     case "Ancient-Ruins":
     case "Bewitched-Woods":
+    case "Corrosive-Mist":
+    case "Ashen-Beach":
     case "Forgotten-Battlefield":
-      output += ' on ' + description.chromaticField.replace('-', ' ');
-      break;
-    case "Dragons-Den":
-      output += " on Dragon's Den";
-      break;
-    case "Waters-Surface": 
-      output += " on Water's Surface";
-      break;
-    case "Cave":
-    case "Underwater":
-    case "Undercolony":
     default:
-      output += ' on ' + description.chromaticField;
+      output += ' on ' + description.chromaticField.replace('-', ' ');
       break;
     }
   }
