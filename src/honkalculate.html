@@ -3,14 +3,13 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Pok&eacute;mon Damage Calculator</title>
-	 <link rel="icon" type="image/x-icon" href="./img/favicon.png">
-    <link type="text/css" rel="stylesheet" href="./css/vendor/bootstrap.css" />
-    <link type="text/css" rel="stylesheet" href="https://cdn.datatables.net/1.10.4/css/jquery.dataTables.min.css" />
-    <link type="text/css" rel="stylesheet" href="https://cdn.datatables.net/colvis/1.1.1/css/dataTables.colVis.css" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Dawn Damage Calculator</title>
+    <link rel="icon" type="image/x-icon" href="./img/favicon.png">
     <link type="text/css" rel="stylesheet" href="./js/vendor/select2/select2.css" />
     <link type="text/css" rel="stylesheet" href="./css/main.css?" />
-    <link type="text/css" rel="stylesheet" href="./css/dark-theme.css" id="dark-theme-styles">
+    <link type="text/css" rel="stylesheet" href="./css/vendor/bootstrap.css" />
+    <link type="text/css" rel="stylesheet" href="./css/dark-theme.css?" id="dark-theme-styles">
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26211653-3"></script>
     <script>
@@ -27,13 +26,10 @@
     </script>
     <!-- Immediately loads the dark theme in order to reduce FOIT -->
     <script>
-        /*
-        * localStorage will only store strings
-        * This means that if it has the value 'false',
-        * It will be truey and incorrectly cause the
-        * dark theme to load.
-        */
-        if (localStorage.getItem('darkTheme') !== 'true') {
+        // localStorage will only store strings
+        // This means that if it has the value 'false',
+        // It will be truthy.
+        if ((localStorage.getItem('darkTheme') || '' + window.matchMedia('(prefers-color-scheme: dark)').matches) === 'false') {
             document.getElementById('dark-theme-styles').disabled = true;
         }
     </script>
@@ -41,19 +37,23 @@
 
 <body class="dark-theme">
 
-<div class="header"><div class="header-inner">
-    <ul class="nav">
-        <li><a class="button nav-first" href="//pokemonshowdown.com"><img src="./img/pokemonshowdownbeta.png" alt="Pok&eacute;mon Showdown! (beta)" /> Home</a></li>
-        <li><a class="button" href="//dex.pokemonshowdown.com">Pok&eacute;dex</a></li>
-        <li><a class="button" href="//replay.pokemonshowdown.com/">Replays</a></li>
-        <li><a class="button" href="//pokemonshowdown.com/ladder/">Ladder</a></li>
-        <li><a class="button nav-last" href="//pokemonshowdown.com/forums/">Forum</a></li>
-    </ul>
-    <ul class="nav nav-play">
-        <li><a class="button greenbutton nav-first nav-last" href="//play.pokemonshowdown.com/">Play</a></li>
-    </ul>
-    <div style="clear:both"></div>
-</div></div>
+<header>
+    <div class="nav-wrapper"><ul class="nav">
+        <li><a class="button nav-first" href="https://play.dawn-ps.com/">Battle</a></li>
+        <li><a class="button nav-last" href="https://discord.gg/Q3WmjYD">Discord</a></li>
+        <li><a class="button nav-first" href="https://docs.google.com/document/d/1gXHM9rd2PyPqpKJ228vXe7ftVGyMDNnQ7Hn3Ge79Fok/edit?usp=sharing">Fields</a></li>
+        <li><a class="button" href="https://docs.google.com/document/d/1LlQJBNK8YK0ji0rjv88iQ6RNXXjToVAfyEK__gX9Qtc/edit?usp=sharing">Crests</a></li>
+        <li><a class="button nav-last" href="https://docs.google.com/document/d/1J9PyUBzB_JeT5xIRQPG2YFLkYwE_-n1fyC4P9fJ4Ke0/edit?usp=sharing">Aevian / MegaG</a></li>
+        <li><a class="button nav-first nav-last" href="https://github.com/Viperio19/dawn-calc">GitHub</a></li>
+    </ul></div>
+</header>
+
+<!-- START WRAPPER -->
+<style>
+    @import url(https://cdn.datatables.net/1.10.4/css/jquery.dataTables.min.css);
+    @import url(https://cdn.datatables.net/colvis/1.1.1/css/dataTables.colVis.css);
+</style>
+
 <div class="wrapper">
 
     <span class="title-text main-title-text">Pok&eacute;mon Damage Calculator</span>
@@ -94,8 +94,6 @@
             <input class="visually-hidden" type="checkbox" name="tier" id="Ubers" /><label class="btn btn-right" for="Ubers">Ubers</label>
     </span>
     </div>
-
-</div>
 
 	<div class="flex-parent">
 		<div class="panel-group" id="accordion">
@@ -648,25 +646,24 @@
                         <input class="visually-hidden" type="radio" name="format" value="Doubles" id="doubles-format" />
                         <label class="btn btn-right" for="doubles-format">Doubles</label>
                     </div>
-                    <div class="gen-specific g6 g7 g8 g9" title="Select the current terrain.">
-                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Electric" id="electric" /><label class="btn btn-xxxwide btn-left" for="electric">Electric Terrain</label>
-                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Grassy" id="grassy" /><label class="btn btn-xxxwide btn-mid" for="grassy">Grassy Terrain</label>
-                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Misty" id="misty" /><label class="btn btn-xxxwide btn-right" for="misty">Misty Terrain</label>
+                    <div aria-labelledby="selectTerrainInstruction" class="gen-specific g6 g7 g8 g9" role="group" title="Select the current terrain.">
+                        <span class="visually-hidden" id="selectTerrainInstruction">Select the current terrain.</span>
+                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Electric" id="electric" /><label class="btn btn-left" for="electric">Electric</label>
+                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Grassy" id="grassy" /><label class="btn btn-mid" for="grassy">Grassy</label>
+                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Misty" id="misty" /><label class="btn btn-mid" for="misty">Misty</label>
+                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Psychic" id="psychic" /><label class="btn btn-xxxwide btn-right" for="psychic">Psychic Terrain</label>
                     </div>
-                    <div class="gen-specific g7 g8 g9" title="Select the current terrain.">
-                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Psychic" id="psychic" /><label class="btn btn-xxxwide btn-mid" for="psychic">Psychic Terrain</label>
+                    <div aria-labelledby="selectRuinInstruction" class="gen-specific g9 format-specific doubles" role="group" style="margin: 5px auto auto;" title="Select the ruin abilities from other Pok&eacute;mon on the field.">
+                        <span class="visually-hidden" id="selectRuinInstruction">Select the active Ruin abilities from other Poke&eacute;mon on the field.</span>
+                        <input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Beads" id="beads" />
+                        <label class="btn btn-left" for="beads">Beads</label>
+                        <input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Tablets" id="tablets" />
+                        <label class="btn btn-mid" for="tablets">Tablets</label>
+                        <input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Sword" id="sword" />
+                        <label class="btn btn-mid" for="sword">Sword</label>
+                        <input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Vessel" id="vessel" />
+                        <label class="btn btn-xxxwide btn-right" for="vessel">Vessel of Ruin</label>
                     </div>
-						  <div aria-labelledby="selectRuinInstruction" class="gen-specific g9 format-specific doubles" role="group" style="margin: 5px auto auto;" title="Select the ruin abilities from other Pok&eacute;mon on the field.">
-								<span class="visually-hidden" id="selectRuinInstruction">Select the active Ruin abilities from other Poke&eacute;mon on the field.</span>
-								<input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Beads" id="beads" />
-								<label class="btn btn-xxxwide btn-left" for="beads">Beads of Ruin</label>
-								<input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Tablets" id="tablets" />
-								<label class="btn btn-xxxwide btn-mid" for="tablets">Tablets of Ruin</label>
-								<input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Sword" id="sword" />
-								<label class="btn btn-xxxwide btn-right" for="sword">Sword of Ruin</label>
-								<input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Vessel" id="vessel" />
-								<label class="btn btn-xxxwide btn-mid" for="vessel">Vessel of Ruin</label>
-						  </div>
                     <hr class="gen-specific g6 g7 g8 g9" />
                     <div class="gen-specific g3 g4 g5 g6 g7 g8 g9" style="width: 22.2em; margin: 5px auto;" title="Select the current weather condition.">
                         <input class="visually-hidden" type="radio" name="weather" value="" id="clear" checked="checked" />
@@ -803,6 +800,16 @@
                             <label class="btn btn-wide" for="leechSeedR">Leech Seed</label>
                         </div>
                     </div>
+                    <div class="btn-group">
+                        <div class="left" title="Has this Pok&eacute;mon been affected by Salt Cure?">
+                            <input class="visually-hidden" type="checkbox" id="saltCureL" />
+                            <label class="btn btn-wide" for="saltCureL">Salt Cure</label>
+                        </div>
+                        <div class="right" title="Has this Pok&eacute;mon been affected by Salt Cure?">
+                            <input class="visually-hidden" type="checkbox" id="saltCureR" />
+                            <label class="btn btn-wide" for="saltCureR">Salt Cure</label>
+                        </div>
+                    </div>
                     <div class="btn-group gen-specific g2 g3 g4 g5 g6 g7 g8 g9">
                         <div class="left" title="Has this Pok&eacute;mon been revealed with Foresight or Odor Sleuth?">
                             <input class="visually-hidden" type="checkbox" id="foresightL" />
@@ -919,10 +926,6 @@
     </div>
 	</div>
 
-
-    <script type="text/javascript">
-        var linkExtension = '.template.html';
-    </script>
     <!-- jquery.dataTables is incompatible with newer versions of jQuery -->
     <script type="text/javascript" src="./js/vendor/jquery-1.9.1.min.js"></script>
     <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script> <!-- to be replaced (probably) -->
@@ -974,13 +977,18 @@
     <script type="text/javascript" src="./js/shared_controls.js?"></script>
     <script type="text/javascript" src="./js/honkalculate_controls.js?"></script>
 
-    <div style="clear:both;padding:20px;text-align:left">Created by Honko, maintained by Austin and Kris
-        <ul><li><a href="https://github.com/smogon/damage-calc/contributors" class="links-lighten" target="_blank">Contributors</a></li>
-        <li><a href="https://www.smogon.com/forums/threads/pok%C3%A9mon-showdown-damage-calculator.3593546/" class="links-lighten" target="_blank">Bug Reports</a></li>
-        <li><a href="https://github.com/smogon/damage-calc" class="links-lighten" target="_blank">GitHub repository</a></li></ul>
-        <button type="button" id="dark-theme-toggle"></button>
-        <script type="text/javascript" src="./js/dark-theme-toggle.js?"></script>
-    </div>
+</div>
+<!-- END WRAPPER -->
+
+<div class="credits">Created by <a href="https://www.youtube.com/Viperio_19" target="_blank">Viperio</a>, based off of the <a href="https://github.com/smogon/damage-calc/" target="_blank">Pokémon Showdown Damage Calculator</a>
+
+    <select id="dark-theme-toggle">
+        <option value="">Auto dark theme</option>
+        <option value="false">Light theme</option>
+        <option value="true">Dark theme</option>
+    </select>
+    <script type="text/javascript" src="./js/dark-theme-toggle.js?"></script>
+</div>
 
 </body>
 

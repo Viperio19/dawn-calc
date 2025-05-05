@@ -8,7 +8,6 @@ export namespace State {
     abilityOn?: boolean;
     isDynamaxed?: boolean;
     dynamaxLevel?: number;
-    isSaltCure?: boolean;
     isStarstruck?: boolean;
     isLockOn?: boolean;
     corrosiveBond?: boolean;
@@ -80,6 +79,7 @@ export namespace State {
     isIngrain?: boolean;
     isAquaRing?: boolean;
     isNightmare?: boolean;
+    isSaltCured?: boolean;
     isForesight?: boolean;
     isSoak?: boolean;
     isTailwind?: boolean;

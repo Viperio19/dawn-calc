@@ -793,7 +793,9 @@ export function calculateSMSSSV(
       (move.named('Dream Eater') &&
         (!(defender.hasStatus('slp') || defender.hasAbility('Comatose') || field.chromaticField === 'Haunted-Graveyard'))) || // Haunted Graveyard - Dream Eater never fails
       (move.named('Steel Roller') && !field.terrain) ||
-      (move.named('Poltergeist') && (!defender.item || isQPActive(defender, field)) && field.chromaticField !== 'Forgotten-Battlefield') // Forgotten Battelfield - Poltergeist never fails
+      (move.named('Poltergeist') &&
+        (!defender.item || (isQPActive(defender, field) && defender.hasItem('Booster Energy'))) &&
+        field.chromaticField !== 'Forgotten-Battlefield') // Forgotten Battelfield - Poltergeist never fails
   ) {
     return result;
   }
@@ -1400,11 +1402,12 @@ export function calculateSMSSSV(
     desc.attackerAbility = "Parental Bond";
   }
 
-  let damage = [];
+  const damage = [];
   for (let i = 0; i < 16; i++) {
     damage[i] =
       getFinalDamage(baseDamage, i, typeEffectiveness, applyBurn, stabMod, finalMod, protect);
   }
+  result.damage = childDamage ? [damage, childDamage] : damage;
 
   desc.attackBoost =
     move.named('Foul Play') ? defender.boosts[attackStat] : attacker.boosts[attackStat];
@@ -1422,6 +1425,7 @@ export function calculateSMSSSV(
       numAttacks = move.hits;
     }
     let usedItems = [false, false];
+    const damageMatrix = [damage];
     for (let times = 1; times < numAttacks; times++) {
       usedItems = checkMultihitBoost(gen, attacker, defender, move,
         field, desc, usedItems[0], usedItems[1]);
@@ -1478,21 +1482,22 @@ export function calculateSMSSSV(
       );
       const newFinalMod = chainMods(newFinalMods, 41, 131072);
 
-      let damageMultiplier = 0;
-      damage = damage.map(affectedAmount => {
+      const damageArray = [];
+      for (let i = 0; i < 16; i++) {
         const newFinalDamage = getFinalDamage(
           newBaseDamage,
-          damageMultiplier,
+          i,
           typeEffectiveness,
           applyBurn,
           stabMod,
           newFinalMod,
           protect
         );
-        damageMultiplier++;
-        return affectedAmount + newFinalDamage;
-      });
+        damageArray[i] = newFinalDamage;
+      }
+      damageMatrix[times] = damageArray;
     }
+    result.damage = damageMatrix;
     desc.defenseBoost = origDefBoost;
     desc.attackBoost = origAtkBoost;
   }
@@ -1569,7 +1574,7 @@ export function calculateBasePowerSMSSSV(
     if (defender.status || defender.hasAbility('Comatose')) {
       basePower *= 2;
     // Forgotten Battlefield - Hex also works on minor status conditions
-    } else if (field.defenderSide.isNightmare || field.defenderSide.isSeeded || defender.isSaltCure) {
+    } else if (field.defenderSide.isNightmare || field.defenderSide.isSeeded || field.defenderSide.isSaltCured) {
       basePower *= 2;
       desc.chromaticField = field.chromaticField;
     }
@@ -1600,7 +1605,8 @@ export function calculateBasePowerSMSSSV(
     break;
   case 'Acrobatics':
     basePower = move.bp * (attacker.hasItem('Flying Gem') ||
-        (!attacker.item || isQPActive(attacker, field)) ? 2 : 1);
+        (!attacker.item ||
+          (isQPActive(attacker, field) && attacker.hasItem('Booster Energy'))) ? 2 : 1);
     // Ring Arena - Acrobatics is always doubled (As if the user was not holding an item)
     if (field.chromaticField === 'Ring-Arena' && basePower == move.bp) {
       basePower *= 2;
@@ -2019,7 +2025,7 @@ export function calculateBPModsSMSSSV(
   const defenderItem = (defender.item && defender.item !== '')
     ? defender.item : defender.disabledItem;
   let resistedKnockOffDamage =
-    (!defenderItem || isQPActive(defender, field)) ||
+    (!defenderItem || (isQPActive(defender, field) && defenderItem === 'Booster Energy')) ||
     (defender.named('Dialga-Origin') && defenderItem === 'Adamant Crystal') ||
     (defender.named('Palkia-Origin') && defenderItem === 'Lustrous Globe') ||
     // Griseous Core for gen 9, Griseous Orb otherwise
@@ -2030,8 +2036,8 @@ export function calculateBPModsSMSSSV(
     (defender.named('Kyogre', 'Kyogre-Primal') && defenderItem === 'Blue Orb') ||
     (defender.name.includes('Silvally') && defenderItem.includes('Memory')) ||
     defenderItem.includes(' Z') ||
-    (defender.named('Zacian') && defenderItem === 'Rusted Sword') ||
-    (defender.named('Zamazenta') && defenderItem === 'Rusted Shield') ||
+    (defender.name.includes('Zacian') && defenderItem === 'Rusted Sword') ||
+    (defender.name.includes('Zamazenta') && defenderItem === 'Rusted Shield') ||
     (defender.name.includes('Ogerpon-Cornerstone') && defenderItem === 'Cornerstone Mask') ||
     (defender.name.includes('Ogerpon-Hearthflame') && defenderItem === 'Hearthflame Mask') ||
     (defender.name.includes('Ogerpon-Wellspring') && defenderItem === 'Wellspring Mask') ||

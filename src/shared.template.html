@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Dawn Damage Calculator</title>
+    <link rel="icon" type="image/x-icon" href="./img/favicon.png">
+    <link type="text/css" rel="stylesheet" href="./js/vendor/select2/select2.css" />
+    <link type="text/css" rel="stylesheet" href="./css/main.css?" />
+    <link type="text/css" rel="stylesheet" href="./css/vendor/bootstrap.css" />
+    <link type="text/css" rel="stylesheet" href="./css/dark-theme.css?" id="dark-theme-styles">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26211653-3"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-26211653-3');
+
+        window.onerror = function(err, uri, line) {
+            gtag('event', 'exception', {'description': uri + ':' + line + ': ' + err});
+            return false;
+        };
+    </script>
+    <!-- Immediately loads the dark theme in order to reduce FOIT -->
+    <script>
+        // localStorage will only store strings
+        // This means that if it has the value 'false',
+        // It will be truthy.
+        if ((localStorage.getItem('darkTheme') || '' + window.matchMedia('(prefers-color-scheme: dark)').matches) === 'false') {
+            document.getElementById('dark-theme-styles').disabled = true;
+        }
+    </script>
+</head>
+
+<body class="dark-theme">
+
+<header>
+    <div class="nav-wrapper"><ul class="nav">
+        <li><a class="button nav-first" href="https://play.dawn-ps.com/">Battle</a></li>
+        <li><a class="button nav-last" href="https://discord.gg/Q3WmjYD">Discord</a></li>
+        <li><a class="button nav-first" href="https://docs.google.com/document/d/1gXHM9rd2PyPqpKJ228vXe7ftVGyMDNnQ7Hn3Ge79Fok/edit?usp=sharing">Fields</a></li>
+        <li><a class="button" href="https://docs.google.com/document/d/1LlQJBNK8YK0ji0rjv88iQ6RNXXjToVAfyEK__gX9Qtc/edit?usp=sharing">Crests</a></li>
+        <li><a class="button nav-last" href="https://docs.google.com/document/d/1J9PyUBzB_JeT5xIRQPG2YFLkYwE_-n1fyC4P9fJ4Ke0/edit?usp=sharing">Aevian / MegaG</a></li>
+        <li><a class="button nav-first nav-last" href="https://github.com/Viperio19/dawn-calc">GitHub</a></li>
+    </ul></div>
+</header>
+
+[content]
+
+<div class="credits">Created by <a href="https://www.youtube.com/Viperio_19" target="_blank">Viperio</a>, based off of the <a href="https://github.com/smogon/damage-calc/" target="_blank">Pokémon Showdown Damage Calculator</a>
+
+    <select id="dark-theme-toggle">
+        <option value="">Auto dark theme</option>
+        <option value="false">Light theme</option>
+        <option value="true">Dark theme</option>
+    </select>
+    <script type="text/javascript" src="./js/dark-theme-toggle.js?"></script>
+</div>
+
+</body>
+
+</html>
