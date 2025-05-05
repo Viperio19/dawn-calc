@@ -58,7 +58,7 @@ export interface RawDesc {
   fieldCondition?: string;
   gritStages?: number;
   weather?: Weather;
-  isTailwind?: boolean;
+  subWeather?: string;
   isMagnetRise?: boolean;
   isAttackerSoak?: boolean;
   isDefenderSoak?: boolean;
@@ -111,7 +111,7 @@ export function displayMove(
   const minDisplay = toDisplay(notation, min, defender.maxHP());
   const maxDisplay = toDisplay(notation, max, defender.maxHP());
 
-  const recoveryText = getRecovery(gen, attacker, defender, move, damage, notation).text;
+  const recoveryText = getRecovery(gen, attacker, defender, move, damage, field, notation).text;
   const recoilText = getRecoil(gen, attacker, defender, move, damage, field, notation).text;
 
   return `${minDisplay} - ${maxDisplay}${notation}${recoveryText &&
@@ -124,6 +124,7 @@ export function getRecovery(
   defender: Pokemon,
   move: Move,
   damage: Damage,
+  field: Field,
   notation = '%'
 ) {
   const [minDamage, maxDamage] = damageRange(damage);
@@ -168,6 +169,19 @@ export function getRecovery(
   // Ring Arena - Grit Stage Effects: 2 - After an attack, the Pokemon gains 1/6 of the damage in HP dealt to other Pokemon
   if (attacker.gritStages && attacker.gritStages >= 2) {
     const percentHealed = 1 / 6;
+    const max = Math.round(defender.maxHP() * percentHealed);
+    for (let i = 0; i < minD.length; i++) {
+      const range = [minD[i], maxD[i]];
+      for (const j in recovery) {
+        let drained = Math.round(range[j] * percentHealed);
+        recovery[j] += Math.min(drained * move.hits, max);
+      }
+    }
+  }
+
+  // Ashen Beach - Scorching Sands recovers 50% of damage dealt
+  if (field.chromaticField === 'Ashen-Beach' && move.named('Scorching Sands')) {
+    const percentHealed = 1 / 2;
     const max = Math.round(defender.maxHP() * percentHealed);
     for (let i = 0; i < minD.length; i++) {
       const range = [minD[i], maxD[i]];
@@ -1064,6 +1078,12 @@ function getEndOfTurn(
     texts.push('Volcanic Eruption damage');
   }
 
+  // Ashen Beach - Sand Veil heals 1/8 at the end of each turn whilst in Sandstorm
+  if (field.chromaticField === 'Ashen-Beach' && defender.hasAbility('Sand Veil') && field.hasWeather('Sand') && !healBlock) {
+    damage += Math.floor(defender.maxHP() / 8);
+    texts.push('Sand Veil recovery');
+  }
+
   return {damage, texts};
 }
 
@@ -1405,8 +1425,9 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     output += ' in ' + description.weather;
   } else if (description.terrain) {
     output += ' in ' + description.terrain + ' Terrain';
-  } else if (description.isTailwind) {
-    output += ' in Tailwind';
+  }
+  if (description.subWeather) {
+    output += ' in ' + description.subWeather;
   }
   // Fields - Put field names at the end of damage calc text
   if (description.chromaticField) {
@@ -1441,6 +1462,7 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Ancient-Ruins":
     case "Bewitched-Woods":
     case "Corrosive-Mist":
+    case "Ashen-Beach":
     case "Forgotten-Battlefield":
     default:
       output += ' on ' + description.chromaticField.replace('-', ' ');

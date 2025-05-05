@@ -132,6 +132,11 @@ export function calculateSMSSSV(
     move.category = attacker.stats.atk > attacker.stats.spa ? 'Physical' : 'Special';
   }
 
+  // Ashen Beach - Becomes Special if user's Sp. Attack is higher than Attack
+  if (move.named('Strength')) {
+    move.category = attacker.stats.spa > attacker.stats.atk ? 'Special' : 'Physical';
+  }
+
   const result = new Result(gen, attacker, defender, move, field, 0, desc);
 
   if (move.category === 'Status' && !move.named('Nature Power')) {
@@ -295,7 +300,7 @@ export function calculateSMSSSV(
     // Sky - Weather Ball becomes Flying-type during tailwind if no other weathers are active
     if (type === 'Normal' && field.attackerSide.isTailwind && field.chromaticField === 'Sky') {
       type = 'Flying';
-      desc.isTailwind = true;
+      desc.subWeather = "Tailwind";
       desc.chromaticField = field.chromaticField;
     } else {
       desc.weather = field.weather;
@@ -364,6 +369,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Bewitched-Woods' ? 'Grass'
         : field.chromaticField === 'Undercolony' ? 'Bug'
         : field.chromaticField === 'Corrosive-Mist' ? 'Poison'
+        : field.chromaticField === 'Ashen-Beach' ? 'Psychic'
         : field.chromaticField === 'Forgotten-Battlefield' ? 'Ghost'
         : 'Normal';
       if (type !== 'Normal' || field.chromaticField === 'Blessed-Sanctum') {
@@ -524,12 +530,22 @@ export function calculateSMSSSV(
     type = attacker.teraType;
   }
 
+  // Fields - Move modifications (type)
+
   // Corrosive Mist - Explosion has Poison + Fire typing
   if (field.chromaticField === 'Corrosive-Mist' && (move.named('Explosion') || (move.named('Nature Power') && !field.terrain))) {
     type = 'Poison';
     typeTwo = 'Fire';
     desc.moveType = type;
     desc.moveType2 = typeTwo;
+    desc.chromaticField = field.chromaticField;
+  }
+
+  // Ashen Beach - Strength is now Fighting type
+  if (field.chromaticField === 'Ashen-Beach' && move.named('Strength')) {
+    type = 'Fighting';
+    desc.moveType = type;
+    desc.chromaticField = field.chromaticField;
   }
 
   move.type = type;
@@ -641,6 +657,21 @@ export function calculateSMSSSV(
     }
   }
 
+  // Fields - Type effectiveness changes
+
+  // Eclipse - Solar Beam and Solar Blade fail
+  if (field.chromaticField === 'Eclipse' && move.named('Solar Beam', 'Solar Blade')) {
+    desc.chromaticField = field.chromaticField;
+    typeEffectiveness = 0;
+  }
+
+  // Factory - Heatproof grants Fire immunity
+  if (field.chromaticField === 'Factory' && defender.hasAbility('Heatproof') && move.hasType('Fire')) {
+    desc.defenderAbility = defender.ability;
+    desc.chromaticField = field.chromaticField;
+    typeEffectiveness = 0;
+  }
+
   // Inverse - Normal type moves always hit for neutral damage
   if (field.chromaticField === 'Inverse' && move.hasType('Normal')) {
     typeEffectiveness = 1;
@@ -659,6 +690,13 @@ export function calculateSMSSSV(
     typeEffectiveness = 0.5;
     desc.defenderAbility = defender.ability;
     desc.chromaticField = field.chromaticField;
+  }
+
+  // Ashen Beach - Water Compaction grants Water immunity / Hydration grants Water Absorb
+  if (field.chromaticField === 'Ashen-Beach' && defender.hasAbility('Water Compaction', 'Hydration') && move.hasType('Water')) {
+    desc.defenderAbility = defender.ability;
+    desc.chromaticField = field.chromaticField;
+    typeEffectiveness = 0;
   }
 
   // Crests - Resistances and Immunities
@@ -799,14 +837,6 @@ export function calculateSMSSSV(
     }
   }
 
-  if (field.chromaticField === 'Eclipse') {
-    // Eclipse - Solar Beam and Solar Blade fail
-    if (move.named('Solar Beam', 'Solar Blade')) {
-      desc.chromaticField = field.chromaticField;
-      return result;
-    }
-  }
-
   if (field.chromaticField === 'Dragons-Den') {
     // Dragon's Den - Dragon Pulse can now hit Fairy type Pokemon (for Resisted Damage)
     if (move.named('Dragon Pulse') && defender.hasType('Fairy')) {
@@ -937,15 +967,6 @@ export function calculateSMSSSV(
     }
   }
 
-  if (field.chromaticField === 'Factory') {
-    // Factory - Heatproof grants Fire immunity
-    if (defender.hasAbility('Heatproof') && move.hasType('Fire')) {
-      desc.defenderAbility = defender.ability;
-      desc.chromaticField = field.chromaticField;
-      return result;
-    }
-  }
-
   if (field.chromaticField === 'Waters-Surface') {
     if ((defender.hasStatus('brn') && !defenderMagicGuard) || // Water's Surface - Burn damage is halved
         (((defender.hasAbility('Rain Dish') && !field.hasWeather('Rain', 'Heavy Rain') && field.chromaticField === 'Waters-Surface') || // Water's Surface - Activates Rain Dish
@@ -1009,8 +1030,7 @@ export function calculateSMSSSV(
       desc.chromaticField = field.chromaticField;
     }
 
-    if ((move.named('Explosion') || (move.named('Nature Power') && !field.terrain)) || // Corrosive Mist - Explosion has Poison + Fire typing, gains Corrosion effect
-        (defender.hasAbility('Toxic Chain', 'Poison Touch', 'Flash Fire') && defender.hasStatus('psn', 'tox') && !healBlock) || // Corrosive Mist - Toxic Chain, Poison Touch, and Flash Fire grant Poison Heal
+    if ((defender.hasAbility('Toxic Chain', 'Poison Touch', 'Flash Fire') && defender.hasStatus('psn', 'tox') && !healBlock) || // Corrosive Mist - Toxic Chain, Poison Touch, and Flash Fire grant Poison Heal
         (move.named('Sludge Bomb', 'Temper Flare', 'Heat Wave') && defender.hasStatus('psn', 'tox', 'brn'))) { // Corrosive Mist - Sludge Bomb, Temper Flare and Heat Wave additionally detonate poisoned, badly poisoned, and burned Pokemon, cleansing status and dealing 33% of their max HP
       desc.chromaticField = field.chromaticField;
     }
@@ -1796,6 +1816,10 @@ export function calculateBasePowerSMSSSV(
         basePower = 250;
         move.category = 'Physical';
         desc.moveName = 'Explosion';
+        break;
+      case 'Ashen-Beach':
+        basePower = 0;
+        desc.moveName = 'Trick Room';
         break;
       case 'Forgotten-Battlefield':
         basePower = 0;
@@ -2796,9 +2820,32 @@ export function calculateAtModsSMSSSV(
     desc.chromaticField = field.chromaticField;
   }
 
+  if (field.chromaticField === 'Ashen-Beach') {
+    // Ashen Beach - Telepathy boosts Special Attack by 1.5x
+    if (attacker.hasAbility('Telepathy') && move.category === 'Special') {
+      atMods.push(6144);
+      desc.attackerAbility = attacker.ability;
+      desc.chromaticField = field.chromaticField;
+    }
+
+    // Ashen Beach - Inner Focus boosts Attack and Special Attack by 1.3x when user is statused
+    if (attacker.hasAbility('Inner Focus') && attacker.status) {
+      atMods.push(5324);
+      desc.attackerAbility = attacker.ability;
+      desc.chromaticField = field.chromaticField;
+    }
+
+    // Drill Run, Aura Sphere, Zen Headbutt, Sandsear Storm, Muddy Water, and Cross Chop deal 1.3x more damage during Gravity
+    if (field.isGravity && move.named('Drill Run', 'Aura Sphere', 'Zen Headbutt', 'Sandsear Storm', 'Muddy Water', 'Cross Chop')) {
+      atMods.push(5324);
+      desc.subWeather = 'Gravity';
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
   if (field.chromaticField === 'Forgotten-Battlefield') {
     // Forgotten Battlefield - Pokémon with Mummy have their Attack and Speed halved
-    if (attacker.hasAbility('Mummy')) {
+    if (attacker.hasAbility('Mummy') && move.category === 'Physical') {
       atMods.push(2048);
       desc.attackerAbility = attacker.ability;
       desc.chromaticField = field.chromaticField;

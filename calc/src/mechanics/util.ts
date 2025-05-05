@@ -141,6 +141,11 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
     speedMods.push(3072);
   }
 
+  // Ashen Beach - Being statused grants 1.5x speed
+  if (field.chromaticField === 'Ashen-Beach' && pokemon.status) {
+    speedMods.push(6144);
+  }
+
   // Forgotten Battlefield - Pokémon with Mummy have their Attack and Speed halved
   if (field.chromaticField === 'Forgotten-Battlefield' && pokemon.hasAbility('Mummy')) {
     speedMods.push(2048);
@@ -505,6 +510,12 @@ export function checkFieldEntryEffects(gen: Generation, source: Pokemon, target:
     // Underwater - Prism Scale: Boosts the users Speed by 1 stage
     if (source.hasItem('Prism Scale')) {
       source.boosts.spe = Math.min(6, source.boosts.spe + 1);
+    }
+  } else if (field.chromaticField === 'Ashen-Beach') {
+    // Ashen Beach - Prism Scale: Boosts Attack, Special Attack (and Accuracy) +1
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.atk = Math.min(6, source.boosts.atk + 1);
+      source.boosts.spa = Math.min(6, source.boosts.spa + 1);
     }
   } else if (field.chromaticField === 'Forgotten-Battlefield') {
     // Forgotten Battlefield - Prism Scale: Grants +1 Attack and Speed
