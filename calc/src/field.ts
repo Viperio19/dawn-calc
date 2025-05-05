@@ -90,6 +90,7 @@ export class Side implements State.Side {
   isAquaRing: boolean;
   isSeeded: boolean;
   isNightmare: boolean;
+  isSaltCured: boolean;
   isForesight: boolean;
   isSoak: boolean;
   isTailwind: boolean;
@@ -120,6 +121,7 @@ export class Side implements State.Side {
     this.isAquaRing = !!side.isAquaRing;
     this.isSeeded = !!side.isSeeded;
     this.isNightmare = !!side.isNightmare;
+    this.isSaltCured = !!side.isSaltCured;
     this.isForesight = !!side.isForesight;
     this.isSoak = !!side.isSoak;
     this.isTailwind = !!side.isTailwind;
