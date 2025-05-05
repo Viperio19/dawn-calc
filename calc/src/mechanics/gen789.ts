@@ -1079,10 +1079,11 @@ export function calculateSMSSSV(
       (move.hasType('Electric') &&
         defender.hasAbility('Lightning Rod', 'Motor Drive', 'Volt Absorb')) ||
       (move.hasType('Ground') &&
-        !field.isGravity && !move.named('Thousand Arrows') && !(move.named('Bulldoze') && field.chromaticField === 'Desert') && // Desert - Bulldoze grounds adjacent foes; first hit neutral on Airborne foes
-        !defender.hasItem('Iron Ball') &&
+        !move.named('Thousand Arrows') && !(move.named('Bulldoze') && field.chromaticField === 'Desert') && // Desert - Bulldoze grounds adjacent foes; first hit neutral on Airborne foes
+        !field.isGravity && !field.defenderSide.isIngrain && !defender.hasItem('Iron Ball') &&
+        (field.defenderSide.isMagnetRise ||
         (defender.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') || // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
-        (defender.named('Probopass-Crest') && !attackerIgnoresAbility))) || // Probopass Crest - Grants Levitate
+        (defender.named('Probopass-Crest') && !attackerIgnoresAbility)))) || // Probopass Crest - Grants Levitate
       (move.flags.bullet && defender.hasAbility('Bulletproof')) ||
       (move.flags.sound && !move.named('Clangorous Soul') && defender.hasAbility('Soundproof')) ||
       (move.priority > 0 && defender.hasAbility('Queenly Majesty', 'Dazzling', 'Armor Tail')) || 
@@ -1098,8 +1099,12 @@ export function calculateSMSSSV(
     return result;
   }
 
-  if (move.hasType('Ground') && !move.named('Thousand Arrows') && !(move.named('Bulldoze') && field.chromaticField === 'Desert') && // Desert - Bulldoze grounds adjacent foes; first hit neutral on Airborne foes
-      !field.isGravity && defender.hasItem('Air Balloon')) {
+  if (move.hasType('Ground') &&
+      !move.named('Thousand Arrows') &&
+      !(move.named('Bulldoze') && field.chromaticField === 'Desert') && // Desert - Bulldoze grounds adjacent foes; first hit neutral on Airborne foes
+      !field.isGravity &&
+      !field.defenderSide.isIngrain &&
+      defender.hasItem('Air Balloon')) {
     desc.defenderItem = defender.item;
     return result;
   }

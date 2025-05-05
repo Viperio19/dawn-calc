@@ -604,6 +604,13 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
   let damage = 0;
   const texts: string[] = [];
 
+  const defenderGrounded = defenderSide.isIngrain || defender.hasItem('Iron Ball') ||
+    (!defender.hasType('Flying') &&
+    !defenderSide.isMagnetRise &&
+    !defender.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') && // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
+    !defender.hasItem('Air Balloon') &&
+    !defender.named('Probopass-Crest')) // Probopass Crest - Grants Levitate
+
   // Acidic Wasteland - Hazards are consumed when set but regurgitate at the end of the turn as an attacking move
   if (field.chromaticField === 'Acidic-Wasteland') {
     // Acidic Wasteland - Regurgigated hazards: Stealth Rock applies double its normal effect
@@ -620,12 +627,8 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
       damage += Math.floor((effectiveness * defender.maxHP()) / 4);
       texts.push('regurgitated Stealth Rock');    
     }
-    // Acidic Wasteland - Regurgigated hazards: Spikes deal 33% of the Pokemon’s max HP
-    if (defenderSide.spikes != 0 &&
-        !defender.hasType('Flying') &&
-        !defender.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') && // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
-        !defender.hasItem('Air Balloon') &&
-        !defender.named('Probopass-Crest')) { // Probopass Crest - Grants Levitate
+    // Acidic Wasteland - Regurgigated hazards: Spikes deal 33% of the Pokemon’s max HP; ignores Flying immunity
+    if (defenderSide.spikes != 0) {
       damage += Math.floor(defender.maxHP() / 3);
       texts.push('regurgitated Spikes');
     }
@@ -689,11 +692,7 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
       texts.push('Steelsurge');
     }
 
-    if (!defender.hasType('Flying') &&
-        !defender.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') && // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
-        !defender.hasItem('Air Balloon') &&
-        !defender.named('Probopass-Crest') // Probopass Crest - Grants Levitate
-    ) {
+    if (defenderGrounded) {
       if (defenderSide.spikes === 1) {
         damage += Math.floor(defender.maxHP() / 8);
         if (gen.num === 2) {

@@ -241,7 +241,7 @@ export function getMoveEffectiveness(
       effectiveness = 2;
     }
 
-    if (effectiveness === 0 && isRingTarget) {
+    if (effectiveness === 0 && (isRingTarget || (field.defenderSide.isIngrain && move.hasType('Ground')))) {
       effectiveness = 1;
     }
 
@@ -256,7 +256,7 @@ export function getMoveEffectiveness(
     return 1;
   } else {
     let effectiveness = gen.types.get(toID(move.type))!.effectiveness[type]!;
-    if (effectiveness === 0 && isRingTarget) {
+    if (effectiveness === 0 && (isRingTarget || (field.defenderSide.isIngrain && move.hasType('Ground')))) {
       effectiveness = 1;
     }
     if (move.named('Flying Press')) {

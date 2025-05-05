@@ -1513,7 +1513,7 @@ function createField() {
 			isForesight: isForesight[i],
 			isSoak: isSoak[i],
 			isTailwind: isTailwind[i],
-			sMagnetRise: isMagnetRise[i],
+			isMagnetRise: isMagnetRise[i],
 			isHelpingHand: isHelpingHand[i],
 			isFlowerGift: isFlowerGift[i],
 			isSteelySpirit: isSteelySpirit[i],
