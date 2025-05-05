@@ -370,6 +370,7 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Undercolony' ? 'Bug'
         : field.chromaticField === 'Corrosive-Mist' ? 'Poison'
         : field.chromaticField === 'Ashen-Beach' ? 'Psychic'
+        : field.chromaticField === 'Tempest' ? 'Flying'
         : field.chromaticField === 'Forgotten-Battlefield' ? 'Ghost'
         : 'Normal';
       if (type !== 'Normal' || field.chromaticField === 'Blessed-Sanctum') {
@@ -434,102 +435,6 @@ export function calculateSMSSSV(
     field.defenderSide.isAuroraVeil = false;
   }
 
-  let hasAteAbilityTypeChange = false;
-  let isAerilate = false;
-  let isPixilate = false;
-  let isRefrigerate = false;
-  let isGalvanize = false;
-  let isLiquidVoice = false;
-  let isNormalize = false;
-  let isTypeSync = false;
-  let isSawsbuckCrest = false;
-  let isSimipourCrest = false;
-  let isSimisageCrest = false;
-  let isSimisearCrest = false;
-  let isDDenIntimidate = false;
-  let isStarlightFairy = false;
-  const noTypeChange = move.named(
-    'Revelation Dance',
-    'Judgment',
-    'Nature Power',
-    'Techno Blast',
-    'Multi-Attack',
-    'Natural Gift',
-    'Weather Ball',
-    'Terrain Pulse',
-    'Struggle',
-  ) || (move.named('Tera Blast') && attacker.teraType)
-    || (move.named('Hyper Voice', 'Tri Attack', 'Echoed Voice') && field.chromaticField === 'Blessed-Sanctum');
-
-  if (!move.isZ && !noTypeChange) {
-    const normal = type === 'Normal';
-    if ((isAerilate = attacker.hasAbility('Aerilate') && normal)) {
-      type = 'Flying';
-    } else if ((isGalvanize = (attacker.hasAbility('Galvanize') || attacker.named('Luxray-Crest')) && normal)) { // Luxray Crest - Gains Galvanize
-      type = 'Electric';
-    } else if ((isLiquidVoice = attacker.hasAbility('Liquid Voice') && !!move.flags.sound)) {
-      type = 'Water';
-    } else if ((isPixilate = attacker.hasAbility('Pixilate') && normal)) {
-      type = 'Fairy';
-    } else if ((isRefrigerate = attacker.hasAbility('Refrigerate') && normal)) {
-      type = 'Ice';
-    } else if ((isNormalize = attacker.hasAbility('Normalize'))) { // Boosts any type
-      type = 'Normal';
-    // Custom Eeveelutions - Type Sync: Makes normal moves match the users primary type
-    } else if ((isTypeSync = attacker.hasAbility('Type Sync') && normal)) {
-      type = attacker.types[0];
-    // Sawsbuck Crest - Normal-type moves become seasonal type and are boosted by 20%
-    } else if (isSawsbuckCrest = attacker.name.includes('Sawsbuck-Crest-') && normal) {
-      type = attacker.types[0];
-    // Simipour Crest - Normal-type moves become Grass-type
-    } else if ((isSimipourCrest = attacker.named('Simipour-Crest') && normal)) {
-      type = 'Grass';
-    // Simisage Crest - Normal-type moves become Fire-type
-    } else if ((isSimisageCrest = attacker.named('Simisage-Crest') && normal)) {
-      type = 'Fire';
-    // Simisear Crest - GNormal-type moves become Water-type
-    } else if ((isSimisearCrest = attacker.named('Simisear-Crest') && normal)) {
-      type = 'Water';
-    // Dragon's Den - Intimidate makes user’s Normal-type moves become Dragon type and have 1.2x power
-    } else if ((isDDenIntimidate = attacker.hasAbility('Intimidate') && normal && field.chromaticField === 'Dragons-Den')) {
-      type = 'Dragon';
-    // Starlight Arena - Normal-type moves change to Fairy-type
-    } else if ((isStarlightFairy = normal && field.chromaticField === 'Starlight-Arena')) {
-      type = 'Fairy';
-    // Rainbow - Quick Attack matches the typing of the Eevee using it
-    } else if (attacker.named('Umbreon', 'Flareon', 'Vaporeon', 'Espeon', 'Jolteon', 'Glaceon', 'Leafeon', 'Sylveon', 'Eevee') &&
-               field.chromaticField === 'Rainbow' && move.named('Quick Attack')) {
-      desc.chromaticField = field.chromaticField;
-      type = attacker.types[0]; 
-    } else if (move.named('Mirror Beam')) {
-      // Aevian - Mirror Beam: If the user has a secondary type the move changes type to match the secondary typing of the user
-      if (attacker.types[1] && attacker.types[1] != ("???" as TypeName)) {
-        type = attacker.types[1];
-      }
-      desc.mirrorBeamType = type;
-    }
-    if (isGalvanize || isPixilate || isRefrigerate || isAerilate || isNormalize || isTypeSync) {
-      desc.attackerAbility = attacker.ability;
-      hasAteAbilityTypeChange = true;
-    } else if (isLiquidVoice) {
-      desc.attackerAbility = attacker.ability;
-    } else if (isSawsbuckCrest) {
-      hasAteAbilityTypeChange = true;
-    } else if (isDDenIntimidate) {
-      desc.attackerAbility = attacker.ability;
-      desc.moveType = type;
-      desc.chromaticField = field.chromaticField;
-      hasAteAbilityTypeChange = true;
-    } else if (isStarlightFairy) {
-      desc.moveType = type;
-      desc.chromaticField = field.chromaticField;
-    }
-  }
-
-  if (move.named('Tera Blast') && attacker.teraType) {
-    type = attacker.teraType;
-  }
-
   // Fields - Move modifications (type)
 
   // Corrosive Mist - Explosion has Poison + Fire typing
@@ -546,6 +451,108 @@ export function calculateSMSSSV(
     type = 'Fighting';
     desc.moveType = type;
     desc.chromaticField = field.chromaticField;
+  }
+
+  let hasAteAbilityTypeChange = false;
+  let isAerilate = false;
+  let isPixilate = false;
+  let isRefrigerate = false;
+  let isGalvanize = false;
+  let isLiquidVoice = false;
+  let isNormalize = false;
+  let isTypeSync = false;
+  let isSawsbuckCrest = false;
+  let isDDenIntimidate = false;
+  const noTypeChange = move.named(
+    'Revelation Dance',
+    'Judgment',
+    'Nature Power',
+    'Techno Blast',
+    'Multi-Attack',
+    'Natural Gift',
+    'Weather Ball',
+    'Terrain Pulse',
+    'Struggle',
+  ) || (move.named('Tera Blast') && attacker.teraType)
+    || (move.named('Hyper Voice', 'Tri Attack', 'Echoed Voice') && field.chromaticField === 'Blessed-Sanctum');
+
+  if (!move.isZ && !noTypeChange) {
+    const normal = type === 'Normal';
+    if (isAerilate = attacker.hasAbility('Aerilate') && normal) {
+      type = 'Flying';
+    } else if (isGalvanize = (attacker.hasAbility('Galvanize') || attacker.named('Luxray-Crest')) && normal) { // Luxray Crest - Gains Galvanize
+      type = 'Electric';
+    } else if (isLiquidVoice = attacker.hasAbility('Liquid Voice') && !!move.flags.sound) {
+      type = 'Water';
+    } else if (isPixilate = attacker.hasAbility('Pixilate') && normal) {
+      type = 'Fairy';
+    } else if (isRefrigerate = attacker.hasAbility('Refrigerate') && normal) {
+      type = 'Ice';
+    } else if (isNormalize = attacker.hasAbility('Normalize')) { // Boosts any type
+      type = 'Normal';
+    // Custom Eeveelutions - Type Sync: Makes normal moves match the users primary type
+    } else if (isTypeSync = attacker.hasAbility('Type Sync') && normal) {
+      type = attacker.types[0];
+    // Sawsbuck Crest - Normal-type moves become seasonal type and are boosted by 20%
+    } else if (isSawsbuckCrest = attacker.name.includes('Sawsbuck-Crest-') && normal) {
+      type = attacker.types[0];
+    // Simipour Crest - Normal-type moves become Grass-type
+    } else if (attacker.named('Simipour-Crest') && normal) {
+      type = 'Grass';
+      desc.moveType = type;
+    // Simisage Crest - Normal-type moves become Fire-type
+    } else if (attacker.named('Simisage-Crest') && normal) {
+      type = 'Fire';
+      desc.moveType = type;
+    // Simisear Crest - GNormal-type moves become Water-type
+    } else if (attacker.named('Simisear-Crest') && normal) {
+      type = 'Water';
+      desc.moveType = type;
+    // Dragon's Den - Intimidate makes user’s Normal-type moves become Dragon type and have 1.2x power
+    } else if (field.chromaticField === 'Dragons-Den' && attacker.hasAbility('Intimidate') && normal ) {
+      type = 'Dragon';
+    // Starlight Arena - Normal-type moves change to Fairy-type
+    } else if (field.chromaticField === 'Starlight-Arena' && normal) {
+      type = 'Fairy';
+      desc.moveType = type;
+      desc.chromaticField = field.chromaticField;
+    // Rainbow - Quick Attack matches the typing of the Eevee using it
+    } else if (attacker.named('Umbreon', 'Flareon', 'Vaporeon', 'Espeon', 'Jolteon', 'Glaceon', 'Leafeon', 'Sylveon', 'Eevee') &&
+               field.chromaticField === 'Rainbow' && move.named('Quick Attack')) {
+      desc.chromaticField = field.chromaticField;
+      type = attacker.types[0];
+    // Tempest - While Snow is active all Normal moves turn into Ice-type
+    } else if (field.chromaticField === 'Tempest' && field.hasWeather('Snow') && normal) {
+      type = 'Ice';
+      desc.moveType = type;
+      desc.weather = field.weather;
+      desc.chromaticField = field.chromaticField;
+    } else if (move.named('Mirror Beam')) {
+      // Aevian - Mirror Beam: If the user has a secondary type the move changes type to match the secondary typing of the user
+      if (attacker.types[1] && attacker.types[1] != ("???" as TypeName)) {
+        type = attacker.types[1];
+      }
+      desc.mirrorBeamType = type;
+    }
+
+    if (isGalvanize || isPixilate || isRefrigerate || isAerilate || isNormalize || isTypeSync) {
+      desc.attackerAbility = attacker.ability;
+      hasAteAbilityTypeChange = true;
+    } else if (isLiquidVoice) {
+      desc.attackerAbility = attacker.ability;
+    } else if (isSawsbuckCrest) {
+      hasAteAbilityTypeChange = true;
+      desc.moveType = type;
+    } else if (isDDenIntimidate) {
+      desc.attackerAbility = attacker.ability;
+      desc.moveType = type;
+      desc.chromaticField = field.chromaticField;
+      hasAteAbilityTypeChange = true;
+    }
+  }
+
+  if (move.named('Tera Blast') && attacker.teraType) {
+    type = attacker.teraType;
   }
 
   move.type = type;
@@ -1821,6 +1828,10 @@ export function calculateBasePowerSMSSSV(
         basePower = 0;
         desc.moveName = 'Trick Room';
         break;
+      case 'Tempest':
+        basePower = 110;
+        desc.moveName = 'Hurricane';
+        break;
       case 'Forgotten-Battlefield':
         basePower = 0;
         desc.moveName = 'Spite';
@@ -2835,10 +2846,31 @@ export function calculateAtModsSMSSSV(
       desc.chromaticField = field.chromaticField;
     }
 
-    // Drill Run, Aura Sphere, Zen Headbutt, Sandsear Storm, Muddy Water, and Cross Chop deal 1.3x more damage during Gravity
+    // Ashen Beach - Drill Run, Aura Sphere, Zen Headbutt, Sandsear Storm, Muddy Water, and Cross Chop deal 1.3x more damage during Gravity
     if (field.isGravity && move.named('Drill Run', 'Aura Sphere', 'Zen Headbutt', 'Sandsear Storm', 'Muddy Water', 'Cross Chop')) {
       atMods.push(5324);
       desc.subWeather = 'Gravity';
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  if (field.chromaticField === 'Tempest') {
+    // Tempest - Flying, Electric, and Ice moves that target multiple opponents deal 1.3x damage
+    if (['allAdjacent', 'allAdjacentFoes'].includes(move.target) && move.hasType('Flying', 'Electric', 'Ice')) {
+      atMods.push(5120);
+      desc.chromaticField = field.chromaticField;
+    }
+
+    // Tempest - Snow Cloak and Ice Body grants the user resistance to Flying
+    if (defender.hasAbility('Snow Cloak', 'Ice Body') && move.hasType('Flying')) {
+      atMods.push(2048);
+      desc.defenderAbility = defender.ability;
+      desc.chromaticField = field.chromaticField;
+    }
+
+    // Tempest - Wild charge deals 1.3x damage
+    if (move.named('Wild Charge')) {
+      atMods.push(5324);
       desc.chromaticField = field.chromaticField;
     }
   }

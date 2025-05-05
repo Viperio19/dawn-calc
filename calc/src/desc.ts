@@ -1439,6 +1439,7 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Factory":
     case "Rainbow":
     case "Inverse":
+    case "Tempest":
       output += ' on ' + description.chromaticField + ' Field';
       break;
     case "Dragons-Den":

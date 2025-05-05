@@ -517,6 +517,11 @@ export function checkFieldEntryEffects(gen: Generation, source: Pokemon, target:
       source.boosts.atk = Math.min(6, source.boosts.atk + 1);
       source.boosts.spa = Math.min(6, source.boosts.spa + 1);
     }
+  } else if (field.chromaticField === 'Tempest') {
+    // Tempest - Big Pecks and Gulp Missile grant +1 Defense on entry
+    if (source.hasAbility('Big Pecks', 'Gulp Missile')) {
+      source.boosts.def = Math.min(6, source.boosts.def + 1);
+    }
   } else if (field.chromaticField === 'Forgotten-Battlefield') {
     // Forgotten Battlefield - Prism Scale: Grants +1 Attack and Speed
     if (source.hasItem('Prism Scale')) {
