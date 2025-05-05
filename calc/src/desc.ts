@@ -51,6 +51,7 @@ export interface RawDesc {
   moveName: string;
   moveTurns?: string;
   moveType?: TypeName;
+  moveType2?: TypeName;
   rivalry?: 'buffed' | 'nerfed';
   terrain?: Terrain;
   chromaticField?: string;
@@ -353,11 +354,13 @@ export function getKOChance(
   const hazards = getHazards(gen, defender, field.defenderSide, field);
   const eot = getEndOfTurn(gen, attacker, defender, move, field);
   const toxicCounter =
-  // Jungle - Shield Dust grants Magic Guard
-  // Rainbow - Flareon gets Magic Guard
-    defender.hasStatus('tox') && !(defender.hasAbility('Magic Guard', 'Poison Heal') ||
-     (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') ||
-     (defender.named('Flareon') && field.chromaticField === 'Rainbow')) ? defender.toxicCounter : 0;
+    defender.hasStatus('tox') &&
+    !(defender.hasAbility('Magic Guard', 'Poison Heal') ||
+     (defender.named('Zangoose-Crest')) || // Zangoose Crest - Grants Poison Heal
+     (defender.hasAbility('Shield Dust') && field.chromaticField === 'Jungle') || // Jungle - Shield Dust grants Magic Guard
+     (defender.named('Flareon') && field.chromaticField === 'Rainbow') || // Rainbow - Flareon gets Magic Guard
+     (field.chromaticField === 'Corrosive-Mist' && (defender.hasAbility('Toxic Chain', 'Poison Touch', 'Flash Fire') || // Corrosive Mist - Toxic Chain, Poison Touch, and Flash Fire grant Poison Heal / detonation clears status
+      move.named('Sludge Bomb', 'Temper Flare', 'Heat Wave')))) ? defender.toxicCounter : 0;
 
   // multi-hit moves have too many possibilities for brute-forcing to work, so reduce it
   // to an approximate distribution
@@ -839,9 +842,14 @@ function getEndOfTurn(
 
   const defenderPoisonHeal = defender.hasAbility('Poison Heal') ||
                              defender.named('Zangoose-Crest') || // Zangoose Crest - Grants Poison Heal
-                             (field.chromaticField === 'Rainbow' && defender.named('Umbreon')); // Rainbow - Umbreon gains Poison Heal
+                             (field.chromaticField === 'Rainbow' && defender.named('Umbreon')) || // Rainbow - Umbreon gains Poison Heal
+                             (field.chromaticField === 'Corrosive-Mist' && defender.hasAbility('Toxic Chain', 'Poison Touch', 'Flash Fire')); // Corrosive Mist - Toxic Chain, Poison Touch, and Flash Fire grant Poison Heal
 
-  if (defender.hasStatus('psn')) {
+  // Corrosive Mist - Sludge Bomb, Temper Flare and Heat Wave additionally detonate poisoned, badly poisoned, and burned Pokemon, cleansing status and dealing 33% of their max HP
+  if (field.chromaticField === 'Corrosive-Mist' && defender.hasStatus('psn', 'tox', 'brn') && move.named('Sludge Bomb', 'Temper Flare', 'Heat Wave', 'Corrosive Gas')) {
+    damage -= Math.floor(defender.maxHP() / 3);
+    texts.push('detonation damage');
+  } else if (defender.hasStatus('psn')) {
     if (defenderPoisonHeal) {
       if (!healBlock) {
         damage += Math.floor(defender.maxHP() / 8);
@@ -870,6 +878,11 @@ function getEndOfTurn(
     // Water's Surface - Burn damage is halved
     if (field.chromaticField === 'Waters-Surface') {
       modifier *= 2;
+    }
+
+    // Corrosive Mist - Burned pokemon take 1/8th of their max HP per turn
+    if (field.chromaticField === 'Corrosive-Mist') {
+      modifier /= 2;
     }
 
     damage -= Math.floor(defender.maxHP() / ((gen.num === 1 || gen.num > 6 ? 16 : 8) * modifier));
@@ -1338,6 +1351,8 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     output += '(' + description.moveBP + ' BP ' + description.moveType + ') ';
   } else if (description.moveBP) {
     output += '(' + description.moveBP + ' BP) ';
+  } else if (description.moveType && description.moveType2) {
+    output += '(' + description.moveType + ' / ' + description.moveType2 + ') ';
   } else if (description.moveType) {
     output += '(' + description.moveType + ') ';
   }
@@ -1405,6 +1420,15 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Inverse":
       output += ' on ' + description.chromaticField + ' Field';
       break;
+    case "Dragons-Den":
+      output += " on Dragon's Den";
+      break;
+    case "Waters-Surface": 
+      output += " on Water's Surface";
+      break;
+    case "Cave":
+    case "Underwater":
+    case "Undercolony":
     case "Thundering-Plateau":
     case "Starlight-Arena":
     case "Ring-Arena":
@@ -1416,20 +1440,10 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
     case "Acidic-Wasteland":
     case "Ancient-Ruins":
     case "Bewitched-Woods":
+    case "Corrosive-Mist":
     case "Forgotten-Battlefield":
-      output += ' on ' + description.chromaticField.replace('-', ' ');
-      break;
-    case "Dragons-Den":
-      output += " on Dragon's Den";
-      break;
-    case "Waters-Surface": 
-      output += " on Water's Surface";
-      break;
-    case "Cave":
-    case "Underwater":
-    case "Undercolony":
     default:
-      output += ' on ' + description.chromaticField;
+      output += ' on ' + description.chromaticField.replace('-', ' ');
       break;
     }
   }

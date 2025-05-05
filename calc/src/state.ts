@@ -11,6 +11,7 @@ export namespace State {
     isSaltCure?: boolean;
     isStarstruck?: boolean;
     isLockOn?: boolean;
+    corrosiveBond?: boolean;
     gritStages?: number;
     alliesFainted?: number;
     boostedStat?: I.StatIDExceptHP | 'auto';

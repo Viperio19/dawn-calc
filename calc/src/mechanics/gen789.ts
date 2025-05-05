@@ -216,7 +216,8 @@ export function calculateSMSSSV(
     'Stance Change', 'Tera Shift', 'Zen Mode', 'Zero to Hero',
   ];
 
-  if (attacker.hasAbility('Neutralizing Gas') &&
+  // Corrosive Mist - Stench and White Smoke grant Neutralizing Gas
+  if ((attacker.hasAbility('Neutralizing Gas') || (field.chromaticField === 'Corrosive-Mist' && attacker.hasAbility('Stench', 'White Smoke'))) &&
     !ignoresNeutralizingGas.includes(defender.ability || '')) {
     desc.attackerAbility = attacker.ability;
     if (defender.hasItem('Ability Shield')) {
@@ -226,7 +227,8 @@ export function calculateSMSSSV(
     }
   }
 
-  if (defender.hasAbility('Neutralizing Gas') &&
+  // Corrosive Mist - Stench and White Smoke grant Neutralizing Gas
+  if ((defender.hasAbility('Neutralizing Gas') || (field.chromaticField === 'Corrosive-Mist' && defender.hasAbility('Stench', 'White Smoke'))) &&
     !ignoresNeutralizingGas.includes(attacker.ability || '')) {
     desc.defenderAbility = defender.ability;
     if (attacker.hasItem('Ability Shield')) {
@@ -272,9 +274,16 @@ export function calculateSMSSSV(
     desc.chromaticField = field.chromaticField;
   }
 
+  // Corrosive Mist - Cross Poison and Flame Burst always results in a critical hit
+  if (!tempCritical && field.chromaticField === 'Corrosive-Mist' && move.named('Cross Poison', 'Flame Burst')) {
+    tempCritical = true;
+    desc.chromaticField = field.chromaticField;
+  }
+
   const isCritical = tempCritical;
 
   let type = move.type;
+  let typeTwo = '???' as TypeName;
   if (move.originalName === 'Weather Ball') {
     const holdingUmbrella = attacker.hasItem('Utility Umbrella');
     type =
@@ -351,9 +360,10 @@ export function calculateSMSSSV(
         : field.chromaticField === 'Underwater' ? 'Water'
         : field.chromaticField === 'Rainbow' ?
           (attacker.item && attacker.item.includes('Plate')) ? getItemBoostType(attacker.item)! : 'Normal'
-        : field.chromaticField === 'Undercolony' ? 'Bug'
         : field.chromaticField === 'Inverse' ? 'Psychic'
         : field.chromaticField === 'Bewitched-Woods' ? 'Grass'
+        : field.chromaticField === 'Undercolony' ? 'Bug'
+        : field.chromaticField === 'Corrosive-Mist' ? 'Poison'
         : field.chromaticField === 'Forgotten-Battlefield' ? 'Ghost'
         : 'Normal';
       if (type !== 'Normal' || field.chromaticField === 'Blessed-Sanctum') {
@@ -514,7 +524,16 @@ export function calculateSMSSSV(
     type = attacker.teraType;
   }
 
+  // Corrosive Mist - Explosion has Poison + Fire typing
+  if (field.chromaticField === 'Corrosive-Mist' && (move.named('Explosion') || (move.named('Nature Power') && !field.terrain))) {
+    type = 'Poison';
+    typeTwo = 'Fire';
+    desc.moveType = type;
+    desc.moveType2 = typeTwo;
+  }
+
   move.type = type;
+  move.type2 = typeTwo;
 
   // FIXME: this is incorrect, should be move.flags.heal, not move.drain
   if (((attacker.hasAbility('Triage') || attacker.named('Cherrim-Crest') || attacker.named('Cherrim-Crest-Sunshine')) && move.drain) || // Cherrim Crest - Grants Triage
@@ -565,7 +584,8 @@ export function calculateSMSSSV(
     field,
     isGhostRevealed,
     field.isGravity,
-    isRingTarget
+    isRingTarget,
+    attacker
   );
   let type2Effectiveness = type2
     ? getMoveEffectiveness(
@@ -575,7 +595,8 @@ export function calculateSMSSSV(
       field,
       isGhostRevealed,
       field.isGravity,
-      isRingTarget
+      isRingTarget,
+      attacker
     )
     : 1;
 
@@ -607,7 +628,8 @@ export function calculateSMSSSV(
       field,
       isGhostRevealed,
       field.isGravity,
-      isRingTarget
+      isRingTarget,
+      attacker
     );
 
     // Inverse type effectiveness
@@ -961,13 +983,6 @@ export function calculateSMSSSV(
     } 
   }
 
-  if (field.chromaticField === 'Undercolony') {
-    // Undercolony - Rock Throw is super effective vs Ground types
-    if (move.named('Rock Throw') && defender.hasType('Ground')) {
-      desc.chromaticField = field.chromaticField;
-    }
-  }
-
   if (field.chromaticField === 'Inverse') {
     // Inverse - The type chart is inverted [Immunities are now 2x weaknesses] (always print the field name because of this)
     desc.chromaticField = field.chromaticField;
@@ -976,6 +991,27 @@ export function calculateSMSSSV(
   if (field.chromaticField === 'Bewitched-Woods') {
     if ((move.hasType('Grass') && defender.hasType('Steel')) || // Bewitched Woods - Grass Types now hit Steel Type Pokemon for neutral damage
         (move.hasType('Poison') && defender.hasType('Fairy'))) { // Bewitched Woods - Poison attacks deal neutral damage to Fairy Types
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  if (field.chromaticField === 'Undercolony') {
+    // Undercolony - Rock Throw is super effective vs Ground types
+    if (move.named('Rock Throw') && defender.hasType('Ground')) {
+      desc.chromaticField = field.chromaticField;
+    }
+  }
+
+  if (field.chromaticField === 'Corrosive-Mist') {
+    // Corrosive Mist - Corrosion now affects Poison Type attacks as well [Super Effective]
+    if (attacker.hasAbility('Corrosion') && move.hasType('Poison') && defender.hasType('Steel')) {
+      desc.attackerAbility = attacker.ability;
+      desc.chromaticField = field.chromaticField;
+    }
+
+    if ((move.named('Explosion') || (move.named('Nature Power') && !field.terrain)) || // Corrosive Mist - Explosion has Poison + Fire typing, gains Corrosion effect
+        (defender.hasAbility('Toxic Chain', 'Poison Touch', 'Flash Fire') && defender.hasStatus('psn', 'tox') && !healBlock) || // Corrosive Mist - Toxic Chain, Poison Touch, and Flash Fire grant Poison Heal
+        (move.named('Sludge Bomb', 'Temper Flare', 'Heat Wave') && defender.hasStatus('psn', 'tox', 'brn'))) { // Corrosive Mist - Sludge Bomb, Temper Flare and Heat Wave additionally detonate poisoned, badly poisoned, and burned Pokemon, cleansing status and dealing 33% of their max HP
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -1229,6 +1265,14 @@ export function calculateSMSSSV(
     checkMultihitBoost(gen, child, defender, move, field, desc);
     childDamage = calculateSMSSSV(gen, child, defender, move, field).damage as number[];
     desc.attackerAbility = attacker.ability;
+  // Corrosive Mist - If the target is poisoned, badly poisoned or burned, all fire type attacks against it gain the parental bond effect. 
+  } else if (field.chromaticField === 'Corrosive-Mist' && move.hasType('Fire') && defender.hasStatus('psn', 'tox', 'brn') &&
+             !attacker.corrosiveBond && move.hits === 1 && !isSpread) {
+    const child = attacker.clone();
+    child.corrosiveBond = true;
+    checkMultihitBoost(gen, child, defender, move, field, desc);
+    childDamage = calculateSMSSSV(gen, child, defender, move, field).damage as number[];
+    desc.chromaticField = field.chromaticField;
   }
 
   // Probopass Crest - After an attack, each mini nose casts a 20BP type-based damage after a damaging move. (3 Attacks: steel, rock, electric [Special])
@@ -1734,12 +1778,6 @@ export function calculateBasePowerSMSSSV(
         basePower = 100;
         desc.moveName = 'Judgment';
         break;
-      case 'Undercolony':
-        basePower = 80;
-        move.category = 'Physical';
-        move.drain = [1, 2];
-        desc.moveName = 'Leech Life';
-        break;
       case 'Inverse':
         basePower = 0;
         desc.moveName = 'Trick Room';
@@ -1747,6 +1785,17 @@ export function calculateBasePowerSMSSSV(
       case 'Bewitched-Woods':
         basePower = 0;
         desc.moveName = 'Strength Sap';
+        break;
+      case 'Undercolony':
+        basePower = 80;
+        move.category = 'Physical';
+        move.drain = [1, 2];
+        desc.moveName = 'Leech Life';
+        break;
+      case 'Corrosive-Mist':
+        basePower = 250;
+        move.category = 'Physical';
+        desc.moveName = 'Explosion';
         break;
       case 'Forgotten-Battlefield':
         basePower = 0;
@@ -1995,7 +2044,8 @@ export function calculateBPModsSMSSSV(
       field,
       isGhostRevealed,
       field.isGravity,
-      isRingTarget
+      isRingTarget,
+      attacker
     );
     const type2Effectiveness = types[1] ? getMoveEffectiveness(
       gen,
@@ -2004,7 +2054,8 @@ export function calculateBPModsSMSSSV(
       field,
       isGhostRevealed,
       field.isGravity,
-      isRingTarget
+      isRingTarget,
+      attacker
     ) : 1;
     if (type1Effectiveness * type2Effectiveness >= 2) {
       bpMods.push(5461);
@@ -2738,6 +2789,13 @@ export function calculateAtModsSMSSSV(
     desc.chromaticField = field.chromaticField;
   }
 
+  // Corrosive Mist - Flash Fire additionally grants resistance to Poison Type attacks
+  if (field.chromaticField === 'Corrosive-Mist' && defender.hasAbility('Flash Fire') && move.hasType('Poison')) {
+    atMods.push(2048);
+    desc.defenderAbility = defender.ability;
+    desc.chromaticField = field.chromaticField;
+  }
+
   if (field.chromaticField === 'Forgotten-Battlefield') {
     // Forgotten Battlefield - Pokémon with Mummy have their Attack and Speed halved
     if (attacker.hasAbility('Mummy')) {
@@ -3039,7 +3097,7 @@ function calculateBaseDamageSMSSSV(
     baseDamage = pokeRound(OF32(baseDamage * 3072) / 4096);
   }
 
-  if (attacker.hasAbility('Parental Bond (Child)')) {
+  if (attacker.hasAbility('Parental Bond (Child)') || attacker.corrosiveBond) {
     baseDamage = pokeRound(OF32(baseDamage * 1024) / 4096);
   }
 

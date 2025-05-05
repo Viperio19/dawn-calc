@@ -197,6 +197,7 @@ export function getMoveEffectiveness(
   isGhostRevealed?: boolean,
   isGravity?: boolean,
   isRingTarget?: boolean,
+  attacker?: Pokemon,
 ) {
   if (isGhostRevealed && type === 'Ghost' && move.hasType('Normal', 'Fighting')) {
     return 1;
@@ -223,6 +224,25 @@ export function getMoveEffectiveness(
              ((move.hasType('Grass') && type === 'Steel') || // Bewitched Woods - Grass Types now hit Steel Type Pokemon for neutral damage
              (move.hasType('Poison') && type === 'Fairy'))) { // Bewitched Woods - Poison attacks deal neutral damage to Fairy Types
     return 1;
+  } else if (field.chromaticField === 'Corrosive-Mist') {
+    let effectiveness = gen.types.get(toID(move.type))!.effectiveness[type]!;
+    const explosion = move.named('Explosion') || (move.named('Nature Power') && !field.terrain);
+
+    // Corrosion now affects Poison Type attacks as well [Super Effective]
+    if ((attacker?.hasAbility('Corrosion') || explosion) && move.hasType('Poison') && type === 'Steel') {
+      effectiveness = 2;
+    }
+
+    if (effectiveness === 0 && isRingTarget) {
+      effectiveness = 1;
+    }
+
+    // Explosion has Poison + Fire typing
+    if (explosion) {
+      effectiveness *= gen.types.get('fire' as ID)!.effectiveness[type]!;
+    }
+
+    return effectiveness;
   // Forgotten Battlefield - Gigaton Hammer deals neutral damage to steel types
   } else if (field.chromaticField === 'Forgotten-Battlefield' && move.named('Gigaton Hammer') && type === 'Steel') {
     return 1;
@@ -854,7 +874,7 @@ export function getStabMod(pokemon: Pokemon, move: Move, field: Field, side: Sid
     } else if (move.type !== pokemon.types[0] && pokemon.hasOriginalType(move.type)) {
       stabMod += 2048;
     }
-  } else if (pokemon.hasOriginalType(move.type)) {
+  } else if (pokemon.hasOriginalType(move.type) || (move.type2! && pokemon.hasOriginalType(move.type2))) {
     stabMod += 2048;
   } else if ((pokemon.hasAbility('Protean', 'Libero') || pokemon.named('Boltund-Crest')) && !pokemon.teraType) { // Boltund Crest - Grants Libero
     stabMod += 2048;

@@ -551,6 +551,10 @@ function setPrismScaleEffects(pokeObj) {
 				pokemon.find(".saltcure").prop("checked", true);
 			}
 		});
+	// Corrosive Mist - Prism Scale: Applies toxic to both sides
+	} else if (chromaticField === 'Corrosive-Mist') {
+		autosetStatus("#p1", "Prism Scale", pokeObj);
+		autosetStatus("#p2", "Prism Scale", pokeObj);
 	// Forgotten Battlefield - Prism Scale: Changes ability to Mummy
 	} else if (chromaticField === 'Forgotten-Battlefield') {
 		var abilityObj = pokeObj.find(".ability");
@@ -660,6 +664,7 @@ var lastAutoStatus = {"#p1": "Healthy"};
 function autosetStatus(p, item, pokeObj) {
 	var currentStatus = $(p + " .status").val();
 	var pokemon = createPokemon(pokeObj);
+	var chromaticField = $("#chromatic-field").val();
 	if (currentStatus !== lastAutoStatus[p]) {
 		lastManualStatus[p] = currentStatus;
 	}
@@ -668,6 +673,10 @@ function autosetStatus(p, item, pokeObj) {
 		$(p + " .status").val("Burned");
 		$(p + " .status").change();
 	} else if (item === "Toxic Orb" || pokemon.named('Zangoose-Crest')) { // Zangoose Crest - Poisons Zangoose
+		lastAutoStatus[p] = "Badly Poisoned";
+		$(p + " .status").val("Badly Poisoned");
+		$(p + " .status").change();
+	} else if (item === "Prism Scale" && chromaticField === 'Corrosive-Mist') {
 		lastAutoStatus[p] = "Badly Poisoned";
 		$(p + " .status").val("Badly Poisoned");
 		$(p + " .status").change();
