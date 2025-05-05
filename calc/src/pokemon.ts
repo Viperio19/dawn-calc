@@ -27,6 +27,7 @@ export class Pokemon implements State.Pokemon {
   isStarstruck?: boolean;
   isLockOn?: boolean;
   gritStages?: number;
+  corrosiveBond?: boolean;
   alliesFainted?: number;
   foesFainted?: number;
   relicanthTurns?: number;
@@ -76,6 +77,7 @@ export class Pokemon implements State.Pokemon {
     this.isSaltCure = !!options.isSaltCure;
     this.isStarstruck = !!options.isStarstruck;
     this.isLockOn = !!options.isLockOn;
+    this.corrosiveBond = !!options.corrosiveBond;
     this.gritStages = options.gritStages;
     this.alliesFainted = options.alliesFainted;
     this.boostedStat = options.boostedStat;
@@ -193,6 +195,7 @@ export class Pokemon implements State.Pokemon {
       isSaltCure: this.isSaltCure,
       isStarstruck: this.isStarstruck,
       isLockOn: this.isLockOn,
+      corrosiveBond: this.corrosiveBond,
       gritStages: this.gritStages,
       alliesFainted: this.alliesFainted,
       boostedStat: this.boostedStat,
