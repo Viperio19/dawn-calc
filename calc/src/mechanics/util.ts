@@ -685,13 +685,20 @@ export function checkMultihitBoost(
     defender.stats.spe = getFinalSpeed(gen, defender, field, field.defenderSide);
   }
 
-  if (move.dropsStats) {
+  let dropsStats = move.dropsStats;
+
+  // Fable - Hyper Beam lowers Special Attack by 2 instead of recharging
+  if (field.chromaticField === 'Fable' && move.named('Hyper Beam')) {
+    dropsStats = 2;
+    desc.chromaticField = field.chromaticField;
+  }
+
+  if (dropsStats) {
     if (ignoreDefenseBoosts) {
       desc.attackerAbility = attacker.ability;
     } else {
       // No move with dropsStats has fancy logic regarding category here
       const stat = move.category === 'Special' ? 'spa' : 'atk';
-      let dropsStats = move.dropsStats;
 
       // Dragon's Den - Draco Meteor only drops 1 stage of Special Attack
       if (field.chromaticField === 'Dragons-Den' && move.named("Draco Meteor")) {

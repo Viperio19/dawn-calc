@@ -698,8 +698,10 @@ function getEndOfTurn(
   const loseItem = move.named('Knock Off') && !defender.hasAbility('Sticky Hold');
 
   // psychic noise should suppress all recovery effects
-  const healBlock = (move.named('Psychic Noise') ||
-    ((move.named('Shock Wave') || move.named('Nature Power')) && field.chromaticField === 'Thundering-Plateau')) && // Thundering Plateau - Shock Wave applies Heal Block
+  const healBlock =
+    (move.named('Psychic Noise') ||
+     ((move.named('Shock Wave') || move.named('Nature Power')) && field.chromaticField === 'Thundering-Plateau') || // Thundering Plateau - Shock Wave applies Heal Block
+     (attacker.hasItem('Prism Scale') || defender.hasItem('Prism Scale')) && field.chromaticField === 'Fable') && // Fable - Prism Scale: Apply Heal Block to both sides
     !(
       // suppression conditions
       attacker.hasAbility('Sheer Force') ||

@@ -203,7 +203,8 @@ export function calculateSMSSSV(
     'Photon Geyser',
     'Searing Sunraze Smash',
     'Sunsteel Strike'
-  ) || (field.chromaticField === 'Underwater' && move.named('Wave Crash')); // Underwater - Wave Crash ignores the abilities of other Pokémon
+  ) || (field.chromaticField === 'Underwater' && move.named('Wave Crash')) || // Underwater - Wave Crash ignores the abilities of other Pokémon
+       (field.chromaticField === 'Fable' && move.named('Outrage', 'Thrash')) // Fable - Outrage and Thrash ignore the abilities of opposing pokemon
 
   if (defenderAbilityIgnored && (attackerIgnoresAbility || moveIgnoresAbility)) {
     if (attackerIgnoresAbility) desc.attackerAbility = attacker.ability;
@@ -813,14 +814,16 @@ export function calculateSMSSSV(
 
   // Fields - Text for description
 
-  const healBlock = (move.named('Psychic Noise') ||
-  ((move.named('Shock Wave') || move.named('Nature Power')) && field.chromaticField === 'Thundering-Plateau')) && // Thundering Plateau - Shock Wave applies Heal Block
-  !(
-    // suppression conditions
-    attacker.hasAbility('Sheer Force') ||
-    defender.hasItem('Covert Cloak') ||
-    defender.hasAbility('Shield Dust', 'Aroma Veil')
-  );
+  const healBlock =
+    (move.named('Psychic Noise') ||
+     ((move.named('Shock Wave') || move.named('Nature Power')) && field.chromaticField === 'Thundering-Plateau') || // Thundering Plateau - Shock Wave applies Heal Block
+     (attacker.hasItem('Prism Scale') || defender.hasItem('Prism Scale')) && field.chromaticField === 'Fable') && // Fable - Prism Scale: Apply Heal Block to both sides
+    !(
+      // suppression conditions
+      attacker.hasAbility('Sheer Force') ||
+      defender.hasItem('Covert Cloak') ||
+      defender.hasAbility('Shield Dust', 'Aroma Veil')
+    );
 
   // Jungle - Shield Dust grants Magic Guard
   // Rainbow - Flareon gains Magic Guard
@@ -1836,6 +1839,10 @@ export function calculateBasePowerSMSSSV(
         basePower = 0;
         desc.moveName = 'Spite';
         break;
+      case 'Fable':
+        basePower = 0;
+        desc.moveName = 'Noble Roar';
+        break;
       default:
         basePower = 80;
         desc.moveName = 'Tri Attack';
@@ -1933,6 +1940,13 @@ export function calculateBasePowerSMSSSV(
   // Forgotten Battlefield - Sacred Sword is 120 Base Power when used by a Steel Type
   if (field.chromaticField === 'Forgotten-Battlefield' && move.named('Sacred Sword') && attacker.hasType('Steel')) {
     basePower = 120;
+    desc.moveBP = basePower;
+    desc.chromaticField = field.chromaticField;
+  }
+
+  // Fable - Dragon Claw has 90 base power
+  if (field.chromaticField === 'Fable' && move.named('Dragon Claw')) {
+    basePower = 90;
     desc.moveBP = basePower;
     desc.chromaticField = field.chromaticField;
   }
@@ -2231,10 +2245,15 @@ export function calculateBPModsSMSSSV(
     desc.isPowerSpot = true;
   }
 
-  if (attacker.hasAbility('Rivalry') && ![attacker.gender, defender.gender].includes('N')) {
+  // Fable - Rivalry guarantees the damage increase regardless of gender
+  if (attacker.hasAbility('Rivalry') && (![attacker.gender, defender.gender].includes('N') || field.chromaticField === 'Fable')) {
     if (attacker.gender === defender.gender) {
       bpMods.push(5120);
       desc.rivalry = 'buffed';
+    } else if (field.chromaticField === 'Fable') {
+      bpMods.push(5120);
+      desc.rivalry = 'buffed';
+      desc.chromaticField = field.chromaticField;
     } else {
       bpMods.push(3072);
       desc.rivalry = 'nerfed';
@@ -2888,7 +2907,15 @@ export function calculateAtModsSMSSSV(
       atMods.push(8192);
       desc.chromaticField = field.chromaticField;
     }
+  }
 
+  if (field.chromaticField === 'Fable') {
+    // Fable - Reckless, Mold Breaker, Hustle, Berserk, and Anger Point cause this Pokémon's offensive stats to be multiplied by 1.5 / Pokémon with Queenly Majesty deal x1.5 damage 
+    if (attacker.hasAbility('Reckless', 'Mold Breaker', 'Hustle', 'Berserk', 'Anger Point', 'Queenly Majesty')) {
+      atMods.push(6144);
+      desc.attackerAbility = attacker.ability;
+      desc.chromaticField = field.chromaticField;
+    }
   }
 
   // Fields - Prism Scale Effects: Miscellaneous boosts
