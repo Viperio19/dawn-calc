@@ -1412,7 +1412,17 @@ export function calculateSMSSSV(
     damage[i] =
       getFinalDamage(baseDamage, i, typeEffectiveness, applyBurn, stabMod, finalMod, protect);
   }
-  result.damage = childDamage ? [damage, childDamage] : damage;
+
+  result.damage =
+  childDamage
+    ? [damage, childDamage]
+    : noseDamage
+      ? [damage, noseDamage]
+      : spitUpDamage
+        ? [damage, spitUpDamage]
+        : typhlosionDamage
+          ? [damage, typhlosionDamage]
+          : damage;
 
   desc.attackBoost =
     move.named('Foul Play') ? defender.boosts[attackStat] : attacker.boosts[attackStat];
@@ -1506,17 +1516,6 @@ export function calculateSMSSSV(
     desc.defenseBoost = origDefBoost;
     desc.attackBoost = origAtkBoost;
   }
-
-  result.damage =
-    childDamage
-      ? [damage, childDamage]
-      : noseDamage
-        ? [damage, noseDamage]
-        : spitUpDamage
-          ? [damage, spitUpDamage]
-          : typhlosionDamage
-            ? [damage, typhlosionDamage]
-            : damage;
 
   // #endregion
 
