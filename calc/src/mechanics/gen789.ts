@@ -1049,8 +1049,7 @@ export function calculateSMSSSV(
   }
 
   if (field.chromaticField === 'Forgotten-Battlefield') {
-    if ((move.named('Poltergeist') && (!defender.item || isQPActive(defender, field))) || // Forgotten Battlefield - Poltergeist never fails
-        (move.named('Gigaton Hammer') && defender.hasType('Steel'))) { // Forgotten Battlefield - Gigaton Hammer deals neutral damage to steel types
+    if ((move.named('Gigaton Hammer') && defender.hasType('Steel'))) { // Forgotten Battlefield - Gigaton Hammer deals double damage to steel and fighting types
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -2480,9 +2479,9 @@ export function calculateAttackSMSSSV(
     attack += Math.floor((Math.floor(attacker.stats['spd'] * 6 / 5) / 10));
   }
 
-  // Dusknoir Crest - Increases physical attack by 25%
+  // Dusknoir Crest - Increases physical attack by 50%
   if (attacker.named('Dusknoir-Crest') && move.category === 'Physical') {
-    attack = pokeRound((attack * 5) / 4);
+    attack = pokeRound((attack * 3) / 2);
   }
 
   // Hypno Crest - Increases special attack by 50%
@@ -2747,9 +2746,9 @@ export function calculateAtModsSMSSSV(
 
   // Fields - Attack Modifiers
 
-  // Haunted Graveyard - Dazzling Gleam, Draining Kiss, Foul Play, and Spirit Break deal 1.2x damage
-  if (field.chromaticField === 'Haunted-Graveyard' && move.named('Dazzling Gleam', 'Draining Kiss', 'Foul Play', 'Spirit Break')) {
-    atMods.push(4915);
+  // Forgotten Battlefield - Gigaton Hammer deals neutral Double damage to Fighting and steel types
+  if (field.chromaticField === 'Forgotten Battlefield' && move.named('Gigaton Hammer') && (defender.hasType('Steel') || defender.hasType('Fighting'))) {
+    atMods.push(8192);
     desc.chromaticField = field.chromaticField;
   }
 
