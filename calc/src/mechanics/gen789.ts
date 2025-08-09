@@ -1049,7 +1049,7 @@ export function calculateSMSSSV(
   }
 
   if (field.chromaticField === 'Forgotten-Battlefield') {
-    if ((move.named('Gigaton Hammer') && defender.hasType('Steel'))) { // Forgotten Battlefield - Gigaton Hammer deals double damage to steel and fighting types
+    if (move.named('Gigaton Hammer') && defender.hasType('Steel')) { // Forgotten Battlefield - Gigaton Hammer deals double damage to steel and fighting types
       desc.chromaticField = field.chromaticField;
     }
   }
