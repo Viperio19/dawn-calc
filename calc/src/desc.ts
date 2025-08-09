@@ -938,7 +938,6 @@ function getEndOfTurn(
     texts.push((modifier > 1 ? 'reduced ' : '') + 'burn damage');
   } else if (
     (defender.hasStatus('slp') || defender.hasAbility('Comatose')) &&
-    (attacker.hasAbility('Bad Dreams') || field.chromaticField === 'Haunted-Graveyard') && // Haunted Graveyard - Bad Dreams is always active
     !defenderMagicGuard
   ) {
     damage -= Math.floor(defender.maxHP() / 8);
