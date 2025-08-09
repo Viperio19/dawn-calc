@@ -2746,7 +2746,7 @@ export function calculateAtModsSMSSSV(
 
   // Fields - Attack Modifiers
 
-  // Forgotten Battlefield - Gigaton Hammer deals neutral Double damage to Fighting and steel types
+  // Forgotten Battlefield - Gigaton Hammer deals double damage to Fighting and Steel types
   if (field.chromaticField === 'Forgotten Battlefield' && move.named('Gigaton Hammer') && (defender.hasType('Steel') || defender.hasType('Fighting'))) {
     atMods.push(8192);
     desc.chromaticField = field.chromaticField;
