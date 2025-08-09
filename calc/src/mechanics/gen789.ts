@@ -1048,12 +1048,6 @@ export function calculateSMSSSV(
     }
   }
 
-  if (field.chromaticField === 'Forgotten-Battlefield') {
-    if (move.named('Gigaton Hammer') && defender.hasType('Steel')) { // Forgotten Battlefield - Gigaton Hammer deals double damage to steel and fighting types
-      desc.chromaticField = field.chromaticField;
-    }
-  }
-
   if (move.type === 'Stellar') {
     desc.defenderTera = defender.teraType; // always show in this case
     typeEffectiveness = !defender.teraType ? 1 : 2;
@@ -2747,7 +2741,7 @@ export function calculateAtModsSMSSSV(
   // Fields - Attack Modifiers
 
   // Forgotten Battlefield - Gigaton Hammer deals double damage to Fighting and Steel types
-  if (field.chromaticField === 'Forgotten Battlefield' && move.named('Gigaton Hammer') && (defender.hasType('Steel') || defender.hasType('Fighting'))) {
+  if (field.chromaticField === 'Forgotten-Battlefield' && move.named('Gigaton Hammer') && defender.hasType('Fighting', 'Steel')) {
     atMods.push(8192);
     desc.chromaticField = field.chromaticField;
   }
