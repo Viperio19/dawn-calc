@@ -10106,7 +10106,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   Golisopod: {otherFormes: ['Golisopod-Aevian']},
   Gothitelle: {otherFormes: ['Gothitelle-Crest', 'Gothitelle-Crest-Dark']},
   Grimmsnarl: {otherFormes: ['Grimmsnarl-Gmax', 'Grimmsnarl-Mega-G']},
-  Gyarados: {otherFormes: ['Gyarados-Aevian']},
+  Gyarados: {otherFormes: ['Gyarados-Aevian', 'Gyarados-Mega']},
   'Hakamo-o': {otherFormes: ['Hakamo-o-Aevian']},
   Hatterene: {otherFormes: ['Hatterene-Gmax', 'Hatterene-Mega-G']},
   Hypno: {otherFormes: ['Hypno-Crest']},
