@@ -543,14 +543,11 @@ function setPrismScaleEffects(pokeObj) {
 		}
 	// Undercolony - Prism Scale: Applies Salt Cure to the opponent
 	} else if (chromaticField === 'Undercolony') {
-		var allPokemon = $('.poke-info');
-		allPokemon.each(function () {
-			var pokemon = $(this);
-			var id2 = pokemon.prop("id");
-			if (id !== id2) {
-				pokemon.find(".saltcure").prop("checked", true);
-			}
-		});
+		if (id === 'p1') {
+			$("#saltCureR").prop("checked", true);
+		} else {
+			$("#saltCureL").prop("checked", true);
+		}
 	// Corrosive Mist - Prism Scale: Applies toxic to both sides
 	} else if (chromaticField === 'Corrosive-Mist') {
 		autosetStatus("#p1", "Prism Scale", pokeObj);
@@ -764,6 +761,7 @@ $(".move-selector").change(function () {
 	var stockpile = moveName === 'Spit Up' || (moveName === 'Belch' && startsWith(pokemonName, "Swalot")); 
 	if (Array.isArray(move.multihit) || (!isNaN(move.multihit) && move.multiaccuracy) || startsWith(pokemonName, "Cinccino-Crest")) {
 		moveGroupObj.children(".move-times").hide();
+		moveGroupObj.children(".move-times").val(1);
 		moveGroupObj.children(".stockpile").hide();
 		moveGroupObj.children(".move-hits").empty();
 		if (!isNaN(move.multihit)) {
@@ -795,10 +793,19 @@ $(".move-selector").change(function () {
 
 		moveGroupObj.children(".move-hits").val(moveHits);
 	} else if (stockpile) {
+		moveGroupObj.children(".move-hits").val(1);
 		moveGroupObj.children(".move-hits").hide();
 		moveGroupObj.children(".stockpile").show();
+		moveGroupObj.children(".move-times").val(1);
+		moveGroupObj.children(".move-times").hide();
+	} else if (!isNaN(move.multihit)) {
+		moveGroupObj.children(".move-hits").val(1);
+		moveGroupObj.children(".move-hits").hide();
+		moveGroupObj.children(".stockpile").hide();
+		moveGroupObj.children(".move-times").val(1);
 		moveGroupObj.children(".move-times").hide();
 	} else {
+		moveGroupObj.children(".move-hits").val(1);
 		moveGroupObj.children(".move-hits").hide();
 		moveGroupObj.children(".stockpile").hide();
 		moveGroupObj.children(".move-times").show();
@@ -1029,8 +1036,13 @@ $(".set-selector").change(function () {
 		} else {
 			formeObj.hide();
 		}
-		calcHP(pokeObj);
 		calcStats(pokeObj);
+		var total = pokeObj.find(".hp").find(".total").text();
+		pokeObj.find(".max-hp").text(total);
+		pokeObj.find(".max-hp").attr("data-prev", total);
+		pokeObj.find(".current-hp").val(total);
+		pokeObj.find(".current-hp").attr("data-set", true);
+		calcHP(pokeObj);
 		abilityObj.change();
 		itemObj.change();
 		if (pokemon.gender === "N") {
@@ -1364,7 +1376,6 @@ function createPokemon(pokeInfo) {
 			ivs: ivs,
 			evs: evs,
 			isDynamaxed: isDynamaxed,
-			isSaltCure: pokeInfo.find(".saltcure").is(":checked"),
 			isStarstruck: pokeInfo.find(".starstruck").is(":checked"),
 			isLockOn: pokeInfo.find(".lockon").is(":checked"),
 			gritStages: pokeInfo.prop("id") === 'p1'
@@ -1465,6 +1476,7 @@ function createField() {
 	var isAquaRing = [$("#aquaRingL").prop("checked"), $("#aquaRingR").prop("checked")];
 	var isSeeded = [$("#leechSeedL").prop("checked"), $("#leechSeedR").prop("checked")];
 	var isNightmare = [$("#nightmareL").prop("checked"), $("#nightmareR").prop("checked")];
+	var isSaltCured = [$("#saltCureL").prop("checked"), $("#saltCureR").prop("checked")];
 	var isForesight = [$("#foresightL").prop("checked"), $("#foresightR").prop("checked")];
 	var isSoak = [$("#soakL").prop("checked"), $("#soakR").prop("checked")];
 	var isMagnetRise = [$("#magnetRiseL").prop("checked"), $("#magnetRiseR").prop("checked")];
@@ -1482,12 +1494,35 @@ function createField() {
 
 	var createSide = function (i) {
 		return new calc.Side({
-			spikes: spikes[i], isSR: isSR[i], steelsurge: steelsurge[i], isStickyWeb: isStickyWeb[i],
-			vinelash: vinelash[i], wildfire: wildfire[i], cannonade: cannonade[i], volcalith: volcalith[i],
-			isReflect: isReflect[i], isLightScreen: isLightScreen[i], isProtected: isProtected[i], isIngrain: isIngrain[i],
-			isAquaRing: isAquaRing[i], isSeeded: isSeeded[i], isNightmare: isNightmare[i], isForesight: isForesight[i], isSoak: isSoak[i], isTailwind: isTailwind[i],
-			isMagnetRise: isMagnetRise[i], isHelpingHand: isHelpingHand[i], isFlowerGift: isFlowerGift[i], isFriendGuard: isFriendGuard[i],
-			isAuroraVeil: isAuroraVeil[i], isAreniteWall: isAreniteWall[i], isBattery: isBattery[i], isPowerSpot: isPowerSpot[i], isSwitching: isSwitchingOut[i] ? 'out' : undefined
+			spikes: spikes[i],
+			isSR: isSR[i],
+			steelsurge: steelsurge[i],
+			isStickyWeb: isStickyWeb[i],
+			vinelash: vinelash[i],
+			wildfire: wildfire[i],
+			cannonade: cannonade[i],
+			volcalith: volcalith[i],
+			isReflect: isReflect[i],
+			isLightScreen: isLightScreen[i],
+			isProtected: isProtected[i],
+			isIngrain: isIngrain[i],
+			isAquaRing: isAquaRing[i],
+			isSeeded: isSeeded[i],
+			isNightmare: isNightmare[i],
+			isSaltCured: isSaltCured[i],
+			isForesight: isForesight[i],
+			isSoak: isSoak[i],
+			isTailwind: isTailwind[i],
+			isMagnetRise: isMagnetRise[i],
+			isHelpingHand: isHelpingHand[i],
+			isFlowerGift: isFlowerGift[i],
+			isSteelySpirit: isSteelySpirit[i],
+			isFriendGuard: isFriendGuard[i],
+			isAuroraVeil: isAuroraVeil[i],
+			isAreniteWall: isAreniteWall[i],
+			isBattery: isBattery[i],
+			isPowerSpot: isPowerSpot[i],
+			isSwitching: isSwitchingOut[i] ? 'out' : undefined
 		});
 	};
 	return new calc.Field({
@@ -1689,6 +1724,7 @@ $(".gen").change(function () {
 	loadDefaultLists();
 	$(".gen-specific.g" + gen).show();
 	$(".gen-specific").not(".g" + gen).hide();
+	$("input:radio[name='format']").change();
 	var typeOptions = getSelectOptions(Object.keys(typeChart));
 	$("select.type1, select.move-type").find("option").remove().end().append(typeOptions);
 	$("select.teraType").find("option").remove().end().append(getSelectOptions(Object.keys(typeChart).slice(1)));
@@ -1754,6 +1790,8 @@ function clearField() {
 	$("#leechSeedR").prop("checked", false);
 	$("#nightmareL").prop("checked", false);
 	$("#nightmareR").prop("checked", false);
+	$("#saltCureL").prop("checked", false);
+	$("#saltCureR").prop("checked", false);
 	$("#foresightL").prop("checked", false);
 	$("#foresightR").prop("checked", false);
 	$("#helpingHandL").prop("checked", false);

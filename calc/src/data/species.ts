@@ -7042,7 +7042,16 @@ const SM_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     bs: {hp: 45, at: 65, df: 40, sa: 30, sd: 40, sp: 60},
     weightkg: 9.2,
     nfe: true,
+    otherFormes: ['Rockruff-Dusk'],
     abilities: {0: 'Keen Eye'},
+  },
+  'Rockruff-Dusk': {
+    types: ['Rock'],
+    bs: {hp: 45, at: 65, df: 40, sa: 30, sd: 40, sp: 60},
+    weightkg: 9.2,
+    nfe: true,
+    abilities: {0: 'Own Tempo'},
+    baseSpecies: 'Rockruff',
   },
   Rowlet: {
     types: ['Grass', 'Flying'],
@@ -9123,6 +9132,13 @@ const SV_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     gender: 'N',
     abilities: {0: 'Sword of Ruin'},
   },
+  Chuggon: {
+    types: ['Dragon', 'Poison'],
+    bs: {hp: 30, at: 23, df: 77, sa: 55, sd: 65, sp: 30},
+    weightkg: 50,
+    abilities: {0: 'Shell Armor'},
+    nfe: true,
+  },
   Chuggalong: {
     types: ['Dragon', 'Poison'],
     bs: {hp: 45, at: 43, df: 117, sa: 120, sd: 110, sp: 108},
@@ -9179,6 +9195,13 @@ const SV_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     bs: {hp: 150, at: 100, df: 115, sa: 65, sd: 65, sp: 35},
     weightkg: 220,
     abilities: {0: 'Unaware'},
+  },
+  Draggalong: {
+    types: ['Dragon', 'Poison'],
+    bs: {hp: 40, at: 33, df: 92, sa: 95, sd: 80, sp: 85},
+    weightkg: 110,
+    abilities: {0: 'Armor Tail'},
+    nfe: true,
   },
   Dudunsparce: {
     types: ['Normal'],
@@ -9760,6 +9783,12 @@ const SV_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     gender: 'N',
     abilities: {0: 'Protosynthesis'},
   },
+  Shox: {
+    types: ['Electric', 'Normal'],
+    bs: {hp: 136, at: 55, df: 87, sa: 108, sd: 108, sp: 56},
+    weightkg: 99.9,
+    abilities: {0: 'Electromorphosis'},
+  },
   Shroodle: {
     types: ['Poison', 'Normal'],
     bs: {hp: 40, at: 65, df: 35, sa: 40, sd: 35, sp: 75},
@@ -10077,7 +10106,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   Golisopod: {otherFormes: ['Golisopod-Aevian']},
   Gothitelle: {otherFormes: ['Gothitelle-Crest', 'Gothitelle-Crest-Dark']},
   Grimmsnarl: {otherFormes: ['Grimmsnarl-Gmax', 'Grimmsnarl-Mega-G']},
-  Gyarados: {otherFormes: ['Gyarados-Aevian']},
+  Gyarados: {otherFormes: ['Gyarados-Aevian', 'Gyarados-Mega']},
   'Hakamo-o': {otherFormes: ['Hakamo-o-Aevian']},
   Hatterene: {otherFormes: ['Hatterene-Gmax', 'Hatterene-Mega-G']},
   Hypno: {otherFormes: ['Hypno-Crest']},
