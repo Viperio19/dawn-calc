@@ -251,9 +251,6 @@ export function getMoveEffectiveness(
     }
 
     return effectiveness;
-  // Forgotten Battlefield - Gigaton Hammer deals neutral damage to steel types
-  } else if (field.chromaticField === 'Forgotten-Battlefield' && move.named('Gigaton Hammer') && type === 'Steel') {
-    return 1;
   } else {
     let effectiveness = gen.types.get(toID(move.type))!.effectiveness[type]!;
     if (effectiveness === 0 && (isRingTarget || (field.defenderSide.isIngrain && move.hasType('Ground')))) {
