@@ -160,12 +160,13 @@ export function getRecovery(
     recovery[0] = recovery[1] = average - attacker.curHP();
   }
 
+  // Parental Bond counts as multiple heals for drain moves, but not for Shell Bell
+  // Currently no drain moves are multihit, however this covers for it.
+  if (attacker.hasAbility('Parental Bond') || move.hits > 1) {
+    [minD, maxD] = multiDamageRange(damage) as [number[], number[]];
+  }
+
   if (move.drain) {
-    // Parental Bond counts as multiple heals for drain moves, but not for Shell Bell
-    // Currently no drain moves are multihit, however this covers for it.
-    if (attacker.hasAbility('Parental Bond') || move.hits > 1) {
-      [minD, maxD] = multiDamageRange(damage) as [number[], number[]];
-    }
     const percentHealed = move.drain[0] / move.drain[1];
     const max = Math.round(defender.curHP() * percentHealed);
     for (let i = 0; i < minD.length; i++) {
@@ -173,7 +174,7 @@ export function getRecovery(
       for (const j in recovery) {
         let drained = Math.max(Math.round(range[j] * percentHealed), 1);
         if (attacker.hasItem('Big Root') || attacker.named('Shiinotic-Crest')) drained = Math.trunc(drained * 5324 / 4096); // Shiinotic Crest - Draining effect recovery is boosted by 30%
-        recovery[j] += Math.min(drained * move.hits, max);
+        recovery[j] += Math.min(drained, max);
       }
     }
   }
@@ -186,7 +187,7 @@ export function getRecovery(
       const range = [minD[i], maxD[i]];
       for (const j in recovery) {
         let drained = Math.max(Math.round(range[j] * percentHealed), 1);
-        recovery[j] += Math.min(drained * move.hits, max);
+        recovery[j] += Math.min(drained, max);
       }
     }
   }
@@ -199,7 +200,7 @@ export function getRecovery(
       const range = [minD[i], maxD[i]];
       for (const j in recovery) {
         let drained = Math.max(Math.round(range[j] * percentHealed), 1);
-        recovery[j] += Math.min(drained * move.hits, max);
+        recovery[j] += Math.min(drained, max);
       }
     }
   }

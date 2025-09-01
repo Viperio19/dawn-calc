@@ -116,10 +116,33 @@ export class Move implements State.Move {
         this.hits = (options.ability === 'Skill Link')
           ? 5
           : options.hits!;
-      // Ledian Crest - Punching Moves hit 4 Times
-      } else if (options.species == 'Ledian-Crest' && data.flags.punch) {
-        this.hits = 4;
       }
+      
+      // Ledian Crest - Punching Moves hit 4 Times
+      if (options.species == 'Ledian-Crest' && data.flags.punch) {
+        if (data.id === 'cometpunch') {
+          switch (this.hits) {
+          case 1:
+            this.hits = 4;
+            break;
+          case 2:
+            this.hits = 8;
+            break;
+          case 3:
+            this.hits = 12;
+            break;
+          case 4:
+            this.hits = 16;
+            break;
+          case 5:
+            this.hits = 20;
+            break;
+          }
+        } else {
+          this.hits = 4;
+        }
+      }
+
       this.timesUsedWithMetronome = options.timesUsedWithMetronome;
       this.stockpiles = options.stockpiles;
       this.moveSlot = options.moveSlot;
