@@ -609,7 +609,7 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
     !defenderSide.isMagnetRise &&
     !defender.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') && // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
     !defender.hasItem('Air Balloon') &&
-    !defender.named('Probopass-Crest')) // Probopass Crest - Grants Levitate
+    !defender.named('Probopass-Crest')); // Probopass Crest - Grants Levitate
 
   // Acidic Wasteland - Hazards are consumed when set but regurgitate at the end of the turn as an attacking move
   if (field.chromaticField === 'Acidic-Wasteland') {
@@ -641,8 +641,10 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
         !(defender.hasType('Rock') && field.chromaticField === 'Undercolony')) { // Undercolony - Rock types absorb Stealth Rocks
       const rockType = gen.types.get('rock' as ID)!;
       let effectiveness =
-        rockType.effectiveness[defender.types[0]]! *
-        (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
+        defender.teraType && defender.teraType !== 'Stellar'
+          ? rockType.effectiveness[defender.teraType]!
+          : rockType.effectiveness[defender.types[0]]! *
+            (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
 
       // Glaceon Crest - Gives resistance to fighting and rock type moves
       if (defender.named('Glaceon-Crest') && effectiveness > 0.5) {
@@ -679,8 +681,10 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
     if (defenderSide.steelsurge && !defender.hasAbility('Mountaineer')) {
       const steelType = gen.types.get('steel' as ID)!;
       let effectiveness =
-        steelType.effectiveness[defender.types[0]]! *
-        (defender.types[1] ? steelType.effectiveness[defender.types[1]]! : 1);
+        defender.teraType && defender.teraType !== 'Stellar'
+          ? steelType.effectiveness[defender.teraType]!
+          : steelType.effectiveness[defender.types[0]]! *
+            (defender.types[1] ? steelType.effectiveness[defender.types[1]]! : 1);
 
       // XOR between Torterra-Crest and Inverse Field so they cancel each other out
       if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
@@ -958,7 +962,7 @@ function getEndOfTurn(
   }
 
   if (!defenderMagicGuard &&
-      (TRAPPING.includes(move.name) ||
+      ((TRAPPING.includes(move.name) && gen.num > 1) ||
        (attacker.named('Vespiquen-Crest-Offense') && move.named('Attack Order')) || // Vespiquen Crest - Attack order applies Infestation
        (move.named('Leaf Tornado') && field.chromaticField === 'Flower-Garden') || // Flower Garden - Leaf Tornado is now a binding move that deals 1/8 max HP per turn for 2-5 turns
        (move.named('Sandsear Storm') && field.chromaticField === 'Desert'))) { // Desert - Sandsear Storm applies Sand Tomb trapping and chip damage effect 
