@@ -128,7 +128,8 @@ export function calculateSMSSSV(
   if (defender.teraType !== 'Stellar') desc.defenderTera = defender.teraType;
 
   if (move.named('Photon Geyser', 'Light That Burns the Sky') ||
-      (move.named('Tera Blast') && attacker.teraType)) {
+      (move.named('Tera Blast') && attacker.teraType) ||
+      (move.named('Tera Starstorm') && attacker.teraType && attacker.named('Terapagos-Stellar'))) {
     move.category = attacker.stats.atk > attacker.stats.spa ? 'Physical' : 'Special';
   }
 
@@ -2217,7 +2218,7 @@ export function calculateBPModsSMSSSV(
   // Sheer Force does not power up max moves or remove the effects (SadisticMystic)
   if (
     (attacker.hasAbility('Sheer Force') &&
-      (move.secondaries || move.named('Order Up')) && !move.isMax) ||
+      (move.secondaries || move.named('Electro Shot', 'Order Up')) && !move.isMax) ||
     (attacker.hasAbility('Sand Force') &&
       field.hasWeather('Sand') && move.hasType('Rock', 'Ground', 'Steel')) ||
     (attacker.hasAbility('Analytic') &&
@@ -2963,10 +2964,12 @@ export function calculateDefenseSMSSSV(
         : hitsPhysical
           ? 'def'
           : 'spd';
+
+  const boosts = defender.boosts[field.isWonderRoom ? hitsPhysical ? 'spd' : 'def' : defenseStat];
   
   desc.defenseEVs = getStatDescriptionText(gen, defender, defenseStat, defender.nature);
-  if (defender.boosts[defenseStat] === 0 ||
-      (isCritical && defender.boosts[defenseStat] > 0) ||
+  if (boosts === 0 ||
+      (isCritical && boosts > 0) ||
       move.ignoreDefensive) {
     defense = defender.rawStats[defenseStat];
   } else if (attacker.hasAbility('Unaware')) {
@@ -2987,8 +2990,8 @@ export function calculateDefenseSMSSSV(
     desc.gritStages = attacker.gritStages;
     desc.chromaticField = field.chromaticField;
   } else {
-    defense = getModifiedStat(defender.rawStats[defenseStat]!, defender.boosts[defenseStat]!);
-    desc.defenseBoost = defender.boosts[defenseStat];
+    defense = getModifiedStat(defender.rawStats[defenseStat]!, boosts);
+    desc.defenseBoost = boosts;
   }
 
   // unlike all other defense modifiers, Sandstorm SpD boost gets applied directly
