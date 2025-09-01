@@ -7042,7 +7042,16 @@ const SM_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     bs: {hp: 45, at: 65, df: 40, sa: 30, sd: 40, sp: 60},
     weightkg: 9.2,
     nfe: true,
+    otherFormes: ['Rockruff-Dusk'],
     abilities: {0: 'Keen Eye'},
+  },
+  'Rockruff-Dusk': {
+    types: ['Rock'],
+    bs: {hp: 45, at: 65, df: 40, sa: 30, sd: 40, sp: 60},
+    weightkg: 9.2,
+    nfe: true,
+    abilities: {0: 'Own Tempo'},
+    baseSpecies: 'Rockruff',
   },
   Rowlet: {
     types: ['Grass', 'Flying'],
@@ -9123,6 +9132,13 @@ const SV_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     gender: 'N',
     abilities: {0: 'Sword of Ruin'},
   },
+  Chuggon: {
+    types: ['Dragon', 'Poison'],
+    bs: {hp: 30, at: 23, df: 77, sa: 55, sd: 65, sp: 30},
+    weightkg: 50,
+    abilities: {0: 'Shell Armor'},
+    nfe: true,
+  },
   Chuggalong: {
     types: ['Dragon', 'Poison'],
     bs: {hp: 45, at: 43, df: 117, sa: 120, sd: 110, sp: 108},
@@ -9179,6 +9195,13 @@ const SV_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     bs: {hp: 150, at: 100, df: 115, sa: 65, sd: 65, sp: 35},
     weightkg: 220,
     abilities: {0: 'Unaware'},
+  },
+  Draggalong: {
+    types: ['Dragon', 'Poison'],
+    bs: {hp: 40, at: 33, df: 92, sa: 95, sd: 80, sp: 85},
+    weightkg: 110,
+    abilities: {0: 'Armor Tail'},
+    nfe: true,
   },
   Dudunsparce: {
     types: ['Normal'],
@@ -9713,6 +9736,22 @@ const SV_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     gender: 'N',
     abilities: {0: 'Protosynthesis'},
   },
+  Ramnarok: {
+    types: ['Fire', 'Steel'],
+    bs: {hp: 110, at: 63, df: 104, sa: 104, sd: 134, sp: 85},
+    weightkg: 250,
+    abilities: {0: 'No Guard'},
+    otherFormes: ['Ramnarok-Radiant'],
+    gender: 'N',
+  },
+  'Ramnarok-Radiant': {
+    types: ['Fire', 'Ice'],
+    bs: {hp: 110, at: 63, df: 85, sa: 134, sd: 54, sp: 154},
+    weightkg: 182,
+    abilities: {0: 'No Guard'},
+    baseSpecies: 'Ramnarok',
+    gender: 'N',
+  },
   Rellor: {
     types: ['Bug'],
     bs: {hp: 41, at: 50, df: 60, sa: 31, sd: 58, sp: 30},
@@ -9759,6 +9798,12 @@ const SV_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     weightkg: 8,
     gender: 'N',
     abilities: {0: 'Protosynthesis'},
+  },
+  Shox: {
+    types: ['Electric', 'Normal'],
+    bs: {hp: 136, at: 55, df: 87, sa: 108, sd: 108, sp: 56},
+    weightkg: 99.9,
+    abilities: {0: 'Electromorphosis'},
   },
   Shroodle: {
     types: ['Poison', 'Normal'],
@@ -10024,6 +10069,7 @@ const SV_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   },
 };
 
+// Crests - Aevian - Mega-Gmax - Custom Eeveelutions - Form declarations for all these new forms
 const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   Alcremie: {otherFormes: ['Alcremie-Gmax', 'Alcremie-Mega-G']},
   Ampharos: {otherFormes: ['Ampharos-Aevian', 'Ampharos-Aevian-Crest', 'Ampharos-Mega']},
@@ -10076,7 +10122,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   Golisopod: {otherFormes: ['Golisopod-Aevian']},
   Gothitelle: {otherFormes: ['Gothitelle-Crest', 'Gothitelle-Crest-Dark']},
   Grimmsnarl: {otherFormes: ['Grimmsnarl-Gmax', 'Grimmsnarl-Mega-G']},
-  Gyarados: {otherFormes: ['Gyarados-Aevian']},
+  Gyarados: {otherFormes: ['Gyarados-Aevian', 'Gyarados-Mega']},
   'Hakamo-o': {otherFormes: ['Hakamo-o-Aevian']},
   Hatterene: {otherFormes: ['Hatterene-Gmax', 'Hatterene-Mega-G']},
   Hypno: {otherFormes: ['Hypno-Crest']},
@@ -10183,7 +10229,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
   Torterra: {otherFormes: ['Torterra-Crest']},
   Toxtricity: {otherFormes: ['Toxtricity-Aevian', 'Toxtricity-Gmax', 'Toxtricity-Low-Key', 'Toxtricity-Low-Key-Gmax', 'Toxtricity-Mega-G']},
   Typhlosion: {otherFormes: ['Typhlosion-Hisui', 'Typhlosion-Crest']},
-  Urshifu: {otherFormes: ['Urshifu-Gmax', 'Urshifu-Mega-G', 'Urshifu-Rapid-Strike', 'Urshifu-Rapid-Strike-Gmax', 'Urshifu-Rapid-Strike-Mega-G']},
+  Urshifu: {otherFormes: ['Urshifu-Gmax', 'Urshifu-Mega-G', 'Urshifu-Rapid-Strike', 'Urshifu-Rapid-Strike-Gmax', 'Urshifu-RS-Mega-G']},
   Venusaur: {otherFormes: ['Venusaur-Mega', 'Venusaur-Gmax', 'Venusaur-Mega-G']},
   Vespiquen: {otherFormes: ['Vespiquen-Crest-Offense', 'Vespiquen-Crest-Defense']},
   Volcarona: {otherFormes: ['Volcarona-Aevian']},
@@ -10388,7 +10434,7 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<SpeciesData>} = {
     abilities: {0: 'Unseen Fist'},
     baseSpecies: 'Urshifu',
   },
-  'Urshifu-Rapid-Strike-Mega-G': {
+  'Urshifu-RS-Mega-G': {
     types: ['Fighting', 'Water'],
     bs: {hp: 100, at: 165, df: 110, sa: 73, sd: 70, sp: 132},
     weightkg: 221.6,

@@ -23,6 +23,7 @@ export class Move implements State.Move {
   moveSlot?: number;
   bp: number;
   type: I.TypeName;
+  type2?: I.TypeName;
   category: I.MoveCategory;
   flags: I.MoveFlags;
   secondaries: any;
@@ -110,10 +111,12 @@ export class Move implements State.Move {
               : data.multihit[0] + 1;
           }
         }
+      // Cinccino Crest - All moves non flat damage moves turn into multi-strike moves, 2-5 hits of 35% the BP
       } else if (options.species == 'Cinccino-Crest') {
         this.hits = (options.ability === 'Skill Link')
           ? 5
-          : 3;
+          : options.hits!;
+      // Ledian Crest - Punching Moves hit 4 Times
       } else if (options.species == 'Ledian-Crest' && data.flags.punch) {
         this.hits = 4;
       }
@@ -184,7 +187,7 @@ export class Move implements State.Move {
   }
 
   hasType(...types: Array<(I.TypeName | undefined)>) {
-    return types.includes(this.type);
+    return types.includes(this.type) || (this.type2! && types.includes(this.type2));
   }
 
   clone() {

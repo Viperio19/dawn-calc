@@ -62,8 +62,8 @@ export function calculateBWXY(
 
   checkIntimidate(gen, attacker, defender, field);
   checkIntimidate(gen, defender, attacker, field);
-  checkDownload(attacker, defender, field.isWonderRoom);
-  checkDownload(defender, attacker, field.isWonderRoom);
+  checkDownload(attacker, defender, field);
+  checkDownload(defender, attacker, field);
 
   computeFinalStats(gen, attacker, defender, field, 'atk', 'spa');
 
@@ -257,7 +257,7 @@ export function calculateBWXY(
     return result;
   }
 
-  if (move.priority > 0 && field.hasTerrain('Psychic') && isGrounded(defender, field, field.defenderSide.isIngrain)) {
+  if (move.priority > 0 && field.hasTerrain('Psychic') && isGrounded(defender, field, field.defenderSide)) {
     desc.terrain = field.terrain;
     return result;
   }
@@ -329,7 +329,7 @@ export function calculateBWXY(
 
   // the random factor is applied between the crit mod and the stab mod, so don't apply anything
   // below this until we're inside the loop
-  let stabMod = getStabMod(attacker, move, desc);
+  let stabMod = getStabMod(attacker, move, field, field.attackerSide, desc);
 
   const applyBurn =
     attacker.hasStatus('brn') &&
@@ -362,16 +362,18 @@ export function calculateBWXY(
     desc.attackerAbility = attacker.ability;
   }
 
-  let damage: number[] = [];
+  const damage: number[] = [];
   for (let i = 0; i < 16; i++) {
     damage[i] =
       getFinalDamage(baseDamage, i, typeEffectiveness, applyBurn, stabMod, finalMod);
   }
+  result.damage = childDamage ? [damage, childDamage] : damage;
 
   desc.attackBoost =
     move.named('Foul Play') ? defender.boosts[attackStat] : attacker.boosts[attackStat];
 
   if (move.timesUsed! > 1 || move.hits > 1) {
+    const damageMatrix = [damage];
     // store boosts so intermediate boosts don't show.
     const origDefBoost = desc.defenseBoost;
     const origAtkBoost = desc.attackBoost;
@@ -395,7 +397,7 @@ export function calculateBWXY(
 
       if (move.timesUsed! > 1) {
         // Adaptability does not change between hits of a multihit, only between turns
-        stabMod = getStabMod(attacker, move, desc);
+        stabMod = getStabMod(attacker, move, field, field.attackerSide, desc);
       }
 
       const newBasePower = calculateBasePowerBWXY(
@@ -421,25 +423,24 @@ export function calculateBWXY(
       );
       const newFinalMod = chainMods(newFinalMods, 41, 131072);
 
-      let damageMultiplier = 0;
-      damage = damage.map(affectedAmount => {
+      const damageArray = [];
+      for (let i = 0; i < 16; i++) {
         const newFinalDamage = getFinalDamage(
           newBaseDamage,
-          damageMultiplier,
+          i,
           typeEffectiveness,
           applyBurn,
           stabMod,
           newFinalMod
         );
-        damageMultiplier++;
-        return affectedAmount + newFinalDamage;
-      });
+        damageArray[i] = newFinalDamage;
+      }
+      damageMatrix[times] = damageArray;
     }
+    result.damage = damageMatrix;
     desc.defenseBoost = origDefBoost;
     desc.attackBoost = origAtkBoost;
   }
-
-  result.damage = childDamage ? [damage, childDamage] : damage;
 
   // #endregion
 
@@ -780,7 +781,7 @@ export function calculateBPModsBWXY(
 
   // It's not actually clear if the terrain modifiers are base damage mods like weather or are
   // base power mods like in Gen 7+, but the research doesn't exist for this yet so we match PS here
-  if (isGrounded(attacker, field, field.attackerSide.isIngrain)) {
+  if (isGrounded(attacker, field, field.attackerSide)) {
     if ((field.hasTerrain('Electric') && move.hasType('Electric')) ||
         (field.hasTerrain('Grassy') && move.hasType('Grass'))
     ) {
@@ -788,7 +789,7 @@ export function calculateBPModsBWXY(
       desc.terrain = field.terrain;
     }
   }
-  if (isGrounded(defender, field, field.defenderSide.isIngrain)) {
+  if (isGrounded(defender, field, field.defenderSide)) {
     if ((field.hasTerrain('Misty') && move.hasType('Dragon')) ||
         (field.hasTerrain('Grassy') && move.named('Bulldoze', 'Earthquake'))
     ) {
@@ -933,17 +934,20 @@ export function calculateDefenseBWXY(
   let defense: number;
   const defenseStat = move.overrideDefensiveStat || move.category === 'Physical' ? 'def' : 'spd';
   const hitsPhysical = defenseStat === 'def';
+  const boosts = defender.boosts[
+    field.isWonderRoom ? defenseStat === 'spd' ? 'def' : 'spd' : defenseStat
+  ];
   desc.defenseEVs = getStatDescriptionText(gen, defender, defenseStat, defender.nature);
-  if (defender.boosts[defenseStat] === 0 ||
-    (isCritical && defender.boosts[defenseStat] > 0) ||
+  if (boosts === 0 ||
+    (isCritical && boosts > 0) ||
     move.ignoreDefensive) {
     defense = defender.rawStats[defenseStat];
   } else if (attacker.hasAbility('Unaware')) {
     defense = defender.rawStats[defenseStat];
     desc.attackerAbility = attacker.ability;
   } else {
-    defense = getModifiedStat(defender.rawStats[defenseStat]!, defender.boosts[defenseStat]!);
-    desc.defenseBoost = defender.boosts[defenseStat];
+    defense = getModifiedStat(defender.rawStats[defenseStat]!, boosts);
+    desc.defenseBoost = boosts;
   }
 
   // unlike all other defense modifiers, Sandstorm SpD boost gets applied directly

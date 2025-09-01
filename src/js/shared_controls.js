@@ -303,6 +303,7 @@ $(".ability").bind("keyup change", function () {
 	
 	stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (teraType === "Stellar" && checked));
 
+	// Spiritomb Crest - Show dropdown menus for selecting how many allies and foes have fainted
 	if (pokemon.name === "Spiritomb-Crest") {
 		$(this).closest(".poke-info").find(".alliesFainted").show();
 		$(this).closest(".poke-info").find(".foesFainted").show();
@@ -317,6 +318,7 @@ $(".ability").bind("keyup change", function () {
 		$(this).closest(".poke-info").find(".foesFainted").hide();
 	}
 
+	// Relicanth Crest - Show dropdown menu for selecting how many turns Relicanth has been in battle
 	if (pokemon.name === "Relicanth-Crest") {
 		$(this).closest(".poke-info").find(".relicanthTurns").show();
 	} else {
@@ -371,8 +373,14 @@ function autosetWeather(ability, i) {
 		return;
 	}
 
-	var currentWeather = $("input:radio[name='weather']:checked").val();
 	var chromaticField = $("#chromatic-field").val();
+
+	// Underwater - Weather fails
+	if (chromaticField === 'Underwater') {
+		return;
+	}
+
+	var currentWeather = $("input:radio[name='weather']:checked").val();
 	if (lastAutoWeather.indexOf(currentWeather) === -1) {
 		lastManualWeather = currentWeather;
 		lastAutoWeather[1 - i] = "";
@@ -380,8 +388,11 @@ function autosetWeather(ability, i) {
 	switch (ability) {
 	case "Drought":
 	case "Orichalcum Pulse":
-		lastAutoWeather[i] = "Sun";
-		$("#sun").prop("checked", true);
+		// Eclipse - Drought and Orichalcum Pulse fail
+		if (chromaticField !== 'Eclipse') {
+			lastAutoWeather[i] = "Sun";
+			$("#sun").prop("checked", true);
+		}
 		break;
 	case "Drizzle":
 		// Desert - Drizzle fails
@@ -502,19 +513,53 @@ function setPrismScaleEffects(pokeObj) {
 	// Ancient Ruins - Prism Scale: Sets Wonder Room
 	} else if (chromaticField === 'Ancient-Ruins') {
 		$("#wonderroom").prop("checked", true);
-	}
+	// Factory - Prism Scale: Applies Magnet Rise
+	} else if (chromaticField === 'Factory') {
+		if (id === 'p1') {
+			$("#magnetRiseL").prop("checked", true);
+		} else {
+			$("#magnetRiseR").prop("checked", true);
+		}
+	// Water's Surface - Prism Scale: Applies Aqua Ring
+	} else if (chromaticField === 'Waters-Surface') {
+		if (id === 'p1') {
+			$("#aquaRingL").prop("checked", true);
+		} else {
+			$("#aquaRingR").prop("checked", true);
+		}
+	// Underwater - Prism Scale: Applies Soak (Self)
+	} else if (chromaticField === 'Underwater') {
+		if (id === 'p1') {
+			$("#soakL").prop("checked", true);
+		} else {
+			$("#soakR").prop("checked", true);
+		}
+	// Rainbow - Prism Scale: Terastallizes Pokémon
+	} else if (chromaticField === 'Rainbow') {
+		if (id === 'p1') {
+			$("#teraL").prop("checked", true);
+		} else {
+			$("#teraR").prop("checked", true);
+		}
 	// Undercolony - Prism Scale: Applies Salt Cure to the opponent
-	else if (chromaticField === 'Undercolony') {
-		var allPokemon = $('.poke-info');
-		allPokemon.each(function () {
-			var pokeObj = $(this);
-			var id2 = pokeObj.prop("id");
-			if (id !== id2) {
-				pokeObj.find(".saltcure").prop("checked", true);
-			}
-		});
+	} else if (chromaticField === 'Undercolony') {
+		if (id === 'p1') {
+			$("#saltCureR").prop("checked", true);
+		} else {
+			$("#saltCureL").prop("checked", true);
+		}
+	// Corrosive Mist - Prism Scale: Applies toxic to both sides
+	} else if (chromaticField === 'Corrosive-Mist') {
+		autosetStatus("#p1", "Prism Scale", pokeObj);
+		autosetStatus("#p2", "Prism Scale", pokeObj);
+	// Forgotten Battlefield - Prism Scale: Changes ability to Mummy
+	} else if (chromaticField === 'Forgotten-Battlefield') {
+		var abilityObj = pokeObj.find(".ability");
+		setSelectValueIfValid(abilityObj, "Mummy", "Mummy");
 	}
 }
+
+const weatherAbilities = ["Drought", "Orichalcum Pulse", "Drizzle", "Sand Stream", "Snow Warning", "Desolate Land", "Primordial Sea", "Delta Stream"];
 
 $("#chromatic-field").change(function () {
 	var chromaticField = $("#chromatic-field").val();
@@ -522,28 +567,40 @@ $("#chromatic-field").change(function () {
 	$(".field-specific." + chromaticField).show();
 	$(".field-specific").not("." + chromaticField).hide();
 
+	$(".field-specific-not." + chromaticField).hide();
+	$(".field-specific-not").not("." + chromaticField).show();
+
 	$("#starstruckL").prop("checked", false);
 	$("#starstruckR").prop("checked", false);
+	$("#lockonL").prop("checked", false);
+	$("#lockonR").prop("checked", false);
 	$("#gritL0").prop("checked", true);
 	$("#gritR0").prop("checked", true);
 
 	var currentWeather = $("input:radio[name='weather']:checked").val();
 
-	// Desert - Drizzle and Rain Dance fail
-	if (chromaticField === 'Desert' && currentWeather === 'Rain') {
+	if ((chromaticField === 'Eclipse' && currentWeather === 'Sun') || // Eclipse - Drought, Orichalcum Pulse and Sunny Day fail
+	   (chromaticField === 'Desert' && currentWeather === 'Rain') || // Desert - Drizzle and Rain Dance fail
+		chromaticField === 'Underwater') { // Underwater - Weather fails
 		$("#clear").prop("checked", true);
 	}
 
 	var allPokemon = $('.poke-info');
 	allPokemon.each(function () {
 		var pokeObj = $(this);
-		var id = pokeObj.prop("id");
 	
 		var ability = pokeObj.find(".ability").val();
 		var item = pokeObj.find(".item").val();
 
 		var teraType = pokeObj.find(".teraType").val();
 		var checked = pokeObj.find(".teraToggle").prop("checked");
+
+		currentWeather = $("input:radio[name='weather']:checked").val();
+
+		// Update weather for abilities that might fail on certain fields
+		if (currentWeather === "" && weatherAbilities.includes(ability)) {
+			autosetWeather(ability, 0);
+		}
 
 		stellarButtonsVisibility(pokeObj, (ability === "Pixilate" && chromaticField === "Starlight-Arena") || (teraType === "Stellar" && checked));
 		
@@ -604,6 +661,7 @@ var lastAutoStatus = {"#p1": "Healthy"};
 function autosetStatus(p, item, pokeObj) {
 	var currentStatus = $(p + " .status").val();
 	var pokemon = createPokemon(pokeObj);
+	var chromaticField = $("#chromatic-field").val();
 	if (currentStatus !== lastAutoStatus[p]) {
 		lastManualStatus[p] = currentStatus;
 	}
@@ -611,7 +669,11 @@ function autosetStatus(p, item, pokeObj) {
 		lastAutoStatus[p] = "Burned";
 		$(p + " .status").val("Burned");
 		$(p + " .status").change();
-	} else if (item === "Toxic Orb" || pokemon.named('Zangoose-Crest')) {
+	} else if (item === "Toxic Orb" || pokemon.named('Zangoose-Crest')) { // Zangoose Crest - Poisons Zangoose
+		lastAutoStatus[p] = "Badly Poisoned";
+		$(p + " .status").val("Badly Poisoned");
+		$(p + " .status").change();
+	} else if (item === "Prism Scale" && chromaticField === 'Corrosive-Mist') {
 		lastAutoStatus[p] = "Badly Poisoned";
 		$(p + " .status").val("Badly Poisoned");
 		$(p + " .status").change();
@@ -697,15 +759,20 @@ $(".move-selector").change(function () {
 	var fullSetName = pokeObj.find("input.set-selector").val();
 	var pokemonName = fullSetName.substring(0, fullSetName.indexOf(" ("));
 	var stockpile = moveName === 'Spit Up' || (moveName === 'Belch' && startsWith(pokemonName, "Swalot")); 
-	var moveSlot = startsWith(pokemonName, "Ampharos-Aevian"); 
-	if (Array.isArray(move.multihit) || (!isNaN(move.multihit) && move.multiaccuracy)) {
+	if (Array.isArray(move.multihit) || (!isNaN(move.multihit) && move.multiaccuracy) || startsWith(pokemonName, "Cinccino-Crest")) {
 		moveGroupObj.children(".move-times").hide();
+		moveGroupObj.children(".move-times").val(1);
 		moveGroupObj.children(".stockpile").hide();
 		moveGroupObj.children(".move-hits").empty();
 		if (!isNaN(move.multihit)) {
 			for (var i = 1; i <= move.multihit; i++) {
 				moveGroupObj.children(".move-hits").append("<option value=" + i + ">" + i + " hits</option>");
 			}
+		// Cinccino Crest - All moves non flat damage moves turn into multi-strike moves. 2-5 hits of 35% the BP
+		} else if (startsWith(pokemonName, "Cinccino-Crest")) {
+			for (var i = 2; i <= 5; i++) {
+				moveGroupObj.children(".move-hits").append("<option value=" + i + ">" + i + " hits</option>");
+			}			
 		} else {
 			for (var i = 1; i <= move.multihit[1]; i++) {
 				moveGroupObj.children(".move-hits").append("<option value=" + i + ">" + i + " hits</option>");
@@ -726,20 +793,24 @@ $(".move-selector").change(function () {
 
 		moveGroupObj.children(".move-hits").val(moveHits);
 	} else if (stockpile) {
+		moveGroupObj.children(".move-hits").val(1);
 		moveGroupObj.children(".move-hits").hide();
 		moveGroupObj.children(".stockpile").show();
+		moveGroupObj.children(".move-times").val(1);
+		moveGroupObj.children(".move-times").hide();
+	} else if (!isNaN(move.multihit)) {
+		moveGroupObj.children(".move-hits").val(1);
+		moveGroupObj.children(".move-hits").hide();
+		moveGroupObj.children(".stockpile").hide();
+		moveGroupObj.children(".move-times").val(1);
 		moveGroupObj.children(".move-times").hide();
 	} else {
+		moveGroupObj.children(".move-hits").val(1);
 		moveGroupObj.children(".move-hits").hide();
 		moveGroupObj.children(".stockpile").hide();
 		moveGroupObj.children(".move-times").show();
 	}
 	moveGroupObj.children(".move-z").prop("checked", false);
-	if (moveSlot) {
-		moveGroupObj.children(".move-slot").show();
-	} else {
-		moveGroupObj.children(".move-slot").hide();
-	}
 });
 
 $(".item").change(function () {
@@ -965,8 +1036,13 @@ $(".set-selector").change(function () {
 		} else {
 			formeObj.hide();
 		}
-		calcHP(pokeObj);
 		calcStats(pokeObj);
+		var total = pokeObj.find(".hp").find(".total").text();
+		pokeObj.find(".max-hp").text(total);
+		pokeObj.find(".max-hp").attr("data-prev", total);
+		pokeObj.find(".current-hp").val(total);
+		pokeObj.find(".current-hp").attr("data-set", true);
+		calcHP(pokeObj);
 		abilityObj.change();
 		itemObj.change();
 		if (pokemon.gender === "N") {
@@ -1300,8 +1376,8 @@ function createPokemon(pokeInfo) {
 			ivs: ivs,
 			evs: evs,
 			isDynamaxed: isDynamaxed,
-			isSaltCure: pokeInfo.find(".saltcure").is(":checked"),
 			isStarstruck: pokeInfo.find(".starstruck").is(":checked"),
+			isLockOn: pokeInfo.find(".lockon").is(":checked"),
 			gritStages: pokeInfo.prop("id") === 'p1'
 					    ? parseInt(pokeInfo.find("input:radio[name='gritL']:checked").val())
 						: parseInt(pokeInfo.find("input:radio[name='gritR']:checked").val()),
@@ -1315,10 +1391,10 @@ function createPokemon(pokeInfo) {
 			status: CALC_STATUS[pokeInfo.find(".status").val()],
 			toxicCounter: pokeInfo.find(".status").val() === 'Badly Poisoned' ? ~~pokeInfo.find(".toxic-counter").val() : 0,
 			moves: [
-				getMoveDetails(pokeInfo.find(".move1"), opts),
-				getMoveDetails(pokeInfo.find(".move2"), opts),
-				getMoveDetails(pokeInfo.find(".move3"), opts),
-				getMoveDetails(pokeInfo.find(".move4"), opts),
+				getMoveDetails(pokeInfo.find(".move1"), opts, 1),
+				getMoveDetails(pokeInfo.find(".move2"), opts, 2),
+				getMoveDetails(pokeInfo.find(".move3"), opts, 3),
+				getMoveDetails(pokeInfo.find(".move4"), opts, 4),
 			],
 			overrides: {
 				baseStats: baseStats,
@@ -1334,7 +1410,7 @@ function getGender(gender) {
 	return 'F';
 }
 
-function getMoveDetails(moveInfo, opts) {
+function getMoveDetails(moveInfo, opts, moveSlot) {
 	var moveName = moveInfo.find("select.move-selector").val();
 	var isZMove = gen > 6 && moveInfo.find("input.move-z").prop("checked");
 	var isCrit = moveInfo.find(".move-crit").prop("checked");
@@ -1343,7 +1419,6 @@ function getMoveDetails(moveInfo, opts) {
 	var timesUsed = +moveInfo.find(".move-times").val();
 	var timesUsedWithMetronome = moveInfo.find(".metronome").is(':visible') ? +moveInfo.find(".metronome").val() : 1;
 	var stockpiles = +moveInfo.find(".stockpile").val();
-	var moveSlot = +moveInfo.find(".move-slot").val();
 	var overrides = {
 		basePower: +moveInfo.find(".move-bp").val(),
 		type: moveInfo.find(".move-type").val()
@@ -1401,7 +1476,10 @@ function createField() {
 	var isAquaRing = [$("#aquaRingL").prop("checked"), $("#aquaRingR").prop("checked")];
 	var isSeeded = [$("#leechSeedL").prop("checked"), $("#leechSeedR").prop("checked")];
 	var isNightmare = [$("#nightmareL").prop("checked"), $("#nightmareR").prop("checked")];
+	var isSaltCured = [$("#saltCureL").prop("checked"), $("#saltCureR").prop("checked")];
 	var isForesight = [$("#foresightL").prop("checked"), $("#foresightR").prop("checked")];
+	var isSoak = [$("#soakL").prop("checked"), $("#soakR").prop("checked")];
+	var isMagnetRise = [$("#magnetRiseL").prop("checked"), $("#magnetRiseR").prop("checked")];
 	var isHelpingHand = [$("#helpingHandL").prop("checked"), $("#helpingHandR").prop("checked")];
 	var isTailwind = [$("#tailwindL").prop("checked"), $("#tailwindR").prop("checked")];
 	var isFlowerGift = [$("#flowerGiftL").prop("checked"), $("#flowerGiftR").prop("checked")];
@@ -1416,12 +1494,35 @@ function createField() {
 
 	var createSide = function (i) {
 		return new calc.Side({
-			spikes: spikes[i], isSR: isSR[i], steelsurge: steelsurge[i], isStickyWeb: isStickyWeb[i],
-			vinelash: vinelash[i], wildfire: wildfire[i], cannonade: cannonade[i], volcalith: volcalith[i],
-			isReflect: isReflect[i], isLightScreen: isLightScreen[i], isProtected: isProtected[i], isIngrain: isIngrain[i],
-			isAquaRing: isAquaRing[i], isSeeded: isSeeded[i], isNightmare: isNightmare[i], isForesight: isForesight[i],
-			isTailwind: isTailwind[i], isHelpingHand: isHelpingHand[i], isFlowerGift: isFlowerGift[i], isFriendGuard: isFriendGuard[i],
-			isAuroraVeil: isAuroraVeil[i], isAreniteWall: isAreniteWall[i], isBattery: isBattery[i], isPowerSpot: isPowerSpot[i], isSwitching: isSwitchingOut[i] ? 'out' : undefined
+			spikes: spikes[i],
+			isSR: isSR[i],
+			steelsurge: steelsurge[i],
+			isStickyWeb: isStickyWeb[i],
+			vinelash: vinelash[i],
+			wildfire: wildfire[i],
+			cannonade: cannonade[i],
+			volcalith: volcalith[i],
+			isReflect: isReflect[i],
+			isLightScreen: isLightScreen[i],
+			isProtected: isProtected[i],
+			isIngrain: isIngrain[i],
+			isAquaRing: isAquaRing[i],
+			isSeeded: isSeeded[i],
+			isNightmare: isNightmare[i],
+			isSaltCured: isSaltCured[i],
+			isForesight: isForesight[i],
+			isSoak: isSoak[i],
+			isTailwind: isTailwind[i],
+			isMagnetRise: isMagnetRise[i],
+			isHelpingHand: isHelpingHand[i],
+			isFlowerGift: isFlowerGift[i],
+			isSteelySpirit: isSteelySpirit[i],
+			isFriendGuard: isFriendGuard[i],
+			isAuroraVeil: isAuroraVeil[i],
+			isAreniteWall: isAreniteWall[i],
+			isBattery: isBattery[i],
+			isPowerSpot: isPowerSpot[i],
+			isSwitching: isSwitchingOut[i] ? 'out' : undefined
 		});
 	};
 	return new calc.Field({
@@ -1623,6 +1724,7 @@ $(".gen").change(function () {
 	loadDefaultLists();
 	$(".gen-specific.g" + gen).show();
 	$(".gen-specific").not(".g" + gen).hide();
+	$("input:radio[name='format']").change();
 	var typeOptions = getSelectOptions(Object.keys(typeChart));
 	$("select.type1, select.move-type").find("option").remove().end().append(typeOptions);
 	$("select.teraType").find("option").remove().end().append(getSelectOptions(Object.keys(typeChart).slice(1)));
@@ -1658,6 +1760,8 @@ function clearField() {
 	$("#gravity").prop("checked", false);
 	$("#starstruckL").prop("checked", false);
 	$("#starstruckR").prop("checked", false);
+	$("#lockonL").prop("checked", false);
+	$("#lockonR").prop("checked", false);
 	$("#gritL0").prop("checked", true);
 	$("#gritR0").prop("checked", true);
 	$("#srL").prop("checked", false);
@@ -1686,6 +1790,8 @@ function clearField() {
 	$("#leechSeedR").prop("checked", false);
 	$("#nightmareL").prop("checked", false);
 	$("#nightmareR").prop("checked", false);
+	$("#saltCureL").prop("checked", false);
+	$("#saltCureR").prop("checked", false);
 	$("#foresightL").prop("checked", false);
 	$("#foresightR").prop("checked", false);
 	$("#helpingHandL").prop("checked", false);

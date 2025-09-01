@@ -337,9 +337,10 @@ const SV = SS.concat([
   'Wind Power',
   'Wind Rider',
   'Zero to Hero',
-  // chromatic abilities
+  // Custom Eeveelutions - Abilities
   'Mastery',
   'Type Sync',
+  // Aevian - Abilities
   'Inexorable',
   'Reflector',
   'Resuscitation',

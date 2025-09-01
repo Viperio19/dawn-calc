@@ -291,6 +291,7 @@ export function calculateDPP(
       numAttacks = move.hits;
     }
     let usedItems = [false, false];
+    const damageMatrix = [damage];
     for (let times = 1; times < numAttacks; times++) {
       usedItems = checkMultihitBoost(gen, attacker, defender, move,
         field, desc, usedItems[0], usedItems[1]);
@@ -308,10 +309,10 @@ export function calculateDPP(
       }
       baseDamage = calculateFinalModsDPP(baseDamage, attacker, move, field, desc, isCritical);
 
-      let damageMultiplier = 0;
-      result.damage = result.damage.map(affectedAmount => {
+      const damageArray = [];
+      for (let i = 0; i < 16; i++) {
         let newFinalDamage = 0;
-        newFinalDamage = Math.floor((baseDamage * (85 + damageMultiplier)) / 100);
+        newFinalDamage = Math.floor((baseDamage * (85 + i)) / 100);
         newFinalDamage = Math.floor(newFinalDamage * stabMod);
         newFinalDamage = Math.floor(newFinalDamage * type1Effectiveness);
         newFinalDamage = Math.floor(newFinalDamage * type2Effectiveness);
@@ -319,10 +320,11 @@ export function calculateDPP(
         newFinalDamage = Math.floor(newFinalDamage * ebeltMod);
         newFinalDamage = Math.floor(newFinalDamage * tintedMod);
         newFinalDamage = Math.max(1, newFinalDamage);
-        damageMultiplier++;
-        return affectedAmount + newFinalDamage;
-      });
+        damageArray[i] = newFinalDamage;
+      }
+      damageMatrix[times] = damageArray;
     }
+    result.damage = damageMatrix;
     desc.defenseBoost = origDefBoost;
     desc.attackBoost = origAtkBoost;
   }
@@ -392,6 +394,12 @@ export function calculateBasePowerDPP(
     basePower = Math.min(200, 60 + 20 * countBoosts(gen, defender.boosts));
     desc.moveBP = basePower;
     break;
+  case 'Pursuit':
+    const switching = field.defenderSide.isSwitching === 'out';
+    basePower = move.bp * (switching ? 2 : 1);
+    if (switching) desc.isSwitching = 'out';
+    desc.moveBP = basePower;
+    break;
   case 'Wake-Up Slap':
     if (defender.hasStatus('slp')) {
       basePower *= 2;
@@ -436,6 +444,11 @@ export function calculateBPModsDPP(
     desc.isHelpingHand = true;
   }
 
+  if (attacker.hasAbility('Technician') && basePower <= 60) {
+    basePower = Math.floor(basePower * 1.5);
+    desc.attackerAbility = attacker.ability;
+  }
+
   const isPhysical = move.category === 'Physical';
   if ((attacker.hasItem('Muscle Band') && isPhysical) ||
       (attacker.hasItem('Wise Glasses') && !isPhysical)) {
@@ -464,8 +477,7 @@ export function calculateBPModsDPP(
     ((attacker.hasAbility('Overgrow') && move.hasType('Grass')) ||
       (attacker.hasAbility('Blaze') && move.hasType('Fire')) ||
       (attacker.hasAbility('Torrent') && move.hasType('Water')) ||
-      (attacker.hasAbility('Swarm') && move.hasType('Bug')))) ||
-      (attacker.hasAbility('Technician') && basePower <= 60)
+      (attacker.hasAbility('Swarm') && move.hasType('Bug'))))
   ) {
     basePower = Math.floor(basePower * 1.5);
     desc.attackerAbility = attacker.ability;
@@ -479,6 +491,18 @@ export function calculateBPModsDPP(
     basePower = Math.floor(basePower * 1.25);
     desc.defenderAbility = defender.ability;
   }
+
+  if (attacker.hasAbility('Rivalry') && ![attacker.gender, defender.gender].includes('N')) {
+    if (attacker.gender === defender.gender) {
+      basePower = Math.floor(basePower * 1.25);
+      desc.rivalry = 'buffed';
+    } else {
+      basePower = Math.floor(basePower * 0.75);
+      desc.rivalry = 'nerfed';
+    }
+    desc.attackerAbility = attacker.ability;
+  }
+
   return basePower;
 }
 
@@ -682,15 +706,6 @@ function calculateFinalModsDPP(
     desc.attackerItem = attacker.item;
   }
 
-  if (move.named('Pursuit') && field.defenderSide.isSwitching === 'out') {
-    // technician negates switching boost, thanks DaWoblefet
-    if (attacker.hasAbility('Technician')) {
-      baseDamage = Math.floor(baseDamage * 1);
-    } else {
-      baseDamage = Math.floor(baseDamage * 2);
-      desc.isSwitching = 'out';
-    }
-  }
   return baseDamage;
 }
 

@@ -470,6 +470,7 @@ SS.push('Utility Umbrella', 'Vile Vial');
 // Because we support National Dex all Past items are added back in
 SS.push(...GSC_ONLY, 'Old Amber');
 
+// Mega-Gmax - Mega Stones
 export const MEGA_G_STONES: {[species: string]: string} = {
   Alcremieite: 'Alcremie',
   Appletunite: 'Appletun',
@@ -641,6 +642,9 @@ class Item implements I.Item {
     this.id = toID(name);
     this.name = name as I.ItemName;
     this.megaEvolves = MEGA_STONES[name] as I.SpeciesName;
+    if (!this.megaEvolves) {
+      this.megaEvolves = MEGA_G_STONES[name] as I.SpeciesName;
+    }
     const berry = BERRIES[name];
     if (berry) {
       this.isBerry = true;

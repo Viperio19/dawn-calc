@@ -90,8 +90,11 @@ export class Side implements State.Side {
   isAquaRing: boolean;
   isSeeded: boolean;
   isNightmare: boolean;
+  isSaltCured: boolean;
   isForesight: boolean;
+  isSoak: boolean;
   isTailwind: boolean;
+  isMagnetRise: boolean;
   isHelpingHand: boolean;
   isFlowerGift: boolean;
   isFriendGuard: boolean;
@@ -118,8 +121,11 @@ export class Side implements State.Side {
     this.isAquaRing = !!side.isAquaRing;
     this.isSeeded = !!side.isSeeded;
     this.isNightmare = !!side.isNightmare;
+    this.isSaltCured = !!side.isSaltCured;
     this.isForesight = !!side.isForesight;
+    this.isSoak = !!side.isSoak;
     this.isTailwind = !!side.isTailwind;
+    this.isMagnetRise = !!side.isMagnetRise;
     this.isHelpingHand = !!side.isHelpingHand;
     this.isFlowerGift = !!side.isFlowerGift;
     this.isFriendGuard = !!side.isFriendGuard;

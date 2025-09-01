@@ -27,14 +27,13 @@ const EV_ITEMS = [
   'Power Weight',
 ];
 
-export function isGrounded(pokemon: Pokemon, field: Field, ingrain: boolean) {
-  return (field.isGravity || pokemon.hasItem('Iron Ball') || ingrain || 
-    (!pokemon.hasType('Flying') &&
-      !pokemon.hasAbility('Levitate') &&
-      !pokemon.hasAbility('Lunar Idol') &&
-      !pokemon.hasAbility('Solar Idol') &&
+export function isGrounded(pokemon: Pokemon, field: Field, side: Side) {
+  return (field.isGravity || pokemon.hasItem('Iron Ball') || side.isIngrain || 
+    (!side.isMagnetRise &&
+      !pokemon.hasType('Flying') &&
+      !pokemon.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') && // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
       !pokemon.hasItem('Air Balloon') &&
-      !pokemon.named('Probopass-Crest')));
+      !pokemon.named('Probopass-Crest'))); // Probopass Crest - Grants Levitate
 }
 
 export function getModifiedStat(stat: number, mod: number, gen?: Generation) {
@@ -106,7 +105,7 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
       (pokemon.hasAbility('Chlorophyll') && weather.includes('Sun')) ||
       (pokemon.hasAbility('Sand Rush') && weather === 'Sand') ||
       (pokemon.hasAbility('Swift Swim') && weather.includes('Rain')) ||
-      ((pokemon.hasAbility('Slush Rush') || pokemon.named('Empoleon-Crest')) && ['Hail', 'Snow'].includes(weather)) ||
+      ((pokemon.hasAbility('Slush Rush') || pokemon.named('Empoleon-Crest')) && ['Hail', 'Snow'].includes(weather)) || // Empoleon Crest - Grants Slush Rush
       (pokemon.hasAbility('Surge Surfer') && terrain === 'Electric')
   ) {
     speedMods.push(8192);
@@ -119,12 +118,15 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
     speedMods.push(6144);
   }
 
-  if (pokemon.hasItem('Choice Scarf')) {
-    speedMods.push(6144);
-  } else if (pokemon.hasItem('Iron Ball', ...EV_ITEMS)) {
-    speedMods.push(2048);
-  } else if (pokemon.hasItem('Quick Powder') && pokemon.named('Ditto')) {
-    speedMods.push(8192);
+  if (!(pokemon.hasAbility('Unburden') && pokemon.abilityOn)) {
+    // Unburden active implies item no longer present
+    if (pokemon.hasItem('Choice Scarf')) {
+      speedMods.push(6144);
+    } else if (pokemon.hasItem('Iron Ball', ...EV_ITEMS)) {
+      speedMods.push(2048);
+    } else if (pokemon.hasItem('Quick Powder') && pokemon.named('Ditto')) {
+      speedMods.push(8192);
+    }
   }
 
   // Fields - Speed Modifiers
@@ -134,20 +136,42 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
     speedMods.push(5120);
   }
 
+  // Underwater - All non-Water Type Pokemon have their Speed reduced to 0.75x
+  if (field.chromaticField === 'Underwater' &&
+      !pokemon.hasType('Water') &&
+      !pokemon.hasAbility('Swift Swim', 'Steelworker', 'Levitate', 'Magic Guard') &&
+      !(side.isSoak && !pokemon.teraType)) {
+    speedMods.push(3072);
+  }
+
+  // Ashen Beach - Being statused grants 1.5x speed
+  if (field.chromaticField === 'Ashen-Beach' && pokemon.status) {
+    speedMods.push(6144);
+  }
+
+  // Forgotten Battlefield - Pokémon with Mummy have their Attack and Speed halved
+  if (field.chromaticField === 'Forgotten-Battlefield' && pokemon.hasAbility('Mummy')) {
+    speedMods.push(2048);
+  }
+
   // Crests - Speed Modifiers
 
+  // Ariados Crest - Increases Speed by 50%
   if (pokemon.named('Ariados-Crest')) {
     speedMods.push(6144);
   }
 
+  // Magcargo Crest - Swaps its Defense and Speed stats
   if (pokemon.named('Magcargo-Crest')) {
     speed = getModifiedStat(pokemon.rawStats.def, pokemon.boosts.def, gen);
   }
 
+  // Oricorio Crest - Increases Speed by 25%.
   if (pokemon.named('Oricorio-Crest-Baile') || pokemon.named('Oricorio-Crest-Pa\'u') || pokemon.named('Oricorio-Crest-Pom-Pom') || pokemon.named('Oricorio-Crest-Sensu')) {
     speedMods.push(5120);
   }
 
+  // Seviper Crest - Increases Speed by 50%
   if (pokemon.named('Seviper-Crest')) {
     speedMods.push(6144);
   }
@@ -181,6 +205,7 @@ export function getMoveEffectiveness(
   isGhostRevealed?: boolean,
   isGravity?: boolean,
   isRingTarget?: boolean,
+  attacker?: Pokemon,
 ) {
   if (isGhostRevealed && type === 'Ghost' && move.hasType('Normal', 'Fighting')) {
     return 1;
@@ -194,15 +219,41 @@ export function getMoveEffectiveness(
       gen.types.get(toID(move.type))!.effectiveness[type]! *
       gen.types.get('grass' as ID)!.effectiveness[type]!
     );
-  // Undercolony - Rock Throw is super effective vs Ground types
-  } else if (field.chromaticField === 'Undercolony' && move.named('Rock Throw') && type === 'Ground') {
-    return 2;
   // Dragon's Den - Dragon Pulse can now hit Fairy type Pokemon (for Resisted Damage)
   } else if (field.chromaticField === 'Dragons-Den' && move.named('Dragon Pulse') && type === 'Fairy') {
     return 0.5;
+  // Underwater - Dive has the Freeze-Dry effect
+  } else if (field.chromaticField === 'Underwater' && (move.named('Dive') || (move.named('Nature Power') && !field.terrain)) && type === 'Water') {
+    return 2;
+  // Undercolony - Rock Throw is super effective vs Ground types
+  } else if (field.chromaticField === 'Undercolony' && move.named('Rock Throw') && type === 'Ground') {
+    return 2;
+  } else if (field.chromaticField === 'Bewitched-Woods' &&
+             ((move.hasType('Grass') && type === 'Steel') || // Bewitched Woods - Grass Types now hit Steel Type Pokemon for neutral damage
+             (move.hasType('Poison') && type === 'Fairy'))) { // Bewitched Woods - Poison attacks deal neutral damage to Fairy Types
+    return 1;
+  } else if (field.chromaticField === 'Corrosive-Mist') {
+    let effectiveness = gen.types.get(toID(move.type))!.effectiveness[type]!;
+    const explosion = move.named('Explosion') || (move.named('Nature Power') && !field.terrain);
+
+    // Corrosion now affects Poison Type attacks as well [Super Effective]
+    if ((attacker?.hasAbility('Corrosion') || explosion) && move.hasType('Poison') && type === 'Steel') {
+      effectiveness = 2;
+    }
+
+    if (effectiveness === 0 && (isRingTarget || (field.defenderSide.isIngrain && move.hasType('Ground')))) {
+      effectiveness = 1;
+    }
+
+    // Explosion has Poison + Fire typing
+    if (explosion) {
+      effectiveness *= gen.types.get('fire' as ID)!.effectiveness[type]!;
+    }
+
+    return effectiveness;
   } else {
     let effectiveness = gen.types.get(toID(move.type))!.effectiveness[type]!;
-    if (effectiveness === 0 && isRingTarget) {
+    if (effectiveness === 0 && (isRingTarget || (field.defenderSide.isIngrain && move.hasType('Ground')))) {
       effectiveness = 1;
     }
     if (move.named('Flying Press')) {
@@ -286,33 +337,19 @@ export function checkIntimidate(gen: Generation, source: Pokemon, target: Pokemo
       target.boosts.spa = Math.min(6, target.boosts.spa + 2);
     }
   }
-
-  if (source.named('Thievul-Crest') && !blocked) {
-    if (target.hasAbility('Contrary', 'Competitive')) {
-      target.boosts.spa = Math.min(6, target.boosts.spa + 1);
-    } else if (target.hasAbility('Simple')) {
-      target.boosts.spa = Math.max(-6, target.boosts.spa - 2);
-    } else {
-      target.boosts.spa = Math.max(-6, target.boosts.spa - 1);
-    }
-    if (target.hasAbility('Defiant') || (target.hasAbility('Steadfast') && field.chromaticField === 'Ring-Arena')) { // Ring Arena - Steadfast grants Defiant
-      target.boosts.atk = Math.min(6, target.boosts.atk + 2);
-    }
-
-    source.boosts.spa = Math.min(6, source.boosts.atk + 1);
-  }
 }
 
-export function checkDownload(source: Pokemon, target: Pokemon, wonderRoomActive?: boolean) {
+export function checkDownload(source: Pokemon, target: Pokemon, field?: Field) {
   if (source.hasAbility('Download')) {
     let def = target.stats.def;
     let spd = target.stats.spd;
+    let boosts = field!.chromaticField === 'Factory' ? 2 : 1;
     // We swap the defense stats again here since Download ignores Wonder Room
-    if (wonderRoomActive) [def, spd] = [spd, def];
+    if (field!.isWonderRoom) [def, spd] = [spd, def];
     if (spd <= def) {
-      source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+      source.boosts.spa = Math.min(6, source.boosts.spa + boosts);
     } else {
-      source.boosts.atk = Math.min(6, source.boosts.atk + 1);
+      source.boosts.atk = Math.min(6, source.boosts.atk + boosts);
     }
   }
 }
@@ -329,24 +366,47 @@ export function checkDauntlessShield(source: Pokemon, gen: Generation) {
   }
 }
 
-export function checkStickyWeb(source: Pokemon, field: Field, stickyWeb: boolean) {
-  if (stickyWeb && !source.hasItem('Heavy-Duty Boots') && !source.hasAbility('Clear Body', 'White Smoke', 'Full Metal Body')) {
-    // Jungle - Sticky Web reduces Speed by one additional stage
-    let boosts = field.chromaticField === 'Jungle' ? 2 : 1;
-    source.boosts.spe = Math.max(-6, source.boosts.spe - boosts);
+export function checkStickyWeb(source: Pokemon, field: Field, side: Side) {
+  if (side.isStickyWeb && !source.hasItem('Heavy-Duty Boots') && !source.hasAbility('Clear Body', 'White Smoke', 'Full Metal Body') &&
+      (isGrounded(source, field, side) || field.chromaticField === 'Jungle')) { // Jungle - Sticky Web affects non-grounded Pokemon
+    source.boosts.spe = Math.max(-6, source.boosts.spe - 1);
   }
 }
 
-export function checkCrestBoosts(source: Pokemon) {
-  if (source.named('Vespiquen-Crest-Offense')) {
-    source.boosts.atk = Math.min(6, source.boosts.atk + 1);
-    source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+export function checkCrestEntryEffects(gen: Generation, source: Pokemon, target: Pokemon, field: Field) {
+  const blocked =
+    target.hasAbility('Clear Body', 'White Smoke', 'Hyper Cutter', 'Full Metal Body') ||
+    // More abilities now block Intimidate in Gen 8+ (DaWoblefet, Cloudy Mistral)
+    (gen.num >= 8 && target.hasAbility('Inner Focus', 'Own Tempo', 'Oblivious', 'Scrappy')) ||
+    // Cave - Sturdy grants Clear Body
+    (target.hasAbility('Sturdy') && field.chromaticField === 'Cave') ||
+    target.hasItem('Clear Amulet');
+  
+  // Thievul Crest - "Steals" one stage of Special Attack from the opponent. (Decreases one stage on entry, increases one stage to self)
+  if (source.named('Thievul-Crest') && !blocked) {
+    if (target.hasAbility('Contrary', 'Competitive')) {
+      target.boosts.spa = Math.min(6, target.boosts.spa + 1);
+    } else if (target.hasAbility('Simple')) {
+      target.boosts.spa = Math.max(-6, target.boosts.spa - 2);
+    } else if (target.hasAbility('Defiant') || (target.hasAbility('Steadfast') && field.chromaticField === 'Ring-Arena')) { // Ring Arena - Steadfast grants Defiant
+      target.boosts.spa = Math.max(-6, target.boosts.spa - 1);
+      target.boosts.atk = Math.min(6, target.boosts.atk + 2);
+    } else {
+      target.boosts.spa = Math.max(-6, target.boosts.spa - 1);
+    }
+
+    source.boosts.spa = Math.min(6, source.boosts.atk + (source.hasAbility('Simple') ? 2 : 1));
   }
 }
 
 // Fields - Stat boosts from Prism Scale or abilities
-export function checkFieldEntryEffects(source: Pokemon, field: Field) {
-  if (field.chromaticField === 'Dragons-Den') {
+export function checkFieldEntryEffects(gen: Generation, source: Pokemon, target: Pokemon, field: Field) {
+  if (field.chromaticField === 'Jungle') {
+    // Jungle - Compound Eyes raises Special Attack by 2 for each of its stats lowered by a foe
+    if (source.hasAbility('Compound Eyes')) {
+      source.boosts.spa = Math.min(6, source.boosts.spa + 2 * countDrops(gen, source.boosts));
+    }
+  } else if (field.chromaticField === 'Dragons-Den') {
     // Dragon's Den - Prism Scale: Boosts Speed +1 
     if (source.hasItem('Prism Scale')) {
       source.boosts.spe = Math.min(6, source.boosts.spe + 1);
@@ -384,8 +444,8 @@ export function checkFieldEntryEffects(source: Pokemon, field: Field) {
   } else if (field.chromaticField === 'Sky') {
     // Sky - Prism Scale: Lowers the user’s Defense and Special Defense by 1
     if (source.hasItem('Prism Scale')) {
-      source.boosts.def = Math.min(6, source.boosts.def - 1);
-      source.boosts.spd = Math.min(6, source.boosts.spd - 1);
+      source.boosts.def = Math.max(-6, source.boosts.def - 1);
+      source.boosts.spd = Math.max(-6, source.boosts.spd - 1);
     }
     // Sky - Early Bird grants +1 Speed on entry 
     if (source.hasAbility('Early Bird')) {
@@ -430,6 +490,43 @@ export function checkFieldEntryEffects(source: Pokemon, field: Field) {
     // Cave - Battle Armor and Shell Armor grants +1 Defense on entry
     } else if (source.hasAbility('Battle Armor', 'Shell Armor')) {
       source.boosts.def = Math.min(6, source.boosts.def + 1);
+    }
+  } else if (field.chromaticField === 'Factory') {
+    // Factory - Heavy Metal reduces Speed and raises Defense on entry
+    if (source.hasAbility('Heavy Metal')) {
+      source.boosts.spe = Math.max(-6, source.boosts.spe - 1);
+      source.boosts.def = Math.min(6, source.boosts.def + 1);
+    // Factory - Light Metal does the opposite on entry
+    } else if (source.hasAbility('Light Metal')) {
+      source.boosts.spe = Math.min(6, source.boosts.spe + 1);
+      source.boosts.def = Math.max(-6, source.boosts.def - 1);
+    }
+  } else if (field.chromaticField === 'Waters-Surface') {
+    // Water's Surface - Activates Water Compaction
+    if (source.hasAbility('Water Compaction')) {
+      source.boosts.def = Math.min(6, source.boosts.def + 2);
+    }
+  } else if (field.chromaticField === 'Underwater') {
+    // Underwater - Prism Scale: Boosts the users Speed by 1 stage
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.spe = Math.min(6, source.boosts.spe + 1);
+    }
+  } else if (field.chromaticField === 'Ashen-Beach') {
+    // Ashen Beach - Prism Scale: Boosts Attack, Special Attack (and Accuracy) +1
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.atk = Math.min(6, source.boosts.atk + 1);
+      source.boosts.spa = Math.min(6, source.boosts.spa + 1);
+    }
+  } else if (field.chromaticField === 'Tempest') {
+    // Tempest - Big Pecks and Gulp Missile grant +1 Defense on entry
+    if (source.hasAbility('Big Pecks', 'Gulp Missile')) {
+      source.boosts.def = Math.min(6, source.boosts.def + 1);
+    }
+  } else if (field.chromaticField === 'Forgotten-Battlefield') {
+    // Forgotten Battlefield - Prism Scale: Grants +1 Attack and Speed
+    if (source.hasItem('Prism Scale')) {
+      source.boosts.atk = Math.min(6, source.boosts.atk + 1);
+      source.boosts.spe = Math.min(6, source.boosts.spe + 1);
     }
   }
 }
@@ -517,13 +614,15 @@ export function checkMultihitBoost(
 
   const atkSimple = attacker.hasAbility('Simple') ? 2 : 1;
   const defSimple = defender.hasAbility('Simple') ? 2 : 1;
+  const ignoreDefenseBoosts = attacker.hasAbility('Unaware') ||
+                              (field.chromaticField === 'Forgotten-Battlefield' && attacker.hasItem('Rusted Sword')); // Forgotten Battlefield - Rusted Sword causes holder to ignore the foe's Defense and Special Defense raises
 
   if ((!defenderUsedItem) &&
     (defender.hasItem('Luminous Moss') && move.hasType('Water')) ||
     (defender.hasItem('Maranga Berry') && move.category === 'Special') ||
     (defender.hasItem('Kee Berry') && move.category === 'Physical')) {
     const defStat = defender.hasItem('Kee Berry') ? 'def' : 'spd';
-    if (attacker.hasAbility('Unaware')) {
+    if (ignoreDefenseBoosts) {
       desc.attackerAbility = attacker.ability;
     } else {
       if (defender.hasAbility('Contrary')) {
@@ -554,7 +653,7 @@ export function checkMultihitBoost(
   }
 
   if (defender.hasAbility('Stamina')) {
-    if (attacker.hasAbility('Unaware')) {
+    if (ignoreDefenseBoosts) {
       desc.attackerAbility = attacker.ability;
     } else {
       defender.boosts.def = Math.min(defender.boosts.def + 1, 6);
@@ -562,7 +661,7 @@ export function checkMultihitBoost(
       desc.defenderAbility = defender.ability;
     }
   } else if (defender.hasAbility('Water Compaction') && move.hasType('Water')) {
-    if (attacker.hasAbility('Unaware')) {
+    if (ignoreDefenseBoosts) {
       desc.attackerAbility = attacker.ability;
     } else {
       defender.boosts.def = Math.min(defender.boosts.def + 2, 6);
@@ -570,7 +669,7 @@ export function checkMultihitBoost(
       desc.defenderAbility = defender.ability;
     }
   } else if (defender.hasAbility('Weak Armor')) {
-    if (attacker.hasAbility('Unaware')) {
+    if (ignoreDefenseBoosts) {
       desc.attackerAbility = attacker.ability;
     } else {
       if (defender.hasItem('White Herb') && !defenderUsedItem && defender.boosts.def === 0) {
@@ -586,13 +685,20 @@ export function checkMultihitBoost(
     defender.stats.spe = getFinalSpeed(gen, defender, field, field.defenderSide);
   }
 
-  if (move.dropsStats) {
-    if (attacker.hasAbility('Unaware')) {
+  let dropsStats = move.dropsStats;
+
+  // Fable - Hyper Beam lowers Special Attack by 2 instead of recharging
+  if (field.chromaticField === 'Fable' && move.named('Hyper Beam')) {
+    dropsStats = 2;
+    desc.chromaticField = field.chromaticField;
+  }
+
+  if (dropsStats) {
+    if (ignoreDefenseBoosts) {
       desc.attackerAbility = attacker.ability;
     } else {
       // No move with dropsStats has fancy logic regarding category here
       const stat = move.category === 'Special' ? 'spa' : 'atk';
-      let dropsStats = move.dropsStats;
 
       // Dragon's Den - Draco Meteor only drops 1 stage of Special Attack
       if (field.chromaticField === 'Dragons-Den' && move.named("Draco Meteor")) {
@@ -766,36 +872,93 @@ export function getWeight(pokemon: Pokemon, desc: RawDesc, role: 'defender' | 'a
   return weightHG / 10;
 }
 
-export function getStabMod(pokemon: Pokemon, move: Move, desc: RawDesc) {
+export function getStabMod(pokemon: Pokemon, move: Move, field: Field, side: Side, desc: RawDesc) {
   let stabMod = 4096;
-  if (pokemon.hasOriginalType(move.type)) {
+  // Custom Eeveelutions - Mastery: Grants STAB on all moves
+  if (pokemon.hasAbility('Mastery')) {
     stabMod += 2048;
-  } else if (pokemon.hasAbility('Protean', 'Libero') && !pokemon.teraType) {
+  } else if (side.isSoak) {
+    if (move.hasType('Water')) {
+      stabMod += 2048;
+    }
+    desc.isAttackerSoak = true;
+  } else if (pokemon.hasAbility('Mimicry') && !(getMimicryType(field) == "???" && field.chromaticField !== 'Rainbow')) {
+    if (getMimicryType(field) === move.type) {
+      stabMod += 2048;
+    }
+    desc.attackerAbility = pokemon.ability;
+    desc.attackerType = getMimicryType(field);
+  // Starlight Arena - Victory Star changes the user’s primary type to Fairy
+  } else if (pokemon.hasAbility('Victory Star') && field.chromaticField === 'Starlight-Arena') {
+    if (move.hasType('Fairy')) {
+      stabMod += 2048;
+      desc.attackerAbility = pokemon.ability;
+      desc.chromaticField = field.chromaticField;
+    } else if (move.type !== pokemon.types[0] && pokemon.hasOriginalType(move.type)) {
+      stabMod += 2048;
+    }
+  } else if (pokemon.hasOriginalType(move.type) || (move.type2! && pokemon.hasOriginalType(move.type2))) {
+    stabMod += 2048;
+  } else if ((pokemon.hasAbility('Protean', 'Libero') || pokemon.named('Boltund-Crest')) && !pokemon.teraType) { // Boltund Crest - Grants Libero
     stabMod += 2048;
     desc.attackerAbility = pokemon.ability;
-  }
+  // Empoleon Crest - Grants STAB on Ice Moves
+  } else if (pokemon.named('Empoleon-Crest') && move.hasType('Ice')) {
+    stabMod += 2048;
+  // Luxray Crest - Grants STAB on Dark moves
+  } else if (pokemon.named('Luxray-Crest') && move.hasType('Dark')) {
+    stabMod += 2048;
+  // Probopass Crest - Grants STAB on Electric moves
+  } else if ((pokemon.named('Probopass-Crest') || pokemon.named('Electric Nose')) && move.hasType('Electric')) {
+    stabMod += 2048;
+  // Samurott Crest - Grants STAB on Fighting moves
+  } else if (pokemon.named('Samurott-Crest') && move.hasType('Fighting')) {
+    stabMod += 2048;
+  // Simipour Crest - Grants STAB on Grass moves
+  } else if (pokemon.named('Simipour-Crest') && move.hasType('Grass')) {
+    stabMod += 2048;
+  // Simisage Crest - Grants STAB on Fire moves
+  } else if (pokemon.named('Simisage-Crest') && move.hasType('Fire')) {
+    stabMod += 2048;
+  // Simisear Crest - Grants STAB on Water moves
+  } else if (pokemon.named('Simisear-Crest') && move.hasType('Water')) {
+    stabMod += 2048;
+  } 
+
   const teraType = pokemon.teraType;
+
   if (teraType === move.type && teraType !== 'Stellar') {
     stabMod += 2048;
     desc.attackerTera = teraType;
   }
+
   if (pokemon.hasAbility('Adaptability') && pokemon.hasType(move.type)) {
     stabMod += teraType && pokemon.hasOriginalType(teraType) ? 1024 : 2048;
     desc.attackerAbility = pokemon.ability;
   }
+
   return stabMod;
 }
 
-export function getStellarStabMod(pokemon: Pokemon, move: Move, stabMod = 1, turns = 0) {
+export function getStellarStabMod(pokemon: Pokemon, move: Move, field: Field, desc: RawDesc, stabMod = 1, turns = 0) {
   const isStellarBoosted =
     pokemon.teraType === 'Stellar' &&
-    ((move.isStellarFirstUse && turns === 0) || pokemon.named('Terapagos-Stellar'));
+    (move.isStellarFirstUse || pokemon.named('Terapagos-Stellar'));
   if (isStellarBoosted) {
     if (pokemon.hasOriginalType(move.type)) {
       stabMod += 2048;
     } else {
       stabMod = 4915;
     }
+  // Starlight Arena - Pixilate terastalizes the user into the Stellar Type
+  } else if (pokemon.hasAbility('Pixilate') && field.chromaticField === 'Starlight-Arena') {
+    if (pokemon.hasOriginalType(move.type)) {
+      stabMod += 2048;
+    } else {
+      stabMod = 4915;
+    }
+    desc.attackerTera = 'Stellar';
+    desc.chromaticField = field.chromaticField;
   }
   return stabMod;
 }
@@ -811,6 +974,21 @@ export function countBoosts(gen: Generation, boosts: StatsTable) {
     // Only positive boosts are counted
     const boost = boosts[stat];
     if (boost && boost > 0) sum += boost;
+  }
+  return sum;
+}
+
+export function countDrops(gen: Generation, boosts: StatsTable) {
+  let sum = 0;
+
+  const STATS: StatID[] = gen.num === 1
+    ? ['atk', 'def', 'spa', 'spe']
+    : ['atk', 'def', 'spa', 'spd', 'spe'];
+
+  for (const stat of STATS) {
+    // Only negative boosts are counted
+    const boost = boosts[stat];
+    if (boost && boost < 0) sum -= boost;
   }
   return sum;
 }
@@ -901,6 +1079,14 @@ export function getMimicryType(field: Field) {
     return "Psychic" as TypeName;
   } else if (field.chromaticField === 'Cave') {
     return "Rock" as TypeName;
+  } else if (field.chromaticField === 'Factory') {
+    return "Steel" as TypeName;
+  } else if (field.chromaticField === 'Waters-Surface') {
+    return "Water" as TypeName;
+  } else if (field.chromaticField === 'Underwater') {
+    return "Water" as TypeName;
+  } else if (field.chromaticField === 'Rainbow') {
+    return "???" as TypeName;
   } else {
     return "???" as TypeName;
   }
