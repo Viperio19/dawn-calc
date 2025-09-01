@@ -797,7 +797,7 @@ function getEndOfTurn(
       if (field.hasWeather('Snow') && field.chromaticField === 'Snowy-Peaks') {
         damage -= Math.floor(defender.maxHP() / 16);
         texts.push('snow damage');
-      } else {
+      } else if (field.hasWeather('Hail')) {
         damage -= Math.floor(defender.maxHP() / 16);
         texts.push('hail damage');
       }
