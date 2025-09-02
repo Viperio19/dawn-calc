@@ -4972,6 +4972,11 @@ const CHROMATIC_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     maxPower: 20,
   },
   // Aevian - Moves
+  'Arenite Wall': {
+    bp: 0,
+    type: 'Ground',
+    category: 'Status',
+  },
   'Deluge': {
     bp: 60,
     type: 'Water',
