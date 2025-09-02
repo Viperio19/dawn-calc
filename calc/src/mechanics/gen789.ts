@@ -975,8 +975,9 @@ export function calculateSMSSSV(
   }
 
   if (field.chromaticField === 'Cave') {
-    // Cave - Stealth Rocks do resisted damage to rock types and at least neutral damage to non-rock types
-    if (field.defenderSide.isSR && !defender.hasItem('Heavy-Duty Boots') && !defender.hasAbility('Magic Guard', 'Mountaineer')) {
+    if (field.defenderSide.isSR && !defender.hasItem('Heavy-Duty Boots') && !defender.hasAbility('Magic Guard', 'Mountaineer') &&
+        defender.hasType('Rock') || // Cave - Stealth Rocks do resisted damage to rock types
+        defender.hasAbility('Sturdy')) { // Cave - Sturdy grants immunity to Stealth Rocks
       desc.chromaticField = field.chromaticField;
     }
   
@@ -1082,6 +1083,7 @@ export function calculateSMSSSV(
         !move.named('Thousand Arrows') && !(move.named('Bulldoze') && field.chromaticField === 'Desert') && // Desert - Bulldoze grounds adjacent foes; first hit neutral on Airborne foes
         !field.isGravity && !field.defenderSide.isIngrain && !defender.hasItem('Iron Ball') &&
         (field.defenderSide.isMagnetRise ||
+        (defender.hasAbility('Magnet Pull') && field.chromaticField === 'Cave') || // Cave - Magnet Pull grants Levitate
         (defender.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') || // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
         (defender.named('Probopass-Crest') && !attackerIgnoresAbility)))) || // Probopass Crest - Grants Levitate
       (move.flags.bullet && defender.hasAbility('Bulletproof')) ||
@@ -3318,8 +3320,9 @@ export function calculateFinalModsSMSSSV(
     finalMods.push(8192);
   }
 
-  // Blessed Sanctum - Cute Charm grants Multiscale
-  if (defender.hasAbility('Multiscale', 'Shadow Shield') || (defender.hasAbility('Cute Charm') && field.chromaticField === 'Blessed-Sanctum'))
+  if (defender.hasAbility('Multiscale', 'Shadow Shield') ||
+      (defender.hasAbility('Cute Charm') && field.chromaticField === 'Blessed-Sanctum') || // Blessed Sanctum - Cute Charm grants Multiscale
+      (defender.hasAbility('Solid Rock') && field.chromaticField === 'Cave')) // Cave - Solid Rock grants Multiscale
   {
     if (
       defender.curHP() === defender.maxHP() &&
