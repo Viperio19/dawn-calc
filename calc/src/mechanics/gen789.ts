@@ -310,7 +310,7 @@ export function calculateSMSSSV(
     desc.moveType = type;
   } else if (move.named('Judgment') && attacker.item && attacker.item.includes('Plate')) {
     type = getItemBoostType(attacker.item)!;
-  // Blessed Sanctum - Multipulse: Hyper Voice, Tri Attack, and Echoed Voice become Judgement
+  // Blessed Sanctum - Multipulse: Hyper Voice, Tri Attack, and Echoed Voice become Judgment
   } else if (move.named('Hyper Voice', 'Tri Attack', 'Echoed Voice') && field.chromaticField === 'Blessed-Sanctum' &&
              attacker.item && attacker.item.includes('Plate')) {
     type = getItemBoostType(attacker.item)!;
@@ -451,6 +451,13 @@ export function calculateSMSSSV(
   // Ashen Beach - Strength is now Fighting type
   if (field.chromaticField === 'Ashen-Beach' && move.named('Strength')) {
     type = 'Fighting';
+    desc.moveType = type;
+    desc.chromaticField = field.chromaticField;
+  }
+
+  // Forgotten Battlefield - Retaliate's type changes to the user's primary type
+  if (field.chromaticField === 'Forgotten-Battlefield' && move.named('Retaliate')) {
+    type = attacker.types[0];
     desc.moveType = type;
     desc.chromaticField = field.chromaticField;
   }
@@ -898,8 +905,7 @@ export function calculateSMSSSV(
   }
 
   if (field.chromaticField === 'Haunted-Graveyard') {
-    if (((defender.hasStatus('slp') || defender.hasAbility('Comatose')) && !defenderMagicGuard && !attacker.hasAbility('Bad Dreams')) || // Haunted Graveyard - Bad Dreams is always active
-        (move.named('Dream Eater') && !(defender.hasStatus('slp') || defender.hasAbility('Comatose')))) { // Haunted Graveyward - Dream Eater never fails
+    if (move.named('Dream Eater') && !(defender.hasStatus('slp') || defender.hasAbility('Comatose'))) { // Haunted Graveyward - Dream Eater never fails
       desc.chromaticField = field.chromaticField;
     }
 
@@ -1915,7 +1921,7 @@ export function calculateBasePowerSMSSSV(
     desc.chromaticField = field.chromaticField;
   }
 
-  // Blessed Sanctum - Multipulse: Hyper Voice, Tri Attack, and Echoed Voice become Judgement
+  // Blessed Sanctum - Multipulse: Hyper Voice, Tri Attack, and Echoed Voice become Judgment
   if (field.chromaticField === 'Blessed-Sanctum' && move.named('Hyper Voice', 'Tri Attack', 'Echoed Voice')) {
     basePower = 100;
     desc.moveName = 'Judgment';
@@ -2832,9 +2838,9 @@ export function calculateAtModsSMSSSV(
     }
   }
 
-  // Rainbow -  Mystical Fire, Tri Attack, Sacred Fire, Fire Pledge, Water Pledge, Grass Pledge, Aurora Beam, Judgement, Relic Song, Hidden Power, Secret Power, Mist Ball, Sparkling Aria, Prismatic Laser receive a 1.3x damage boost.
+  // Rainbow -  Mystical Fire, Tri Attack, Sacred Fire, Fire Pledge, Water Pledge, Grass Pledge, Aurora Beam, Judgment, Relic Song, Hidden Power, Secret Power, Mist Ball, Sparkling Aria, Prismatic Laser receive a 1.3x damage boost.
   if (field.chromaticField === 'Rainbow') {
-    if (move.named('Sparkling Aria', 'Prismatic Laser', 'Mist Ball', 'Secret Power', 'Hidden Power', 'Relic Song', 'Judgement', 'Aurora Beam', 'Mystical Fire', 'Tri Attack', 'Grass Pledge', 'Water Pledge', 'Water Pledge', 'Fire Pledge', 'Sacred Fire')) {
+    if (move.named('Sparkling Aria', 'Prismatic Laser', 'Mist Ball', 'Secret Power', 'Hidden Power', 'Relic Song', 'Judgment', 'Aurora Beam', 'Mystical Fire', 'Tri Attack', 'Grass Pledge', 'Water Pledge', 'Water Pledge', 'Fire Pledge', 'Sacred Fire')) {
       atMods.push(5324);
       desc.chromaticField = field.chromaticField;
     }
