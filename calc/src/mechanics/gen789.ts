@@ -245,6 +245,14 @@ export function calculateSMSSSV(
     }
   }
 
+  if (move.timesUsed === undefined) move.timesUsed = 1;
+
+  // Tempest - Powder Snow will continue to damage the target for the next 2 turns
+  if (move.named('Powder Snow') && field.chromaticField === 'Tempest') {
+    move.timesUsed += 2;
+    desc.chromaticField = field.chromaticField;
+  }
+
   // Merciless does not ignore Shell Armor, damage dealt to a poisoned Pokemon with Shell Armor
   // will not be a critical hit (UltiMario)
   let tempCritical = !defender.hasAbility('Battle Armor', 'Shell Armor') &&
@@ -675,10 +683,22 @@ export function calculateSMSSSV(
 
   // Fields - Type effectiveness changes
 
-  // Eclipse - Solar Beam and Solar Blade fail
-  if (field.chromaticField === 'Eclipse' && move.named('Solar Beam', 'Solar Blade')) {
-    desc.chromaticField = field.chromaticField;
-    typeEffectiveness = 0;
+  if (field.chromaticField === 'Eclipse') {
+    // Eclipse - Solar Beam and Solar Blade fail
+    if (move.named('Solar Beam', 'Solar Blade')) {
+      desc.chromaticField = field.chromaticField;
+      typeEffectiveness = 0;
+    }
+
+    // Eclipse - Thief is super effective on pokemon without an item
+    if (move.named('Thief') && (!defender.item || (isQPActive(defender, field) && defender.hasItem('Booster Energy')))) {
+      desc.chromaticField = field.chromaticField;
+      typeEffectiveness = 2;
+    }
+  }
+
+  if (field.chromaticField === 'Eclipse' && move.named('Thief') && (!defender.item || (isQPActive(defender, field) && defender.hasItem('Booster Energy')))) {
+
   }
 
   // Factory - Heatproof grants Fire immunity
@@ -2583,10 +2603,10 @@ export function calculateAtModsSMSSSV(
     atMods.push(6144);
     desc.attackerAbility = attacker.ability;
     desc.weather = field.weather;
-  // Flower Garden - Bewitched Woods - Activates Flower Gift regardless of weather
+  // Flower Garden - Activates Flower Gift regardless of weather
   } else if (attacker.named('Cherrim') &&
              attacker.hasAbility('Flower Gift') &&
-             (field.chromaticField === 'Flower-Garden' || field.chromaticField === 'Bewitched-Woods') &&
+             field.chromaticField === 'Flower-Garden'&&
              move.category === 'Physical') {
     atMods.push(6144);
     desc.attackerAbility = attacker.ability;
@@ -2610,7 +2630,7 @@ export function calculateAtModsSMSSSV(
     desc.attackerAbility = attacker.ability;
   } else if ((field.chromaticField === 'Jungle' && attacker.hasAbility('Swarm') && move.hasType('Bug')) || // Jungle - Activates Swarm
              (field.chromaticField === 'Thundering-Plateau' && attacker.hasAbility('Plus', 'Minus') && move.category === 'Special') || // Thundering Plateau - Activates Plus and Minus
-             (field.chromaticField === 'Volcanic-Top' && (attacker.hasAbility('Solar Power') || (attacker.hasAbility('Blaze') && move.hasType('Fire')))) || // Volcanic Top - Activates Blaze and Solar Power
+             (field.chromaticField === 'Volcanic-Top' && attacker.hasAbility('Solar Power')) || // Volcanic Top - Activates Solar Power
              (field.chromaticField === 'Flower-Garden' && attacker.hasAbility('Overgrow') && move.hasType('Grass')) || // Flower Garden - Activates Overgrow
              (field.chromaticField === 'Waters-Surface' && attacker.hasAbility('Torrent') && move.hasType('Water'))) { // Water's Surface - Activates Torrent
     atMods.push(6144);
@@ -2657,8 +2677,8 @@ export function calculateAtModsSMSSSV(
       atMods.push(6144);
       desc.weather = field.weather;
       desc.isFlowerGiftAttacker = true;
-    // Flower Garden - Bewitched Woods - Activates Flower Gift regardless of weather
-    } else if (field.chromaticField === 'Flower-Garden' || field.chromaticField === 'Bewitched-Woods') {
+    // Flower Garden - Activates Flower Gift regardless of weather
+    } else if (field.chromaticField === 'Flower-Garden') {
       atMods.push(6144);
       desc.chromaticField = field.chromaticField;
       desc.isFlowerGiftAttacker = true;
@@ -2748,12 +2768,6 @@ export function calculateAtModsSMSSSV(
   }
 
   // Fields - Attack Modifiers
-
-  // Forgotten Battlefield - Gigaton Hammer deals double damage to Fighting and Steel types
-  if (field.chromaticField === 'Forgotten-Battlefield' && move.named('Gigaton Hammer') && defender.hasType('Fighting', 'Steel')) {
-    atMods.push(8192);
-    desc.chromaticField = field.chromaticField;
-  }
 
   if (field.chromaticField === 'Flower-Garden') {
     // Flower Garden - Horn Leech and Seed Bomb deal 1.3x damage
@@ -2855,13 +2869,6 @@ export function calculateAtModsSMSSSV(
     desc.chromaticField = field.chromaticField;
   }
 
-  // Corrosive Mist - Flash Fire additionally grants resistance to Poison Type attacks
-  if (field.chromaticField === 'Corrosive-Mist' && defender.hasAbility('Flash Fire') && move.hasType('Poison')) {
-    atMods.push(2048);
-    desc.defenderAbility = defender.ability;
-    desc.chromaticField = field.chromaticField;
-  }
-
   if (field.chromaticField === 'Ashen-Beach') {
     // Ashen Beach - Telepathy boosts Special Attack by 1.5x
     if (attacker.hasAbility('Telepathy') && move.category === 'Special') {
@@ -2892,8 +2899,8 @@ export function calculateAtModsSMSSSV(
       desc.chromaticField = field.chromaticField;
     }
 
-    // Tempest - Snow Cloak and Ice Body grants the user resistance to Flying
-    if (defender.hasAbility('Snow Cloak', 'Ice Body') && move.hasType('Flying')) {
+    // Tempest - Snow Cloak and Ice Body grants the user resistance to wind moves
+    if (defender.hasAbility('Snow Cloak', 'Ice Body') && move.flags.wind) {
       atMods.push(2048);
       desc.defenderAbility = defender.ability;
       desc.chromaticField = field.chromaticField;
@@ -2914,8 +2921,8 @@ export function calculateAtModsSMSSSV(
       desc.chromaticField = field.chromaticField;
     }
 
-    // Forgotten Battlefield - Smart Strike deals double damage against Fighting and Steel Types
-    if (move.named('Smart Strike') && defender.hasType('Fighting', 'Steel')) {
+    // Smart Strike and Gigaton Hammer deal double damage against Fighting and Steel Types
+    if (move.named('Smart Strike', 'Gigaton Hammer') && defender.hasType('Fighting', 'Steel')) {
       atMods.push(8192);
       desc.chromaticField = field.chromaticField;
     }
@@ -3111,8 +3118,8 @@ export function calculateDfModsSMSSSV(
       dfMods.push(6144);
       desc.defenderAbility = defender.ability;
       desc.weather = field.weather;
-    // Flower Garden - Bewitched Woods - Activates Flower Gift regardless of weather
-    } else if (field.chromaticField === 'Flower-Garden' || field.chromaticField === 'Bewitched-Woods') {
+    // Flower Garden - Activates Flower Gift regardless of weather
+    } else if (field.chromaticField === 'Flower-Garden') {
       dfMods.push(6144);
       desc.defenderAbility = defender.ability;
       desc.chromaticField = field.chromaticField;
@@ -3379,6 +3386,13 @@ export function calculateFinalModsSMSSSV(
   if (defender.hasAbility('Solid Rock', 'Filter', 'Prism Armor') && typeEffectiveness > 1) {
     finalMods.push(3072);
     desc.defenderAbility = defender.ability;
+  }
+
+  // Bewitched Woods - Leaf Guard grants Prism Armor
+  if (defender.hasAbility('Leaf Guard') && field.chromaticField === 'Bewitched-Woods' && typeEffectiveness > 1) {
+    finalMods.push(3072);
+    desc.defenderAbility = defender.ability;
+    desc.chromaticField = field.chromaticField;
   }
 
   // Aevian Ampharos Crest - Reduces by 30% the super-effective damage taken by the holder

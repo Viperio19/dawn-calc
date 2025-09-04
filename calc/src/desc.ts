@@ -729,7 +729,8 @@ function getEndOfTurn(
   let damage = 0;
   const texts = [];
 
-  const loseItem = move.named('Knock Off') && !defender.hasAbility('Sticky Hold');
+  // Bewitched Woods - Spirit Break additionally removes items
+  const loseItem = (move.named('Knock Off') || (move.named('Spirit Break') && field.chromaticField === 'Bewitched-Woods')) && !defender.hasAbility('Sticky Hold');
 
   // psychic noise should suppress all recovery effects
   const healBlock =

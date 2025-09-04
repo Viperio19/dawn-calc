@@ -556,6 +556,10 @@ function setPrismScaleEffects(pokeObj) {
 	} else if (chromaticField === 'Forgotten-Battlefield') {
 		var abilityObj = pokeObj.find(".ability");
 		setSelectValueIfValid(abilityObj, "Mummy", "Mummy");
+	// Tempest - Prism Scale: Grants Electric Surge
+	} else if (chromaticField === 'Tempest') {
+		$("input:checkbox[name='terrain']:checked").prop("checked", false);
+		$("#electric").prop("checked", true);
 	}
 }
 
