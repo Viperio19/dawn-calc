@@ -207,7 +207,7 @@ export function calculateSMSSSV(
   ) || (field.chromaticField === 'Underwater' && move.named('Wave Crash')) || // Underwater - Wave Crash ignores the abilities of other Pokémon
        (field.chromaticField === 'Fable' && move.named('Outrage', 'Thrash')) // Fable - Outrage and Thrash ignore the abilities of opposing pokemon
 
-  if (defenderAbilityIgnored && (attackerIgnoresAbility || moveIgnoresAbility)) {
+  if (defenderAbilityIgnored && (attackerIgnoresAbility || moveIgnoresAbility || attacker.named('Typhlosion-Crest'))) { // Typhlosion Crest - Grants Turboblaze
     if (attackerIgnoresAbility) desc.attackerAbility = attacker.ability;
     if (defender.hasItem('Ability Shield')) {
       desc.defenderItem = defender.item;
@@ -478,7 +478,6 @@ export function calculateSMSSSV(
   let isLiquidVoice = false;
   let isNormalize = false;
   let isTypeSync = false;
-  let isSawsbuckCrest = false;
   let isDDenIntimidate = false;
   const noTypeChange = move.named(
     'Revelation Dance',
@@ -497,7 +496,7 @@ export function calculateSMSSSV(
     const normal = type === 'Normal';
     if (isAerilate = attacker.hasAbility('Aerilate') && normal) {
       type = 'Flying';
-    } else if (isGalvanize = (attacker.hasAbility('Galvanize') || attacker.named('Luxray-Crest')) && normal) { // Luxray Crest - Gains Galvanize
+    } else if (isGalvanize = attacker.hasAbility('Galvanize') && normal) {
       type = 'Electric';
     } else if (isLiquidVoice = attacker.hasAbility('Liquid Voice') && !!move.flags.sound) {
       type = 'Water';
@@ -510,9 +509,14 @@ export function calculateSMSSSV(
     // Custom Eeveelutions - Type Sync: Makes normal moves match the users primary type
     } else if (isTypeSync = attacker.hasAbility('Type Sync') && normal) {
       type = attacker.types[0];
+    } else if (attacker.named('Luxray-Crest') && normal) { // Luxray Crest - Gains Galvanize
+      type = 'Electric';
+      hasAteAbilityTypeChange = true;
     // Sawsbuck Crest - Normal-type moves become seasonal type and are boosted by 20%
-    } else if (isSawsbuckCrest = attacker.name.includes('Sawsbuck-Crest-') && normal) {
+    } else if (attacker.name.includes('Sawsbuck-Crest-') && normal) {
       type = attacker.types[0];
+      desc.moveType = type;
+      hasAteAbilityTypeChange = true;
     // Simipour Crest - Normal-type moves become Grass-type
     } else if (attacker.named('Simipour-Crest') && normal) {
       type = 'Grass';
@@ -557,9 +561,6 @@ export function calculateSMSSSV(
       hasAteAbilityTypeChange = true;
     } else if (isLiquidVoice) {
       desc.attackerAbility = attacker.ability;
-    } else if (isSawsbuckCrest) {
-      hasAteAbilityTypeChange = true;
-      desc.moveType = type;
     } else if (isDDenIntimidate) {
       desc.attackerAbility = attacker.ability;
       desc.moveType = type;
@@ -587,6 +588,7 @@ export function calculateSMSSSV(
 
   const isGhostRevealed =
     attacker.hasAbility('Scrappy') || attacker.hasAbility('Mind\'s Eye') ||
+      attacker.named('Darmanitan-Crest') || // Darmanitan Crest - Gains Mind’s Eye
       field.defenderSide.isForesight;
   const isRingTarget =
     defender.hasItem('Ring Target') && !defender.hasAbility('Klutz');
@@ -697,10 +699,6 @@ export function calculateSMSSSV(
     }
   }
 
-  if (field.chromaticField === 'Eclipse' && move.named('Thief') && (!defender.item || (isQPActive(defender, field) && defender.hasItem('Booster Energy')))) {
-
-  }
-
   // Factory - Heatproof grants Fire immunity
   if (field.chromaticField === 'Factory' && defender.hasAbility('Heatproof') && move.hasType('Fire')) {
     desc.defenderAbility = defender.ability;
@@ -737,61 +735,69 @@ export function calculateSMSSSV(
 
   // Crests - Resistances and Immunities
 
-  // Druddigon Crest - Gives immunity to fire type moves
+  // Druddigon Crest - Gives immunity to Fire type moves
   if (defender.named('Druddigon-Crest')) {
-    if (move.hasType('Fire')) // Fire Immunity
+    if (move.hasType('Fire')) // Immunity to Fire
       typeEffectiveness = 0;
   }
 
-  // Glaceon Crest - Gives resistance to fighting and rock type moves
+  // Glaceon Crest - Glaceon resists Fighting and Rock attacks
   if (defender.named('Glaceon-Crest') && move.hasType('Fighting', 'Rock') && typeEffectiveness > 0.5) {
     typeEffectiveness = 0.5;
   }
 
-  // Leafeon Crest - Gives resistance to fire and flying type moves
+  // Leafeon Crest - Leafeon resists Fire and Flying attacks
   if (defender.named('Leafeon-Crest') && move.hasType('Fire', 'Flying') && typeEffectiveness > 0.5) {
     typeEffectiveness = 0.5;
   }
 
-  // Luxray Crest - Gives resistance to dark and ghost type moves (dark pseudo-typing without immunities)
+  // Luxray Crest - Gains Dark type resistances and immunities
   if (defender.named('Luxray-Crest')) {
-    if (move.hasType('Dark', 'Ghost')) // Dark Resistances
+    if (move.hasType('Dark', 'Ghost')) // Dark type resistances
       typeEffectiveness *= 0.5;
-  }
-
-  // Samurott Crest - Gives resistances to dark, bug and rock type moves (fighting pseudo-typing)
-  if (defender.named('Samurott-Crest')) {
-    if (move.hasType('Dark', 'Bug', 'Rock')) // Fighting Resistances
-      typeEffectiveness *= 0.5;
-  }
-
-  // Simipour Crest - Gives resistance to grass, water, ground and electric type moves (grass pseudo-typing)
-  if (defender.named('Simipour-Crest')) {
-    if (move.hasType('Grass', 'Water', 'Ground', 'Electric')) // Grass Resistances
-      typeEffectiveness *= 0.5;
-  }
-
-  // Simisage Crest - Gives resistance to grass, fire, bug, ice, steel and fairy type moves (fire pseudo-typing)
-  if (defender.named('Simisage-Crest')) {
-    if (move.hasType('Grass', 'Fire', 'Bug', 'Ice', 'Steel', 'Fairy')) // Fire Resistances
-      typeEffectiveness *= 0.5;
-  }
-
-  // Simisear Crest - Gives resistance to fire, water, ice and steel type moves (water pseudo-typing)
-  if (defender.named('Simisear-Crest')) {
-    if (move.hasType('Fire', 'Water', 'Ice', 'Steel')) // Water Resistances
-      typeEffectiveness *= 0.5;
-  }
-
-  // Skuntank Crest - Gives ground immunity
-  if (defender.named('Skuntank-Crest')) {
-    if (move.hasType('Ground')) // Ground Immunity
+    if (move.hasType('Psychic')) // Dark type immunities
       typeEffectiveness = 0;
   }
 
-  // Whiscash Crest - Gives grass immunity
+  // Noctowl Crest - Gains Psychic type resistances
+  if (defender.named('Noctowl-Crest')) {
+    if (move.hasType('Psychic', 'Fighting')) // Psychic type resistances
+      typeEffectiveness *= 0.5;
+  }
+
+  // Samurott Crest - Gains Fighting type resistances
+  if (defender.named('Samurott-Crest')) {
+    if (move.hasType('Dark', 'Bug', 'Rock')) // Fighting type resistances
+      typeEffectiveness *= 0.5;
+  }
+
+  // Simipour Crest - Gains Grass type resistances
+  if (defender.named('Simipour-Crest')) {
+    if (move.hasType('Grass', 'Water', 'Ground', 'Electric')) // Grass type resistances
+      typeEffectiveness *= 0.5;
+  }
+
+  // Simisage Crest - Gains Fire type resistances
+  if (defender.named('Simisage-Crest')) {
+    if (move.hasType('Grass', 'Fire', 'Bug', 'Ice', 'Steel', 'Fairy')) // Fire type resistances
+      typeEffectiveness *= 0.5;
+  }
+
+  // Simisear Crest - Gains Water type resistances
+  if (defender.named('Simisear-Crest')) {
+    if (move.hasType('Fire', 'Water', 'Ice', 'Steel')) // Water type resistances
+      typeEffectiveness *= 0.5;
+  }
+
+  // Skuntank Crest - Gives immunity to Ground type moves
+  if (defender.named('Skuntank-Crest')) {
+    if (move.hasType('Ground')) // Immunity to Ground
+      typeEffectiveness = 0;
+  }
+
+  // Whiscash Crest - Gives immunity to Grass type moves
   if (defender.named('Whiscash-Crest')) {
-    if (move.hasType('Grass')) // Grass Immunity
+    if (move.hasType('Grass')) // Immunity to Grass
       typeEffectiveness = 0;
   }
 
@@ -2113,6 +2119,7 @@ export function calculateBPModsSMSSSV(
   } else if (move.named('Collision Course', 'Electro Drift')) {
     const isGhostRevealed =
       attacker.hasAbility('Scrappy') || attacker.hasAbility('Mind\'s Eye') ||
+      attacker.named('Darmanitan-Crest') || // Darmanitan Crest - Grants Mind's Eye
       field.defenderSide.isForesight;
     const isRingTarget =
       defender.hasItem('Ring Target') && !defender.hasAbility('Klutz');
@@ -2305,6 +2312,9 @@ export function calculateBPModsSMSSSV(
       if (attacker.types[0] !== 'Ghost') {
         bpMods.push(4505);
       }
+    // Sawsbuck Crest - Normal-type moves become seasonal type and are boosted by 25%
+    } else if (attacker.name.includes('Sawsbuck-Crest-')) {
+      bpMods.push(5120);
     } else {
       bpMods.push(4915);
     }
@@ -2393,6 +2403,11 @@ export function calculateBPModsSMSSSV(
     bpMods.push(6144);
   }
 
+  // Crabominable Crest - Powers up moves by 50% if the holder takes damage before using them
+  if (attacker.named('Crabominable-Crest') && attacker.stats.spe < defender.stats.spe) {
+    bpMods.push(6144);
+  }
+
   // Druddigon Crest - Increases damage dealt with fire and dragon type moves by 30% 
   if (attacker.named('Druddit') && move.hasType('Fire', 'Dragon')) {
     bpMods.push(5324);
@@ -2401,6 +2416,11 @@ export function calculateBPModsSMSSSV(
   // Fearow Crest - Increases damage dealt with stabbing moves by 50%
   if (attacker.named('Fearow-Crest') && move.flags.stabbing) {
     bpMods.push(6144);
+  }
+
+  // Luxray Crest - Gains Tough Claws
+  if (attacker.named('Luxray-Crest') && move.flags.contact) {
+    bpMods.push(5324);
   }
 
   return bpMods;
@@ -2492,9 +2512,9 @@ export function calculateAttackSMSSSV(
     attack = pokeRound((attack * 5) / 4);
   }
 
-  // Crabominable Crest - Increases physical attack and physical defense by 20%
+  // Crabominable Crest - Increases physical defense by 30%
   if (attacker.named('Crabominable-Crest') && move.named('Body Press')) {
-    attack = pokeRound((attack * 6) / 5);
+    attack = pokeRound((attack * 13) / 10);
   }
 
   // Cryogonal Crest - Increases offenses by 10% of its special defense (which is buffed by 20%)
@@ -2530,9 +2550,9 @@ export function calculateAttackSMSSSV(
     desc.relicanthTurnsAttack = turns;
   }
 
-  // Simi Monkeys Crests: Increases offenses by 20%
+  // Simi Monkeys Crests: Increases offenses by 30%
   if (attacker.named('Simipour-Crest') || attacker.named('Simisage-Crest') || attacker.named('Simisear-Crest')) {
-    attack = pokeRound((attack * 6) / 5);
+    attack = pokeRound((attack * 13) / 10);
   }
 
   // Skuntank Crest - Increases offenses by 20%
@@ -2557,11 +2577,6 @@ export function calculateAttackSMSSSV(
   // Vespiquen Crest - Increases offenses by 50% while in attack mode
   if (attacker.named('Vespiquen-Crest-Offense')) {
     attack = pokeRound((attack * 3) / 2);
-  }
-
-  // Whiscash Crest - Increases offenses by 20%
-  if (attacker.named('Whiscash-Crest')) {
-    attack = pokeRound((attack * 6) / 5);
   }
 
   const atMods = calculateAtModsSMSSSV(gen, attacker, defender, move, field, desc);
@@ -2734,7 +2749,11 @@ export function calculateAtModsSMSSSV(
       (move.category === 'Special' && getQPBoostedStat(attacker) === 'spa')
     ) {
       atMods.push(5325);
-      desc.attackerAbility = attacker.ability;
+      if (attacker.named('Druddigon-Crest')) { // Druddigon-Crest - Grants Protosynthesis
+        desc.attackerAbility = "Protosynthesis";
+      } else {
+        desc.attackerAbility = attacker.ability;
+      }
     }
   }
 
@@ -3033,9 +3052,9 @@ export function calculateDefenseSMSSSV(
     defense = pokeRound((defense * 5) / 4);
   }
 
-  // Crabominable Crest - Increases defenses by 20%
+  // Crabominable Crest - Increases defenses by 30%
   if (defender.named('Crabominable-Crest')) {
-    defense = pokeRound((defense * 6) / 5);
+    defense = pokeRound((defense * 13) / 10);
   }
 
   // Meganium Crest - Increases defenses by 20%
@@ -3060,9 +3079,14 @@ export function calculateDefenseSMSSSV(
     desc.relicanthTurnsDefense = turns;
   }
   
-  // Vespiquen Crest (Defense): Increases defense by 50%
+  // Vespiquen Crest (Defense): Increases defenses by 50%
   if (defender.named('Vespiquen-Crest-Defense')) {
     defense = pokeRound((defense * 3) / 2);
+  }
+
+  // Whiscash Crest - Increases defenses by 20%
+  if (defender.named('Whiscash-Crest')) {
+    defense = pokeRound((defense * 6) / 5);
   }
 
   const dfMods = calculateDfModsSMSSSV(
@@ -3170,8 +3194,12 @@ export function calculateDfModsSMSSSV(
       (hitsPhysical && getQPBoostedStat(defender) === 'def') ||
       (!hitsPhysical && getQPBoostedStat(defender) === 'spd')
     ) {
-      desc.defenderAbility = defender.ability;
       dfMods.push(5324);
+      if (defender.named('Druddigon-Crest')) { // Druddigon Crest - Grants Protosynthesis
+        desc.defenderAbility = "Protosynthesis";
+      } else {
+        desc.defenderAbility = defender.ability;
+      }
     }
   }
 
