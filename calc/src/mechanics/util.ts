@@ -31,6 +31,7 @@ export function isGrounded(pokemon: Pokemon, field: Field, side: Side) {
   return (field.isGravity || pokemon.hasItem('Iron Ball') || side.isIngrain || 
     (!side.isMagnetRise &&
       !pokemon.hasType('Flying') &&
+      !(pokemon.hasAbility('Magnet Pull') && field.chromaticField === 'Cave') && // Cave - Magnet Pull grants Levitate
       !pokemon.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') && // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
       !pokemon.hasItem('Air Balloon') &&
       !pokemon.named('Probopass-Crest'))); // Probopass Crest - Grants Levitate
@@ -321,8 +322,6 @@ export function checkIntimidate(gen: Generation, source: Pokemon, target: Pokemo
     target.hasAbility('Clear Body', 'White Smoke', 'Hyper Cutter', 'Full Metal Body') ||
     // More abilities now block Intimidate in Gen 8+ (DaWoblefet, Cloudy Mistral)
     (gen.num >= 8 && target.hasAbility('Inner Focus', 'Own Tempo', 'Oblivious', 'Scrappy')) ||
-    // Cave - Sturdy grants Clear Body
-    (target.hasAbility('Sturdy') && field.chromaticField === 'Cave') ||
     target.hasItem('Clear Amulet');
   if (source.hasAbility('Intimidate') && source.abilityOn && !blocked) {
     if (target.hasAbility('Contrary', 'Defiant', 'Guard Dog') ||
@@ -378,8 +377,6 @@ export function checkCrestEntryEffects(gen: Generation, source: Pokemon, target:
     target.hasAbility('Clear Body', 'White Smoke', 'Hyper Cutter', 'Full Metal Body') ||
     // More abilities now block Intimidate in Gen 8+ (DaWoblefet, Cloudy Mistral)
     (gen.num >= 8 && target.hasAbility('Inner Focus', 'Own Tempo', 'Oblivious', 'Scrappy')) ||
-    // Cave - Sturdy grants Clear Body
-    (target.hasAbility('Sturdy') && field.chromaticField === 'Cave') ||
     target.hasItem('Clear Amulet');
   
   // Thievul Crest - "Steals" one stage of Special Attack from the opponent. (Decreases one stage on entry, increases one stage to self)
@@ -484,11 +481,8 @@ export function checkFieldEntryEffects(gen: Generation, source: Pokemon, target:
     if (source.hasItem('Prism Scale')) {
       source.boosts.def = Math.min(6, source.boosts.def + 1);
     }
-    // Cave - Steam Engine grants +2 Speed on entry
-    if (source.hasAbility('Steam Engine')) {
-      source.boosts.spe = Math.min(6, source.boosts.spe + 2);
     // Cave - Battle Armor and Shell Armor grants +1 Defense on entry
-    } else if (source.hasAbility('Battle Armor', 'Shell Armor')) {
+    if (source.hasAbility('Battle Armor', 'Shell Armor')) {
       source.boosts.def = Math.min(6, source.boosts.def + 1);
     }
   } else if (field.chromaticField === 'Factory') {

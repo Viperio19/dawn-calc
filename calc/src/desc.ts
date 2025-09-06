@@ -608,6 +608,7 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
   const defenderGrounded = defenderSide.isIngrain || defender.hasItem('Iron Ball') ||
     (!defender.hasType('Flying') &&
     !defenderSide.isMagnetRise &&
+    !(defender.hasAbility('Magnet Pull') && field.chromaticField === 'Cave') && // Cave - Magnet Pull grants Levitate
     !defender.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') && // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
     !defender.hasItem('Air Balloon') &&
     !defender.named('Probopass-Crest')); // Probopass Crest - Grants Levitate
@@ -639,7 +640,8 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
       return {damage, texts};
   } else {
     if (defenderSide.isSR && !defender.hasAbility('Mountaineer') &&
-        !(defender.hasType('Rock') && field.chromaticField === 'Undercolony')) { // Undercolony - Rock types absorb Stealth Rocks
+        !(defender.hasType('Rock') && field.chromaticField === 'Undercolony') && // Undercolony - Rock types absorb Stealth Rocks
+        !(defender.hasAbility('Sturdy') && field.chromaticField === 'Cave')) { // Cave - Sturdy grants immunity to Stealth Rocks
       const rockType = gen.types.get('rock' as ID)!;
       let effectiveness =
         defender.teraType && defender.teraType !== 'Stellar'
@@ -664,11 +666,6 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
       if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
           (!defender.named('Torterra-Crest') && (field.chromaticField === 'Inverse'))) { // Inverse - Inverse type effectiveness
         effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to rock
-      }
-      
-      // Cave - Stealth Rocks do at least neutral damage to non-rock types
-      if (field.chromaticField === 'Cave' && !defender.hasType('Rock') && effectiveness < 1) {
-        effectiveness = 1;
       }
       
       // Undercolony - Shell Armor & Battle Armor makes user resist the Rock type
@@ -732,7 +729,8 @@ function getEndOfTurn(
   let damage = 0;
   const texts = [];
 
-  const loseItem = move.named('Knock Off') && !defender.hasAbility('Sticky Hold');
+  // Bewitched Woods - Spirit Break additionally removes items
+  const loseItem = (move.named('Knock Off') || (move.named('Spirit Break') && field.chromaticField === 'Bewitched-Woods')) && !defender.hasAbility('Sticky Hold');
 
   // psychic noise should suppress all recovery effects
   const healBlock =
