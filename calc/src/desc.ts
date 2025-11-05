@@ -173,7 +173,8 @@ export function getRecovery(
       const range = [minD[i], maxD[i]];
       for (const j in recovery) {
         let drained = Math.max(Math.round(range[j] * percentHealed), 1);
-        if (attacker.hasItem('Big Root') || attacker.named('Shiinotic-Crest')) drained = Math.trunc(drained * 5324 / 4096); // Shiinotic Crest - Draining effect recovery is boosted by 30%
+        if (attacker.hasItem('Big Root')) drained = Math.trunc(drained * 5324 / 4096);
+        if (attacker.named('Shiinotic-Crest')) drained = Math.trunc(drained * 3 / 2); // Shiinotic Crest - Draining effect recovery is boosted by 50%
         recovery[j] += Math.min(drained, max);
       }
     }
@@ -757,11 +758,6 @@ function getEndOfTurn(
     if (defender.hasAbility('Dry Skin', 'Solar Power')) {
       damage -= Math.floor(defender.maxHP() / 8);
       texts.push(defender.ability + ' damage');
-    }
-    // Druddigon Crest - If harsh sunlight is active, it will restore 1/8th of its maximum HP at the end of each turn
-    if (defender.named('Druddigon-Crest') && !healBlock) {
-      damage += Math.floor(defender.maxHP() / 8);
-      texts.push('Crest recovery');
     }
   } else if (field.hasWeather('Rain', 'Heavy Rain')) {
     if (!healBlock) {

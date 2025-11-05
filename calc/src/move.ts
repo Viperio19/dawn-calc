@@ -106,7 +106,7 @@ export class Move implements State.Move {
           } else if (options.hits) {
             this.hits = options.hits;
           } else {
-            this.hits = (options.ability === 'Skill Link')
+            this.hits = (options.ability === 'Skill Link' || (options.species == 'Fearow-Crest' && data.id === 'furyattack')) // Fearow Crest - Makes Fury Attack always hit 5 times 
               ? data.multihit[1]
               : data.multihit[0] + 1;
           }

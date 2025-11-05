@@ -260,6 +260,9 @@ $(".percent-hp").keyup(function () {
 $(".ability").bind("keyup change", function () {
 	var ability = $(this).closest(".poke-info").find(".ability").val();
 
+	var pokeObj = $(this).closest(".poke-info");
+	var pokemon = createPokemon(pokeObj);
+
 	for (var i = 1; i <= 4; i++) {
 		var moveSelector = ".move" + i;
 		var moveHits = 3;
@@ -268,7 +271,7 @@ $(".ability").bind("keyup change", function () {
 		var move = moves[moveName] || moves['(No Move)'];
 		if (move.multiaccuracy) {
 			moveHits = move.multihit;
-		} else if (ability === 'Skill Link') {
+		} else if (ability === 'Skill Link' || (pokemon.name === "Fearow-Crest" && moveName === "Fury Attack")) { // Fearow Crest - Makes Fury Attack always hit 5 times 
 			moveHits = 5;
 		} else if ($(this).closest(".poke-info").find(".item").val() === 'Loaded Dice') {
 			moveHits = 4;
@@ -285,16 +288,13 @@ $(".ability").bind("keyup change", function () {
 	}
 	var boostedStat = $(this).closest(".poke-info").find(".boostedStat");
 
-	if (ability === "Protosynthesis" || ability === "Quark Drive") {
+	if (ability === "Protosynthesis" || ability === "Quark Drive" || pokemon.name === "Druddigon-Crest") {
 		boostedStat.show();
 		autosetQP($(this).closest(".poke-info"));
 	} else {
 		boostedStat.val("");
 		boostedStat.hide();
 	}
-
-	var pokeObj = $(this).closest(".poke-info");
-	var pokemon = createPokemon(pokeObj);
 
 	var checked = pokeObj.find(".teraToggle").prop("checked");
 	var ability = pokeObj.find(".ability").val();
@@ -339,10 +339,12 @@ function autosetQP(pokemon) {
 	var ability = pokemon.find(".ability").val();
 	var boostedStat = pokemon.find(".boostedStat").val();
 
+	var name = createPokemon(pokemon).name;
+
 	if (!boostedStat || boostedStat === "auto") {
 		if (
 			(item === "Booster Energy") ||
-			(ability === "Protosynthesis" && currentWeather === "Sun") ||
+			((ability === "Protosynthesis" || name === "Druddigon-Crest") && currentWeather === "Sun") ||
 			(ability === "Quark Drive" && currentTerrain === "Electric")
 		) {
 			pokemon.find(".boostedStat").val("auto");
@@ -784,14 +786,15 @@ $(".move-selector").change(function () {
 		}
 		moveGroupObj.children(".move-hits").show();
 		moveGroupObj.children(".stockpile").hide();
-		var pokemon = $(this).closest(".poke-info");
+		var pokeObj = $(this).closest(".poke-info");
+		var pokemon = createPokemon(pokeObj);
 		
 		var moveHits = 3;
 		if (move.multiaccuracy) {
 			moveHits = move.multihit;
-		} else if (pokemon.find('.ability').val() === 'Skill Link') {
+		} else if (pokeObj.find('.ability').val() === 'Skill Link' || (pokemon.name === "Fearow-Crest" && moveName === "Fury Attack")) { // Fearow Crest - Makes Fury Attack always hit 5 times 
 			moveHits = 5;
-		} else if (pokemon.find(".item").val() === 'Loaded Dice') {
+		} else if (pokeObj.find(".item").val() === 'Loaded Dice') {
 			moveHits = 4;
 		}		
 
@@ -819,6 +822,7 @@ $(".move-selector").change(function () {
 
 $(".item").change(function () {
 	var pokeObj = $(this).closest(".poke-info");
+	var pokemon = createPokemon(pokeObj);
 	var itemName = $(this).val();
 	var $metronomeControl = $(this).closest('.poke-info').find('.metronome');
 	if (itemName === "Metronome") {
@@ -835,7 +839,7 @@ $(".item").change(function () {
 		var move = moves[moveName] || moves['(No Move)'];
 		if (move.multiaccuracy) {
 			moveHits = move.multihit;
-		} else if ($(this).closest(".poke-info").find(".ability").val() === 'Skill Link') {
+		} else if ($(this).closest(".poke-info").find(".ability").val() === 'Skill Link' || (pokemon.name === "Fearow-Crest" && moveName === "Fury Attack")) { // Fearow Crest - Makes Fury Attack always hit 5 times 
 			moveHits = 5;
 		} else if ($(this).closest(".poke-info").find(".item").val() === 'Loaded Dice') {
 			moveHits = 4;

@@ -645,6 +645,14 @@ export function checkMultihitBoost(
   if (defender.hasAbility('Sand Spit')) {
     field.weather = 'Sand';
   }
+  // Glaceon Crest - When this Pokémon with is hit by a damaging move, it sets snow
+  if (defender.named('Glaceon-Crest')) {
+    field.weather = 'Snow';
+  }
+  // Leafeon Crest - When this Pokémon with is hit by a damaging move, it sets sun
+  if (defender.named('Leafeon-Crest')) {
+    field.weather = 'Sun';
+  }
 
   if (defender.hasAbility('Stamina')) {
     if (ignoreDefenseBoosts) {
@@ -677,6 +685,14 @@ export function checkMultihitBoost(
     }
     defender.boosts.spe = Math.min(defender.boosts.spe + 2, 6);
     defender.stats.spe = getFinalSpeed(gen, defender, field, field.defenderSide);
+  }
+
+  // Noctowl Crest - When hit with an attack, its Sp.Def rises by 1
+  if (defender.named('Noctowl-Crest')) {
+    if (!ignoreDefenseBoosts) {
+      defender.boosts.spd = Math.min(defender.boosts.spd + 1, 6);
+      defender.stats.spd = getModifiedStat(defender.rawStats.spd, defender.boosts.spd, gen);
+    }
   }
 
   let dropsStats = move.dropsStats;
@@ -798,7 +814,7 @@ export function isQPActive(
   const terrain = field.terrain;
 
   return (
-    (pokemon.hasAbility('Protosynthesis') &&
+    ((pokemon.hasAbility('Protosynthesis') || pokemon.named('Druddigon-Crest')) && // Druddigon Crest - Grants Protosynthesis
       (weather.includes('Sun') || pokemon.hasItem('Booster Energy'))) ||
     (pokemon.hasAbility('Quark Drive') &&
       (terrain === 'Electric' || pokemon.hasItem('Booster Energy'))) ||
@@ -901,6 +917,9 @@ export function getStabMod(pokemon: Pokemon, move: Move, field: Field, side: Sid
     stabMod += 2048;
   // Luxray Crest - Grants STAB on Dark moves
   } else if (pokemon.named('Luxray-Crest') && move.hasType('Dark')) {
+    stabMod += 2048;
+  // Noctowl Crest - Grants STAB on Psychic moves
+  } else if (pokemon.named('Noctowl-Crest') && move.hasType('Psychic')) {
     stabMod += 2048;
   // Probopass Crest - Grants STAB on Electric moves
   } else if ((pokemon.named('Probopass-Crest') || pokemon.named('Electric Nose')) && move.hasType('Electric')) {
