@@ -693,7 +693,8 @@ export function calculateSMSSSV(
     }
 
     // Eclipse - Thief is super effective on pokemon without an item
-    if (move.named('Thief') && (!defender.item || (isQPActive(defender, field) && defender.hasItem('Booster Energy')))) {
+    if (move.named('Thief') && (!defender.item || defender.hasItem('Prism Scale') ||
+                                (isQPActive(defender, field) && defender.hasItem('Booster Energy')))) {
       desc.chromaticField = field.chromaticField;
       typeEffectiveness = 2;
     }
@@ -1637,6 +1638,7 @@ export function calculateBasePowerSMSSSV(
     break;
   case 'Acrobatics':
     basePower = move.bp * (attacker.hasItem('Flying Gem') ||
+        (attacker.hasItem('Prism Scale') && field.chromaticField !== 'None') ||
         (!attacker.item ||
           (isQPActive(attacker, field) && attacker.hasItem('Booster Energy'))) ? 2 : 1);
     // Ring Arena - Acrobatics is always doubled (As if the user was not holding an item)
@@ -2057,7 +2059,7 @@ export function calculateBPModsSMSSSV(
   const defenderItem = (defender.item && defender.item !== '')
     ? defender.item : defender.disabledItem;
   let resistedKnockOffDamage =
-    (!defenderItem || (isQPActive(defender, field) && defenderItem === 'Booster Energy')) ||
+    (!defenderItem || (isQPActive(defender, field) && defenderItem === 'Booster Energy') || (defenderItem === 'Prism Scale' && field.chromaticField !== 'None')) ||
     (defender.named('Dialga-Origin') && defenderItem === 'Adamant Crystal') ||
     (defender.named('Palkia-Origin') && defenderItem === 'Lustrous Globe') ||
     // Griseous Core for gen 9, Griseous Orb otherwise
