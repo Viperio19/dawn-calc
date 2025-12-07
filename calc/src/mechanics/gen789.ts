@@ -1050,7 +1050,7 @@ export function calculateSMSSSV(
   }
 
   if (field.chromaticField === 'Forgotten-Battlefield') {
-    if ((move.named('Gigaton Hammer') && defender.hasType('Steel'))) { // Forgotten Battlefield - Gigaton Hammer deals double damage to steel and fighting types
+    if (move.named('Gigaton Hammer') && defender.hasType('Steel')) { // Forgotten Battlefield - Gigaton Hammer deals double damage to steel and fighting types
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -2754,7 +2754,7 @@ export function calculateAtModsSMSSSV(
 
   // Fields - Attack Modifiers
 
-  // Forgotten Battlefield - Gigaton Hammer deals neutral Double damage to Fighting and steel types
+  // Forgotten Battlefield - Gigaton Hammer deals double damage to Fighting and Steel types
   if (field.chromaticField === 'Forgotten Battlefield' && move.named('Gigaton Hammer') && (defender.hasType('Steel') || defender.hasType('Fighting'))) {
     atMods.push(8192);
     desc.chromaticField = field.chromaticField;
