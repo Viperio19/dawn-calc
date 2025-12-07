@@ -89,6 +89,7 @@ export namespace State {
     isFriendGuard?: boolean;
     isAuroraVeil?: boolean;
     isAreniteWall?: boolean;
+    isCharge?: boolean; // Charge
     isBattery?: boolean;
     isPowerSpot?: boolean;
     isSteelySpirit?: boolean;

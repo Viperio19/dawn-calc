@@ -569,6 +569,12 @@ export function calculateSMSSSV(
     desc.attackerAbility = attacker.ability;
   }
 
+  // Desert -  Bulldoze gains +1 priority
+  if (move.named('Bulldoze') && field.chromaticField === 'Desert') { 
+    move.priority = 1;
+    desc.chromaticField = field.chromaticField;
+  }
+
   const isGhostRevealed =
     attacker.hasAbility('Scrappy') || attacker.hasAbility('Mind\'s Eye') ||
       field.defenderSide.isForesight;
@@ -776,8 +782,8 @@ export function calculateSMSSSV(
     typeEffectiveness = 1;
   }
 
-  // Desert - Bulldoze grounds adjacent foes; first hit neutral on Airborne foes
-  if (typeEffectiveness === 0 && field.chromaticField === 'Desert' && move.named('Bulldoze')) {
+  // Desert - Scorching Sands grounds adjacent foes; first hit neutral on Airborne foes
+  if (typeEffectiveness === 0 && field.chromaticField === 'Desert' && move.named('Scorching Sands')) {
     typeEffectiveness = 1;
     desc.chromaticField = field.chromaticField;
   }
@@ -860,11 +866,6 @@ export function calculateSMSSSV(
     // Thundering Plateau - Prism Scale: Applies Charge
     if (defender.item === 'Prism Scale' && move.category === 'Special') {
       desc.defenderItem = defender.item;
-      desc.chromaticField = field.chromaticField;
-    }
-
-    // Thundering Plateau - Volt Absorb restores 1/16 of the user's Max HP per turn
-    if (defender.hasAbility('Volt Absorb') && !healBlock) {
       desc.chromaticField = field.chromaticField;
     }
   }
@@ -1093,7 +1094,8 @@ export function calculateSMSSSV(
   }
 
   // Rainbow - Espeon gains Dazzling
-  if (field.chromaticField === 'Rainbow' && move.priority > 0 && defender.named('Espeon')) {
+  if ((field.chromaticField === 'Rainbow' && move.priority > 0 && defender.named('Espeon')) || 
+      (field.chromaticField === 'Desert' && move.priority > 0 && defender.hasAbility('Sand Veil'))) {
     desc.chromaticField = field.chromaticField;
     return result;
   }
@@ -2249,6 +2251,13 @@ export function calculateBPModsSMSSSV(
     desc.isBattery = true;
   }
 
+  // Charge - 2x electric move power
+  if (field.attackerSide.isCharge && move.hasType('Electric')) {
+    bpMods.push(8192);
+    desc.isCharge = attacker.isCharge;
+    desc.isCharge = true;
+  }
+
   if (field.attackerSide.isPowerSpot) {
     bpMods.push(5325);
     desc.isPowerSpot = true;
@@ -2608,8 +2617,7 @@ export function calculateAtModsSMSSSV(
   } else if ((field.chromaticField === 'Jungle' && attacker.hasAbility('Swarm') && move.hasType('Bug')) || // Jungle - Activates Swarm
              (field.chromaticField === 'Thundering-Plateau' && attacker.hasAbility('Plus', 'Minus') && move.category === 'Special') || // Thundering Plateau - Activates Plus and Minus
              (field.chromaticField === 'Volcanic-Top' && (attacker.hasAbility('Solar Power') || (attacker.hasAbility('Blaze') && move.hasType('Fire')))) || // Volcanic Top - Activates Blaze and Solar Power
-             (field.chromaticField === 'Flower-Garden' && attacker.hasAbility('Overgrow') && move.hasType('Grass')) || // Flower Garden - Activates Overgrow
-             (field.chromaticField === 'Waters-Surface' && attacker.hasAbility('Torrent') && move.hasType('Water'))) { // Water's Surface - Activates Torrent
+             (field.chromaticField === 'Flower-Garden' && attacker.hasAbility('Overgrow') && move.hasType('Grass'))) { // Flower Garden - Activates Overgrow
     atMods.push(6144);
     desc.attackerAbility = attacker.ability;
     desc.chromaticField = field.chromaticField;
@@ -2764,6 +2772,12 @@ export function calculateAtModsSMSSSV(
     }
   }
 
+  // Thundering Plateau - Supercell Slam and Shock Wave deal 1.3x damage 
+  if (field.chromaticField === 'Thundering-Plateau' && move.named('Supercell Slam', 'Shock Wave')) {
+    atMods.push(5324);
+    desc.chromaticField = field.chromaticField;
+  }
+
   // Desert - Scald and Steam Eruption deal 1.1x damage
   if (field.chromaticField === 'Desert' && move.named('Scald', 'Steam Eruption')) {
     atMods.push(4505);
@@ -2823,9 +2837,6 @@ export function calculateAtModsSMSSSV(
       atMods.push(5324);
       desc.chromaticField = field.chromaticField;
     // Water's Surface - Dive is 1-Turn and deals 1.2x damage
-    } else if (move.named('Dive')) {
-      atMods.push(4915);
-      desc.chromaticField = field.chromaticField;
     }
   }
 
@@ -3370,10 +3381,19 @@ export function calculateFinalModsSMSSSV(
     desc.defenderAbility = defender.ability;
   }
 
-  if (defender.hasAbility('Solid Rock', 'Filter', 'Prism Armor') && typeEffectiveness > 1) {
+  if (defender.hasAbility('Solid Rock', 'Filter', 'Prism Armor') && typeEffectiveness > 1) { 
     finalMods.push(3072);
     desc.defenderAbility = defender.ability;
   }
+
+// Desert - Solid Rock reduces special damage taken in Sandstorm  
+  if (field.hasWeather('Sand') &&
+      defender.hasAbility('Solid Rock') &&
+      move.category === 'Special') {
+    finalMods.push(2731);
+    desc.defenderAbility = defender.ability;
+  }
+
 
   // Aevian Ampharos Crest - Reduces by 30% the super-effective damage taken by the holder
   if (defender.named('Ampharos-Aevian-Crest') && typeEffectiveness > 1) {
@@ -3420,13 +3440,6 @@ export function calculateFinalModsSMSSSV(
 
   // Fields - Final Modifiers
 
-  // Desert - Sand Veil instead makes user receive ¾ damage dealt in Sandstorm
-  if (field.chromaticField === 'Desert' && defender.hasAbility('Sand Veil') && field.hasWeather('Sand')) {
-    finalMods.push(3072);
-    desc.defenderAbility = defender.ability;
-    desc.weather = field.weather;
-    desc.chromaticField = field.chromaticField;
-  }
 
   return finalMods;
 }

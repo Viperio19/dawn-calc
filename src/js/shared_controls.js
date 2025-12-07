@@ -1484,6 +1484,7 @@ function createField() {
 	var isTailwind = [$("#tailwindL").prop("checked"), $("#tailwindR").prop("checked")];
 	var isFlowerGift = [$("#flowerGiftL").prop("checked"), $("#flowerGiftR").prop("checked")];
 	var isSteelySpirit = [$("#steelySpiritL").prop("checked"), $("#steelySpiritR").prop("checked")];
+	var isCharge = [$("#chargeL").prop("checked"), $("#chargeR").prop("checked")]; // Charge
 	var isFriendGuard = [$("#friendGuardL").prop("checked"), $("#friendGuardR").prop("checked")];
 	var isAuroraVeil = [$("#auroraVeilL").prop("checked"), $("#auroraVeilR").prop("checked")];
 	var isAreniteWall = [$("#areniteWallL").prop("checked"), $("#areniteWallR").prop("checked")];
@@ -1510,13 +1511,14 @@ function createField() {
 			isSeeded: isSeeded[i],
 			isNightmare: isNightmare[i],
 			isSaltCured: isSaltCured[i],
-			isForesight: isForesight[i],
+			is: isForesight[i],
 			isSoak: isSoak[i],
 			isTailwind: isTailwind[i],
 			isMagnetRise: isMagnetRise[i],
 			isHelpingHand: isHelpingHand[i],
 			isFlowerGift: isFlowerGift[i],
 			isSteelySpirit: isSteelySpirit[i],
+			isCharge: isCharge[i], // Charge
 			isFriendGuard: isFriendGuard[i],
 			isAuroraVeil: isAuroraVeil[i],
 			isAreniteWall: isAreniteWall[i],
@@ -1798,6 +1800,8 @@ function clearField() {
 	$("#helpingHandR").prop("checked", false);
 	$("#tailwindL").prop("checked", false);
 	$("#tailwindR").prop("checked", false);
+	$("#chargeL").prop("checked", false); // Charge
+	$("#chargeR").prop("checked", false);
 	$("#friendGuardL").prop("checked", false);
 	$("#friendGuardR").prop("checked", false);
 	$("#auroraVeilL").prop("checked", false);

@@ -62,6 +62,7 @@ export interface RawDesc {
   isMagnetRise?: boolean;
   isAttackerSoak?: boolean;
   isDefenderSoak?: boolean;
+  isCharge?: boolean; // Charge
   isDefenderDynamaxed?: boolean;
   defenderType?: string;
   attackerType?: string;
@@ -190,6 +191,7 @@ export function getRecovery(
       }
     }
   }
+
 
   // Ashen Beach - Scorching Sands recovers 50% of damage dealt
   if (field.chromaticField === 'Ashen-Beach' && move.named('Scorching Sands')) {
@@ -855,7 +857,7 @@ function getEndOfTurn(
   }
 
   if ((field.defenderSide.isAquaRing || defender.named('Phione-Crest')) && !healBlock) { // Phione Crest - Grants Aqua Ring
-    let recovery = Math.floor(defender.maxHP() / (field.chromaticField === 'Waters-Surface' ? 10: 16));
+    let recovery = Math.floor(defender.maxHP() / (field.chromaticField === 'Waters-Surface' ? 8: 16));
     if (defender.hasItem('Big Root')) recovery = Math.trunc(recovery * 5324 / 4096);
     damage += recovery;
     texts.push('Aqua Ring recovery');
@@ -1078,10 +1080,9 @@ function getEndOfTurn(
     texts.push('Parasite damage');
   }
 
-  // Thundering Plateau - Volt Absorb restores 1/16 of the user's Max HP per turn
+  // Thundering Plateau - Electric Type Attacks used by Pokémon with Volt Absorb are super-effective against Electric types
   if (field.chromaticField === 'Thundering-Plateau' && defender.hasAbility('Volt Absorb') && !healBlock) {
-    damage += Math.floor(defender.maxHP() / 16);
-    texts.push('Volt Absorb recovery');
+    texts.push('Volt Absorb');
   }
 
   const VOLCANIC_ERUPTION = [
@@ -1344,6 +1345,9 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   if (description.gritStages) {
     output += Math.min(5, description.gritStages) + ' Grit Stages ';
   }
+  if (description.isCharge) { // Charge
+    output += description.isCharge + ' ';
+  }
   if (description.alliesFainted) {
     output += Math.min(5, description.alliesFainted) +
       ` ${description.alliesFainted === 1 ? 'ally' : 'allies'} fainted `;
@@ -1363,7 +1367,9 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   } else if (description.attackerType) {
     output += description.attackerType + ' ';
   }
-
+  if (description.isCharge) { // Charge
+    output += 'Charge ';
+  }
   if (description.isStellarFirstUse) {
     output += '(First Use) ';
   }
