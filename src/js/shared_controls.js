@@ -1511,7 +1511,7 @@ function createField() {
 			isSeeded: isSeeded[i],
 			isNightmare: isNightmare[i],
 			isSaltCured: isSaltCured[i],
-			is: isForesight[i],
+			isForesight: isForesight[i],
 			isSoak: isSoak[i],
 			isTailwind: isTailwind[i],
 			isMagnetRise: isMagnetRise[i],
