@@ -1094,8 +1094,13 @@ export function calculateSMSSSV(
   }
 
   // Rainbow - Espeon gains Dazzling
-  if ((field.chromaticField === 'Rainbow' && move.priority > 0 && defender.named('Espeon')) || 
-      (field.chromaticField === 'Desert' && move.priority > 0 && defender.hasAbility('Sand Veil'))) {
+  if (field.chromaticField === 'Rainbow' && move.priority > 0 && defender.named('Espeon')) {
+    desc.chromaticField = field.chromaticField;
+    return result;
+  }
+
+  // Desert - sand veil grants Dazzling
+  if (field.chromaticField === 'Desert' && move.priority > 0 && defender.hasAbility('Sand Veil')) {
     desc.chromaticField = field.chromaticField;
     return result;
   }
@@ -2836,7 +2841,6 @@ export function calculateAtModsSMSSSV(
     if (move.named('Discharge', 'Parabolic Charge', 'Shock Wave')) {
       atMods.push(5324);
       desc.chromaticField = field.chromaticField;
-    // Water's Surface - Dive is 1-Turn and deals 1.2x damage
     }
   }
 
@@ -3387,13 +3391,10 @@ export function calculateFinalModsSMSSSV(
   }
 
 // Desert - Solid Rock reduces special damage taken in Sandstorm  
-  if (field.hasWeather('Sand') &&
-      defender.hasAbility('Solid Rock') &&
-      move.category === 'Special') {
+  if (field.hasWeather('Sand') && defender.hasAbility('Solid Rock') && move.category === 'Special' && desc.chromaticField === field.chromaticField) {
     finalMods.push(2731);
     desc.defenderAbility = defender.ability;
   }
-
 
   // Aevian Ampharos Crest - Reduces by 30% the super-effective damage taken by the holder
   if (defender.named('Ampharos-Aevian-Crest') && typeEffectiveness > 1) {

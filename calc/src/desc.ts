@@ -1080,11 +1080,6 @@ function getEndOfTurn(
     texts.push('Parasite damage');
   }
 
-  // Thundering Plateau - Electric Type Attacks used by Pokémon with Volt Absorb are super-effective against Electric types
-  if (field.chromaticField === 'Thundering-Plateau' && defender.hasAbility('Volt Absorb') && !healBlock) {
-    texts.push('Volt Absorb');
-  }
-
   const VOLCANIC_ERUPTION = [
     'Bulldoze', 'Earthquake', 'Eruption', 'Lava Plume', 'Magma Storm', 'Magnitude', 'Stomping Tantrum',
   ];
@@ -1344,9 +1339,6 @@ function buildDescription(description: RawDesc, attacker: Pokemon, defender: Pok
   }
   if (description.gritStages) {
     output += Math.min(5, description.gritStages) + ' Grit Stages ';
-  }
-  if (description.isCharge) { // Charge
-    output += description.isCharge + ' ';
   }
   if (description.alliesFainted) {
     output += Math.min(5, description.alliesFainted) +
