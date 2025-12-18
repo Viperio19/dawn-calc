@@ -2259,7 +2259,6 @@ export function calculateBPModsSMSSSV(
   // Charge - 2x electric move power
   if (field.attackerSide.isCharge && move.hasType('Electric')) {
     bpMods.push(8192);
-    desc.isCharge = attacker.isCharge;
     desc.isCharge = true;
   }
 
