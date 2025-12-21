@@ -400,11 +400,6 @@ function calculateFinalModsADV(
     }
   }
 
-  if (move.named('Pursuit') && field.defenderSide.isSwitching === 'out') {
-    baseDamage = Math.floor(baseDamage * 2);
-    desc.isSwitching = 'out';
-  }
-
   if (field.gameType !== 'Singles' && move.target === 'allAdjacentFoes') {
     baseDamage = Math.floor(baseDamage / 2);
   }
@@ -431,6 +426,11 @@ function calculateFinalModsADV(
   if (isCritical) {
     baseDamage *= 2;
     desc.isCritical = true;
+  }
+
+  if (move.named('Pursuit') && field.defenderSide.isSwitching === 'out') {
+    baseDamage = Math.floor(baseDamage * 2);
+    desc.isSwitching = 'out';
   }
 
   if (move.named('Weather Ball') && field.weather) {

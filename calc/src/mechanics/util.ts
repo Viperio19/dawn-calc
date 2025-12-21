@@ -31,6 +31,7 @@ export function isGrounded(pokemon: Pokemon, field: Field, side: Side) {
   return (field.isGravity || pokemon.hasItem('Iron Ball') || side.isIngrain || 
     (!side.isMagnetRise &&
       !pokemon.hasType('Flying') &&
+      !(pokemon.hasAbility('Magnet Pull') && field.chromaticField === 'Cave') && // Cave - Magnet Pull grants Levitate
       !pokemon.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') && // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
       !pokemon.hasItem('Air Balloon') &&
       !pokemon.named('Probopass-Crest'))); // Probopass Crest - Grants Levitate
@@ -327,8 +328,6 @@ export function checkIntimidate(gen: Generation, source: Pokemon, target: Pokemo
     target.hasAbility('Clear Body', 'White Smoke', 'Hyper Cutter', 'Full Metal Body') ||
     // More abilities now block Intimidate in Gen 8+ (DaWoblefet, Cloudy Mistral)
     (gen.num >= 8 && target.hasAbility('Inner Focus', 'Own Tempo', 'Oblivious', 'Scrappy')) ||
-    // Cave - Sturdy grants Clear Body
-    (target.hasAbility('Sturdy') && field.chromaticField === 'Cave') ||
     target.hasItem('Clear Amulet');
   if (source.hasAbility('Intimidate') && source.abilityOn && !blocked) {
     if (target.hasAbility('Contrary', 'Defiant', 'Guard Dog') ||
@@ -384,8 +383,6 @@ export function checkCrestEntryEffects(gen: Generation, source: Pokemon, target:
     target.hasAbility('Clear Body', 'White Smoke', 'Hyper Cutter', 'Full Metal Body') ||
     // More abilities now block Intimidate in Gen 8+ (DaWoblefet, Cloudy Mistral)
     (gen.num >= 8 && target.hasAbility('Inner Focus', 'Own Tempo', 'Oblivious', 'Scrappy')) ||
-    // Cave - Sturdy grants Clear Body
-    (target.hasAbility('Sturdy') && field.chromaticField === 'Cave') ||
     target.hasItem('Clear Amulet');
   
   // Thievul Crest - "Steals" one stage of Special Attack from the opponent. (Decreases one stage on entry, increases one stage to self)
@@ -490,11 +487,8 @@ export function checkFieldEntryEffects(gen: Generation, source: Pokemon, target:
     if (source.hasItem('Prism Scale')) {
       source.boosts.def = Math.min(6, source.boosts.def + 1);
     }
-    // Cave - Steam Engine grants +2 Speed on entry
-    if (source.hasAbility('Steam Engine')) {
-      source.boosts.spe = Math.min(6, source.boosts.spe + 2);
     // Cave - Battle Armor and Shell Armor grants +1 Defense on entry
-    } else if (source.hasAbility('Battle Armor', 'Shell Armor')) {
+    if (source.hasAbility('Battle Armor', 'Shell Armor')) {
       source.boosts.def = Math.min(6, source.boosts.def + 1);
     }
   } else if (field.chromaticField === 'Factory') {
@@ -657,6 +651,14 @@ export function checkMultihitBoost(
   if (defender.hasAbility('Sand Spit')) {
     field.weather = 'Sand';
   }
+  // Glaceon Crest - When this Pokémon with is hit by a damaging move, it sets snow
+  if (defender.named('Glaceon-Crest')) {
+    field.weather = 'Snow';
+  }
+  // Leafeon Crest - When this Pokémon with is hit by a damaging move, it sets sun
+  if (defender.named('Leafeon-Crest')) {
+    field.weather = 'Sun';
+  }
 
   if (defender.hasAbility('Stamina')) {
     if (ignoreDefenseBoosts) {
@@ -689,6 +691,14 @@ export function checkMultihitBoost(
     }
     defender.boosts.spe = Math.min(defender.boosts.spe + 2, 6);
     defender.stats.spe = getFinalSpeed(gen, defender, field, field.defenderSide);
+  }
+
+  // Noctowl Crest - When hit with an attack, its Sp.Def rises by 1
+  if (defender.named('Noctowl-Crest')) {
+    if (!ignoreDefenseBoosts) {
+      defender.boosts.spd = Math.min(defender.boosts.spd + 1, 6);
+      defender.stats.spd = getModifiedStat(defender.rawStats.spd, defender.boosts.spd, gen);
+    }
   }
 
   let dropsStats = move.dropsStats;
@@ -810,7 +820,7 @@ export function isQPActive(
   const terrain = field.terrain;
 
   return (
-    (pokemon.hasAbility('Protosynthesis') &&
+    ((pokemon.hasAbility('Protosynthesis') || pokemon.named('Druddigon-Crest')) && // Druddigon Crest - Grants Protosynthesis
       (weather.includes('Sun') || pokemon.hasItem('Booster Energy'))) ||
     (pokemon.hasAbility('Quark Drive') &&
       (terrain === 'Electric' || pokemon.hasItem('Booster Energy'))) ||
@@ -913,6 +923,9 @@ export function getStabMod(pokemon: Pokemon, move: Move, field: Field, side: Sid
     stabMod += 2048;
   // Luxray Crest - Grants STAB on Dark moves
   } else if (pokemon.named('Luxray-Crest') && move.hasType('Dark')) {
+    stabMod += 2048;
+  // Noctowl Crest - Grants STAB on Psychic moves
+  } else if (pokemon.named('Noctowl-Crest') && move.hasType('Psychic')) {
     stabMod += 2048;
   // Probopass Crest - Grants STAB on Electric moves
   } else if ((pokemon.named('Probopass-Crest') || pokemon.named('Electric Nose')) && move.hasType('Electric')) {

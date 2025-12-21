@@ -56,6 +56,9 @@ const VALIDATORS: {[format: string]: TeamValidator} = {};
 // the validator which is the only area that needs the Format object
 const UNSUPPORTED: {[format: string]: string} = {
   'gen9almostanyability': '[Gen 9] Almost Any Ability',
+  'gen9nfe': '[Gen 9] NFE',
+  'gen8nfe': '[Gen 8] NFE',
+  'gen7nfe': '[Gen 7] NFE',
 };
 const SHORT_STAT_FORM: {[stat: string]: keyof CalcStatsTable} =
 {'hp': 'hp', 'atk': 'at', 'def': 'df', 'spa': 'sa', 'spd': 'sd', 'spe': 'sp'};
@@ -177,11 +180,11 @@ function getSpecie(gen: Generation, specieName: SpeciesName): Specie | PSSpecie 
 }
 
 function toPSFormat(formatID: ID): ID {
-  if (formatID === 'gen9vgc2024') {
-    return `gen9vgc2025regg` as ID;
+  if (formatID === 'gen9vgc2025') {
+    return `gen9vgc2025regi` as ID;
   }
   if (formatID === 'gen9battlestadiumsingles') {
-    return 'gen9bssregg' as ID;
+    return 'gen9bssregi' as ID;
   }
   return formatID;
 }

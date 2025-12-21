@@ -106,7 +106,7 @@ export class Move implements State.Move {
           } else if (options.hits) {
             this.hits = options.hits;
           } else {
-            this.hits = (options.ability === 'Skill Link')
+            this.hits = (options.ability === 'Skill Link' || (options.species == 'Fearow-Crest' && data.id === 'furyattack')) // Fearow Crest - Makes Fury Attack always hit 5 times 
               ? data.multihit[1]
               : data.multihit[0] + 1;
           }
@@ -116,10 +116,33 @@ export class Move implements State.Move {
         this.hits = (options.ability === 'Skill Link')
           ? 5
           : options.hits!;
-      // Ledian Crest - Punching Moves hit 4 Times
-      } else if (options.species == 'Ledian-Crest' && data.flags.punch) {
-        this.hits = 4;
       }
+      
+      // Ledian Crest - Punching Moves hit 4 Times
+      if (options.species == 'Ledian-Crest' && data.flags.punch) {
+        if (data.id === 'cometpunch') {
+          switch (this.hits) {
+          case 1:
+            this.hits = 4;
+            break;
+          case 2:
+            this.hits = 8;
+            break;
+          case 3:
+            this.hits = 12;
+            break;
+          case 4:
+            this.hits = 16;
+            break;
+          case 5:
+            this.hits = 20;
+            break;
+          }
+        } else {
+          this.hits = 4;
+        }
+      }
+
       this.timesUsedWithMetronome = options.timesUsedWithMetronome;
       this.stockpiles = options.stockpiles;
       this.moveSlot = options.moveSlot;
@@ -155,7 +178,7 @@ export class Move implements State.Move {
     this.hasCrashDamage = !!data.hasCrashDamage;
     this.mindBlownRecoil = !!data.mindBlownRecoil;
     this.struggleRecoil = !!data.struggleRecoil;
-    this.isCrit = (['futuresight', 'doomdesire'].includes(data.id)) || !!options.isCrit || !!data.willCrit ||
+    this.isCrit = !!options.isCrit || !!data.willCrit ||
       // These don't *always* crit (255/256 chance), but for the purposes of the calc they do
       gen.num === 1 && ['crabhammer', 'razorleaf', 'slash', 'karate chop'].includes(data.id);
     this.isStellarFirstUse = !!options.isStellarFirstUse;

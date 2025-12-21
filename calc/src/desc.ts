@@ -161,20 +161,22 @@ export function getRecovery(
     recovery[0] = recovery[1] = average - attacker.curHP();
   }
 
+  // Parental Bond counts as multiple heals for drain moves, but not for Shell Bell
+  // Currently no drain moves are multihit, however this covers for it.
+  if (attacker.hasAbility('Parental Bond') || move.hits > 1) {
+    [minD, maxD] = multiDamageRange(damage) as [number[], number[]];
+  }
+
   if (move.drain) {
-    // Parental Bond counts as multiple heals for drain moves, but not for Shell Bell
-    // Currently no drain moves are multihit, however this covers for it.
-    if (attacker.hasAbility('Parental Bond') || move.hits > 1) {
-      [minD, maxD] = multiDamageRange(damage) as [number[], number[]];
-    }
     const percentHealed = move.drain[0] / move.drain[1];
     const max = Math.round(defender.curHP() * percentHealed);
     for (let i = 0; i < minD.length; i++) {
       const range = [minD[i], maxD[i]];
       for (const j in recovery) {
         let drained = Math.max(Math.round(range[j] * percentHealed), 1);
-        if (attacker.hasItem('Big Root') || attacker.named('Shiinotic-Crest')) drained = Math.trunc(drained * 5324 / 4096); // Shiinotic Crest - Draining effect recovery is boosted by 30%
-        recovery[j] += Math.min(drained * move.hits, max);
+        if (attacker.hasItem('Big Root')) drained = Math.trunc(drained * 5324 / 4096);
+        if (attacker.named('Shiinotic-Crest')) drained = Math.trunc(drained * 3 / 2); // Shiinotic Crest - Draining effect recovery is boosted by 50%
+        recovery[j] += Math.min(drained, max);
       }
     }
   }
@@ -187,7 +189,7 @@ export function getRecovery(
       const range = [minD[i], maxD[i]];
       for (const j in recovery) {
         let drained = Math.max(Math.round(range[j] * percentHealed), 1);
-        recovery[j] += Math.min(drained * move.hits, max);
+        recovery[j] += Math.min(drained, max);
       }
     }
   }
@@ -201,7 +203,7 @@ export function getRecovery(
       const range = [minD[i], maxD[i]];
       for (const j in recovery) {
         let drained = Math.max(Math.round(range[j] * percentHealed), 1);
-        recovery[j] += Math.min(drained * move.hits, max);
+        recovery[j] += Math.min(drained, max);
       }
     }
   }
@@ -609,9 +611,10 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
   const defenderGrounded = defenderSide.isIngrain || defender.hasItem('Iron Ball') ||
     (!defender.hasType('Flying') &&
     !defenderSide.isMagnetRise &&
+    !(defender.hasAbility('Magnet Pull') && field.chromaticField === 'Cave') && // Cave - Magnet Pull grants Levitate
     !defender.hasAbility('Levitate', 'Lunar Idol', 'Solar Idol') && // Aevian - Solar/Lunar Idol: Immune to Ground-type moves
     !defender.hasItem('Air Balloon') &&
-    !defender.named('Probopass-Crest')) // Probopass Crest - Grants Levitate
+    !defender.named('Probopass-Crest')); // Probopass Crest - Grants Levitate
 
   // Acidic Wasteland - Hazards are consumed when set but regurgitate at the end of the turn as an attacking move
   if (field.chromaticField === 'Acidic-Wasteland') {
@@ -640,11 +643,14 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
       return {damage, texts};
   } else {
     if (defenderSide.isSR && !defender.hasAbility('Mountaineer') &&
-        !(defender.hasType('Rock') && field.chromaticField === 'Undercolony')) { // Undercolony - Rock types absorb Stealth Rocks
+        !(defender.hasType('Rock') && field.chromaticField === 'Undercolony') && // Undercolony - Rock types absorb Stealth Rocks
+        !(defender.hasAbility('Sturdy') && field.chromaticField === 'Cave')) { // Cave - Sturdy grants immunity to Stealth Rocks
       const rockType = gen.types.get('rock' as ID)!;
       let effectiveness =
-        rockType.effectiveness[defender.types[0]]! *
-        (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
+        defender.teraType && defender.teraType !== 'Stellar'
+          ? rockType.effectiveness[defender.teraType]!
+          : rockType.effectiveness[defender.types[0]]! *
+            (defender.types[1] ? rockType.effectiveness[defender.types[1]]! : 1);
 
       // Glaceon Crest - Gives resistance to fighting and rock type moves
       if (defender.named('Glaceon-Crest') && effectiveness > 0.5) {
@@ -665,11 +671,6 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
         effectiveness = 1 / effectiveness; // No need to check for dividing by zero because nothing is immune to rock
       }
       
-      // Cave - Stealth Rocks do at least neutral damage to non-rock types
-      if (field.chromaticField === 'Cave' && !defender.hasType('Rock') && effectiveness < 1) {
-        effectiveness = 1;
-      }
-      
       // Undercolony - Shell Armor & Battle Armor makes user resist the Rock type
       if (field.chromaticField === 'Undercolony' && defender.hasAbility('Shell Armor', 'Battle Armor') && effectiveness > 0.5) {
         effectiveness = 0.5;
@@ -681,8 +682,10 @@ function getHazards(gen: Generation, defender: Pokemon, defenderSide: Side, fiel
     if (defenderSide.steelsurge && !defender.hasAbility('Mountaineer')) {
       const steelType = gen.types.get('steel' as ID)!;
       let effectiveness =
-        steelType.effectiveness[defender.types[0]]! *
-        (defender.types[1] ? steelType.effectiveness[defender.types[1]]! : 1);
+        defender.teraType && defender.teraType !== 'Stellar'
+          ? steelType.effectiveness[defender.teraType]!
+          : steelType.effectiveness[defender.types[0]]! *
+            (defender.types[1] ? steelType.effectiveness[defender.types[1]]! : 1);
 
       // XOR between Torterra-Crest and Inverse Field so they cancel each other out
       if ((defender.named('Torterra-Crest') && !(field.chromaticField === 'Inverse')) || // Torterra Crest - Inverse type effectiveness
@@ -729,7 +732,8 @@ function getEndOfTurn(
   let damage = 0;
   const texts = [];
 
-  const loseItem = move.named('Knock Off') && !defender.hasAbility('Sticky Hold');
+  // Bewitched Woods - Spirit Break additionally removes items
+  const loseItem = (move.named('Knock Off') || (move.named('Spirit Break') && field.chromaticField === 'Bewitched-Woods')) && !defender.hasAbility('Sticky Hold');
 
   // psychic noise should suppress all recovery effects
   const healBlock =
@@ -756,11 +760,6 @@ function getEndOfTurn(
     if (defender.hasAbility('Dry Skin', 'Solar Power')) {
       damage -= Math.floor(defender.maxHP() / 8);
       texts.push(defender.ability + ' damage');
-    }
-    // Druddigon Crest - If harsh sunlight is active, it will restore 1/8th of its maximum HP at the end of each turn
-    if (defender.named('Druddigon-Crest') && !healBlock) {
-      damage += Math.floor(defender.maxHP() / 8);
-      texts.push('Crest recovery');
     }
   } else if (field.hasWeather('Rain', 'Heavy Rain')) {
     if (!healBlock) {
@@ -799,7 +798,7 @@ function getEndOfTurn(
       if (field.hasWeather('Snow') && field.chromaticField === 'Snowy-Peaks') {
         damage -= Math.floor(defender.maxHP() / 16);
         texts.push('snow damage');
-      } else {
+      } else if (field.hasWeather('Hail')) {
         damage -= Math.floor(defender.maxHP() / 16);
         texts.push('hail damage');
       }
@@ -960,7 +959,7 @@ function getEndOfTurn(
   }
 
   if (!defenderMagicGuard &&
-      (TRAPPING.includes(move.name) ||
+      ((TRAPPING.includes(move.name) && gen.num > 1) ||
        (attacker.named('Vespiquen-Crest-Offense') && move.named('Attack Order')) || // Vespiquen Crest - Attack order applies Infestation
        (move.named('Leaf Tornado') && field.chromaticField === 'Flower-Garden') || // Flower Garden - Leaf Tornado is now a binding move that deals 1/8 max HP per turn for 2-5 turns
        (move.named('Sandsear Storm') && field.chromaticField === 'Desert'))) { // Desert - Sandsear Storm applies Sand Tomb trapping and chip damage effect 
