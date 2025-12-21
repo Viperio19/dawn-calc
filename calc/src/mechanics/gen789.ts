@@ -3390,9 +3390,10 @@ export function calculateFinalModsSMSSSV(
   }
 
 // Desert - Solid Rock reduces special damage taken in Sandstorm  
-  if (field.hasWeather('Sand') && defender.hasAbility('Solid Rock') && move.category === 'Special' && desc.chromaticField === field.chromaticField) {
+  if (field.hasWeather('Sand') && defender.hasAbility('Solid Rock') && move.category === 'Special' && field.chromaticField === 'Desert') {
     finalMods.push(2731);
     desc.defenderAbility = defender.ability;
+    desc.chromaticField = field.chromaticField;
   }
 
   // Aevian Ampharos Crest - Reduces by 30% the super-effective damage taken by the holder
