@@ -222,13 +222,19 @@ export function getMoveEffectiveness(
     );
   // Dragon's Den - Dragon Pulse can now hit Fairy type Pokemon (for Resisted Damage)
   } else if (field.chromaticField === 'Dragons-Den' && move.named('Dragon Pulse') && type === 'Fairy') {
-    return 0.5;
+    return 1;
   // Underwater - Dive has the Freeze-Dry effect
   } else if (field.chromaticField === 'Underwater' && (move.named('Dive') || (move.named('Nature Power') && !field.terrain)) && type === 'Water') {
     return 2;
   // Undercolony - Rock Throw is super effective vs Ground types
   } else if (field.chromaticField === 'Undercolony' && move.named('Rock Throw') && type === 'Ground') {
     return 2;
+  // Thundering Plateau - Electric Type Attacks used by Pokémon with Volt Absorb are super-effective against Electric types
+  } else if (field.chromaticField === 'Thundering-Plateau' && attacker?.hasAbility('Volt Absorb') && type === 'Electric') {
+    return 2;
+  // Thundering Plateau - Electric Type attacks boosted by Charge deal 0.25x damage to Ground types
+  } else if (field.chromaticField === 'Thundering-Plateau' && field.attackerSide.isCharge && type === 'Ground') {
+    return 0.25;
   } else if (field.chromaticField === 'Bewitched-Woods' &&
              ((move.hasType('Grass') && type === 'Steel') || // Bewitched Woods - Grass Types now hit Steel Type Pokemon for neutral damage
              (move.hasType('Poison') && type === 'Fairy'))) { // Bewitched Woods - Poison attacks deal neutral damage to Fairy Types

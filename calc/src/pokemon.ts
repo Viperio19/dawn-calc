@@ -34,7 +34,7 @@ export class Pokemon implements State.Pokemon {
   item?: I.ItemName;
   disabledItem?: I.ItemName;
   teraType?: I.TypeName;
-
+  isCharge?: boolean; // Charge
   nature: I.NatureName;
   ivs: I.StatsTable;
   evs: I.StatsTable;
