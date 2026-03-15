@@ -259,7 +259,7 @@ $(".percent-hp").keyup(function () {
 
 $(".ability").bind("keyup change", function () {
 	var ability = $(this).closest(".poke-info").find(".ability").val();
-
+	var chromaticField = $("#chromatic-field").val();
 	var pokeObj = $(this).closest(".poke-info");
 	var pokemon = createPokemon(pokeObj);
 
@@ -287,8 +287,9 @@ $(".ability").bind("keyup change", function () {
 		$(this).closest(".poke-info").find(".abilityToggle").hide();
 	}
 	var boostedStat = $(this).closest(".poke-info").find(".boostedStat");
-
-	if (ability === "Protosynthesis" || ability === "Quark Drive" || pokemon.name === "Druddigon-Crest") {
+	// Druddigon-Crest - Druddigon gains protosynthesis
+	// Junlge- Bug types gain Protosynthesis
+	if (ability === "Protosynthesis" || ability === "Quark Drive" || pokemon.name === "Druddigon-Crest" || (chromaticField === "Jungle" && pokemon.hasType("Bug"))) {
 		boostedStat.show();
 		autosetQP($(this).closest(".poke-info"));
 	} else {
@@ -334,17 +335,19 @@ $(".ability").bind("keyup change", function () {
 function autosetQP(pokemon) {
 	var currentWeather = $("input:radio[name='weather']:checked").val();
 	var currentTerrain = $("input:checkbox[name='terrain']:checked").val() || "No terrain";
-
+	var chromaticField = $("#chromatic-field").val();
 	var item = pokemon.find(".item").val();
 	var ability = pokemon.find(".ability").val();
 	var boostedStat = pokemon.find(".boostedStat").val();
 
-	var name = createPokemon(pokemon).name;
-
+	var mon = createPokemon(pokemon);
+	var name = mon.name;
 	if (!boostedStat || boostedStat === "auto") {
+		// Druddigon-Crest - Druddigon gains protosynthesis
+		// Junlge- Bug types gain Protosynthesis
 		if (
 			(item === "Booster Energy") ||
-			((ability === "Protosynthesis" || name === "Druddigon-Crest") && currentWeather === "Sun") ||
+			((ability === "Protosynthesis" || name === "Druddigon-Crest" || (chromaticField === 'Jungle' && mon.hasType('Bug'))) && currentWeather === "Sun") ||
 			(ability === "Quark Drive" && currentTerrain === "Electric")
 		) {
 			pokemon.find(".boostedStat").val("auto");
