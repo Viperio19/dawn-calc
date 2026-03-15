@@ -820,8 +820,9 @@ export function isQPActive(
   const terrain = field.terrain;
   
   return (
-    ((pokemon.hasAbility('Protosynthesis') || pokemon.named('Druddigon-Crest')) || // Druddigon Crest - Grants Protosynthesis
-    (field.chromaticField === 'Jungle' && pokemon.hasType("Bug")))  && // Jungle - Bug typed pokemon gain protosynthesis
+    ((pokemon.hasAbility('Protosynthesis') ||
+      pokemon.named('Druddigon-Crest') || // Druddigon Crest - Grants Protosynthesis
+      (field.chromaticField === 'Jungle' && pokemon.hasType("Bug")))) && // Jungle - Bug typed pokemon gain Protosynthesis
       (weather.includes('Sun') || pokemon.hasItem('Booster Energy')) ||
     (pokemon.hasAbility('Quark Drive') &&
       (terrain === 'Electric' || pokemon.hasItem('Booster Energy'))) ||

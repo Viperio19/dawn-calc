@@ -2776,8 +2776,8 @@ export function calculateAtModsSMSSSV(
       (move.category === 'Special' && getQPBoostedStat(attacker) === 'spa')
     ) {
       atMods.push(5325);
-      // Jungle- Bug type pokemon gain Protosynthesis
-      if (attacker.named('Druddigon-Crest') || (field.chromaticField === 'Jungle' && attacker.hasType('Bug'))) { // Druddigon-Crest - Grants Protosynthesis
+      if (attacker.named('Druddigon-Crest') || // Druddigon-Crest - Grants Protosynthesis
+          (field.chromaticField === 'Jungle' && attacker.hasType('Bug'))) { // Jungle - Bug type pokemon gain Protosynthesis
         desc.attackerAbility = "Protosynthesis";
       } else {
         desc.attackerAbility = attacker.ability;
@@ -3225,8 +3225,8 @@ export function calculateDfModsSMSSSV(
       (!hitsPhysical && getQPBoostedStat(defender) === 'spd')
     ) {
       dfMods.push(5324);
-      // Jungle- Bug type pokemon gain Protosynthesis
-      if (defender.named('Druddigon-Crest') || (field.chromaticField === 'Jungle' && defender.hasType('Bug'))) { // Druddigon Crest - Grants Protosynthesis
+      if (defender.named('Druddigon-Crest') || // Druddigon-Crest - Grants Protosynthesis
+          (field.chromaticField === 'Jungle' && defender.hasType('Bug'))) { // Jungle - Bug type pokemon gain Protosynthesis
         desc.defenderAbility = "Protosynthesis";
       } else {
         desc.defenderAbility = defender.ability;
