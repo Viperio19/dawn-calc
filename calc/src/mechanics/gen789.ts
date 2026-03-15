@@ -268,6 +268,7 @@ export function calculateSMSSSV(
 
   // Jungle - Compound Eye's guarantees Critical Hits against Slowed targets
   if (tempCritical && field.chromaticField === 'Jungle' && attacker.hasAbility('Compound Eyes') && defender.boosts.spe < 0) {
+    desc.chromaticField = field.chromaticField;
     desc.attackerAbility = attacker.ability;
   }
 
