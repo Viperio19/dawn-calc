@@ -259,9 +259,11 @@ $(".percent-hp").keyup(function () {
 
 $(".ability").bind("keyup change", function () {
 	var ability = $(this).closest(".poke-info").find(".ability").val();
-
+	var chromaticField = $("#chromatic-field").val();
 	var pokeObj = $(this).closest(".poke-info");
 	var pokemon = createPokemon(pokeObj);
+	var type1 = pokeObj.find(".type1").val();
+	var type2 = pokeObj.find(".type2").val();
 
 	for (var i = 1; i <= 4; i++) {
 		var moveSelector = ".move" + i;
@@ -287,8 +289,10 @@ $(".ability").bind("keyup change", function () {
 		$(this).closest(".poke-info").find(".abilityToggle").hide();
 	}
 	var boostedStat = $(this).closest(".poke-info").find(".boostedStat");
-
-	if (ability === "Protosynthesis" || ability === "Quark Drive" || pokemon.name === "Druddigon-Crest") {
+	
+	if (ability === "Protosynthesis" || ability === "Quark Drive" ||
+		pokemon.name === "Druddigon-Crest" || // Druddigon-Crest - Grants Protosynthesis
+		(chromaticField === "Jungle" && (type1 === "Bug" || type2 === "Bug"))) { // Jungle - Bug types gain Protosynthesis
 		boostedStat.show();
 		autosetQP($(this).closest(".poke-info"));
 	} else {
@@ -334,17 +338,21 @@ $(".ability").bind("keyup change", function () {
 function autosetQP(pokemon) {
 	var currentWeather = $("input:radio[name='weather']:checked").val();
 	var currentTerrain = $("input:checkbox[name='terrain']:checked").val() || "No terrain";
-
+	var chromaticField = $("#chromatic-field").val();
 	var item = pokemon.find(".item").val();
 	var ability = pokemon.find(".ability").val();
 	var boostedStat = pokemon.find(".boostedStat").val();
+	var type1 = pokemon.find(".type1").val();
+	var type2 = pokemon.find(".type2").val();
 
-	var name = createPokemon(pokemon).name;
-
+	var mon = createPokemon(pokemon);
+	var name = mon.name;
 	if (!boostedStat || boostedStat === "auto") {
 		if (
 			(item === "Booster Energy") ||
-			((ability === "Protosynthesis" || name === "Druddigon-Crest") && currentWeather === "Sun") ||
+			(currentWeather === "Sun" && (ability === "Protosynthesis" ||
+			  name === "Druddigon-Crest" || // Druddigon-Crest - Grants Protosynthesis
+			  (chromaticField === 'Jungle' && (type1 === "Bug" || type2 === "Bug")))) || // Jungle - Bug types gain Protosynthesis
 			(ability === "Quark Drive" && currentTerrain === "Electric")
 		) {
 			pokemon.find(".boostedStat").val("auto");
@@ -616,6 +624,21 @@ $("#chromatic-field").change(function () {
 
 		if (chromaticField === 'Ring-Arena') {
 			updateGritStages(pokeObj);
+		}
+
+		var boostedStat = pokeObj.find(".boostedStat");
+		var type1 = pokeObj.find(".type1").val();
+		var type2 = pokeObj.find(".type2").val();
+		var pokemon = createPokemon(pokeObj);
+		
+		if (ability === "Protosynthesis" || ability === "Quark Drive" ||
+			pokemon.name === "Druddigon-Crest" || // Druddigon-Crest - Grants Protosynthesis
+			(chromaticField === "Jungle" && (type1 === "Bug" || type2 === "Bug"))) { // Jungle - Bug types gain Protosynthesis
+			boostedStat.show();
+			autosetQP($(this).closest(".poke-info"));
+		} else {
+			boostedStat.val("");
+			boostedStat.hide();
 		}
 	});
 });

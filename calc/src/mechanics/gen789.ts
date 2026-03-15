@@ -258,11 +258,24 @@ export function calculateSMSSSV(
   let tempCritical = !defender.hasAbility('Battle Armor', 'Shell Armor') &&
     (move.isCrit ||
     (attacker.named('Ariados-Crest') && (defender.status || defender.boosts.spe < 0)) || // Ariados Crest - Guarantees Critical Hits against Statused and/or Slowed targets
+    (field.chromaticField === 'Jungle' && attacker.hasAbility('Compound Eyes') && defender.boosts.spe < 0) || // Jungle - Compound Eye's guarantees Critical Hits against Slowed targets
+    (field.chromaticField === 'Eclipse' && move.named('Night Slash')) || // Eclipse - Night Slash always crits
     (attacker.named('Samurott-Crest') && move.flags.slicing)) && // Samurott Crest - Slicing moves always Crit
     move.timesUsed === 1;
 
   if (tempCritical == 0)
     tempCritical = false;
+
+  // Jungle - Compound Eye's guarantees Critical Hits against Slowed targets
+  if (tempCritical && field.chromaticField === 'Jungle' && attacker.hasAbility('Compound Eyes') && defender.boosts.spe < 0) {
+    desc.chromaticField = field.chromaticField;
+    desc.attackerAbility = attacker.ability;
+  }
+
+  // Eclipse - Night Slash always crits
+  if (tempCritical && field.chromaticField === 'Eclipse' && move.named('Night Slash')) {
+    desc.chromaticField = field.chromaticField;
+  }
 
   if (!tempCritical && attacker.hasAbility('Merciless')) { 
     if (defender.hasStatus('psn', 'tox')) {
@@ -2661,8 +2674,7 @@ export function calculateAtModsSMSSSV(
   } else if ((field.chromaticField === 'Jungle' && attacker.hasAbility('Swarm') && move.hasType('Bug')) || // Jungle - Activates Swarm
              (field.chromaticField === 'Thundering-Plateau' && attacker.hasAbility('Plus', 'Minus') && move.category === 'Special') || // Thundering Plateau - Activates Plus and Minus
              (field.chromaticField === 'Volcanic-Top' && attacker.hasAbility('Solar Power')) || // Volcanic Top - Activates Solar Power
-             (field.chromaticField === 'Flower-Garden' && attacker.hasAbility('Overgrow') && move.hasType('Grass')) || // Flower Garden - Activates Overgrow
-             (field.chromaticField === 'Waters-Surface' && attacker.hasAbility('Torrent') && move.hasType('Water'))) { // Water's Surface - Activates Torrent
+             (field.chromaticField === 'Flower-Garden' && attacker.hasAbility('Overgrow') && move.hasType('Grass'))) { // Flower Garden - Activates Overgrow
     atMods.push(6144);
     desc.attackerAbility = attacker.ability;
     desc.chromaticField = field.chromaticField;
@@ -2764,7 +2776,8 @@ export function calculateAtModsSMSSSV(
       (move.category === 'Special' && getQPBoostedStat(attacker) === 'spa')
     ) {
       atMods.push(5325);
-      if (attacker.named('Druddigon-Crest')) { // Druddigon-Crest - Grants Protosynthesis
+      if (attacker.named('Druddigon-Crest') || // Druddigon-Crest - Grants Protosynthesis
+          (field.chromaticField === 'Jungle' && attacker.hasType('Bug'))) { // Jungle - Bug type pokemon gain Protosynthesis
         desc.attackerAbility = "Protosynthesis";
       } else {
         desc.attackerAbility = attacker.ability;
@@ -3212,7 +3225,8 @@ export function calculateDfModsSMSSSV(
       (!hitsPhysical && getQPBoostedStat(defender) === 'spd')
     ) {
       dfMods.push(5324);
-      if (defender.named('Druddigon-Crest')) { // Druddigon Crest - Grants Protosynthesis
+      if (defender.named('Druddigon-Crest') || // Druddigon-Crest - Grants Protosynthesis
+          (field.chromaticField === 'Jungle' && defender.hasType('Bug'))) { // Jungle - Bug type pokemon gain Protosynthesis
         desc.defenderAbility = "Protosynthesis";
       } else {
         desc.defenderAbility = defender.ability;
